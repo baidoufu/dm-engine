@@ -16,8 +16,8 @@
 #include "MonItemsMgr.h"
 #include "DownItemMgr.h"
 
-static POINT g_ptSearch[SEARCH_COUNT] =
-{
+static constexpr std::array<POINT, SEARCH_COUNT> g_ptSearch =
+{{
 	{-1,-1},{0,-1},{1,-1},{1,0},		{1,1},{0,1},{-1,1},{-1,0},
 	{-2,-2},{-1,-2},{0,-2},{1,-2},		{2,-2},{2,-1},{2,0},{2,1},
 	{2,2},{1,2},{0,2},{-1,2},			{-2,2},{-2,1},{-2,0},{-2,-1},
@@ -29,14 +29,14 @@ static POINT g_ptSearch[SEARCH_COUNT] =
 	{4,-3},{4,-2},{4,-1},{4,0},         {4,1},{4,2},{4,3},{4,4},
 	{3,4},{2,4},{1,4},{0,4},            {-1,4},{-2,4},{-3,4},{-4,4},
 	{-4,3},{-4,2},{-4,1},{-4,0},        {-4,-1},{-4,-2},{-4,-3},
-};
+}};
 xObjectPool<CMapCellInfo> CLogicMap::m_xCellInfoPool;
-CLogicMap::CLogicMap(void)
+CLogicMap::CLogicMap(VOID)
 {
-	m_xObjList = nullptr;
 	m_pPhysicsMap = nullptr;
 	m_Id = 0;
 	m_iMiniMap = 0;
+	m_iMusicId = 0;
 	m_nIndex = 0;
 	m_iLinkCount = 0;
 	m_pCellInfo = nullptr;
@@ -44,7 +44,6 @@ CLogicMap::CLogicMap(void)
 	m_iMaxBlockElements = 0;
 	m_iWidth = 0;
 	m_iHeight = 0;
-	m_pName = nullptr;
 	m_fExpFactor = 1.0f;
 	m_iStartPointCount = 0;
 	memset(m_pStartPoints, 0, sizeof(m_pStartPoints));
@@ -57,7 +56,7 @@ CLogicMap::CLogicMap(void)
 	subMonsterDropItemToken_ = SUBSCRIBE_EVENT(MonsterDeathEvent, [this](const MonsterDeathEvent& e) { this->handleMonsterDropItem(e); });
 }
 
-CLogicMap::~CLogicMap(void)
+CLogicMap::~CLogicMap(VOID)
 {
 	//取消事件订阅
 	UNSUBSCRIBE_EVENT(subMonsterDropItemToken_);
@@ -69,14 +68,17 @@ BOOL CLogicMap::AddObject(CMapObject* pObject)
 	if (pObject == nullptr || (pNode = pObject->GetLinkNode(LNI_MAP)) == nullptr)return FALSE;
 	if (pNode->BelongTo(&m_xObjList))return FALSE;
 	if (!m_xObjList.addNode(pNode))return FALSE;
-	if (!AddObjectToPos(pObject->getX(), pObject->getY(), pObject))
-	{
-		m_xObjList.removeNode(pNode);
-		return FALSE;
+	{// 锁只保护数据结构
+		std::unique_lock lock(m_MapMutex);
+		if (!AddObjectToPos(pObject->getX(), pObject->getY(), pObject))
+		{
+			m_xObjList.removeNode(pNode);
+			return FALSE;
+		}
+		AddObjectCount(pObject->GetType());
 	}
 	pObject->OnEnterMap(this);
 	CheckEnterEvent(pObject, pObject->getX(), pObject->getY());
-	AddObjectCount(pObject->GetType());
 	if (pObject->InCityArea())
 		pObject->OnEnterCityArea();
 	if (pObject->InSafeArea())
@@ -91,23 +93,18 @@ BOOL CLogicMap::RemoveObject(CMapObject* pObject)
 	//	如果是空指针
 	xListHost<CMapObject>::xListNode* pNode = nullptr;
 	if (pObject == nullptr || (pNode = pObject->GetLinkNode(LNI_MAP)) == nullptr)
-	{
 		return FALSE;
-	}
 	//	如果不属于地图的物件
-	if (!pNode->BelongTo(&m_xObjList))
-	{
-		return FALSE;
-	}
+	if (!pNode->BelongTo(&m_xObjList)) return FALSE;
 	int nx = pObject->getX();
 	int ny = pObject->getY();
-	if (!RemoveObjectFromPos(nx, ny, pObject))
-	{
-		return FALSE;
-	}
-	if (!m_xObjList.removeNode(pNode))
-	{
-		return FALSE;
+	{// 锁只保护数据结构
+		std::unique_lock lock(m_MapMutex);
+		if (!RemoveObjectFromPos(nx, ny, pObject))
+			return FALSE;
+		if (!m_xObjList.removeNode(pNode))
+			return FALSE;
+		DecObjectCount(pObject->GetType());
 	}
 	if (pObject->InCityArea())
 		pObject->OnLeaveCityArea();
@@ -117,7 +114,6 @@ BOOL CLogicMap::RemoveObject(CMapObject* pObject)
 		pObject->OnLeaveWarArea();
 	pObject->OnLeaveMap(this);
 	CheckLeaveEvent(pObject, nx, ny);
-	DecObjectCount(pObject->GetType());
 	return TRUE;
 }
 
@@ -127,7 +123,7 @@ BOOL CLogicMap::InitMapCells()
 	assert(m_iWidth != 0);
 	assert(m_iHeight != 0);
 	int count = m_iWidth * m_iHeight;
-	m_pCellInfo = new CMapCellInfo * [count];
+	m_pCellInfo = std::make_unique<CMapCellInfo*[]>(count);
 
 	if (m_pCellInfo == nullptr)
 	{
@@ -135,18 +131,22 @@ BOOL CLogicMap::InitMapCells()
 			"地图管理器", 0);
 		exit(0);
 	}
-	memset(m_pCellInfo, 0, sizeof(CMapCellInfo*) * count);
+	memset(m_pCellInfo.get(), 0, sizeof(CMapCellInfo*) * count);
 	return TRUE;
 }
 
 BOOL CLogicMap::SendMsg(CMapObject* pSender, const char* pszCodedMsg, int size)
 {
 	if (pszCodedMsg == nullptr || size <= 0) return FALSE;
+	std::shared_lock lock(m_MapMutex);
 	for (auto pNode = m_xObjList.getHead(); pNode != nullptr; pNode = pNode->getNext())
 	{
 		CMapObject* pObj = pNode->getObject();
-		if (pObj != nullptr && pObj != pSender && pObj->CanRecvMsg())
-			pObj->OnAroundMsg(pSender, pszCodedMsg, size);
+		// 快速跳过非玩家对象，避免虚函数调用开销
+		if (pObj == nullptr || pObj == pSender || pObj->GetType() != OBJ_PLAYER) continue;
+		CHumanPlayer* pPlayer = static_cast<CHumanPlayer*>(pObj);
+		if (pPlayer->CanRecvMsg())
+			pPlayer->OnAroundMsg(pSender, pszCodedMsg, size);
 	}
 	return TRUE;
 }
@@ -155,6 +155,7 @@ BOOL CLogicMap::IsBlocked(int x, int y)
 {
 	if (IsLocked(x, y))return TRUE;
 	if (m_pPhysicsMap == nullptr)return TRUE;
+	std::shared_lock lock(m_MapMutex);
 	return m_pPhysicsMap->IsBlocked(x, y);
 }
 
@@ -175,7 +176,7 @@ VOID CLogicMap::SetFlag(const char* pszFlag)
 		size_t len = strlen(p);
 		if (len > 0 && p[len - 1] == ')')
 			p[len - 1] = '\0';
-		nParam = SearchParam(p, Params, 20, ',');
+		nParam = SearchParam(p, Params, 20, ",");
 	}
 
 	e_map_flag flag = GetMapFlagFromString(szTempFlag);
@@ -254,6 +255,19 @@ BOOL CLogicMap::IsFlagSeted(e_map_flag findex, DWORD& dwParam, std::vector<std::
 	return FALSE;
 }
 
+BOOL CLogicMap::IsFlagSeted(e_map_flag findex, DWORD& dwParam)
+{
+	std::vector<std::string> szExtraParams;
+	return IsFlagSeted(findex, dwParam, szExtraParams);
+}
+
+BOOL CLogicMap::IsFlagSeted(e_map_flag findex)
+{
+	DWORD dwParam = 0;
+	std::vector<std::string> szExtraParams;
+	return IsFlagSeted(findex, dwParam, szExtraParams);
+}
+
 BOOL CLogicMap::LoadMap(const char* pszFilename)
 {
 	m_Flag.Clean();
@@ -262,7 +276,7 @@ BOOL CLogicMap::LoadMap(const char* pszFilename)
 	char szPhysicsMapName[256];
 	o_strncpy(szPhysicsMapName, pszPhysicsMapName, 255);
 
-	m_pName = (char*)m_DataFile.GetString("define", "name", "NoName");
+	m_strName = m_DataFile.GetString("define", "name", "NoName");
 	m_iMusicId = m_DataFile.GetInteger("define", "musicid");
 	m_iMiniMap = m_DataFile.GetInteger("define", "minimap");
 	m_nIndex = m_DataFile.GetInteger("define", "mapid");
@@ -303,6 +317,7 @@ VOID CLogicMap::SetPhysicsMap(CPhysicsMap* pPhysicsMap)
 
 CMapObject* CLogicMap::FindObject(int x, int y, e_object_type type)
 {
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
 	if (pCellInfo == nullptr)return nullptr;
 	xListHost<CMapObject>::xListNode* pNode = pCellInfo->m_xObjectList.getHead();
@@ -318,8 +333,26 @@ CMapObject* CLogicMap::FindObject(int x, int y, e_object_type type)
 
 CMapObject* CLogicMap::FindEventObject(int x, int y, int View)
 {
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
-	if (pCellInfo == nullptr)return nullptr;
+	if (pCellInfo == nullptr) return nullptr;
+
+	if (pCellInfo->m_pVisibleEventCache)
+	{
+		CMapObject* pCached = pCellInfo->m_pVisibleEventCache;
+		if (pCached->GetType() != OBJ_VISIBLEEVENT)
+		{
+			// 缓存指向了非事件对象（不应发生），清除脏缓存
+			pCellInfo->m_pVisibleEventCache = nullptr;
+		}
+		else
+		{
+			CVisibleEvent* pEvent = static_cast<CVisibleEvent*>(pCached);
+			if (pEvent->GetView() == View)
+				return pCached;
+		}
+	}
+	// 遍历链表查找
 	xListHost<CMapObject>::xListNode* pNode = pCellInfo->m_xObjectList.getHead();
 	while (pNode)
 	{
@@ -328,23 +361,11 @@ CMapObject* CLogicMap::FindEventObject(int x, int y, int View)
 		{
 			CVisibleEvent* pEvent = static_cast<CVisibleEvent*>(pObj);
 			if (pEvent->GetView() == View)
+			{
+				pCellInfo->m_pVisibleEventCache = pObj;
 				return pObj;
+			}
 		}
-		pNode = pNode->getNext();
-	}
-	return nullptr;
-}
-
-CMapObject* CLogicMap::FindObjectMT(int x, int y, DWORD dwTypeFlag)
-{
-	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
-	if (pCellInfo == nullptr)return nullptr;
-	xListHost<CMapObject>::xListNode* pNode = pCellInfo->m_xObjectList.getHead();
-	while (pNode)
-	{
-		CMapObject* pObj = pNode->getObject();
-		if (pObj && ((1 << pObj->GetType()) & dwTypeFlag))
-			return pObj;
 		pNode = pNode->getNext();
 	}
 	return nullptr;
@@ -353,6 +374,7 @@ CMapObject* CLogicMap::FindObjectMT(int x, int y, DWORD dwTypeFlag)
 CAliveObject* CLogicMap::FindTarget(CAliveObject* pAttacker, UINT x, UINT y, BOOL IsProperTarget, BOOL IsDeath)
 {
 	if (pAttacker == nullptr) return nullptr;
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
 	if (pCellInfo == nullptr)return nullptr;
 	xListHost<CMapObject>::xListNode* pNode = pCellInfo->m_xObjectList.getHead();
@@ -391,16 +413,23 @@ BOOL CLogicMap::MoveObject(CMapObject* pObject, int x, int y)
 	if (IsBlocked(x, y)) return FALSE;
 	int oldx = pObject->getX();
 	int oldy = pObject->getY();
-	CMapCellInfo* pCellInfo = GetMapCellInfo_Safe(pObject->getX(), pObject->getY());
-	CMapCellInfo* pToCellInfo = GetMapCellInfo_Safe(x, y);
-	if (pCellInfo == nullptr || pToCellInfo == nullptr)return FALSE;
 	BOOL bInCity = pObject->InCityArea();
 	BOOL bInSafeArea = pObject->InSafeArea();
 	BOOL bInWarArea = pObject->InWarArea();
-	if (!RemoveObjectFromPos(pObject->getX(), pObject->getY(), pObject)) //从旧格子移除对象
-		return FALSE;
-	if (!AddObjectToPos(x, y, pObject)) //将对象添加到新格子
-		return FALSE;
+	{// 锁保护 RemoveObjectFromPos + AddObjectToPos 的原子性
+		std::unique_lock lock(m_MapMutex);
+		CMapCellInfo* pCellInfo = GetMapCellInfo_Safe(oldx, oldy);
+		CMapCellInfo* pToCellInfo = GetMapCellInfo_Safe(x, y);
+		if (pCellInfo == nullptr || pToCellInfo == nullptr)return FALSE;
+		if (!RemoveObjectFromPos(oldx, oldy, pObject)) //从旧格子移除对象
+			return FALSE;
+		if (!AddObjectToPos(x, y, pObject)) //将对象添加到新格子
+		{
+			// 回滚：将对象重新添加回旧位置
+			AddObjectToPos(oldx, oldy, pObject);
+			return FALSE;
+		}
+	}
 	//	检查离开事件
 	CheckLeaveEvent(pObject, oldx, oldy);
 	//	设置坐标～
@@ -444,9 +473,12 @@ BOOL CLogicMap::AddObjectToPos(int x, int y, CMapObject* pObject)
 			RemoveMapCellInfo_Safe(x, y);
 		return FALSE;
 	}
+	if (pObject->GetType() == OBJ_VISIBLEEVENT)
+		pInfo->m_pVisibleEventCache = pObject;
 	return TRUE;
 }
 
+// 注意：此方法不加锁，调用者必须持有m_MapMutex写锁
 VOID CLogicMap::RemoveMapCellInfo_Safe(int x, int y)
 {
 	if (x < 0 || y < 0 || y >= m_iHeight || x >= m_iWidth)return;
@@ -466,6 +498,8 @@ BOOL CLogicMap::RemoveObjectFromPos(int x, int y, CMapObject* pObject)
 	if (pNode == nullptr)return FALSE;
 	if (!pInfo->m_xObjectList.removeNode(pNode))
 		return FALSE;
+	if (pInfo->m_pVisibleEventCache == pObject)
+		pInfo->m_pVisibleEventCache = nullptr;
 	if (pInfo->m_xObjectList.getCount() <= 0)
 		RemoveMapCellInfo_Safe(x, y);
 	return TRUE;
@@ -473,6 +507,7 @@ BOOL CLogicMap::RemoveObjectFromPos(int x, int y, CMapObject* pObject)
 
 int CLogicMap::GetDupCount(int x, int y)
 {
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr)return 0;
 	int iDupCount = 0;
@@ -501,6 +536,7 @@ int CLogicMap::GetDupCount(int x, int y, e_object_type type)
 {
 	// 障碍处没有堆积~
 	if (this->m_pPhysicsMap && this->m_pPhysicsMap->IsBlocked(x, y))return -1;
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr)return 0;
 	int iDupCount = 0;
@@ -525,7 +561,7 @@ int CLogicMap::GetDropItemPoint(int x, int y, POINT* ptArray, int ArraySize)
 	int drops[SEARCH_COUNT];
 	memset(drops, 0xcd, sizeof(drops));
 	int	droppointcount = 0;
-	POINT* pPt = nullptr;
+	const POINT* pPt = nullptr;
 	int	count = 0;
 	int	index = 0;
 	for (int i = 0; i < ArraySize; i++)
@@ -566,10 +602,10 @@ int CLogicMap::GetDropItemPoint(int x, int y, POINT* ptArray, int ArraySize)
 int CLogicMap::GetValidPoint(int x, int y, POINT* ptArray, int ArraySize)
 {
 	int count = 0;
-	for (int i = 0; i < SEARCH_COUNT; i++)
+	for (const auto& pt : g_ptSearch)
 	{
-		ptArray[count].x = MAX(0, x + g_ptSearch[i].x);
-		ptArray[count].y = MAX(0, y + g_ptSearch[i].y);
+		ptArray[count].x = MAX(0, x + pt.x);
+		ptArray[count].y = MAX(0, y + pt.y);
 		if (IsBlocked(ptArray[count].x, ptArray[count].y)) continue;
 		count++;
 		if (count >= ArraySize) return ArraySize;
@@ -580,6 +616,7 @@ int CLogicMap::GetValidPoint(int x, int y, POINT* ptArray, int ArraySize)
 VOID CLogicMap::CheckEnterCity(CHumanPlayer* pPlayer)
 {
 	if (pPlayer == nullptr)return;
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(pPlayer->getX(), pPlayer->getY());
 	if (pInfo == nullptr)return;
 
@@ -594,6 +631,7 @@ VOID CLogicMap::CheckEnterCity(CHumanPlayer* pPlayer)
 VOID CLogicMap::CheckEnterEvent(CMapObject* pObject, int x, int y)
 {
 	if (pObject == nullptr) return;
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr || !(pInfo->wEventFlag & EVENTFLAG_ENTEREVENT))
 		return;
@@ -616,6 +654,7 @@ VOID CLogicMap::CheckEnterEvent(CMapObject* pObject, int x, int y)
 VOID CLogicMap::CheckLeaveEvent(CMapObject* pObject, int x, int y)
 {
 	if (pObject == nullptr) return;
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr || !(pInfo->wEventFlag & EVENTFLAG_LEAVEEVENT))
 		return;
@@ -661,6 +700,7 @@ VOID CLogicMap::SetSafeArea(int x, int y, int range)
 	int endy = MIN((int)m_iHeight, y + range);
 	if (startx > endx || starty > endy || range < 0)
 		return;
+	std::unique_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int tx = startx; tx < endx; tx++)
 	{
@@ -673,26 +713,6 @@ VOID CLogicMap::SetSafeArea(int x, int y, int range)
 	}
 }
 
-VOID CLogicMap::SetMapEventFlag(int x, int y, int range, DWORD dwFlag)
-{
-	int startx = MAX(0, x - range);
-	int starty = MAX(0, y - range);
-	int endx = MIN((int)m_iWidth, x + range);
-	int endy = MIN((int)m_iHeight, y + range);
-	if (startx > endx || starty > endy || range < 0)
-		return;
-	CMapCellInfo* pInfo = nullptr;
-	for (int tx = startx; tx < endx; tx++)
-	{
-		for (int ty = starty; ty < endy; ty++)
-		{
-			pInfo = GetMapCellInfo_Safe(tx, ty);
-			if (pInfo != nullptr)
-				pInfo->wEventFlag |= (dwFlag & 0xffff);
-		}
-	}
-}
-
 VOID CLogicMap::SetMapEventFlagRect(int x, int y, int xrange, int yrange, DWORD dwFlag)
 {
 	int startx = MAX(0, x - xrange);
@@ -701,6 +721,7 @@ VOID CLogicMap::SetMapEventFlagRect(int x, int y, int xrange, int yrange, DWORD 
 	int endy = MIN((int)m_iHeight, y + yrange);
 	if (startx > endx || starty > endy || xrange < 0 || yrange < 0)
 		return;
+	std::unique_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int tx = startx; tx < endx; tx++)
 	{
@@ -731,6 +752,7 @@ VOID CLogicMap::AddStartPoint(START_POINT* pStartPoint)
 	int endy = MIN((int)m_iHeight, y + range);
 	if (startx > endx || starty > endy || range < 0)
 		return;
+	std::unique_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int tx = startx; tx < endx; tx++)
 	{
@@ -784,7 +806,16 @@ BOOL CLogicMap::GotMineItem(CHumanPlayer* pPlayer)
 			pList->w0++;
 			if (item.baseitem.btStdMode == ISM_MINE)
 				item.wCurDura = GetRangeRand(pList->wDuraMin, pList->wDuraMax) * 1000;
-			return pPlayer->AddBagItem(item);
+			// 背包满时掉落到地面，避免物品消失
+			if (!pPlayer->AddBagItem(item))
+			{
+				if (!CDownItemMgr::GetInstance()->DropItem(this, item, pPlayer->getX(), pPlayer->getY(), TRUE, pPlayer))
+				{
+					CItemManager::GetInstance()->DeleteItem(item.dwMakeIndex);
+					return FALSE;
+				}
+			}
+			return TRUE;
 		}
 		pList = pList->pNext;
 	}
@@ -912,7 +943,7 @@ VOID CLogicMap::SendAroundMsg(int x, int y, int range, const char* szMsg, int si
 	int endy = MIN(m_iHeight - 1, y + range);
 	if (startx > endx || starty > endy) return;
 
-	xListHost<CMapObject>::xListNode* pNode = nullptr;
+	std::shared_lock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int _x = startx; _x <= endx; _x++)
 	{
@@ -920,26 +951,18 @@ VOID CLogicMap::SendAroundMsg(int x, int y, int range, const char* szMsg, int si
 		{
 			pInfo = this->GetMapCellInfo(_x, _y);
 			if (pInfo == nullptr || pInfo->m_xObjectList.getCount() == 0) continue;
-			pNode = pInfo->m_xObjectList.getHead();
-			if (bIncludeSelf)
+			auto* pNode = pInfo->m_xObjectList.getHead();
+			while (pNode)
 			{
-				while (pNode)
-				{
-					CMapObject* pTarget = pNode->getObject();
-					if (pTarget->CanRecvMsg())
-						pTarget->OnAroundMsg(pSender, szMsg, size);
-					pNode = pNode->getNext();
-				}
-			}
-			else
-			{
-				while (pNode)
-				{
-					CMapObject* pTarget = pNode->getObject();
-					if (pSender != pTarget && pTarget->CanRecvMsg())
-						pTarget->OnAroundMsg(pSender, szMsg, size);
-					pNode = pNode->getNext();
-				}
+				CMapObject* pTarget = pNode->getObject();
+				pNode = pNode->getNext();
+				// 快速跳过非玩家对象，避免虚函数调用开销
+				if (pTarget->GetType() != OBJ_PLAYER) continue;
+				if (!bIncludeSelf && pSender == pTarget) continue;
+				// 直接调用玩家消息处理，跳过 CanRecvMsg 虚函数
+				CHumanPlayer* pPlayer = static_cast<CHumanPlayer*>(pTarget);
+				if (pPlayer->CanRecvMsg())
+					pPlayer->OnAroundMsg(pSender, szMsg, size);
 			}
 		}
 	}
@@ -957,6 +980,7 @@ BOOL CLogicMap::DamageAround(CAliveObject* pAttacker, UINT x, UINT y, UINT nRang
 
 	xListHost<CMapObject>::xListNode* pNode = nullptr;
 	CMapCellInfo* pInfo = nullptr;
+	std::shared_lock lock(m_MapMutex);
 	for (int _x = nStartX; _x <= nEndX; _x++)
 	{
 		if (_x < 0 || _x >= this->m_iWidth)continue;
@@ -1011,6 +1035,7 @@ BOOL CLogicMap::CureBagStatusAround(CAliveObject* pAttacker, UINT x, UINT y, UIN
 	if (nStartX > nEndX || nStartY > nEndY) return FALSE;
 	if (nArraySize == 0) return FALSE;
 	if (retTargets != nullptr) retTargets->clear(); // 清空返回的目标列表
+	std::shared_lock lock(m_MapMutex);
 	for (int _x = nStartX; _x <= nEndX; _x++)
 	{
 		if (_x < 0 || _x >= this->m_iWidth)continue;
@@ -1085,6 +1110,7 @@ BOOL CLogicMap::CureBagStatusAround(CAliveObject* pAttacker, UINT x, UINT y, UIN
 BOOL CLogicMap::AddAllProcess(DWORD dwTypeFlag, e_process ident, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4,
 	DWORD dwDelay, int repeattimes, const char* pszString)
 {
+	std::shared_lock lock(m_MapMutex);
 	xListHost<CMapObject>::xListNode* pNode = m_xObjList.getHead();
 	while (pNode)
 	{

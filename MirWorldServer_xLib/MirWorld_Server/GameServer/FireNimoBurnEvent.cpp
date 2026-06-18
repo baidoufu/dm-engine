@@ -7,7 +7,7 @@
 #include "eventmanager.h"
 
 xObjectPool<CFireNimoBurnEvent>	CFireNimoBurnEvent::m_xEventPool;
-CFireNimoBurnEvent::CFireNimoBurnEvent(void)
+CFireNimoBurnEvent::CFireNimoBurnEvent(VOID)
 {
 	m_nDamage = 0;
 	m_pOwner = nullptr;
@@ -15,7 +15,7 @@ CFireNimoBurnEvent::CFireNimoBurnEvent(void)
 	memset(m_pEvents, 0, sizeof(m_pEvents));
 }
 
-CFireNimoBurnEvent::~CFireNimoBurnEvent(void)
+CFireNimoBurnEvent::~CFireNimoBurnEvent(VOID)
 {
 }
 
@@ -55,7 +55,9 @@ VOID CFireNimoBurnEvent::OnUpdate(CVisibleEvent* pEvent)
 			return;
 		}
 	}
-	CMapCellInfo* pInfo = pEvent->GetMap()->GetMapCellInfo(pEvent->getX(), pEvent->getY());
+	CLogicMap* pEventMap = pEvent->GetMap();
+	if (pEventMap == nullptr) { Destroy(); return; }
+	CMapCellInfo* pInfo = pEventMap->GetMapCellInfoShared(pEvent->getX(), pEvent->getY());
 	if (pInfo)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -113,6 +115,7 @@ CFireNimoBurnEvent* CFireNimoBurnEvent::Create(CAliveObject* pOwner, int x, int 
 	int successcount = 0;
 	int forNum = 3;
 	if (type == 4)forNum = MAX_FIRENIMOEVENT_COUNT;
+	auto* pEventManager = CEventManager::GetInstance();
 	for (int i = 0;i < forNum;i++)
 	{
 		int targetX = 0;
@@ -141,7 +144,7 @@ CFireNimoBurnEvent* CFireNimoBurnEvent::Create(CAliveObject* pOwner, int x, int 
 			targetY = y + ptFire[i].y;
 		}
 		if (targetX < 0 || targetX >= pMap->GetWidth() || targetY < 0 || targetY >= pMap->GetHeight()) continue;
-		pEvent->m_pEvents[i] = CEventManager::GetInstance()->NewVisibleEvent(pOwner->GetMap(), targetX, targetY, VE_FIREWALL, dwTick, dwLastTime, pEvent);
+		pEvent->m_pEvents[i] = pEventManager->NewVisibleEvent(pOwner->GetMap(), targetX, targetY, VE_FIREWALL, dwTick, dwLastTime, pEvent);
 		if (pEvent->m_pEvents[i] != nullptr)
 			successcount++;
 	}
@@ -151,6 +154,6 @@ CFireNimoBurnEvent* CFireNimoBurnEvent::Create(CAliveObject* pOwner, int x, int 
 		pEvent = nullptr;
 	}
 	else
-		CEventManager::GetInstance()->AddEventProcessor(pEvent);
+		pEventManager->AddEventProcessor(pEvent);
 	return pEvent;
 }

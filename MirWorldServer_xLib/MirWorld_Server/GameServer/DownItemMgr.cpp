@@ -6,13 +6,13 @@
 #include "itemmanager.h"
 #include "systemscript.h"
 
-CDownItemMgr::CDownItemMgr(void) : m_xDelItemQueue(200000)
+CDownItemMgr::CDownItemMgr(VOID)
 {
 	m_xDownItemList.create(400000);
 	m_nCurFreeIndex = 0;
 }
 
-CDownItemMgr::~CDownItemMgr(void)
+CDownItemMgr::~CDownItemMgr(VOID)
 {
 }
 
@@ -118,7 +118,8 @@ BOOL CDownItemMgr::PickupItem(CLogicMap* pMap, CDownItemObject* pObject, CHumanP
 	if (!pMap->RemoveObject(pObject))
 		return FALSE;
 	ITEM item = pObject->GetItem();
-	ITEMCLASS* pClass = CItemManager::GetInstance()->GetItemClass(item);
+	auto* pItemManager = CItemManager::GetInstance();
+	ITEMCLASS* pClass = pItemManager->GetItemClass(item);
 	BOOL bFlag = TRUE;
 
 	BOOL bDelDownItem = FALSE;
@@ -150,7 +151,7 @@ BOOL CDownItemMgr::PickupItem(CLogicMap* pMap, CDownItemObject* pObject, CHumanP
 
 		if (bFlag || pMap->AddObject(pObject) == FALSE)
 		{
-			CItemManager::GetInstance()->DeleteItem(item.dwMakeIndex);
+			pItemManager->DeleteItem(item.dwMakeIndex);
 			DeleteDownItemObject(pObject);
 		}
 	}
@@ -164,7 +165,7 @@ BOOL CDownItemMgr::PickupItem(CLogicMap* pMap, CDownItemObject* pObject, CHumanP
 		{
 			if (pMap->AddObject(pObject) == FALSE)
 			{
-				CItemManager::GetInstance()->DeleteItem(item.dwMakeIndex);
+				pItemManager->DeleteItem(item.dwMakeIndex);
 				DeleteDownItemObject(pObject);
 			}
 		}
@@ -176,7 +177,7 @@ BOOL CDownItemMgr::PickupItem(CLogicMap* pMap, CDownItemObject* pObject, CHumanP
 		pActionObject->OnPickupItem(*p, x, y);
 		if (pClass && pClass->wPickupPageId != 0)
 		{
-			const char* pszPickupPage = CItemManager::GetInstance()->GetStringFromPool(pClass->wPickupPageId);
+			const char* pszPickupPage = pItemManager->GetStringFromPool(pClass->wPickupPageId);
 			if (pszPickupPage[0] != 0)
 			{
 				pActionObject->SetUsingItem(p);
@@ -189,7 +190,7 @@ BOOL CDownItemMgr::PickupItem(CLogicMap* pMap, CDownItemObject* pObject, CHumanP
 				if (p != &item)
 				{
 					pActionObject->DeleteBagItem(p->dwMakeIndex);
-					CItemManager::GetInstance()->DeleteItem(item.dwMakeIndex);
+					pItemManager->DeleteItem(item.dwMakeIndex);
 					pActionObject->SendTakeBagItem(&item);
 				}
 			}
@@ -217,8 +218,11 @@ VOID CDownItemMgr::UpdateDeletedObject()
 {
 	const UINT MAX_PROCESS_PER_TICK = 100;
 	UINT processed = 0;
-	std::vector<CDownItemObject*> pendingObjects;
-	pendingObjects.reserve(MAX_PROCESS_PER_TICK);
+	// 使用thread_local复用，避免每帧堆分配
+	thread_local std::vector<CDownItemObject*> pendingObjects;
+	pendingObjects.clear();
+	if ((int)pendingObjects.capacity() < MAX_PROCESS_PER_TICK)
+		pendingObjects.reserve(MAX_PROCESS_PER_TICK);
 	while (processed < MAX_PROCESS_PER_TICK)
 	{
 		CDownItemObject* pObject = m_xDelItemQueue.pop();

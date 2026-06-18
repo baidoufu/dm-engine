@@ -7,24 +7,24 @@
 #include "logicmap.h"
 #include "logicmapmgr.h"
 
-CNpcManager::CNpcManager(void)
+CNpcManager::CNpcManager(VOID)
 {
 	m_ScriptNpcs.Create(2048); // 2048个NPC
 	m_xQNpcs.create(2048);
 }
 
-CNpcManager::~CNpcManager(void)
+CNpcManager::~CNpcManager(VOID)
 {
 }
 
 CScriptNpc* CNpcManager::AddNpc(const char* pszString)
 {
-	char szBuffer[1024];
-	o_strncpy(szBuffer, pszString, 1023);
+	std::array<char, 1024> szBuffer{};
+	o_strncpy(szBuffer.data(), pszString, 1023);
 	//NPC名字/DataId/NPC外观/逻辑地图ID参照(正常地图与逻辑地图转换)/坐标X/坐标Y/是否可以对话(0/1)=1表示可以对话/与玩家距离/脚本对应的文本名字/购买百分比/出售百分比 
 	char* Params[11];
 	int	nParam = 0;
-	nParam = SearchParam(szBuffer, Params, 11, ',');
+	nParam = SearchParam(szBuffer.data(), Params, 11, ",");
 	int x, y, dbid, mapid, istalk, nDistance, view;
 	UINT id = 0;
 	if (nParam < 9)return nullptr;
@@ -81,14 +81,29 @@ BOOL CNpcManager::Load(const char* pszFilename)
 	return TRUE;
 }
 
+CScriptNpc* CNpcManager::NewNpc()
+{
+	CScriptNpc* npc = nullptr;
+	UINT id = m_ScriptNpcs.New(&npc);
+	if (id == 0 || npc == nullptr)return nullptr;
+	id = (id & 0xffffff) | (OBJ_NPC << 24);
+	npc->SetId(id);
+	return npc;
+}
+
+VOID CNpcManager::DelNpc(CScriptNpc* pNpc)
+{
+	UINT id = pNpc->GetId() & 0xffffff;
+	pNpc->Clean();
+	m_ScriptNpcs.Del(id);
+}
+
 VOID CNpcManager::Update()
 {
 	CScriptNpc* pNpc = m_xQNpcs.pop();
-	if (pNpc)
-	{
-		pNpc->Update();
-		m_xQNpcs.push(pNpc);
-	}
+	if (pNpc == nullptr) return;
+	pNpc->Update();
+	m_xQNpcs.push(pNpc);
 }
 
 BOOL CNpcManager::AddDynamicNpc(UINT nIdent, const char* pszName, UINT nView, UINT mapid, UINT x, UINT y, const char* pszScript)
@@ -98,22 +113,22 @@ BOOL CNpcManager::AddDynamicNpc(UINT nIdent, const char* pszName, UINT nView, UI
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(mapid);
 	if (pMap == nullptr)return FALSE;
 
-	CScriptNpc* npc = newNpc();
+	CScriptNpc* npc = NewNpc();
 	if (npc == nullptr)return FALSE;
 	if (!npc->Init(nIdent, pszName, nView, x, y, mapid, pObject))
 	{
-		deleteNpc(npc);
+		DelNpc(npc);
 		return FALSE;
 	}
 	if (!m_xDynamicNpcList.addNode(npc->GetLinkNode(LNI_WORLD)))
 	{
-		deleteNpc(npc);
+		DelNpc(npc);
 		return FALSE;
 	}
 	if (!pMap->AddObject(npc))
 	{
 		m_xDynamicNpcList.removeNode(npc->GetLinkNode(LNI_WORLD));
-		deleteNpc(npc);
+		DelNpc(npc);
 		return FALSE;
 	}
 	DPRINT(KEYWORD_PINK, "NPC %s 进入世界在(%d)(%d,%d)\n", pszName, mapid, x, y);
@@ -125,15 +140,14 @@ BOOL CNpcManager::RemoveDynamicNpc(UINT nIdent)
 	xListHost<CMapObject>::xListNode* pNode = m_xDynamicNpcList.getHead();
 	while (pNode)
 	{
-		if (pNode->getObject() &&
-			((CScriptNpc*)pNode->getObject())->GetStoreId() == (nIdent | 0x70000000))
+		if (pNode->getObject() && ((CScriptNpc*)pNode->getObject())->GetStoreId() == (nIdent | 0x70000000))
 		{
 			CScriptNpc* pNpc = (CScriptNpc*)pNode->getObject();
 			m_xDynamicNpcList.removeNode(pNode);
 			if (pNpc->GetMap())
 				pNpc->GetMap()->RemoveObject(pNpc);
 			pNpc->SaveItems();
-			deleteNpc(pNpc);
+			DelNpc(pNpc);
 			return TRUE;
 		}
 		pNode = pNode->getNext();
@@ -146,28 +160,9 @@ CScriptNpc* CNpcManager::GetDynamicNpc(UINT nIdent)
 	xListHost<CMapObject>::xListNode* pNode = m_xDynamicNpcList.getHead();
 	while (pNode)
 	{
-		if (pNode->getObject() &&
-			((CScriptNpc*)pNode->getObject())->GetStoreId() == (nIdent | 0x70000000))
+		if (pNode->getObject() && ((CScriptNpc*)pNode->getObject())->GetStoreId() == (nIdent | 0x70000000))
 			return (CScriptNpc*)pNode->getObject();
-
 		pNode = pNode->getNext();
 	}
 	return nullptr;
-}
-
-CScriptNpc* CNpcManager::newNpc()
-{
-	CScriptNpc* npc = nullptr;
-	UINT id = m_ScriptNpcs.New(&npc);
-	if (id == 0 || npc == nullptr)return nullptr;
-	id = (id & 0xffffff) | (OBJ_NPC << 24);
-	npc->SetId(id);
-	return npc;
-}
-
-VOID CNpcManager::deleteNpc(CScriptNpc* pNpc)
-{
-	UINT id = pNpc->GetId() & 0xffffff;
-	pNpc->Clean();
-	m_ScriptNpcs.Del(id);
 }

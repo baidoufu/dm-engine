@@ -7,7 +7,7 @@
 #include "eventmanager.h"
 
 xObjectPool<SculpEiceEvent>	SculpEiceEvent::m_xEventPool;
-SculpEiceEvent::SculpEiceEvent(void)
+SculpEiceEvent::SculpEiceEvent(VOID)
 {
 	m_nDamage = 0;
 	m_pOwner = nullptr;
@@ -15,7 +15,7 @@ SculpEiceEvent::SculpEiceEvent(void)
 	m_dwOwnerInstanceKey = 0;
 }
 
-SculpEiceEvent::~SculpEiceEvent(void)
+SculpEiceEvent::~SculpEiceEvent(VOID)
 {
 	Destroy();
 }

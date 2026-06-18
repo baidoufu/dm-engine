@@ -34,7 +34,7 @@ CGuildMemberEx::~CGuildMemberEx()
 
 VOID CGuildMemberEx::Init(const char* pszName, UINT nExp, UINT nPower, WORD wLevel, BYTE btJob, CHumanPlayer* pRefPlayer)
 {
-	o_strncpy(m_szCharName, pszName, 16);
+	o_strncpy(m_szCharName.data(), pszName, 16);
 	m_nExp = nExp;
 	m_nPower = nPower;
 	m_btJob = btJob;
@@ -67,7 +67,7 @@ xObjectPool<GUILDMEMBERNODE> CGuildGroupEx::m_xGuildMemberNodePool;
 CGuildGroupEx::CGuildGroupEx()
 {
 	m_nLevel = 0;
-	m_szName[0] = 0;
+	m_szName.fill(0);
 }
 
 CGuildGroupEx::~CGuildGroupEx()
@@ -151,12 +151,12 @@ VOID CGuildGroupEx::ClearAllRef()
 	}
 }
 
-static thread_local char g_szTempBuffer[65536];
 VOID CGuildGroupEx::SendMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpData, int iDataSize)
 {
-	int length = EncodeMsg(g_szTempBuffer, dwFlag, wCmd, w1, w2, w3, lpData, iDataSize);
+	xPacketPool::ScopedPacket packet(65535);
+	int length = EncodeMsg((char*)packet->getfreebuf(), dwFlag, wCmd, w1, w2, w3, lpData, iDataSize);
 	if (length > 0)
-		OnMsg(g_szTempBuffer, length);
+		OnMsg(packet->getbuf(), length);
 }
 
 VOID CGuildGroupEx::OnMsg(const char* pszMsg, int iMsgLength)
@@ -281,19 +281,19 @@ CGuildMemberEx* CGuildGroupEx::GetFirstMember()
 
 xObjectPool<CGuildMemberEx> CGuildEx::m_xMemberPool;
 xObjectPool<CGuildGroupEx> CGuildEx::m_xGroupPool;
-CGuildEx::CGuildEx(void)
+CGuildEx::CGuildEx(VOID)
 {
-	memset(m_xGroups, 0, sizeof(m_xGroups));
+	m_xGroups.fill(nullptr);
 	m_nGroupCount = 0;
-	m_szName[0] = 0;
-	m_szNotice[0] = 0;
-	m_szFilename[0] = 0;
+	m_szName.fill(0);
+	m_szNotice.fill(0);
+	m_szFilename.fill(0);
 	m_nLevel = 0;
 	m_nExp = 0;
 	m_nGold = 0;
-	memset(m_sAllyGuilds, 0, sizeof(m_sAllyGuilds));
+	m_sAllyGuilds.fill({});
 	m_nAllyGuildCount = 0;
-	memset(m_sKillGuilds, 0, sizeof(m_sKillGuilds));
+	m_sKillGuilds.fill({});
 	m_nKillGuildCount = 0;
 	m_fAttackSabuk = FALSE;
 	m_boRecruitState = TRUE;
@@ -301,7 +301,7 @@ CGuildEx::CGuildEx(void)
 	m_boAllNoSay = FALSE;
 }
 
-CGuildEx::~CGuildEx(void)
+CGuildEx::~CGuildEx(VOID)
 {
 }
 
@@ -332,7 +332,7 @@ BOOL CGuildEx::AddGroupToList(CGuildGroupEx* pGroup)
 		pos = i;
 		break;
 	}
-	memmove((void*)(m_xGroups + pos + 1), (void*)(m_xGroups + pos), sizeof(CGuildGroupEx*) * ((int)m_nGroupCount - pos));
+	memmove((VOID*)(m_xGroups.data() + pos + 1), (VOID*)(m_xGroups.data() + pos), sizeof(CGuildGroupEx*) * ((int)m_nGroupCount - pos));
 	m_xGroups[pos] = pGroup;
 	m_nGroupCount++;
 	return TRUE;
@@ -387,26 +387,26 @@ BOOL CGuildEx::ChangeGroup(const char* pszName, UINT nLevel, UINT nOldLevel)
 
 VOID CGuildEx::SendGroupFengHaoData(CHumanPlayer* pPlayer)
 {
-	xPacket packet(g_szTempBuffer, 65535);
-	xPacket packet1(4096);
-	packet.push(&m_nGroupCount, 4);
-	packet1.push(&m_nGroupCount, 4);
+	xPacketPool::ScopedPacket packet(65535);
+	xPacketPool::ScopedPacket packet1;
+	packet->push(&m_nGroupCount, 4);
+	packet1->push(&m_nGroupCount, 4);
 	for (UINT n = 0; n < m_nGroupCount; n++)
 	{
 		if (m_xGroups[n])
 		{
 			UINT nLevel = m_xGroups[n]->GetLevel();
-			packet.push(&nLevel, 4);
+			packet->push(&nLevel, 4);
 			
-			packet1.push(m_xGroups[n]->GetName());
-			packet1.push(1);
+			packet1->push(m_xGroups[n]->GetName());
+			packet1->push(1);
 		}
 	}
-	packet.push((LPVOID)packet1.getbuf(), packet1.getsize());
+	packet->push((LPVOID)packet1->getbuf(), packet1->getsize());
 	if (pPlayer == nullptr)
 	{
-		const void* pData = packet.getbuf();
-		int nSize = packet.getsize();
+		const VOID* pData = packet->getbuf();
+		int nSize = packet->getsize();
 		UINT nMemberCount = m_xMemberNameList.GetCount();
 		for (UINT n = 0; n < nMemberCount; n++)
 		{
@@ -418,21 +418,21 @@ VOID CGuildEx::SendGroupFengHaoData(CHumanPlayer* pPlayer)
 		}
 	}
 	else
-		pPlayer->SendMsg(0, 0xa11, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+		pPlayer->SendMsg(0, 0xa11, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	
 }
 
 VOID CGuildEx::SendGuildTowerInfo(CHumanPlayer* pPlayer)
 {
-	xPacket packet(g_szTempBuffer, 65535);
-	packet.push(2); //通灵塔坐标x
-	packet.push(2); //通灵塔坐标y
-	packet.push(1); //资源充足，通灵塔打开
-	packet.push(14); //本体附加属性
-	packet.push(14); //元神附加属性
-	packet.push(1); //属性打开，个人贡献
-	packet.push(GetFirstOwnerName()); //会长名字
-	packet.push("/");
+	xPacketPool::ScopedPacket packet(65535);
+	packet->push(2); //通灵塔坐标x
+	packet->push(2); //通灵塔坐标y
+	packet->push(1); //资源充足，通灵塔打开
+	packet->push(14); //本体附加属性
+	packet->push(14); //元神附加属性
+	packet->push(1); //属性打开，个人贡献
+	packet->push(GetFirstOwnerName()); //会长名字
+	packet->push("/");
 	char szText[2048]{};
 	int offset = 0;
 	for (int i = 1; i <= 10; i++)
@@ -441,12 +441,13 @@ VOID CGuildEx::SendGuildTowerInfo(CHumanPlayer* pPlayer)
 		offset += sprintf(szText + offset, "%d/%d/%d/%d/%d/%s/", i, nGuildOfficialCount[m_nLevel][i],
 			nGuildOfficialCountMax[i], btGuildOfficialCrony[i], nGuildOfficialPrice[i], sGuildOfficial[i]);
 	}
-	packet.push(szText, offset);
+	packet->push(szText, offset);
 	CGuildMemberEx* pGuildMember = GetMember(pPlayer);
+	if (pGuildMember == nullptr) return; // 玩家不在行会中，安全退出
 	int pLevel = pGuildMember->GetGroup()->GetLevel();//玩家所在分组
 	WORD wPermission = nGuildOfficialPermission[pLevel];
 	if (!wPermission) wPermission = 1024;
-	pPlayer->SendMsg(m_nGold, 0x340, m_nLevel, wPermission, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	pPlayer->SendMsg(m_nGold, 0x340, m_nLevel, wPermission, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 CGuildMemberEx* CGuildEx::GetMember(const char* pszName)
@@ -615,8 +616,8 @@ BOOL CGuildEx::Create(CHumanPlayer* pCreator, const char* pszName)
 		pCreator->SaySystem("名字是非法的!");
 		return FALSE;
 	}
-	o_strncpy(m_szName, pszName, 63);
-	_makepath(m_szFilename, nullptr, ".\\Data\\GuildBase\\Guilds", m_szName, "ini");
+	o_strncpy(m_szName.data(), pszName, 63);
+	_makepath(m_szFilename.data(), nullptr, ".\\Data\\GuildBase\\Guilds", m_szName.data(), "ini");
 	m_nMaxMemberCount = CGameWorld::GetInstance()->GetVar(EVI_STARTGUILDMEMBERCOUNT);
 	if (!AddMember(pCreator))
 	{
@@ -641,8 +642,8 @@ VOID CGuildEx::Init()
 VOID CGuildEx::Save()
 {
 	char szFilename[1024];
-	int len = (int)strlen(m_szFilename);
-	o_strncpy(szFilename, m_szFilename, len);
+	int len = static_cast<int>(strlen(m_szFilename.data()));
+	o_strncpy(szFilename, m_szFilename.data(), len);
 	strcpy(szFilename + len - 3, "ini");
 
 	FILE* fp = fopen(szFilename, "w");
@@ -657,9 +658,9 @@ VOID CGuildEx::Save()
 	fprintf(fp, "%s\n", CGameWorld::GetInstance()->GetName(ENI_GUILDNOTICE));
 	int iptr = 0;
 	BOOL bNewLine = TRUE;
-	while (*(m_szNotice + iptr))
+	while (m_szNotice[iptr])
 	{
-		if (*(m_szNotice + iptr) == '\r')
+		if (m_szNotice[iptr] == '\r')
 		{
 			fputc('\n', fp);
 			bNewLine = TRUE;
@@ -671,7 +672,7 @@ VOID CGuildEx::Save()
 				bNewLine = FALSE;
 				fputc('+', fp);
 			}
-			fputc(*(m_szNotice + iptr), fp);
+			fputc(m_szNotice[iptr], fp);
 		}
 		iptr++;
 		if (iptr >= MAX_GUILD_NOTICE_LENGTH)
@@ -712,7 +713,7 @@ VOID CGuildEx::Save()
 	{
 		if (m_xApplyPlayers[n])
 		{
-			fprintf(fp, "+%s\n", m_xApplyPlayers[n]->pszString);
+			fprintf(fp, "+%s\n", m_xApplyPlayers[n]->pszString.get());
 		}
 	}
 	fputc('\n', fp);
@@ -728,7 +729,7 @@ BOOL CGuildEx::Load(const char* pszFile)
 {
 	CSettingFile sfGuild;
 	if (!sfGuild.Open(pszFile))return FALSE;
-	_splitpath(pszFile, nullptr, nullptr, m_szName, nullptr);
+	_splitpath(pszFile, nullptr, nullptr, m_szName.data(), nullptr);
 	if (m_szName[0] == 0)return FALSE;
 	m_nLevel = (UINT)sfGuild.GetInteger("Guild", "Level", 1); // 行会等级默认值改成1
 	m_nExp = (UINT)sfGuild.GetInteger("Guild", "Exp", 0);
@@ -738,7 +739,7 @@ BOOL CGuildEx::Load(const char* pszFile)
 	char szGuildContentFile[260];
 	if (_strnicmp(pszFile + len - 3, "ini", 3) != 0)
 		return FALSE;
-	o_strncpy(m_szFilename, pszFile, 1020);
+	o_strncpy(m_szFilename.data(), pszFile, 1020);
 	o_strncpy(szGuildContentFile, pszFile, 259);
 	strcpy(szGuildContentFile + len - 3, "txt");
 	CStringFile sfGuildContent(szGuildContentFile);
@@ -753,7 +754,7 @@ BOOL CGuildEx::Load(const char* pszFile)
 	static char* pszMembers = (char*)CGameWorld::GetInstance()->GetName(ENI_MEMBERS);
 	static char* pszApplyList = (char*)CGameWorld::GetInstance()->GetName(ENI_GUILDAPPLYLIST);
 
-	m_szNotice[0] = 0;
+	m_szNotice.fill(0);
 	int iNoticePtr = 0;
 	int nParam = 0;
 	char* pLine = nullptr;
@@ -773,7 +774,7 @@ BOOL CGuildEx::Load(const char* pszFile)
 				if (len + iNoticePtr + 1 >= MAX_GUILD_NOTICE_LENGTH)
 					len = MAX_GUILD_NOTICE_LENGTH - iNoticePtr - 2;
 				if (len <= 0)continue;
-				o_strncpy(m_szNotice + iNoticePtr, pLine, len);
+				o_strncpy(m_szNotice.data() + iNoticePtr, pLine, len);
 				iNoticePtr += len;
 				m_szNotice[iNoticePtr++] = '\r';
 				m_szNotice[iNoticePtr] = 0;
@@ -797,9 +798,9 @@ BOOL CGuildEx::Load(const char* pszFile)
 				xStringsExtracter<5> s(pLine, "|", " \t");
 				if (s.getCount() <= 0)continue;
 				WORD wLevel = 0;
-				wLevel = (DWORD)StringToInteger(s[1]);
+				wLevel = static_cast<WORD>(StringToInteger(s[1]));
 				BYTE btJob = 0;
-				btJob = (DWORD)StringToInteger(s[2]);
+				btJob = static_cast<BYTE>(StringToInteger(s[2]));
 				DWORD dwExp = 0;
 				if (s.getCount() > 3)
 					dwExp = (DWORD)StringToInteger(s[3]);
@@ -815,9 +816,8 @@ BOOL CGuildEx::Load(const char* pszFile)
 			}
 			else if (rgstate == RG_DECLARATION)
 			{
-				std::string decl(pLine);
-				if (!decl.empty())
-					m_DeclarationList.push_back(decl);
+				if (pLine[0] != '\0')
+					m_DeclarationList.emplace_back(pLine);
 			}
 			else if (rgstate == RG_APPLYLIST)
 			{
@@ -905,7 +905,7 @@ BOOL CGuildEx::DelApplyPlayer(const char* pszCharName)
 		if (m_xApplyPlayers[n])
 		{
 			char* Params[1];
-			int nParam = SearchParam(m_xApplyPlayers[n]->pszString, Params, 1, '#');
+			int nParam = SearchParam(m_xApplyPlayers[n]->pszString.get(), Params, 1, "#");
 			if (nParam > 0 && strcmp(Params[0], pszCharName) == 0)
 			{
 				m_xApplyPlayers.Delete(n);
@@ -919,23 +919,23 @@ BOOL CGuildEx::DelApplyPlayer(const char* pszCharName)
 
 VOID CGuildEx::SendApplyList(CHumanPlayer* pOperator)
 {
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	const char* s1C = "guildmgr";
-	packet.push(s1C);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
 	int nValue = 3;
-	packet.push((LPVOID)&nValue, 1);
+	packet->push((LPVOID)&nValue, 1);
 	UINT nCount = m_xApplyPlayers.GetCount();
-	packet.push(&nCount, 4);
+	packet->push(&nCount, 4);
 	for (UINT n = 0; n < nCount; n++)
 	{
 		if (m_xApplyPlayers[n])
 		{
-			packet.push(m_xApplyPlayers[n]->pszString);
-			packet.push(1);
+			packet->push(m_xApplyPlayers[n]->pszString.get());
+			packet->push(1);
 		}
 	}
-	pOperator->SendMsg(pOperator->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	pOperator->SendMsg(pOperator->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CGuildEx::SendWords(const char* pszWords)
@@ -962,13 +962,14 @@ VOID CGuildEx::RefreshMemberTitle()
 
 VOID CGuildEx::SendMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpData, int iDataSize)
 {
-	int length = EncodeMsg(g_szTempBuffer, dwFlag, wCmd, w1, w2, w3, lpData, iDataSize);
+	xPacketPool::ScopedPacket packet(65535);
+	int length = EncodeMsg((char*)packet->getfreebuf(), dwFlag, wCmd, w1, w2, w3, lpData, iDataSize);
 	if (length > 0)
 	{
 		for (UINT n = 0; n < m_nGroupCount; n++)
 		{
 			if (m_xGroups[n])
-				m_xGroups[n]->OnMsg(g_szTempBuffer, length);
+				m_xGroups[n]->OnMsg(packet->getbuf(), length);
 		}
 	}
 }
@@ -987,43 +988,42 @@ UINT CGuildEx::GetMemberCountFor46Level()
 
 BOOL CGuildEx::SendFirstPage(CHumanPlayer* pPlayer)
 {
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	//	"测试行会\r \r0\r<Notice>\r大家好, 这里是测试行会\r没有任何功能, 只是给你看看, 哈哈\r<KillGuilds>假冒伪劣\r<AllyGuilds>KITT\r传世引擎\r"
-	packet.push(GetName());
+	packet->push(GetName());
 	if (IsMaster(pPlayer))
-		packet.push("\r \r1\r<Notice>\r");
+		packet->push("\r \r1\r<Notice>\r");
 	else
-		packet.push("\r \r0\r<Notice>\r");
-	packet.push(m_szNotice);
-	packet.push("\r<KillGuilds>");
+		packet->push("\r \r0\r<Notice>\r");
+	packet->push(m_szNotice.data());
+	packet->push("\r<KillGuilds>");
 	for (UINT n = 0; n < m_nKillGuildCount; n++)
 	{
 		if (m_sKillGuilds[n].szName[0])
 		{
-			packet.push(m_sKillGuilds[n].szName);
-			packet.push("\r");
+			packet->push(m_sKillGuilds[n].szName);
+			packet->push("\r");
 		}
 	}
-	packet.push("<AllyGuilds>");
+	packet->push("<AllyGuilds>");
 	for (UINT n = 0; n < m_nAllyGuildCount; n++)
 	{
 		if (m_sAllyGuilds[n].szName[0])
 		{
-			packet.push(m_sAllyGuilds[n].szName);
-			packet.push("\r");
+			packet->push(m_sAllyGuilds[n].szName);
+			packet->push("\r");
 		}
 	}
 	// 100是行会最大成员数
-	pPlayer->SendMsg(0, 0x2f1, 100, 0, 1, (LPVOID)packet.getbuf(), packet.getsize());
+	pPlayer->SendMsg(0, 0x2f1, 100, 0, 1, (LPVOID)packet->getbuf(), packet->getsize());
 	return TRUE;
 }
 
 BOOL CGuildEx::SendDurationMemberList(CHumanPlayer* pPlayer)
 {
 	//	"#1/*行会会长/会长1/#2/*行会成员/成员1/成员2/"
-	char szBuffer[4096]{};
-	xPacket packet1(szBuffer, 4096);
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet1;
+	xPacketPool::ScopedPacket packet(65535);
 	char szText[256];
 	int length = 0;
 	UINT nGroupCount = 0;//有成员的组数量
@@ -1032,16 +1032,16 @@ BOOL CGuildEx::SendDurationMemberList(CHumanPlayer* pPlayer)
 		if (m_xGroups[n] && m_xGroups[n]->GetCount() > 0)
 		{
 			sprintf(szText, "#%u/*%s/", m_xGroups[n]->GetLevel(), m_xGroups[n]->GetName());
-			packet1.push(szText);
-			m_xGroups[n]->AppendDurationMembers(packet1);
+			packet1->push(szText);
+			m_xGroups[n]->AppendDurationMembers(*packet1);
 			nGroupCount++;
 		}
 	}
-	length = EncodeMsg((char*)packet.getfreebuf(), 0, 0x345, 0, 0, 0, (LPVOID)packet1.getbuf(), packet1.getsize());
-	packet.addsize(length);
+	length = EncodeMsg((char*)packet->getfreebuf(), 0, 0x345, 0, 0, 0, (LPVOID)packet1->getbuf(), packet1->getsize());
+	packet->addsize(length);
 	//发送行会成员数据
-	packet1.clear();
-	packet1.push(&nGroupCount, 2);
+	packet1->clear();
+	packet1->push(&nGroupCount, 2);
 	for (UINT n = 0; n < m_nGroupCount; n++)
 	{
 		if (m_xGroups[n] && m_xGroups[n]->GetCount() > 0)
@@ -1049,19 +1049,19 @@ BOOL CGuildEx::SendDurationMemberList(CHumanPlayer* pPlayer)
 		    UINT uLevel = m_xGroups[n]->GetLevel();
 			const char* szGroupName = m_xGroups[n]->GetName();
 			WORD uCount = m_xGroups[n]->GetCount();
-			packet1.push(&uLevel, 2);//分组序号
-			packet1.push(szGroupName);//分组名
-			packet1.push(1);
-			packet1.push(&uCount, 2);//分组下人数
-			m_xGroups[n]->AppendDurationMembers2(packet1);
+			packet1->push(&uLevel, 2);//分组序号
+			packet1->push(szGroupName);//分组名
+			packet1->push(1);
+			packet1->push(&uCount, 2);//分组下人数
+			m_xGroups[n]->AppendDurationMembers2(*packet1);
 		}
 	}
-	length = EncodeMsg((char*)packet.getfreebuf(), 0, 0x34a, 1, 0, 0, (LPVOID)packet1.getbuf(), packet1.getsize());
-	packet.addsize(length);
+	length = EncodeMsg((char*)packet->getfreebuf(), 0, 0x34a, 1, 0, 0, (LPVOID)packet1->getbuf(), packet1->getsize());
+	packet->addsize(length);
 	if (pPlayer == nullptr)
 	{
-		const char* pData = packet.getbuf();
-		int nSize = packet.getsize();
+		const char* pData = packet->getbuf();
+		int nSize = packet->getsize();
 		UINT nMemberCount = m_xMemberNameList.GetCount();
 		for (UINT n = 0; n < nMemberCount; n++)
 		{
@@ -1076,7 +1076,7 @@ BOOL CGuildEx::SendDurationMemberList(CHumanPlayer* pPlayer)
 	}
 	else
 	{
-		pPlayer->OnAroundMsg(nullptr, packet.getbuf(), packet.getsize());
+		pPlayer->OnAroundMsg(nullptr, packet->getbuf(), packet->getsize());
 		pPlayer->UpdateViewName();
 	}
 	return TRUE;
@@ -1295,16 +1295,16 @@ VOID CGuildEx::Clear()
 	}
 	m_xApplyPlayers.Clear();
 	m_DeclarationList.clear();
-	memset(m_xGroups, 0, sizeof(m_xGroups));
+	m_xGroups.fill(nullptr);
 	m_nGroupCount = 0;
-	m_szName[0] = 0;
-	m_szNotice[0] = 0;
-	m_szFilename[0] = 0;
+	m_szName.fill(0);
+	m_szNotice.fill(0);
+	m_szFilename.fill(0);
 	m_nLevel = 0;
 	m_nExp = 0;
-	memset(m_sAllyGuilds, 0, sizeof(m_sAllyGuilds));
+	m_sAllyGuilds.fill({});
 	m_nAllyGuildCount = 0;
-	memset(m_sKillGuilds, 0, sizeof(m_sKillGuilds));
+	m_sKillGuilds.fill({});
 	m_nKillGuildCount = 0;
 	m_fAttackSabuk = FALSE;
 	m_nMaxMemberCount = 0;

@@ -2,30 +2,28 @@
 #include ".\dbclientobj.h"
 #include <memory>
 
-CDBClientObj::CDBClientObj(void)
+CDBClientObj::CDBClientObj(VOID)
 {
 	Clean();
 }
 
-CDBClientObj::~CDBClientObj(void)
+CDBClientObj::~CDBClientObj(VOID)
 {
 }
 
-void CDBClientObj::Update()
+VOID CDBClientObj::Update()
 {
 	CClientObject::Update();
 }
 
 VOID CDBClientObj::SendQueryCharlist(UINT id, UINT key, const char* pszAccount, const char* pszServerName)
 {
-	if (this == nullptr)return;
 	tQueryCharList qlist(key, pszAccount, pszServerName);
 	SendMsg(id, DM_QUERYCHARLIST, 0, 0, 0, qlist.GetPtr(), qlist.GetSize());
 }
 
 VOID CDBClientObj::SendQueryCreateChar(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName, BYTE btClass, BYTE btSex, BYTE btHair)
 {
-	if (this == nullptr)return;
 	CREATECHARDESC desc;
 	desc.dwKey = key;
 	desc.btClass = btClass;
@@ -40,35 +38,30 @@ VOID CDBClientObj::SendQueryCreateChar(UINT id, UINT key, const char* pszAccount
 
 VOID CDBClientObj::SendQueryDelChar(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName)
 {
-	if (this == nullptr)return;
 	tQueryPersonInfo info(key, pszAccount, pszServerName, pszName);
 	SendMsg(id, DM_DELETECHARACTER, 0, 0, 0, info.GetPtr(), info.GetSize());
 }
 
 VOID CDBClientObj::SendQueryDeletedCharList(UINT id, UINT key, const char* pszAccount, const char* pszServerName)
 {
-	if (this == nullptr)return;
 	tQueryCharList clist(key, pszAccount, pszServerName);
 	SendMsg(id, DM_DELETEDCHARLIST, 0, 0, 0, clist.GetPtr(), clist.GetSize());
 }
 
 VOID CDBClientObj::SendQueryRestoreChar(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName)
 {
-	if (this == nullptr)return;
 	tQueryPersonInfo info(key, pszAccount, pszServerName, pszName);
 	SendMsg(id, DM_RESTORECHARACTER, 0, 0, 0, info.GetPtr(), info.GetSize());
 }
 
 VOID CDBClientObj::SendQueryMapPosition(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName)
 {
-	if (this == nullptr)return;
 	tQueryPersonInfo info(key, pszAccount, pszServerName, pszName);
 	SendMsg(id, DM_GETCHARPOSITIONFORSELCHAR, 0, 0, 0, info.GetPtr(), info.GetSize());
 }
 
 VOID CDBClientObj::SendQueryDbInfo(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName)
 {
-	if (this == nullptr)return;
 	tQueryPersonInfo info(key, pszAccount, pszServerName, pszName);
 	SendMsg(id, DM_GETCHARDBINFO, 0, 0, 0, info.GetPtr(), info.GetSize());
 }
@@ -126,11 +119,6 @@ VOID CDBClientObj::SendQueryMagic(UINT id, UINT key, DWORD dwDBId)
 	SendMsg(id, DM_QUERYMAGIC, key & 0xffff, ((key & 0xffff0000) >> 16), 0, &dwDBId, sizeof(DWORD));
 }
 
-VOID CDBClientObj::UpdateAccountState(DWORD dwServerId, const char* pszAccount, UINT state)
-{
-	SendMsg(dwServerId, DM_UPDATEACCOUNTSTATE, state, 0, 0, (LPVOID)pszAccount);
-}
-
 VOID CDBClientObj::SendUpdateItemPos(BYTE btFlag, BAGITEMPOS* pItemPos, WORD wCount)
 {
 	SendMsg(0, DM_UPDATEITEMPOSEX, wCount, btFlag, 0, (LPVOID)pItemPos, wCount * sizeof(BAGITEMPOS));
@@ -148,22 +136,22 @@ VOID CDBClientObj::QueryCommunity(UINT id, DWORD dwKey, DWORD dwOwner)
 
 VOID CDBClientObj::SendBreakFriend(const char* friend1, const char* friend2)
 {
-	char szText[1024];
-	sprintf(szText, "%s/%s", friend1, friend2);
-	SendMsg(0, DM_BREAKFRIEND, 0, 0, 0, (LPVOID)szText);
+	std::array<char, 1024> szText{};
+	sprintf(szText.data(), "%s/%s", friend1, friend2);
+	SendMsg(0, DM_BREAKFRIEND, 0, 0, 0, (LPVOID)szText.data());
 }
 VOID CDBClientObj::SendBreakTeacher(const char* pszTeacher, const char* pszStudent)
 {
-	char szText[1024];
-	sprintf(szText, "%s/%s", pszTeacher, pszStudent);
-	SendMsg(0, DM_BREAKMASTER, 0, 0, 0, (LPVOID)szText);
+	std::array<char, 1024> szText{};
+	sprintf(szText.data(), "%s/%s", pszTeacher, pszStudent);
+	SendMsg(0, DM_BREAKMASTER, 0, 0, 0, (LPVOID)szText.data());
 }
 
 VOID CDBClientObj::SendBreakMarriage(const char* pszMarriage1, const char* pszMarriage2)
 {
-	char szText[1024];
-	sprintf(szText, "%s/%s", pszMarriage1, pszMarriage2);
-	SendMsg(0, DM_BREAKMARRIAGE, 0, 0, 0, (LPVOID)szText);
+	std::array<char, 1024> szText{};
+	sprintf(szText.data(), "%s/%s", pszMarriage1, pszMarriage2);
+	SendMsg(0, DM_BREAKMARRIAGE, 0, 0, 0, (LPVOID)szText.data());
 }
 
 VOID CDBClientObj::SendUpdateItems(DWORD dwOwner, BYTE btFlag, DBITEM* pItemArray, int count)
@@ -183,35 +171,33 @@ VOID CDBClientObj::SendQueryUpgradeItem(DWORD id, DWORD dwKey, DWORD dwDBId)
 
 VOID CDBClientObj::SendRestoreGuild(const char* name, const char* guildname)
 {
-	char szTemp[200];
-	sprintf(szTemp, "%s/%s", name, guildname);
-	SendMsg(0, DM_RESTOREGUILDNAME, 0, 0, 0, (LPVOID)szTemp);
+	std::array<char, 200> szTemp{};
+	sprintf(szTemp.data(), "%s/%s", name, guildname);
+	SendMsg(0, DM_RESTOREGUILDNAME, 0, 0, 0, (LPVOID)szTemp.data());
 }
 
 VOID CDBClientObj::SendExecSqlCommand(UINT nId, UINT nKey, UINT nTransid, const char* pszCommand, UINT nRecordDefCount, COLTYPE* pDefTypes, UINT nRecordCount)
 {
-	const int BUFFER_SIZE = 65536;
-	std::unique_ptr<char[]> szBuffer(new char[BUFFER_SIZE]);
-	xPacket packet(szBuffer.get(), BUFFER_SIZE);
+	xPacketPool::ScopedPacket packet(65536);
 	DWORD dwTemp = static_cast<DWORD>(strlen(pszCommand)) + 1;
-	packet.push(&nTransid, sizeof(DWORD));
-	packet.push(&dwTemp, sizeof(DWORD));
-	packet.push((LPVOID)pszCommand, dwTemp);
-	packet.push(&nRecordCount, sizeof(DWORD));
+	packet->push(&nTransid, sizeof(DWORD));
+	packet->push(&dwTemp, sizeof(DWORD));
+	packet->push((LPVOID)pszCommand, dwTemp);
+	packet->push(&nRecordCount, sizeof(DWORD));
 	if (nRecordDefCount == 0)pDefTypes = nullptr;
 	if (pDefTypes == nullptr)nRecordDefCount = 0;
-	packet.push(&nRecordDefCount, sizeof(DWORD));
+	packet->push(&nRecordDefCount, sizeof(DWORD));
 	if (pDefTypes)
-		packet.push((LPVOID)pDefTypes, sizeof(COLTYPE) * nRecordDefCount);
-	SendMsg(nId, DM_EXECSQL, nKey & 0xffff, (nKey & 0xffff0000) >> 16, 0, (LPVOID)packet.getbuf(), static_cast<int>(packet.getsize()));
+		packet->push((LPVOID)pDefTypes, sizeof(COLTYPE) * nRecordDefCount);
+	SendMsg(nId, DM_EXECSQL, nKey & 0xffff, (nKey & 0xffff0000) >> 16, 0, (LPVOID)packet->getbuf(), static_cast<int>(packet->getsize()));
 }
 
 VOID CDBClientObj::SendAddCredit(const char* pszName, UINT nCount)
 {
-	char szTemp[1024] = { 0 };
-	*(UINT*)szTemp = nCount;
-	o_strncpy(szTemp + sizeof(UINT), pszName, 16);
-	SendMsg(0, DM_ADDCREDIT, 0, 0, 0, (LPVOID)szTemp, sizeof(UINT) + 20);
+	std::array<char, 1024> szTemp{};
+	*(UINT*)szTemp.data() = nCount;
+	o_strncpy(szTemp.data() + sizeof(UINT), pszName, 16);
+	SendMsg(0, DM_ADDCREDIT, 0, 0, 0, (LPVOID)szTemp.data(), sizeof(UINT) + 20);
 }
 
 VOID CDBClientObj::SendDeleteMagic(DWORD dwOwner, WORD wMagicId)

@@ -4,10 +4,10 @@ class xIocpServer;
 class xServerObject
 {
 public:
-	xServerObject(void);
-	virtual ~xServerObject(void);
+	xServerObject(VOID);
+	virtual ~xServerObject(VOID);
 	xIocpServer* getServer() { return m_pxIocpServer; }
-	void	setServer(xIocpServer* pServer) { m_pxIocpServer = pServer; }
+	VOID	setServer(xIocpServer* pServer) { m_pxIocpServer = pServer; }
 private:
 	xIocpServer* m_pxIocpServer;
 };

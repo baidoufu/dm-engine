@@ -6,13 +6,14 @@ class CHumanPlayer;
 class CDownItemObject : public CMapObject
 {
 public:
-	CDownItemObject(void);
-	virtual ~CDownItemObject(void);
+	CDownItemObject(VOID);
+	virtual ~CDownItemObject(VOID);
 	VOID Clean();
 	BOOL GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer = nullptr);
 	BOOL GetOutViewmsg(char* pszMsg, int& length, CMapObject* pViewer = nullptr);
 	BOOL CanRecvMsg() { return FALSE; }
 	e_object_type GetType() { return OBJ_DOWNITEM; }
+	e_class_type GetClassType() { return CLS_DOWNITEM; }
 	//获取物品
 	ITEM& GetItem() { return m_Item; }
 	//设置物品

@@ -1,13 +1,13 @@
 #include "StdAfx.h"
 #include ".\simpledbconnection.h"
 
-CSimpleDBConnection::CSimpleDBConnection(void)
+CSimpleDBConnection::CSimpleDBConnection(VOID)
 {
 	this->m_xRecvPacket.create(65536);
 	this->m_xSendPacket.create(65536);
 }
 
-CSimpleDBConnection::~CSimpleDBConnection(void)
+CSimpleDBConnection::~CSimpleDBConnection(VOID)
 {
 	this->m_xRecvPacket.destroy();
 	this->m_xSendPacket.destroy();
@@ -58,11 +58,11 @@ VOID CSimpleDBConnection::Update()
 	}
 }
 
-static thread_local char szTemp[65536];
+static thread_local std::array<char, 65536> szTemp{};
 VOID CSimpleDBConnection::SendMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpData, int datasize)
 {
-	int length = EncodeMsg(szTemp, dwFlag, wCmd, w1, w2, w3, lpData, datasize);
-	m_xSendPacket.push((LPVOID)szTemp, length);
+	int length = EncodeMsg(szTemp.data(), dwFlag, wCmd, w1, w2, w3, lpData, datasize);
+	m_xSendPacket.push((LPVOID)szTemp.data(), length);
 	length = Send((LPVOID)m_xSendPacket.getbuf(), m_xSendPacket.getsize());
 	if (length < 1)return;
 	if (length == m_xSendPacket.getsize())
@@ -71,7 +71,7 @@ VOID CSimpleDBConnection::SendMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WOR
 		m_xSendPacket.free(length);
 }
 
-static thread_local char g_szTempBuffer2[65536];
+static thread_local std::array<char, 65536> g_szTempBuffer2{};
 int	CSimpleDBConnection::ParseMessage(char* pszMsg, int iSize)
 {
 	char* pStart = nullptr;
@@ -107,11 +107,27 @@ int	CSimpleDBConnection::ParseMessage(char* pszMsg, int iSize)
 				else
 				{
 					if (*pStart >= '0' && *pStart <= '9')pStart++;
-					int length = _UnGameCode(pStart, (BYTE*)g_szTempBuffer2);
+					const int encodedLen = static_cast<int>(pszMsg + i - pStart);
+					// 编码数据长度上限检查：防止解码后溢出g_szTempBuffer2
+					const int maxEncodedLen = static_cast<int>(g_szTempBuffer2.size()) * 3 / 4;
+					if (encodedLen > maxEncodedLen || encodedLen <= 0)
+					{
+						pStart = nullptr;
+						ParsedSize = i + 1;
+						break;
+					}
+					int length = _UnGameCode(pStart, (BYTE*)g_szTempBuffer2.data());
+					// 解码后长度安全检查
+					if (length <= 0 || length > static_cast<int>(g_szTempBuffer2.size()))
+					{
+						pStart = nullptr;
+						ParsedSize = i + 1;
+						break;
+					}
 					//if( m_pMsgProcessor )
-					//	m_pMsgProcessor->OnMsg( this, (MIRMSG*)g_szTempBuffer2, length - sizeof( MIRMSGHEADER ) );
+					//	m_pMsgProcessor->OnMsg( this, (MIRMSG*)g_szTempBuffer2.data(), length - sizeof( MIRMSGHEADER ) );
 					//else
-					OnMsg((MIRMSG*)g_szTempBuffer2, length - sizeof(MIRMSGHEADER));
+					OnMsg((MIRMSG*)g_szTempBuffer2.data(), length - sizeof(MIRMSGHEADER));
 				}
 				pszMsg[i] = '!';
 				pStart = nullptr;

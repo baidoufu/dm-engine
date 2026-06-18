@@ -3,18 +3,18 @@
 //#include ".\scriptsection.h"
 #include ".\scriptelement.h"
 #include ".\scriptobjectmgr.h"
+#include <array>
 
-CScriptObject::CScriptObject(void) : 
-	m_xPageList(TRUE), m_iTradeItemCount(0), m_szFileName{}, m_szLeftPage{}, m_szName{}
+CScriptObject::CScriptObject(VOID) : 
+	m_xPageList(TRUE)
 {
 	m_pPageList = nullptr;
 	m_pGoodsList = nullptr;
-	memset(m_btTradeItemType, 0, sizeof(m_btTradeItemType));
+	m_btTradeItemType.fill(0);
 	this->m_pLeftPage = nullptr;
-	this->m_bBigBox = FALSE;
 }
 
-CScriptObject::~CScriptObject(void)
+CScriptObject::~CScriptObject(VOID)
 {
 }
 
@@ -44,8 +44,8 @@ BOOL CScriptObject::Load(const char* pszFilename)
 	CScriptFile file;
 	if (!file.Load(pszFilename))
 		return FALSE;
-	if (pszFilename != this->m_szFileName)
-		o_strncpy(this->m_szFileName, pszFilename, 1020);
+	if (strcmp(pszFilename, this->m_szFileName.data()) != 0)
+		o_strncpy(this->m_szFileName.data(), pszFilename, 1020);
 	m_bBigBox = FALSE;
 	this->m_pLeftPage = nullptr;
 	char* pLine = file.FirstLine();
@@ -58,9 +58,9 @@ BOOL CScriptObject::Load(const char* pszFilename)
 			continue;
 		case '[':
 		{
-			char szName[200];
-			filtercopy(szName, pLine, 7, CharSetWhite);
-			if (_stricmp(szName, "[Goods]") == 0)//对比GOODS是否相等
+			std::array<char, 200> szName{};
+			filtercopy(szName.data(), pLine, 7, CharSetWhite);
+			if (_stricmp(szName.data(), "[Goods]") == 0)//对比GOODS是否相等
 			{
 				CSe_Goods* pGoods = new CSe_Goods;
 				if (!pGoods->Parse(file))
@@ -122,7 +122,7 @@ BOOL CScriptObject::Load(const char* pszFilename)
 			else if (_strnicmp(pLine, "#bigbox:", 8) == 0)
 			{
 				m_bBigBox = TRUE;
-				o_strncpy(m_szLeftPage, pLine + 8, 250);
+				o_strncpy(m_szLeftPage.data(), pLine + 8, 250);
 			}
 			else
 				continue;
@@ -132,7 +132,7 @@ BOOL CScriptObject::Load(const char* pszFilename)
 			break;
 		}
 	} while (pLine = file.NextLine());
-	_splitpath(pszFilename, nullptr, nullptr, m_szName, nullptr);
+	_splitpath(pszFilename, nullptr, nullptr, m_szName.data(), nullptr);
 	return TRUE;
 }
 
@@ -173,16 +173,16 @@ BOOL CScriptObject::IsItemTradeble(BYTE btStdMode)
 	return m_btTradeItemType[btStdMode];
 }
 
-VOID CScriptObject::Reload()
+BOOL CScriptObject::Reload()
 {
 	Destroy();
-	Load(this->m_szFileName);
+	return Load(this->m_szFileName.data());
 }
 
 CScriptObject* CScriptObject::GetLeftPage()
 {
 	if (!this->IsBigBox())return nullptr;
 	if (this->m_pLeftPage == nullptr)
-		this->m_pLeftPage = CScriptObjectMgr::GetInstance()->GetScriptObject(this->m_szLeftPage);
+		this->m_pLeftPage = CScriptObjectMgr::GetInstance()->GetScriptObject(this->m_szLeftPage.data());
 	return m_pLeftPage;
 }

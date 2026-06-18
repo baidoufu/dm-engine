@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 class CSe_Page;
 class CSe_Goods;
 
@@ -25,31 +26,31 @@ class CScriptObject :
 	public xVariableProvider
 {
 public:
-	CScriptObject(void);
-	virtual ~CScriptObject(void);
+	CScriptObject(VOID);
+	virtual ~CScriptObject(VOID);
 	BOOL Load(const char* pszFilename);
 	VOID Destroy();
 	CSe_Page* GetPage(const char* pszPage);
 
-	const char* getName() { return m_szName; }
+	const char* getName() { return m_szName.data(); }
 	ScriptVersion& getVersion() { return m_Version; }
 	CSe_Goods* getGoodsList() { return m_pGoodsList; }
 	BOOL IsItemTradeble(BYTE btStdMode);
-	VOID Reload();
+	BOOL Reload();
 	BOOL IsBigBox()const { return m_bBigBox; }
 	CScriptObject* GetLeftPage();
 private:
-	char m_szFileName[1024];
+	std::array<char, 1024> m_szFileName{};
 	VOID AddTradeItemType(BYTE btType);
 	xStringList<32> m_xPageList;
 	xVarList<32> m_xVarList;
 	CSe_Page* m_pPageList;
 	CSe_Goods* m_pGoodsList;
 	ScriptVersion m_Version;
-	char m_szName[64];
-	BYTE m_btTradeItemType[256];
-	int	 m_iTradeItemCount;
-	BOOL m_bBigBox;
-	char m_szLeftPage[256];
+	std::array<char, 64> m_szName{};
+	std::array<BYTE, 256> m_btTradeItemType{};
+	int	 m_iTradeItemCount{ 0 };
+	BOOL m_bBigBox{ FALSE };
+	std::array<char, 256> m_szLeftPage{};
 	CScriptObject* m_pLeftPage;
 };

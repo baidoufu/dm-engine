@@ -2,25 +2,12 @@
 #include "inc.h"
 #include ".\baniplistex.h"
 
-CIpListEx::CIpListEx(void)
+CIpListEx::CIpListEx(VOID)
 {
-	this->m_pMaskAddress = nullptr;
-	this->m_pNormalAddress = nullptr;
-	this->m_pRangeAddress = nullptr;
-	this->m_dwMaskAddressCount = 0;
-	this->m_dwNormalAddressCount = 0;
-	this->m_dwRangeAddressCount = 0;
 }
 
-CIpListEx::~CIpListEx(void)
+CIpListEx::~CIpListEx(VOID)
 {
-	if (this->m_pMaskAddress)delete[]this->m_pMaskAddress;
-	if (this->m_pRangeAddress)delete[]this->m_pRangeAddress;
-	if (this->m_pNormalAddress)delete[]this->m_pNormalAddress;
-
-	this->m_dwMaskAddressCount = 0;
-	this->m_dwNormalAddressCount = 0;
-	this->m_dwRangeAddressCount = 0;
 }
 
 BOOL CIpListEx::Load(const char* pszFilename)
@@ -28,59 +15,39 @@ BOOL CIpListEx::Load(const char* pszFilename)
 	THREAD_PROTECT;	//	读取和检测要进行线程保护
 	CStringFile sf(pszFilename);
 
-	char* pszAddress = nullptr;
+	m_vNormalAddress.clear();
+	m_vRangeAddress.clear();
+	m_vMaskAddress.clear();
 
-
-	if (this->m_pMaskAddress)
+	DWORD dwNormalCount = 0, dwRangeCount = 0, dwMaskCount = 0;
+	for (UINT i = 0; i < (UINT)sf.GetLineCount(); ++i)
 	{
-		delete[]this->m_pMaskAddress;
-		this->m_pMaskAddress = nullptr;
-	}
-	if (this->m_pRangeAddress)
-	{
-		delete[]this->m_pRangeAddress;
-		this->m_pRangeAddress = nullptr;
-	}
-	if (this->m_pNormalAddress)
-	{
-		delete[]this->m_pNormalAddress;
-		this->m_pNormalAddress = nullptr;
-	}
-
-	this->m_dwMaskAddressCount = 0;
-	this->m_dwNormalAddressCount = 0;
-	this->m_dwRangeAddressCount = 0;
-
-	for (UINT i = 0;i < (UINT)sf.GetLineCount();i++)
-	{
-		pszAddress = TrimEx(sf[i]);
+		char* pszAddress = TrimEx(sf[i]);
 		if (*pszAddress == 0 ||
-			*pszAddress == '#')continue;
+			*pszAddress == '#') continue;
 		if (strchr(pszAddress, '-') != nullptr)
-			this->m_dwRangeAddressCount++;
+			++dwRangeCount;
 		else if (strchr(pszAddress, ':') != nullptr)
-			this->m_dwMaskAddressCount++;
+			++dwMaskCount;
 		else
-			this->m_dwNormalAddressCount++;
+			++dwNormalCount;
 	}
 
-	if (this->m_dwMaskAddressCount > 0)
-		this->m_pMaskAddress = new MaskAddress[this->m_dwMaskAddressCount];
-	if (this->m_dwRangeAddressCount > 0)
-		this->m_pRangeAddress = new RangeAddress[this->m_dwRangeAddressCount];
-	if (this->m_dwNormalAddressCount > 0)
-		this->m_pNormalAddress = new DWORD[this->m_dwNormalAddressCount];
+	if (dwMaskCount > 0)
+		m_vMaskAddress.reserve(dwMaskCount);
+	if (dwRangeCount > 0)
+		m_vRangeAddress.reserve(dwRangeCount);
+	if (dwNormalCount > 0)
+		m_vNormalAddress.reserve(dwNormalCount);
 
-	char* p = nullptr;
-
-	for (UINT i = 0;i < (UINT)sf.GetLineCount();i++)
+	for (UINT i = 0; i < (UINT)sf.GetLineCount(); ++i)
 	{
-		pszAddress = TrimEx(sf[i]);
+		char* pszAddress = TrimEx(sf[i]);
 		if (*pszAddress == 0 ||
-			*pszAddress == '#')continue;
-		if ((p = strchr(pszAddress, '-')) != nullptr)
+			*pszAddress == '#') continue;
+		char* p = strchr(pszAddress, '-');
+		if (p != nullptr)
 		{
-			//this->m_dwRangeAddressCount ++;
 			*p++ = 0;
 			AddRangeAddr((DWORD)ntohl(inet_addr(TrimEx(pszAddress))), (DWORD)ntohl(inet_addr(TrimEx(p))));
 		}
@@ -112,127 +79,78 @@ BOOL CIpListEx::AddRangeAddr(DWORD dwStart, DWORD dwEnd)
 	dwStart = min(d1, d2);
 	dwEnd = max(d1, d2);
 	if (dwStart == dwEnd)return AddNormalAddr(dwStart);
-	for (DWORD i = 0;i < this->m_dwRangeAddressCount;i++)
+	for (auto& range : m_vRangeAddress)
 	{
-		if (dwEnd < this->m_pRangeAddress[i].dwStart)
+		if (dwEnd < range.dwStart)
 		{
-			//	Insert @ position i
-			memmove(&m_pRangeAddress[i + 1], &m_pRangeAddress[i], sizeof(RangeAddress) * (this->m_dwRangeAddressCount - i));
-			m_pRangeAddress[i].dwStart = dwStart;
-			m_pRangeAddress[i].dwEnd = dwEnd;
-			this->m_dwRangeAddressCount++;
-			return TRUE;
+			continue;
 		}
-		else if (dwStart > m_pRangeAddress[i].dwEnd)
+		else if (dwStart > range.dwEnd)
 		{
 			continue;
 		}
 
-		if (dwEnd > m_pRangeAddress[i].dwEnd)
-			m_pRangeAddress[i].dwEnd = dwEnd;
+		if (dwEnd > range.dwEnd)
+			range.dwEnd = dwEnd;
 
-		if (dwStart < m_pRangeAddress[i].dwStart)
-			m_pRangeAddress[i].dwStart = dwStart;
+		if (dwStart < range.dwStart)
+			range.dwStart = dwStart;
 
 		return TRUE;
 	}
-	this->m_pRangeAddress[this->m_dwRangeAddressCount].dwStart = dwStart;
-	this->m_pRangeAddress[this->m_dwRangeAddressCount++].dwEnd = dwEnd;
+	m_vRangeAddress.push_back({ dwStart, dwEnd });
 	return TRUE;
 }
 
 BOOL CIpListEx::AddMaskAddr(DWORD dwAddr, DWORD dwMask)
 {
 	dwAddr &= dwMask;
-	for (DWORD i = 0;i < this->m_dwMaskAddressCount;i++)
+	for (auto& mask : m_vMaskAddress)
 	{
-		if (this->m_pMaskAddress[i].dwAddr == dwAddr)
+		if (mask.dwAddr == dwAddr)
 		{
-			if ((dwMask & this->m_pMaskAddress[i].dwMask) == dwMask)
+			if ((dwMask & mask.dwMask) == dwMask)
 				return TRUE;
-			if ((dwMask & this->m_pMaskAddress[i].dwMask) == this->m_pMaskAddress[i].dwMask)
+			if ((dwMask & mask.dwMask) == mask.dwMask)
 			{
-				m_pMaskAddress[i].dwMask = dwMask;
+				mask.dwMask = dwMask;
 				return TRUE;
 			}
 		}
 	}
-	this->m_pMaskAddress[this->m_dwMaskAddressCount].dwAddr = dwAddr;
-	this->m_pMaskAddress[this->m_dwMaskAddressCount++].dwMask = dwMask;
+	m_vMaskAddress.push_back({ dwAddr, dwMask });
 	return TRUE;
 }
 
 BOOL CIpListEx::AddNormalAddr(DWORD dwAddr)
 {
-	for (DWORD i = 0;i < this->m_dwNormalAddressCount;i++)
-	{
-		if (dwAddr < this->m_pNormalAddress[i])
-		{
-			memmove(&m_pNormalAddress[i + 1], &m_pNormalAddress[i], sizeof(DWORD) * (this->m_dwNormalAddressCount - i));
-			m_pNormalAddress[i] = dwAddr;
-			this->m_dwNormalAddressCount++;
-			return TRUE;
-		}
-		else if (dwAddr == this->m_pNormalAddress[i])
-			return TRUE;
-	}
-	this->m_pNormalAddress[this->m_dwNormalAddressCount++] = dwAddr;
+	// 使用二分查找插入位置保持有序
+	auto it = std::lower_bound(m_vNormalAddress.begin(), m_vNormalAddress.end(), dwAddr);
+	if (it != m_vNormalAddress.end() && *it == dwAddr)
+		return TRUE; // 已存在
+	m_vNormalAddress.insert(it, dwAddr);
 	return TRUE;
 }
 
 BOOL CIpListEx::AddressInNormalAddr(DWORD dwAddr)
 {
-	DWORD	s = 0, m = 0, e = this->m_dwNormalAddressCount;
-	while (s < e)
-	{
-		m = (s + e) / 2;
-		if (dwAddr == this->m_pNormalAddress[m])
-			return TRUE;
-		else if (dwAddr > this->m_pNormalAddress[m])
-		{
-			if (s == m)
-				return FALSE;
-			s = m;
-		}
-		else
-		{
-			if (e == m)
-				return FALSE;
-			e = m;
-		}
-	}
-	return FALSE;
+	return std::binary_search(m_vNormalAddress.begin(), m_vNormalAddress.end(), dwAddr);
 }
 
 BOOL CIpListEx::AddressInMaskAddr(DWORD dwAddr)
 {
-	for (DWORD i = 0;i < this->m_dwMaskAddressCount;i++)
+	for (const auto& mask : m_vMaskAddress)
 	{
-		if (this->m_pMaskAddress[i].AddrIn(dwAddr))return TRUE;
+		if (mask.AddrIn(dwAddr))return TRUE;
 	}
 	return FALSE;
 }
 
 BOOL CIpListEx::AddressInRangeAddr(DWORD dwAddr)
 {
-	DWORD	s = 0, m = 0, e = this->m_dwRangeAddressCount;
-	while (s < e)
+	for (const auto& range : m_vRangeAddress)
 	{
-		m = (s + e) / 2;
-		if (this->m_pRangeAddress[m].AddrIn(dwAddr))
-			return TRUE;
-		else if (dwAddr > this->m_pRangeAddress[m].dwEnd)
-		{
-			if (s == m)
-				return FALSE;
-			s = m;
-		}
-		else
-		{
-			if (e == m)
-				return FALSE;
-			e = m;
-		}
+		if (range.AddrIn(dwAddr))return TRUE;
 	}
 	return FALSE;
 }

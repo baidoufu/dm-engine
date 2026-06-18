@@ -1,5 +1,8 @@
 #pragma once
 
+#include <WinSock2.h>
+#include <ws2tcpip.h>
+
 enum e_socket_status
 {
 	SS_EMPTY,
@@ -12,12 +15,12 @@ enum e_socket_status
 class xSimpleSocket
 {
 public:
-	xSimpleSocket(void);
+	xSimpleSocket(VOID);
 	xSimpleSocket(SOCKET sInit, e_socket_status status);
 	xSimpleSocket(xSimpleSocket& socket);
 
 	VOID SetSocket(SOCKET s, e_socket_status status = SS_ACCEPTED);
-	virtual ~xSimpleSocket(void);
+	virtual ~xSimpleSocket(VOID);
 
 	BOOL Socket(int af = AF_INET, int type = SOCK_STREAM, int protocol = IPPROTO_TCP);
 

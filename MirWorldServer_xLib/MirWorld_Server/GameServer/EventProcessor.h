@@ -5,8 +5,8 @@ class CMapObject;
 class CEventProcessor : public xListHost<CEventProcessor>::xListNode
 {
 public:
-	CEventProcessor(void);
-	virtual ~CEventProcessor(void);
+	CEventProcessor(VOID);
+	virtual ~CEventProcessor(VOID);
 	// 更新处理器状态（虚函数, 由派生类实现）
 	virtual VOID Update() {}
 	// 对象进入事件区域（虚函数, 由派生类实现）

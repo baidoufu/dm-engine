@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+#include <string>
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 //		√Ë ˆ£∫
@@ -13,4 +15,5 @@ public:
 	BOOL ChangeCommandName(const char* pszCommand, const char* pszNewName);
 protected:
 	xStringList<1024> m_xCommandList;
+	std::unordered_map<std::string, fnCommandProc> m_xCache;
 };

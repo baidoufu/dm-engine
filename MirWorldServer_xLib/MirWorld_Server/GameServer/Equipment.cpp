@@ -11,7 +11,7 @@ CEquipment::CEquipment(CHumanPlayer* pPlayer)
 	Clean();
 }
 
-CEquipment::~CEquipment(void)
+CEquipment::~CEquipment(VOID)
 {
 }
 
@@ -46,7 +46,7 @@ BOOL CEquipment::UnEquipItem(int pos, ITEM& outItem)
 	if (m_Equipments[pos].dwMakeIndex == 0) return FALSE;
 	if (!m_pPlayer->OnUnEquipItem(pos, m_Equipments[pos])) return FALSE;
 	outItem = m_Equipments[pos];
-	memset(m_Equipments + pos, 0, sizeof(ITEM));
+	memset(&m_Equipments[pos], 0, sizeof(ITEM));
 	RemovePropCache(outItem);
 	m_pPlayer->OnEquipmentOff(pos, m_Equipments[pos]);
 	return TRUE;
@@ -54,8 +54,8 @@ BOOL CEquipment::UnEquipItem(int pos, ITEM& outItem)
 
 VOID CEquipment::Clean()
 {
-	memset(m_Equipments, 0, sizeof(m_Equipments));
-	memset(m_PropMap, 0, sizeof(m_PropMap));
+	m_Equipments.fill({});
+	m_PropMap.fill(0);
 }
 
 BOOL CEquipment::CheckFitable(int pos, ITEM& inItem)
@@ -165,14 +165,15 @@ VOID CEquipment::AddPropCache(ITEM& item)
 	}
 	if (ac2p != -1)
 	{
+		int nMaxDef = item.baseitem.btMaxDef;
 		if (item.baseitem.btStdMode == 19 || item.baseitem.btStdMode == 23) // 如果是项链、戒指, 要乘以10
 		{
-			item.baseitem.btMaxDef *= 10; // 魔法躲避 或者 毒物躲避
+			nMaxDef *= 10; // 魔法躲避 或者 毒物躲避
 		}
 		if (ac2p < 0)
-			m_PropMap[ac2p * -1] -= item.baseitem.btMaxDef;
+			m_PropMap[ac2p * -1] -= nMaxDef;
 		else
-			m_PropMap[ac2p] += item.baseitem.btMaxDef;
+			m_PropMap[ac2p] += nMaxDef;
 	}
 	if (mac1p != -1)
 	{
@@ -183,14 +184,15 @@ VOID CEquipment::AddPropCache(ITEM& item)
 	}
 	if (mac2p != -1)
 	{
+		int nMaxMagDef = item.baseitem.btMaxMagDef;
 		if (item.baseitem.btStdMode == 23) // 如果是戒指, 要乘以10
 		{
-			item.baseitem.btMaxMagDef *= 10; // 中毒恢复
+			nMaxMagDef *= 10; // 中毒恢复
 		}
 		if (mac2p < 0)
-			m_PropMap[mac2p * -1] -= item.baseitem.btMaxMagDef;
+			m_PropMap[mac2p * -1] -= nMaxMagDef;
 		else
-			m_PropMap[mac2p] += item.baseitem.btMaxMagDef;
+			m_PropMap[mac2p] += nMaxMagDef;
 	}
 	if (bAddSpecialPower)
 	{
@@ -201,6 +203,7 @@ VOID CEquipment::AddPropCache(ITEM& item)
 			m_PropMap[PI_HOLLY] += value * -1;
 	}
 	ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(item);
+	if (pItemClass == nullptr) return;
 	int btMagicNicety = pItemClass->btMagicNicety;
 	if (btMagicNicety > 0)
 	{
@@ -238,10 +241,15 @@ VOID CEquipment::RemovePropCache(ITEM& item)
 	}
 	if (ac2p != -1)
 	{
+		int nMaxDef = item.baseitem.btMaxDef;
+		if (item.baseitem.btStdMode == 19 || item.baseitem.btStdMode == 23) // 如果是项链、戒指, 要乘以10
+		{
+			nMaxDef *= 10; // 魔法躲避 或者 毒物躲避
+		}
 		if (ac2p < 0)
-			m_PropMap[ac2p * -1] += item.baseitem.btMaxDef;
+			m_PropMap[ac2p * -1] += nMaxDef;
 		else
-			m_PropMap[ac2p] -= item.baseitem.btMaxDef;
+			m_PropMap[ac2p] -= nMaxDef;
 	}
 	if (mac1p != -1)
 	{
@@ -252,10 +260,15 @@ VOID CEquipment::RemovePropCache(ITEM& item)
 	}
 	if (mac2p != -1)
 	{
+		int nMaxMagDef = item.baseitem.btMaxMagDef;
+		if (item.baseitem.btStdMode == 23) // 如果是戒指, 要乘以10
+		{
+			nMaxMagDef *= 10; // 中毒恢复
+		}
 		if (mac2p < 0)
-			m_PropMap[mac2p * -1] += item.baseitem.btMaxMagDef;
+			m_PropMap[mac2p * -1] += nMaxMagDef;
 		else
-			m_PropMap[mac2p] -= item.baseitem.btMaxMagDef;
+			m_PropMap[mac2p] -= nMaxMagDef;
 	}
 	if (bAddSpecialPower)
 	{
@@ -266,6 +279,7 @@ VOID CEquipment::RemovePropCache(ITEM& item)
 			m_PropMap[PI_HOLLY] -= value * -1;
 	}
 	ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(item);
+	if (pItemClass == nullptr) return;
 	int btMagicNicety = pItemClass->btMagicNicety;
 	if (btMagicNicety > 0)
 	{
@@ -372,7 +386,7 @@ BOOL CEquipment::CheckNeedInfo(BYTE needtype, BYTE needlevel)
 
 VOID CEquipment::ResetPropCache()
 {
-	memset(this->m_PropMap, 0, sizeof(this->m_PropMap));
+	m_PropMap.fill(0);
 	for (int i = 0; i < _U_MAX; i++)
 	{
 		if (m_Equipments[i].dwMakeIndex != 0)

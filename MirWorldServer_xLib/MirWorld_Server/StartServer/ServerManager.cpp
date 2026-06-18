@@ -14,7 +14,7 @@ static const FileHashInfo FILE_HASH_TABLE[] = {
     {"ServerCenter.exe", ""}
 };
 
-ServerManager::ServerManager() : m_pMySQL(NULL)
+ServerManager::ServerManager() : m_pMySQL(nullptr)
 {
     // 工作目录
     m_workDir = ".\\Bin\\";
@@ -31,7 +31,7 @@ ServerManager::~ServerManager()
     if (m_pMySQL)
     {
         delete m_pMySQL;
-        m_pMySQL = NULL;
+        m_pMySQL = nullptr;
     }
 }
 
@@ -87,11 +87,11 @@ bool ServerManager::Initialize()
     // 创建 MySQL 管理器
     m_pMySQL = new MySQLProcess();
     // 添加所有服务器
-    m_servers.push_back(new ServerProcess("ServerCenter", ".\\ServerCenter.exe"));
-    m_servers.push_back(new ServerProcess("DBServer", ".\\DBServer.exe"));
-    m_servers.push_back(new ServerProcess("LoginServer", ".\\LoginServer.exe"));
-    m_servers.push_back(new ServerProcess("SelectCharServer", ".\\SelectCharServer.exe"));
-    m_servers.push_back(new ServerProcess("GameServer", ".\\GameServer.exe"));
+    m_servers.emplace_back(new ServerProcess("ServerCenter", ".\\ServerCenter.exe"));
+    m_servers.emplace_back(new ServerProcess("DBServer", ".\\DBServer.exe"));
+    m_servers.emplace_back(new ServerProcess("LoginServer", ".\\LoginServer.exe"));
+    m_servers.emplace_back(new ServerProcess("SelectCharServer", ".\\SelectCharServer.exe"));
+    m_servers.emplace_back(new ServerProcess("GameServer", ".\\GameServer.exe"));
     return true;
 }
 
@@ -106,7 +106,10 @@ bool ServerManager::StartAll()
     for (size_t i = 0; i < m_servers.size(); i++)
     {
         m_servers[i]->Start();
-        Sleep(500); // 间隔500ms启动下一个
+        // ServerCenter需要足够时间完成初始化并开始监听，后续服务器才能成功连接
+        // DBServer需要等待ServerCenter就绪后注册
+        // LoginServer/SelectCharServer/GameServer需要等待SC和DB就绪
+        Sleep(2000); // 间隔2秒启动下一个，确保前一个服务器完成初始化
     }
     printf("========== 所有服务器启动完成 ==========\n\n");
     return true;
@@ -125,7 +128,7 @@ bool ServerManager::StartTest(const std::string& name)
         if (_stricmp(m_servers[i]->GetName().c_str(), name.c_str()) == 0) // 排除指定服务不启动
             continue;
         m_servers[i]->Start();
-        Sleep(500); // 间隔500ms启动下一个
+        Sleep(2000); // 间隔1秒启动下一个，确保前一个服务器完成初始化
     }
     printf("========== 测试服务器启动完成 ==========\n\n");
     return true;
@@ -137,7 +140,7 @@ bool ServerManager::StopAll()
     for (int i = (int)m_servers.size() - 1; i >= 0; i--)
     {
         m_servers[i]->Stop();
-        Sleep(300);
+        Sleep(500);
     }
     if (m_pMySQL)
         m_pMySQL->Stop();
@@ -145,7 +148,7 @@ bool ServerManager::StopAll()
     return true;
 }
 
-void ServerManager::PrintStatus()
+VOID ServerManager::PrintStatus()
 {
     printf("\n========== 服务器状态 ==========\n");
     if (m_pMySQL)

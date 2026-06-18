@@ -10,8 +10,8 @@ class CScriptNpc :
 	public CScriptShell
 {
 public:
-	CScriptNpc(void);
-	virtual ~CScriptNpc(void);
+	CScriptNpc(VOID);
+	virtual ~CScriptNpc(VOID);
 	BOOL Init(UINT dbid, const char* pszName, int view, int x, int y, DWORD mapid, CScriptObject* pScriptObject);
 	VOID QueryTalk(CHumanPlayer* pPlayer);
 	VOID QuerySelectLink(CHumanPlayer* pPlayer, const char* pLink, BOOL bHumanQuery = TRUE);
@@ -27,8 +27,8 @@ public:
 	DWORD GetHealth() {
 		return 0x00640064;
 	}
-	const char* GetName() { return m_szName; }
-	const char* GetViewName() { return m_szLongName; }
+	const char* GetName() { return m_szName.data(); }
+	const char* GetViewName() { return m_szLongName.data(); }
 	BOOL IsNPC()const { return m_bIsNpc; }
 	BOOL CanMove() { return FALSE; }
 	BOOL AddItem(ITEM& item);
@@ -63,7 +63,7 @@ public:
 
 	VOID SetLongName(const char* szLongName)
 	{
-		o_strncpy(m_szLongName, szLongName, 127);
+		o_strncpy(m_szLongName.data(), szLongName, 127);
 	}
 
 	VOID OnEnterMap(CLogicMap* pMap);
@@ -84,24 +84,21 @@ public:
 	VOID SendCreateGuildHelp(CHumanPlayer* pPlayer, const char* pWords);
 	VOID SendCustomUIWnd(CHumanPlayer* pPlayer, const char* pWords);
 protected:
-	BOOL OnPageShow(CScriptTarget* pTarget, CScriptView* pView, const char* pszPage);
 	NpcGoodsList* FindGoodsList(ITEM& item);
 	NpcGoodsList* FindGoodsList(const char* pszName);
-	int ProcPageVars(CHumanPlayer* pPlayer, char* pszPage, int size, int maxsize);
 	VOID SendClosePage(CHumanPlayer* pPlayer);
 	VOID SendGoodsList(CHumanPlayer* pPlayer);
-	VOID SendGoodsItemList(CHumanPlayer* pPlayer, const char* pTemplate, int ptr);
 
 	VOID DeleteNpcGoodsList(NpcGoodsList* pList);
 	VOID DeleteNpcGoodsItemList(NpcGoodsList* pList, NpcGoodsItemList* pItemList);
 	BOOL InitGoods(tagGoods* pGoodsList);
 
-	char m_szName[32];
-	char m_szViewName[128];
+	std::array<char, 32> m_szName;
+	std::array<char, 128> m_szViewName;
 	int	m_nView;
 	UINT m_StoreId;
 	NpcGoodsList* m_pSellGoodsList;
-	BYTE m_btSellList[100];
+	std::array<BYTE, 100> m_btSellList{};
 	int	m_iSellListCount;
 	float m_fSellPercent;
 	float m_fBuyPercent;

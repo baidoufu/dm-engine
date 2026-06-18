@@ -5,13 +5,13 @@
 #include "eventprocessor.h"
 #include "visibleevent.h"
 
-CEventManager::CEventManager(void) : m_DeleteObjectQueue(20000)
+CEventManager::CEventManager(VOID)
 {
 	m_pCurUpdateEvent = nullptr;
 	m_pCurUpdateProcessor = nullptr;
 }
 
-CEventManager::~CEventManager(void)
+CEventManager::~CEventManager(VOID)
 {
 }
 
@@ -56,8 +56,11 @@ VOID CEventManager::UpdateDeleteObject()
 {
 	const UINT MAX_PROCESS_PER_TICK = 100;
 	UINT processed = 0;
-	std::vector<CVisibleEvent*> pendingObjects;
-	pendingObjects.reserve(MAX_PROCESS_PER_TICK);
+	// 使用thread_local复用，避免每帧堆分配
+	thread_local std::vector<CVisibleEvent*> pendingObjects;
+	pendingObjects.clear();
+	if ((int)pendingObjects.capacity() < MAX_PROCESS_PER_TICK)
+		pendingObjects.reserve(MAX_PROCESS_PER_TICK);
 	while (processed < MAX_PROCESS_PER_TICK)
 	{
 		CVisibleEvent* pEvent = m_DeleteObjectQueue.pop();

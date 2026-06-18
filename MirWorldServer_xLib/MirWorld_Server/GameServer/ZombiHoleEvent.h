@@ -10,8 +10,8 @@ class CAliveObject;
 class ZombiHoleEvent : public CEventProcessor
 {
 public:
-	ZombiHoleEvent(void);
-	virtual ~ZombiHoleEvent(void);
+	ZombiHoleEvent(VOID);
+	virtual ~ZombiHoleEvent(VOID);
 	ZombiHoleEvent(const ZombiHoleEvent&) = delete;           // 禁止拷贝构造
 	ZombiHoleEvent& operator=(const ZombiHoleEvent&) = delete; // 禁止拷贝赋值
 	// 更新可见事件状态

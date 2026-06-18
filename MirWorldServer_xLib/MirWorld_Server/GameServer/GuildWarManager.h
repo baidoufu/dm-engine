@@ -17,8 +17,8 @@ class CGuildWarManager :
 	public xSingletonClass<CGuildWarManager>
 {
 public:
-	CGuildWarManager(void);
-	virtual ~CGuildWarManager(void);
+	CGuildWarManager(VOID);
+	virtual ~CGuildWarManager(VOID);
 	BOOL RequestWar(CGuildEx* pReqGuild, CGuildEx* pAtkGuild);
 	VOID Update();
 protected:

@@ -20,15 +20,6 @@
     <Filter Include="功能处理\玩家">
       <UniqueIdentifier>{acd25f75-a6ef-4c64-8be4-7425e83ac2ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="功能处理\操作">
-      <UniqueIdentifier>{9a1483db-82e6-4d1e-9601-cd96d2d079ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\操作\交易">
-      <UniqueIdentifier>{46fa74e7-ecef-4651-88fc-6fbdb400c1b3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\操作\组队">
-      <UniqueIdentifier>{b1b34d82-b160-46ae-8f40-0201426e41dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="功能处理\行会">
       <UniqueIdentifier>{1091afb4-e2c0-4b69-b40c-62b23ad314ef}</UniqueIdentifier>
     </Filter>
@@ -44,23 +35,8 @@
     <Filter Include="功能处理\NPC">
       <UniqueIdentifier>{93557992-4675-46e6-b80d-7b85b4b27740}</UniqueIdentifier>
     </Filter>
-    <Filter Include="功能处理\操作\事件">
-      <UniqueIdentifier>{d5788939-4279-42b3-9513-88a809e0a80c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\操作\矿石">
-      <UniqueIdentifier>{06c5d56e-816a-4016-af0e-8dce1b05c38a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\操作\排行榜">
-      <UniqueIdentifier>{36818526-9f9a-46cd-80a5-e4528490e14c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\操作\任务">
-      <UniqueIdentifier>{c5c0bfd2-715f-4ca7-a1ac-15ceeb14fc49}</UniqueIdentifier>
-    </Filter>
     <Filter Include="功能处理\地图\对象">
       <UniqueIdentifier>{87e376f9-eb08-4580-b512-599dfed7d071}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\玩家\技能数据">
-      <UniqueIdentifier>{9618b198-2c4c-42a3-a363-da54679d0e33}</UniqueIdentifier>
     </Filter>
     <Filter Include="架构基础">
       <UniqueIdentifier>{e2c0d997-4385-4c7f-bd87-c949f3f34cc7}</UniqueIdentifier>
@@ -73,9 +49,6 @@
     </Filter>
     <Filter Include="库包相关\xScript">
       <UniqueIdentifier>{56cd1b0b-f74c-481f-87c8-5eddff33184f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="库包相关\xObject">
-      <UniqueIdentifier>{ccc8b84b-fb19-4158-9e3f-928ca9c25c04}</UniqueIdentifier>
     </Filter>
     <Filter Include="库包相关\xTools">
       <UniqueIdentifier>{8dc0a3e7-6d0e-4be0-892c-1389aabaf2da}</UniqueIdentifier>
@@ -95,11 +68,44 @@
     <Filter Include="功能处理\行会\沙城">
       <UniqueIdentifier>{5f261904-f50b-42ad-b633-34fb9a6f5996}</UniqueIdentifier>
     </Filter>
-    <Filter Include="功能处理\操作\活动">
+    <Filter Include="功能处理\玩家\客户端消息">
+      <UniqueIdentifier>{2eb45a83-f2bc-4ed1-b838-d1078efc77d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\技能">
+      <UniqueIdentifier>{9618b198-2c4c-42a3-a363-da54679d0e33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能">
+      <UniqueIdentifier>{9a1483db-82e6-4d1e-9601-cd96d2d079ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\交易">
+      <UniqueIdentifier>{46fa74e7-ecef-4651-88fc-6fbdb400c1b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\组队">
+      <UniqueIdentifier>{b1b34d82-b160-46ae-8f40-0201426e41dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\事件">
+      <UniqueIdentifier>{d5788939-4279-42b3-9513-88a809e0a80c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\矿石">
+      <UniqueIdentifier>{06c5d56e-816a-4016-af0e-8dce1b05c38a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\排行榜">
+      <UniqueIdentifier>{36818526-9f9a-46cd-80a5-e4528490e14c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\任务">
+      <UniqueIdentifier>{c5c0bfd2-715f-4ca7-a1ac-15ceeb14fc49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\活动">
       <UniqueIdentifier>{58da1cb7-f61c-4aec-8978-288431f501fa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="功能处理\玩家\时长封号">
+    <Filter Include="功能处理\功能\封号时长">
       <UniqueIdentifier>{fb4d8f15-db27-4627-a34a-4e004156a873}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\功能\封号">
+      <UniqueIdentifier>{0eef0f05-6a47-461e-a4bb-e2a07c986277}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="机器人">
+      <UniqueIdentifier>{c6abfd78-7e7f-4edf-9466-dcf7138f1a35}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -138,12 +144,6 @@
     <ClCompile Include="SpecialEquipmentManager.cpp">
       <Filter>功能处理\物品</Filter>
     </ClCompile>
-    <ClCompile Include="Equipment.cpp">
-      <Filter>功能处理\玩家</Filter>
-    </ClCompile>
-    <ClCompile Include="gsClientObj.cpp">
-      <Filter>功能处理\玩家</Filter>
-    </ClCompile>
     <ClCompile Include="Human_Action.cpp">
       <Filter>功能处理\玩家</Filter>
     </ClCompile>
@@ -174,11 +174,8 @@
     <ClCompile Include="HumanPlayerMgr.cpp">
       <Filter>功能处理\玩家</Filter>
     </ClCompile>
-    <ClCompile Include="TitleManager.cpp">
-      <Filter>功能处理\玩家</Filter>
-    </ClCompile>
     <ClCompile Include="MagicManager.cpp">
-      <Filter>功能处理\玩家\技能数据</Filter>
+      <Filter>功能处理\技能</Filter>
     </ClCompile>
     <ClCompile Include="AliveObject.cpp">
       <Filter>功能处理\地图\对象</Filter>
@@ -193,34 +190,34 @@
       <Filter>功能处理\NPC</Filter>
     </ClCompile>
     <ClCompile Include="ExchangeObj.cpp">
-      <Filter>功能处理\操作\交易</Filter>
+      <Filter>功能处理\功能\交易</Filter>
     </ClCompile>
     <ClCompile Include="ExchangeObjectMgr.cpp">
-      <Filter>功能处理\操作\交易</Filter>
+      <Filter>功能处理\功能\交易</Filter>
     </ClCompile>
     <ClCompile Include="GroupObject.cpp">
-      <Filter>功能处理\操作\组队</Filter>
+      <Filter>功能处理\功能\组队</Filter>
     </ClCompile>
     <ClCompile Include="GroupObjectMgr.cpp">
-      <Filter>功能处理\操作\组队</Filter>
+      <Filter>功能处理\功能\组队</Filter>
     </ClCompile>
     <ClCompile Include="ChangeMapEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="EventManager.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="EventObject.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="EventProcessor.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="FireBurnEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="VisibleEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="GuildEx.cpp">
       <Filter>功能处理\行会</Filter>
@@ -276,12 +273,6 @@
     <ClCompile Include="ScriptView.cpp">
       <Filter>库包相关\xScript</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>库包相关\xObject</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>库包相关\xObject</Filter>
-    </ClCompile>
     <ClCompile Include="FmtTextFile.cpp">
       <Filter>架构基础</Filter>
     </ClCompile>
@@ -307,7 +298,7 @@
       <Filter>功能处理\行会\行会战</Filter>
     </ClCompile>
     <ClCompile Include="TaskManager.cpp">
-      <Filter>功能处理\操作\任务</Filter>
+      <Filter>功能处理\功能\任务</Filter>
     </ClCompile>
     <ClCompile Include="tinystr.cpp">
       <Filter>库包相关\TinyXml</Filter>
@@ -322,28 +313,28 @@
       <Filter>库包相关\TinyXml</Filter>
     </ClCompile>
     <ClCompile Include="FireNimoBurnEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="MineList.cpp">
-      <Filter>功能处理\操作\矿石</Filter>
+      <Filter>功能处理\功能\矿石</Filter>
     </ClCompile>
     <ClCompile Include="TopManager.cpp">
-      <Filter>功能处理\操作\排行榜</Filter>
+      <Filter>功能处理\功能\排行榜</Filter>
     </ClCompile>
     <ClCompile Include="MonsterTrapper.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="ZombiHoleEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="SculpEiceEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="DamageEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="FireRainEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="ScriptElement.cpp">
       <Filter>库包相关\xScript</Filter>
@@ -383,9 +374,6 @@
     </ClCompile>
     <ClCompile Include="ScriptVariable.cpp">
       <Filter>库包相关\xScript</Filter>
-    </ClCompile>
-    <ClCompile Include="PoolManager.cpp">
-      <Filter>库包相关\xTools</Filter>
     </ClCompile>
     <ClCompile Include="xSimpleSocket.cpp">
       <Filter>库包相关\xTools</Filter>
@@ -427,25 +415,25 @@
       <Filter>功能处理\地图</Filter>
     </ClCompile>
     <ClCompile Include="TriggerEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="BossTJ.cpp">
-      <Filter>功能处理\操作\活动</Filter>
+      <Filter>功能处理\功能\活动</Filter>
     </ClCompile>
     <ClCompile Include="TimeAchieve.cpp">
-      <Filter>功能处理\操作\活动</Filter>
+      <Filter>功能处理\功能\活动</Filter>
     </ClCompile>
     <ClCompile Include="MonsterAttack.cpp">
       <Filter>功能处理\怪物</Filter>
     </ClCompile>
     <ClCompile Include="BlueFireEvent.cpp">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
     <ClCompile Include="GameStage.cpp">
-      <Filter>功能处理\操作\活动</Filter>
+      <Filter>功能处理\功能\活动</Filter>
     </ClCompile>
     <ClCompile Include="FengHaoGrowManager.cpp">
-      <Filter>功能处理\玩家\时长封号</Filter>
+      <Filter>功能处理\功能\封号时长</Filter>
     </ClCompile>
     <ClCompile Include="Human_FengHao.cpp">
       <Filter>功能处理\玩家</Filter>
@@ -455,6 +443,33 @@
     </ClCompile>
     <ClCompile Include="Variable_Achieve.cpp">
       <Filter>架构相关\脚本变量</Filter>
+    </ClCompile>
+    <ClCompile Include="gsClientMsgHandler.cpp">
+      <Filter>功能处理\玩家\客户端消息</Filter>
+    </ClCompile>
+    <ClCompile Include="gsClientObj.cpp">
+      <Filter>功能处理\玩家\客户端消息</Filter>
+    </ClCompile>
+    <ClCompile Include="Equipment.cpp">
+      <Filter>功能处理\物品</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleManager.cpp">
+      <Filter>功能处理\功能\封号</Filter>
+    </ClCompile>
+    <ClCompile Include="BotBehaviorTree.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotDatabase.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotManager.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotPlayer.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotContext.cpp">
+      <Filter>机器人</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -491,26 +506,14 @@
     <ClInclude Include="SpecialEquipmentManager.h">
       <Filter>功能处理\物品</Filter>
     </ClInclude>
-    <ClInclude Include="Equipment.h">
-      <Filter>功能处理\玩家</Filter>
-    </ClInclude>
-    <ClInclude Include="gsClientObj.h">
-      <Filter>功能处理\玩家</Filter>
-    </ClInclude>
     <ClInclude Include="HumanPlayer.h">
       <Filter>功能处理\玩家</Filter>
     </ClInclude>
     <ClInclude Include="HumanPlayerMgr.h">
       <Filter>功能处理\玩家</Filter>
     </ClInclude>
-    <ClInclude Include="StringDef.h">
-      <Filter>功能处理\玩家</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleManager.h">
-      <Filter>功能处理\玩家</Filter>
-    </ClInclude>
     <ClInclude Include="MagicManager.h">
-      <Filter>功能处理\玩家\技能数据</Filter>
+      <Filter>功能处理\技能</Filter>
     </ClInclude>
     <ClInclude Include="AliveObject.h">
       <Filter>功能处理\地图\对象</Filter>
@@ -525,34 +528,34 @@
       <Filter>功能处理\NPC</Filter>
     </ClInclude>
     <ClInclude Include="ExchangeObj.h">
-      <Filter>功能处理\操作\交易</Filter>
+      <Filter>功能处理\功能\交易</Filter>
     </ClInclude>
     <ClInclude Include="ExchangeObjectMgr.h">
-      <Filter>功能处理\操作\交易</Filter>
+      <Filter>功能处理\功能\交易</Filter>
     </ClInclude>
     <ClInclude Include="GroupObject.h">
-      <Filter>功能处理\操作\组队</Filter>
+      <Filter>功能处理\功能\组队</Filter>
     </ClInclude>
     <ClInclude Include="GroupObjectMgr.h">
-      <Filter>功能处理\操作\组队</Filter>
+      <Filter>功能处理\功能\组队</Filter>
     </ClInclude>
     <ClInclude Include="ChangeMapEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="EventManager.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="EventObject.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="EventProcessor.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="FireBurnEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="VisibleEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="GuildEx.h">
       <Filter>功能处理\行会</Filter>
@@ -614,12 +617,6 @@
     <ClInclude Include="ScriptView.h">
       <Filter>库包相关\xScript</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>库包相关\xObject</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectManager.h">
-      <Filter>库包相关\xObject</Filter>
-    </ClInclude>
     <ClInclude Include="FindFile.h">
       <Filter>架构基础</Filter>
     </ClInclude>
@@ -657,7 +654,7 @@
       <Filter>功能处理\行会\行会战</Filter>
     </ClInclude>
     <ClInclude Include="TaskManager.h">
-      <Filter>功能处理\操作\任务</Filter>
+      <Filter>功能处理\功能\任务</Filter>
     </ClInclude>
     <ClInclude Include="tinystr.h">
       <Filter>库包相关\TinyXml</Filter>
@@ -669,28 +666,28 @@
       <Filter>资源文件</Filter>
     </ClInclude>
     <ClInclude Include="FireNimoBurnEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="MineList.h">
-      <Filter>功能处理\操作\矿石</Filter>
+      <Filter>功能处理\功能\矿石</Filter>
     </ClInclude>
     <ClInclude Include="TopManager.h">
-      <Filter>功能处理\操作\排行榜</Filter>
+      <Filter>功能处理\功能\排行榜</Filter>
     </ClInclude>
     <ClInclude Include="MonsterTrapper.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="ZombiHoleEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="SculpEiceEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="DamageEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="FireRainEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="ScriptElement.h">
       <Filter>库包相关\xScript</Filter>
@@ -731,9 +728,6 @@
     <ClInclude Include="ScriptVariable.h">
       <Filter>库包相关\xScript</Filter>
     </ClInclude>
-    <ClInclude Include="PoolManager.h">
-      <Filter>库包相关\xTools</Filter>
-    </ClInclude>
     <ClInclude Include="xSimpleSocket.h">
       <Filter>库包相关\xTools</Filter>
     </ClInclude>
@@ -747,34 +741,64 @@
       <Filter>功能处理\地图</Filter>
     </ClInclude>
     <ClInclude Include="TriggerEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="BossTJ.h">
-      <Filter>功能处理\操作\活动</Filter>
+      <Filter>功能处理\功能\活动</Filter>
     </ClInclude>
     <ClInclude Include="TimeAchieve.h">
-      <Filter>功能处理\操作\活动</Filter>
+      <Filter>功能处理\功能\活动</Filter>
     </ClInclude>
     <ClInclude Include="MonsterAttack.h">
       <Filter>功能处理\怪物</Filter>
     </ClInclude>
     <ClInclude Include="BlueFireEvent.h">
-      <Filter>功能处理\操作\事件</Filter>
+      <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
     <ClInclude Include="GameStage.h">
-      <Filter>功能处理\操作\活动</Filter>
+      <Filter>功能处理\功能\活动</Filter>
     </ClInclude>
     <ClInclude Include="EventsBus.h">
       <Filter>架构基础</Filter>
     </ClInclude>
     <ClInclude Include="FengHaoGrowManager.h">
-      <Filter>功能处理\玩家\时长封号</Filter>
+      <Filter>功能处理\功能\封号时长</Filter>
     </ClInclude>
     <ClInclude Include="VMProtectHelper.h">
       <Filter>架构基础</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClInclude Include="gsClientObj.h">
+      <Filter>功能处理\玩家\客户端消息</Filter>
+    </ClInclude>
+    <ClInclude Include="gsClientMsgTable.h">
+      <Filter>功能处理\玩家\客户端消息</Filter>
+    </ClInclude>
+    <ClInclude Include="Equipment.h">
+      <Filter>功能处理\物品</Filter>
+    </ClInclude>
+    <ClInclude Include="StringDef.h">
+      <Filter>架构基础</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleManager.h">
+      <Filter>功能处理\功能\封号</Filter>
+    </ClInclude>
+    <ClInclude Include="BotBehaviorTree.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotDatabase.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotHumanBehavior.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotManager.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotPlayer.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotContext.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

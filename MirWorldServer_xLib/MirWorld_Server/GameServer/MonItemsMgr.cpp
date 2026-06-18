@@ -3,11 +3,11 @@
 #include ".\itemmanager.h"
 #include ".\gameworld.h"
 
-CMonItemsMgr::CMonItemsMgr(void)
+CMonItemsMgr::CMonItemsMgr(VOID)
 {
 }
 
-CMonItemsMgr::~CMonItemsMgr(void)
+CMonItemsMgr::~CMonItemsMgr(VOID)
 {
 }
 
@@ -28,8 +28,8 @@ VOID CMonItemsMgr::OnFoundFile(const char* pszFilename, UINT nParam1)
 		if (pItems == nullptr)
 		{
 			pItems = new MONITEMS;
-			_splitpath(pszFilename, nullptr, nullptr, pItems->szMonName, nullptr);
-			o_strncpy(pItems->szFilename, pszFilename, 250);
+			_splitpath(pszFilename, nullptr, nullptr, pItems->szMonName.data(), nullptr);
+			o_strncpy(pItems->szFilename.data(), pszFilename, 250);
 		}
 		else
 		{
@@ -40,12 +40,12 @@ VOID CMonItemsMgr::OnFoundFile(const char* pszFilename, UINT nParam1)
 				delete ppp;
 				ppp = pItems->pItems;
 			}
-			PRINT(SUCCESS_GREEN, "更新 %s 的物品掉落文件 %s \n", pItems->szMonName, pItems->szFilename);
+			PRINT(SUCCESS_GREEN, "更新 %s 的物品掉落文件 %s \n", pItems->szMonName.data(), pItems->szFilename.data());
 		}
 	}
 	else
 		pItems = this->GetMonItems(pszFilename);
-	CStringFile sf(pItems->szFilename);
+	CStringFile sf(pItems->szFilename.data());
 	DOWNITEM* pDownItem = nullptr;
 	char* p = nullptr;
 	char* p1 = nullptr;
@@ -76,14 +76,14 @@ VOID CMonItemsMgr::OnFoundFile(const char* pszFilename, UINT nParam1)
 			ITEMCLASS* pItem = CItemManager::GetInstance()->GetItemClassByName(Params[2]);
 			if (pItem == nullptr)
 			{
-				PRINT(ERROR_RED, "在 %s 的物品掉落文件中 %u 行发现未定义的物品 %s !\n", pItems->szMonName, i + 1, Params[2]);
+				PRINT(ERROR_RED, "在 %s 的物品掉落文件中 %u 行发现未定义的物品 %s !\n", pItems->szMonName.data(), i + 1, Params[2]);
 				continue;
 			}
 		}
 		else
 			pDownItem->bGold = TRUE;
 
-		o_strncpy(pDownItem->szName, Params[2], 31);
+		o_strncpy(pDownItem->szName.data(), Params[2], 31);
 
 		pDownItem->nMin = StringToInteger(Params[0]);
 		pDownItem->nMax = StringToInteger(Params[1]);
@@ -104,7 +104,7 @@ VOID CMonItemsMgr::OnFoundFile(const char* pszFilename, UINT nParam1)
 		pItems->pItems = pDownItem;
 		pDownItem = nullptr;
 	}
-	m_MonItemsHash.HAdd(pItems->szMonName, (LPVOID)pItems);
+	m_MonItemsHash.HAdd(pItems->szMonName.data(), (LPVOID)pItems);
 }
 
 BOOL CMonItemsMgr::CreateDownItem(DOWNITEM* pDownItem, ITEM& item)
@@ -132,7 +132,7 @@ BOOL CMonItemsMgr::CreateDownItem(DOWNITEM* pDownItem, ITEM& item)
 			if (isSingleCount) rate = CGameWorld::GetInstance()->GetVar(EVI_RANDOMUPGRADEITEMRATE);
 			ratefix = isSingleCount ? rate : GetRangeRand(pDownItem->nCount, pDownItem->nCountMax);
 		}
-		if (!ItemManager->CreateTempItem(pDownItem->szName, item, TRUE, ratefix))return FALSE;
+		if (!ItemManager->CreateTempItem(pDownItem->szName.data(), item, TRUE, ratefix))return FALSE;
 	}
 	return TRUE;
 }

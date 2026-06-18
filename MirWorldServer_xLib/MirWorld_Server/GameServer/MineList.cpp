@@ -1,15 +1,7 @@
 #include "StdAfx.h"
 #include "logicmap.h"
 #include "logicmapmgr.h"
-//#include ".\minelist.h"
-//
-//CMineList::CMineList(void)
-//{
-//}
-//
-//CMineList::~CMineList(void)
-//{
-//}
+
 VOID LoadMineList(const char* pszFileName)
 {
 	CStringFile sf(pszFileName);

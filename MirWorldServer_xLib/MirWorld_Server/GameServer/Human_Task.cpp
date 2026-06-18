@@ -159,7 +159,7 @@ VOID CHumanPlayer::SendTaskInfo()
 			char szFinalAim[256];
 			// 读取任务模板中的数据, 并格式化一些变量
 			ProcFmtText(pDefine->pszTitle, szTitle, 128, GetScriptTarget());
-			TASK_STEP* pStep = pDefine->pSteps + (dwStep - 1);
+			TASK_STEP* pStep = pDefine->pSteps.get() + (dwStep - 1);
 			ProcFmtText(pStep->pszDesc, szTaskDesc, 2048, GetScriptTarget());
 			if (pStep->pszStepaim)
 				ProcFmtText(pStep->pszStepaim, szStepaim, 256, GetScriptTarget());
@@ -188,7 +188,7 @@ VOID CHumanPlayer::UpdateTaskToDB()
 		pObj->UpdateTaskInfo(GetDBId(), &this->m_TaskInfo);
 }
 
-void CHumanPlayer::RebuildTaskIdIndexMap(int startIndex)
+VOID CHumanPlayer::RebuildTaskIdIndexMap(int startIndex)
 {
 	m_TaskIdToIndexMap.clear();
 	// 将 startIndex 之后的有效任务向前移动, 填补删除的空缺

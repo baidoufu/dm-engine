@@ -4,10 +4,10 @@
 ServerProcess::ServerProcess(const std::string& name, const std::string& path)
     : m_name(name)
     , m_path(path)
-    , m_hProcess(NULL)
-    , m_hThread(NULL)
-    , m_hOutput(NULL)
-    , m_hInput(NULL)
+    , m_hProcess(nullptr)
+    , m_hThread(nullptr)
+    , m_hOutput(nullptr)
+    , m_hInput(nullptr)
     , m_dwProcessId(0)
     , m_bRunning(false)
     , m_bAutoRestart(true)
@@ -34,12 +34,12 @@ bool ServerProcess::Start()
     SECURITY_ATTRIBUTES sa{};
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
     sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
+    sa.lpSecurityDescriptor = nullptr;
 
-    HANDLE hReadPipe = NULL;
-    HANDLE hWritePipe = NULL;
-    HANDLE hReadInputPipe = NULL;
-    HANDLE hWriteInputPipe = NULL;
+    HANDLE hReadPipe = nullptr;
+    HANDLE hWritePipe = nullptr;
+    HANDLE hReadInputPipe = nullptr;
+    HANDLE hWriteInputPipe = nullptr;
 
     // 创建输出管道以读取子进程输出
     if (!CreatePipe(&hReadPipe, &hWritePipe, &sa, 0))
@@ -85,8 +85,8 @@ bool ServerProcess::Start()
     char workDir[MAX_PATH];
     GetCurrentDirectoryA(MAX_PATH, workDir);
 
-    if (!CreateProcessA(NULL, cmdLine, NULL, NULL, TRUE, 
-        0, NULL, workDir, &si, &pi))
+    if (!CreateProcessA(nullptr, cmdLine, nullptr, nullptr, TRUE, 
+        0, nullptr, workDir, &si, &pi))
     {
         DWORD error = GetLastError();
         printf("[%s] 启动失败: %d\n", m_name.c_str(), error);
@@ -102,6 +102,9 @@ bool ServerProcess::Start()
     m_dwProcessId = pi.dwProcessId;
     m_bRunning = true;
     m_lastRestartTime = std::chrono::steady_clock::now();
+    // 手动启动（非自动重启）时重置重启计数器
+    if (m_bManualStop)
+        m_restartCount = 0;
 
     // 保存管道句柄
     m_hOutput = hReadPipe;
@@ -112,15 +115,15 @@ bool ServerProcess::Start()
     CloseHandle(hReadInputPipe);
 
     // 创建读取输出线程
-    unsigned int threadId = 0;
-    HANDLE hThread = (HANDLE)_beginthreadex(NULL, 0, ReadOutputThread, this, 0, &threadId);
+    UINT threadId = 0;
+    HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, ReadOutputThread, this, 0, &threadId);
     if (hThread)
         CloseHandle(hThread);
     else
         printf("[%s] 创建输出线程失败\n", m_name.c_str());
 
     // 创建监控线程
-    HANDLE hMonitorThread = (HANDLE)_beginthreadex(NULL, 0, MonitorThread, this, 0, &threadId);
+    HANDLE hMonitorThread = (HANDLE)_beginthreadex(nullptr, 0, MonitorThread, this, 0, &threadId);
     if (hMonitorThread)
         CloseHandle(hMonitorThread);
     else
@@ -141,9 +144,22 @@ bool ServerProcess::Stop()
     m_bManualStop = true;
     printf("[%s] 正在停止...\n", m_name.c_str());
 
-    // 强制终止进程...
-    TerminateProcess(m_hProcess, 0);
-    WaitForSingleObject(m_hProcess, 5000);
+    bool bGraceful = false;
+    if (m_hInput && m_bRunning)
+    {
+        if (SendCommand("exit"))
+        {
+            // 等待进程自行退出（最多10秒）
+            if (WaitForSingleObject(m_hProcess, 10000) == WAIT_OBJECT_0)
+                bGraceful = true;
+        }
+    }
+
+    if (!bGraceful)
+    {
+        TerminateProcess(m_hProcess, 0);
+        WaitForSingleObject(m_hProcess, 3000);
+    }
 
     CloseHandle(m_hProcess);
     CloseHandle(m_hThread);
@@ -151,17 +167,17 @@ bool ServerProcess::Stop()
     if (m_hOutput)
     {
         CloseHandle(m_hOutput);
-        m_hOutput = NULL;
+        m_hOutput = nullptr;
     }
 
     if (m_hInput)
     {
         CloseHandle(m_hInput);
-        m_hInput = NULL;
+        m_hInput = nullptr;
     }
 
-    m_hProcess = NULL;
-    m_hThread = NULL;
+    m_hProcess = nullptr;
+    m_hThread = nullptr;
     m_bRunning = false;
 
     printf("[%s] 已停止\n", m_name.c_str());
@@ -189,7 +205,7 @@ bool ServerProcess::SendCommand(const std::string& command)
     std::string fullCommand = command + "\n";
     DWORD bytesWritten;
     
-    if (!WriteFile(m_hInput, fullCommand.c_str(), (DWORD)fullCommand.length(), &bytesWritten, NULL))
+    if (!WriteFile(m_hInput, fullCommand.c_str(), (DWORD)fullCommand.length(), &bytesWritten, nullptr))
     {
         DWORD error = GetLastError();
         printf("[%s] 发送命令失败: %d\n", m_name.c_str(), error);
@@ -200,21 +216,21 @@ bool ServerProcess::SendCommand(const std::string& command)
     return true;
 }
 
-unsigned __stdcall ServerProcess::ReadOutputThread(void* param)
+unsigned __stdcall ServerProcess::ReadOutputThread(VOID* param)
 {
     ServerProcess* pThis = (ServerProcess*)param;
     pThis->ReadOutput();
     return 0;
 }
 
-unsigned __stdcall ServerProcess::MonitorThread(void* param)
+unsigned __stdcall ServerProcess::MonitorThread(VOID* param)
 {
     ServerProcess* pThis = (ServerProcess*)param;
     pThis->MonitorProcess();
     return 0;
 }
 
-void ServerProcess::MonitorProcess()
+VOID ServerProcess::MonitorProcess()
 {
     // 等待进程结束
     if (m_hProcess)
@@ -231,22 +247,22 @@ void ServerProcess::MonitorProcess()
         if (m_hProcess)
         {
             CloseHandle(m_hProcess);
-            m_hProcess = NULL;
+            m_hProcess = nullptr;
         }
         if (m_hThread)
         {
             CloseHandle(m_hThread);
-            m_hThread = NULL;
+            m_hThread = nullptr;
         }
         if (m_hOutput)
         {
             CloseHandle(m_hOutput);
-            m_hOutput = NULL;
+            m_hOutput = nullptr;
         }
         if (m_hInput)
         {
             CloseHandle(m_hInput);
-            m_hInput = NULL;
+            m_hInput = nullptr;
         }
         m_bRunning = false;
 
@@ -254,10 +270,10 @@ void ServerProcess::MonitorProcess()
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - m_lastRestartTime).count();
         
-        // 如果5秒内连续重启超过3次, 则停止自动重启
-        if (elapsed < 5 && m_restartCount >= 3)
+        // 如果60秒内重启超过5次, 则停止自动重启
+        if (elapsed < 60 && m_restartCount >= 5)
         {
-            printf("[%s] 重启过于频繁, 已停止自动重启保护\n", m_name.c_str());
+            printf("[%s] 60秒内已重启%d次, 重启过于频繁, 已停止自动重启保护\n", m_name.c_str(), m_restartCount);
             if (m_restartCallback)
             {
                 m_restartCallback(this);
@@ -265,8 +281,11 @@ void ServerProcess::MonitorProcess()
             return;
         }
 
-        // 等待3秒后重启
-        Sleep(3000);
+        // 等待3秒后重启（频繁重启时增加等待时间）
+        DWORD dwWaitMs = 3000;
+        if (m_restartCount >= 3)
+            dwWaitMs = 10000;
+        Sleep(dwWaitMs);
 
         m_restartCount++;
         printf("[%s] 正在执行第 %d 次自动重启...\n", m_name.c_str(), m_restartCount);
@@ -275,6 +294,8 @@ void ServerProcess::MonitorProcess()
         if (Start())
         {
             printf("[%s] 自动重启成功\n", m_name.c_str());
+            // 进程稳定运行超过60秒后重置重启计数器
+            // 这里先记录重启时间，由下次MonitorProcess检测稳定运行后重置
         }
         else
         {
@@ -292,13 +313,13 @@ void ServerProcess::MonitorProcess()
     }
 }
 
-void ServerProcess::ReadOutput()
+VOID ServerProcess::ReadOutput()
 {
     char buffer[8192]{};
     DWORD bytesRead;
     while (m_bRunning && m_hOutput)
     {
-        if (!ReadFile(m_hOutput, buffer, sizeof(buffer) - 1, &bytesRead, NULL))
+        if (!ReadFile(m_hOutput, buffer, sizeof(buffer) - 1, &bytesRead, nullptr))
         {
             DWORD error = GetLastError();
             if (error != ERROR_BROKEN_PIPE)

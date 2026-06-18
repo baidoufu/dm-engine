@@ -7,6 +7,8 @@
 #include ".\scriptobjectmgr.h"
 #include ".\scriptobject.h"
 #include ".\humanplayer.h"
+#include <memory>
+#include <array>
 
 BOOL g_bDebugScript = FALSE;
 xObjectPool<xPacket> CScriptElement::m_xParamStackPool;
@@ -29,8 +31,8 @@ BOOL CSe_Goods::Parse(CScriptFile& file)
 		xStringsExtracter<3> goods(pLine, " \t", " \t");
 		if (goods[0] == nullptr || goods[0][0] == 0)
 			continue;
-		Goods* pGoods = new Goods;
-		o_strncpy(pGoods->szName, goods[0], 30);
+		auto pGoods = std::make_unique<Goods>();
+		o_strncpy(pGoods->szName.data(), goods[0], 30);
 		if (goods[1])
 			pGoods->wCount = (WORD)StringToInteger(goods[1]);
 		else
@@ -39,7 +41,7 @@ BOOL CSe_Goods::Parse(CScriptFile& file)
 			pGoods->wRefreshTime = (WORD)StringToInteger(goods[2]);
 		else
 			pGoods->wRefreshTime = 5;
-		AddGoods(pGoods);
+		AddGoods(std::move(pGoods));
 	}
 	return TRUE;
 }
@@ -52,18 +54,19 @@ bool CSe_Goods::hasFourchar(const char* szName)//没用废弃, 拦不住
 	return true;
 }
 
-VOID CSe_Goods::AddGoods(Goods* pGoods)
+VOID CSe_Goods::AddGoods(std::unique_ptr<Goods> pGoods)
 {
+	Goods* pRaw = pGoods.release();
 	if (this->m_pGoodsList)
 	{
 		Goods* p = m_pGoodsList;
 		while (p->pNext)
 			p = p->pNext;
-		p->pNext = pGoods;
+		p->pNext = pRaw;
 	}
 	else
-		m_pGoodsList = pGoods;
-	pGoods->pNext = nullptr;
+		m_pGoodsList = pRaw;
+	pRaw->pNext = nullptr;
 }
 
 VOID CSe_Goods::Destroy()
@@ -82,9 +85,9 @@ VOID CSe_Goods::Destroy()
 //		描述：
 //		注释：
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
-CSe_Page::CSe_Page(void)
+CSe_Page::CSe_Page(VOID)
 {
-	this->m_pElements = nullptr;
+	this->m_pElements.reset();
 	this->m_AccessRight = PAR_PUBLIC;
 	this->m_szName[0] = 0;
 	m_pObject = nullptr;
@@ -94,8 +97,8 @@ VOID CSe_Page::Destroy()
 {
 	if (m_pElements)
 	{
-		this->m_pElements->delToTail();
-		m_pElements = nullptr;
+		m_pElements->delToTail();
+		m_pElements.reset();
 	}
 }
 
@@ -226,7 +229,7 @@ VOID CSe_Page::AddScriptElement(CScriptElement* pElement)
 	if (m_pElements)
 		m_pElements->addTail(pElement);
 	else
-		m_pElements = pElement;
+		m_pElements.reset(pElement);
 }
 
 BOOL CSe_Page::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView)
@@ -236,7 +239,7 @@ BOOL CSe_Page::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView
 		PRINT(ERROR_RED, "(");
 		PRINT(SUCCESS_GREEN, "%u", this->m_nLineNumber);
 		PRINT(ERROR_RED, ")[");
-		PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName());
+		PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner() ? ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName() : "null");
 		PRINT(ERROR_RED, "]");
 		PRINT(ERROR_RED, ":ExecPage:");
 		PRINT(SUCCESS_GREEN, "%s.%s \n", this->m_pObject->getName(), this->m_szName);
@@ -245,7 +248,7 @@ BOOL CSe_Page::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView
 	if (pPTarget && pPTarget->CheckExceedDistance(TRUE))
 		return FALSE;
 
-	CScriptElement* p = m_pElements;
+	CScriptElement* p = m_pElements.get();
 	while (p)
 	{
 		if (!p->Execute(pShell, pTarget, pView))
@@ -279,7 +282,7 @@ BOOL CSe_NormalAct::Parse(CScriptFile& file)
 	if (m_nParamCount > 0)
 	{
 		if (m_nParamCount > MAX_CALL_PARAMS + 1)m_nParamCount = MAX_CALL_PARAMS + 1;
-		m_pParams = new ScriptParamEx[m_nParamCount];
+		m_pParams = std::make_unique<ScriptParamEx[]>(m_nParamCount);
 		for (UINT i = 0;i < m_nParamCount;i++)
 		{
 			char* p = Params[i + 1];
@@ -308,7 +311,7 @@ BOOL CSe_NormalAct::Parse(CScriptFile& file)
 			}
 		}
 	}
-	m_pViewString = copystring(Params[0]);
+	m_pViewString.reset(copystring(Params[0]));
 	return TRUE;
 }
 
@@ -316,7 +319,7 @@ BOOL CSe_NormalAct::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScrip
 {
 	if (m_fnProc == nullptr)return FALSE;
 	CParamStackHelper paramstack;
-	CallParamEx Params[MAX_CALL_PARAMS + 1];
+	std::array<CallParamEx, MAX_CALL_PARAMS + 1> Params{};
 	for (UINT i = 0;i < m_nParamCount;i++) // 构建最终参数表
 	{
 		if (m_pParams[i].wType == SP_VARIABLE)
@@ -346,17 +349,17 @@ BOOL CSe_NormalAct::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScrip
 		PRINT(ERROR_RED, "(");
 		PRINT(SUCCESS_GREEN, "%u", this->m_nLineNumber);
 		PRINT(ERROR_RED, ")[");
-		PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName());
+		PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner() ? ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName() : "null");
 		PRINT(ERROR_RED, "]");
 		PRINT(ERROR_RED, ":ExecCmd:");
-		PRINT(SUCCESS_GREEN, "%s ", m_pViewString);
+		PRINT(SUCCESS_GREEN, "%s ", m_pViewString.get());
 		for (UINT i = 0;i < m_nParamCount;i++)
 		{
 			PRINT(SUCCESS_GREEN, "%s ", Params[i].pszParam);
 		}
 		PRINT(ERROR_RED, "\n");
 	}
-	m_dwResult = m_fnProc(pShell, pTarget, pView, Params, m_nParamCount, bContinue);
+	m_dwResult = m_fnProc(pShell, pTarget, pView, Params.data(), m_nParamCount, bContinue);
 	if(g_bDebugScript)
 		PRINT( ERROR_RED, "返回值: ( %u ) %s\n", m_dwResult, bContinue?"继续":"中断" );
 	return bContinue;
@@ -364,16 +367,7 @@ BOOL CSe_NormalAct::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScrip
 
 VOID CSe_NormalAct::Destroy()
 {
-	if (m_pParams)
-	{
-		delete[]m_pParams;
-		m_pParams = nullptr;
-	}
-	if (m_pViewString)
-	{
-		delete[] m_pViewString;
-		m_pViewString = nullptr;
-	}
+	m_pParams.reset();
 	m_fnProc = nullptr;
 }
 
@@ -381,15 +375,15 @@ VOID CSe_NormalAct::Destroy()
 //		描述：
 //		注释：
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
-static thread_local char g_szTempBuffer[65536];
+static thread_local std::array<char, 65536> g_szTempBuffer{};
 BOOL CSe_NormalSay::Parse(CScriptFile& file)
 {
 	CScriptElement::Parse(file);
 	char* pLine = file.CurrentLineRaw();
 	if (pLine == nullptr || *pLine == 0)return FALSE;
-	int size = ProcFmtText(pLine, g_szTempBuffer, 65535, (xVariableProvider*)CScriptObjectMgr::GetInstance());
+	int size = ProcFmtText(pLine, g_szTempBuffer.data(), 65535, (xVariableProvider*)CScriptObjectMgr::GetInstance());
 	if (size > 0)
-		this->m_pSayWords = copystring(g_szTempBuffer);
+		this->m_pSayWords.reset(copystring(g_szTempBuffer.data()));
 	return TRUE;
 }
 
@@ -397,29 +391,25 @@ BOOL CSe_NormalSay::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScrip
 {
 	if (m_pSayWords)
 	{
-		int size = ProcFmtText(m_pSayWords, g_szTempBuffer, 65535, (xVariableProvider*)pTarget);
+		int size = ProcFmtText(m_pSayWords.get(), g_szTempBuffer.data(), 65535, (xVariableProvider*)pTarget);
 		if (g_bDebugScript)
 		{
 			PRINT(ERROR_RED, "(");
 			PRINT(SUCCESS_GREEN, "%u", this->m_nLineNumber);
 			PRINT(ERROR_RED, ")[");
-			PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName());
+			PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner() ? ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName() : "null");
 			PRINT(ERROR_RED, "]");
 			PRINT(ERROR_RED, ":AddWords:");
-			PRINT(SUCCESS_GREEN, "%s \n", g_szTempBuffer);
+			PRINT(SUCCESS_GREEN, "%s \n", g_szTempBuffer.data());
 		}
-		pView->AppendWords(g_szTempBuffer);
+		pView->AppendWords(g_szTempBuffer.data());
 	}
 	return TRUE;
 }
 
 VOID CSe_NormalSay::Destroy()
 {
-	if (m_pSayWords)
-	{
-		delete[]m_pSayWords;
-		m_pSayWords = nullptr;
-	}
+	m_pSayWords.reset();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -479,7 +469,7 @@ BOOL CSe_IfStatement::Parse(CScriptFile& file)
 				return TRUE;
 			else if (_stricmp(pLine, "#elseif") == 0)
 			{
-				this->m_pElseIfStatement = new CSe_IfStatement;
+				this->m_pElseIfStatement.reset(new CSe_IfStatement);
 				return this->m_pElseIfStatement->Parse(file);
 			}
 			else
@@ -509,19 +499,19 @@ BOOL CSe_IfStatement::Parse(CScriptFile& file)
 			}
 			else
 			{
-				CScriptElement** ppList = nullptr;
+				std::unique_ptr<CScriptElement>* ppList = nullptr;
 				if (statementstate == IPS_IF)
-					ppList = (CScriptElement**)&m_pCondition;
+					ppList = (std::unique_ptr<CScriptElement>*)&m_pCondition;
 				else if (statementstate == IPS_TRUE)
-					ppList = (CScriptElement**)&m_pTrueElements;
+					ppList = &m_pTrueElements;
 				else
-					ppList = (CScriptElement**)&m_pFalseElements;
+					ppList = &m_pFalseElements;
 				if (ppList)
 				{
 					if (*ppList)
 						(*ppList)->addTail(pElement);
 					else
-						*ppList = pElement;
+						ppList->reset(pElement);
 				}
 			}
 		}
@@ -531,7 +521,7 @@ BOOL CSe_IfStatement::Parse(CScriptFile& file)
 
 BOOL CSe_IfStatement::CheckConditionList(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView)
 {
-	CSe_NormalAct* p = m_pCondition;
+	CSe_NormalAct* p = m_pCondition.get();
 	while (p)
 	{
 		p->Execute(pShell, pTarget, pView);
@@ -558,9 +548,9 @@ BOOL CSe_IfStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScr
 	if (this->m_bNot)
 		bCheckResult = !bCheckResult;
 	if (bCheckResult)
-		p = m_pTrueElements;
+		p = m_pTrueElements.get();
 	else
-		p = m_pFalseElements;
+		p = m_pFalseElements.get();
 
 	while (p)
 	{
@@ -579,17 +569,17 @@ VOID CSe_IfStatement::Destroy()
 	if (m_pCondition)
 	{
 		m_pCondition->delToTail();
-		m_pCondition = nullptr;
+		m_pCondition.reset();
 	}
 	if (m_pTrueElements)
 	{
 		m_pTrueElements->delToTail();
-		m_pTrueElements = nullptr;
+		m_pTrueElements.reset();
 	}
 	if (m_pFalseElements)
 	{
 		m_pFalseElements->delToTail();
-		m_pFalseElements = nullptr;
+		m_pFalseElements.reset();
 	}
 }
 
@@ -644,7 +634,7 @@ BOOL CSe_CaseBlock::Parse(CScriptFile& file)
 				if (m_pElements)
 					m_pElements->addTail(pElement);
 				else
-					m_pElements = pElement;
+					m_pElements.reset(pElement);
 			}
 		}
 	}
@@ -653,7 +643,7 @@ BOOL CSe_CaseBlock::Parse(CScriptFile& file)
 
 BOOL CSe_CaseBlock::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView)
 {
-	CScriptElement* p = this->m_pElements;
+	CScriptElement* p = this->m_pElements.get();
 	while (p)
 	{
 		if (!p->Execute(pShell, pTarget, pView))
@@ -669,7 +659,7 @@ VOID CSe_CaseBlock::Destroy()
 	if (m_pElements)
 	{
 		this->m_pElements->delToTail();
-		this->m_pElements = nullptr;
+		this->m_pElements.reset();
 	}
 }
 
@@ -706,11 +696,9 @@ BOOL CSe_SwitchStatement::Parse(CScriptFile& file)
 
 	switch_parse_state parsestate = SPS_SWITCH;
 	file.SetLineIndex(nStartIndex);
-	m_nCaseBlocks = 0;
 	if (nCaseBlocks > 0)
 	{
-		this->m_pCaseBlocks = new CSe_CaseBlock * [nCaseBlocks];
-		memset(m_pCaseBlocks, 0, sizeof(CSe_CaseBlock*) * nCaseBlocks);
+		m_pCaseBlocks.reserve(nCaseBlocks);
 	}
 	while (pLine = file.NextLine())
 	{
@@ -720,15 +708,13 @@ BOOL CSe_SwitchStatement::Parse(CScriptFile& file)
 			parsestate = SPS_CASESAY;
 			if (_strnicmp(pLine, "#case:", 6) == 0)
 			{
-				m_pCaseBlocks[m_nCaseBlocks] = new CSe_CaseBlock;
-				if (!m_pCaseBlocks[m_nCaseBlocks]->Parse(file))
+				auto pCaseBlock = std::make_unique<CSe_CaseBlock>();
+				if (!pCaseBlock->Parse(file))
 				{
 					PRINT(ERROR_RED, "CASE块解析失败在 %s 的 %u 行!\n", file.GetFileName(), file.GetCurrentLineNumber());
-					delete m_pCaseBlocks[m_nCaseBlocks];
-					m_pCaseBlocks[m_nCaseBlocks] = nullptr;
 				}
 				else
-					m_nCaseBlocks++;
+					m_pCaseBlocks.emplace_back(std::move(pCaseBlock));
 			}
 			else if (_stricmp(pLine, "#default") == 0)
 			{
@@ -736,12 +722,11 @@ BOOL CSe_SwitchStatement::Parse(CScriptFile& file)
 					PRINT(ERROR_RED, "多余的DEFAULT在 %s 的 %u 行!\n", file.GetFileName(), file.GetCurrentLineNumber());
 				else
 				{
-					m_pDefaultBlock = new CSe_CaseBlock;
+					m_pDefaultBlock = std::make_unique<CSe_CaseBlock>();
 					if (!m_pDefaultBlock->Parse(file))
 					{
 						PRINT(ERROR_RED, "DEFAULT解析失败在 %s 的 %u 行!\n", file.GetFileName(), file.GetCurrentLineNumber());
-						delete m_pDefaultBlock;
-						m_pDefaultBlock = nullptr;
+						m_pDefaultBlock.reset();
 					}
 				}
 			}
@@ -767,19 +752,18 @@ BOOL CSe_SwitchStatement::Parse(CScriptFile& file)
 		{
 			if (parsestate == SPS_SWITCH)
 			{
-				if (this->m_pBranchSource != nullptr)
+				if (m_pBranchSource)
 				{
 					PRINT(ERROR_RED, "警告: Switch过多的条件项目在 %s 的 %u 行!\n", file.GetFileName(), file.GetCurrentLineNumber());
 					continue;
 				}
 				else
 				{
-					m_pBranchSource = new CSe_NormalAct;
+					m_pBranchSource = std::make_unique<CSe_NormalAct>();
 					if (!m_pBranchSource->Parse(file))
 					{
 						PRINT(ERROR_RED, "错误: Switch 条件解析失败在 %s 的 %u 行!\n", file.GetFileName(), file.GetCurrentLineNumber());
-						delete m_pBranchSource;
-						m_pBranchSource = nullptr;
+						m_pBranchSource.reset();
 					}
 				}
 			}
@@ -796,41 +780,22 @@ BOOL CSe_SwitchStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, 
 			return FALSE;
 		DWORD nCode = m_pBranchSource->getResult();
 
-		for (UINT i = 0;i < this->m_nCaseBlocks;i++)
+		for (const auto& pCaseBlock : m_pCaseBlocks)
 		{
-			if (this->m_pCaseBlocks[i] &&
-				this->m_pCaseBlocks[i]->getCode() == nCode)
-				return this->m_pCaseBlocks[i]->Execute(pShell, pTarget, pView);
+			if (pCaseBlock && pCaseBlock->getCode() == nCode)
+				return pCaseBlock->Execute(pShell, pTarget, pView);
 		}
 	}
-	if (this->m_pDefaultBlock)
+	if (m_pDefaultBlock)
 		return m_pDefaultBlock->Execute(pShell, pTarget, pView);
 	return TRUE;
 }
 
 VOID CSe_SwitchStatement::Destroy()
 {
-	if (m_pCaseBlocks != nullptr)
-	{
-		for (UINT n = 0;n < this->m_nCaseBlocks;n++)
-		{
-			if (m_pCaseBlocks[n])
-				delete m_pCaseBlocks[n];
-		}
-		delete[]m_pCaseBlocks;
-		m_pCaseBlocks = nullptr;
-	}
-	m_nCaseBlocks = 0;
-	if (m_pBranchSource)
-	{
-		delete m_pBranchSource;
-		m_pBranchSource = nullptr;
-	}
-	if (m_pDefaultBlock)
-	{
-		delete m_pDefaultBlock;
-		m_pDefaultBlock = nullptr;
-	}
+	m_pCaseBlocks.clear();
+	m_pBranchSource.reset();
+	m_pDefaultBlock.reset();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -858,7 +823,7 @@ BOOL CSe_JsonStatement::Parse(CScriptFile& file)
 		if (_stricmp(pLine, "#end") == 0)break;
 		combinedContent += pLine;
 	}
-	m_pWords = copystring(combinedContent.c_str());
+	m_pWords.reset(copystring(combinedContent.c_str()));
 	return TRUE;
 }
 
@@ -866,10 +831,10 @@ BOOL CSe_JsonStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CS
 {
 	if (m_pWords)
 	{
-		ProcFmtText(m_pWords, g_szTempBuffer, 65535, (xVariableProvider*)pTarget);
+		ProcFmtText(m_pWords.get(), g_szTempBuffer.data(), 65535, (xVariableProvider*)pTarget);
 		CScriptNpc* pNPC = (CScriptNpc*)pShell;
 		if (pNPC)
-			pNPC->SendMerChantJsonMsg(pTarget, g_szTempBuffer, m_nType);
+			pNPC->SendMerChantJsonMsg(pTarget, g_szTempBuffer.data(), m_nType);
 	}
 	return TRUE;
 }
@@ -877,11 +842,7 @@ BOOL CSe_JsonStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CS
 VOID CSe_JsonStatement::Destroy()
 {
 	m_nType = 0;
-	if (m_pWords)
-	{
-		delete[]m_pWords;
-		m_pWords = nullptr;
-	}
+	m_pWords.reset();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -909,7 +870,7 @@ BOOL CSe_FlashStatement::Parse(CScriptFile& file)
 		if (_stricmp(pLine, "#end") == 0)break;
 		combinedContent += pLine;
 	}
-	m_pWords = copystring(combinedContent.c_str());
+	m_pWords.reset(copystring(combinedContent.c_str()));
 	return TRUE;
 }
 
@@ -917,8 +878,8 @@ BOOL CSe_FlashStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, C
 {
 	if (m_pWords)
 	{
-		ProcFmtText(m_pWords, g_szTempBuffer, 65536, (xVariableProvider*)pTarget);
-		pView->AppendWords(g_szTempBuffer);
+		ProcFmtText(m_pWords.get(), g_szTempBuffer.data(), 65536, (xVariableProvider*)pTarget);
+		pView->AppendWords(g_szTempBuffer.data());
 		pView->SetParam(m_nType);
 	}
 	return TRUE;
@@ -927,9 +888,5 @@ BOOL CSe_FlashStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, C
 VOID CSe_FlashStatement::Destroy()
 {
 	m_nType = 0;
-	if (m_pWords)
-	{
-		delete[]m_pWords;
-		m_pWords = nullptr;
-	}
+	m_pWords.reset();
 }

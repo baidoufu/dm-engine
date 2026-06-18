@@ -21,15 +21,14 @@
 #include "autoscriptmanager.h"
 
 xObjectPool<StringCacheNode> CMonsterEx::m_xStringCachePool;
-CMonsterEx::CMonsterEx(void) : m_xUpdateNode(this)
+CMonsterEx::CMonsterEx(VOID) : m_xUpdateNode(this)
 {
 	m_pGen = nullptr;
 	m_pScriptPage = nullptr;
-	m_xQProcess.create(CGameWorld::GetInstance()->GetMonsterQueue());
 	Clean();
 }
 
-CMonsterEx::~CMonsterEx(void)
+CMonsterEx::~CMonsterEx(VOID)
 {
 }
 
@@ -99,13 +98,13 @@ VOID CMonsterEx::Clean()
 	m_boSpecialGen = FALSE;
 	m_wGotoX = 0;
 	m_wGotoY = 0;
-	strcpy(m_szOriginalName, "");
+	m_szOriginalName[0] = '\0';
 	CAiObjectEx::Clean();
 }
 
 const char* CMonsterEx::GetViewName()
 {
-	return m_szLongName;
+	return m_szLongName.data();
 }
 
 VOID CMonsterEx::OnDeath(DWORD dwKiller)
@@ -140,7 +139,11 @@ VOID CMonsterEx::OnDeath(DWORD dwKiller)
 				pKiller = ((CHumanPlayer*)pObject->GetOwner());
 		}
 		if (GetType() == OBJ_MONSTER || GetType() == OBJ_PET)
-			((CMonsterEx*)pObject)->m_dwKillCount++;
+		{
+			// 只有当攻击者也是怪物/宠物时才增加其击杀计数
+			if (pObject->GetType() == OBJ_MONSTER || pObject->GetType() == OBJ_PET)
+				((CMonsterEx*)pObject)->m_dwKillCount++;
+		}
 		pObject->AddExp(GetPropValue(PI_EXP), GetPropValue(PI_LEVEL), GetId());
 		if (pKiller)
 		{
@@ -200,6 +203,8 @@ VOID CMonsterEx::Update()
 		CMonsterManagerEx::GetInstance()->DeleteMonster(this);
 		return;
 	}
+	// 提前检查当前是否正在执行不可打断的动作，防止移动指令叠加
+	BOOL bIsBusy = (m_ActionType != AT_STAND && m_ActionType != AT_WALK && m_ActionType != AT_RUN);
 	CAliveObject* pTarget = GetTarget();
 	if (pTarget && !m_bIsShow && (m_pDesc->sprop.pFlag & SF_SHOW) != 0)
 	{
@@ -220,12 +225,12 @@ VOID CMonsterEx::Update()
 	//与目标距离只有1格了
 	if (m_bNoAiDelayAttack && pTarget && DISTANCE(getX(), getY(), pTarget->getX(), pTarget->getY()) <= 1)
 	{
-		if (GetType() == OBJ_MONSTER && GetActionType() != AT_SHOW)//没有延时攻击, 实现玩家经过怪时会及时攻击.
+		if (GetType() == OBJ_MONSTER && GetActionType() != AT_SHOW && !bIsBusy)//没有延时攻击, 实现玩家经过怪时会及时攻击.
 		{
 			m_bNoAiDelayAttack = FALSE;
 			DWORD dwActionTime = 0;
-			if (GetActionType() == AT_WALK)	dwActionTime = 112;
-			if (GetActionType() == AT_RUN)	dwActionTime = 42;
+			if (GetActionType() == AT_WALK)	dwActionTime = 200;
+			if (GetActionType() == AT_RUN)	dwActionTime = 100;
 			if (dwActionTime != 0)
 				SetAction(AT_AIACTION, GetDirection(), getX(), getY(), dwActionTime);
 		}
@@ -233,7 +238,7 @@ VOID CMonsterEx::Update()
 	// 检查宠物叛变
 	if (m_bSetOwner && m_betrayTimer.IsTimeOut(m_dwBetray)) 
 	{
-		MonsterClass* pDesc = CMonsterManagerEx::GetInstance()->GetClassByName(m_szOriginalName);
+		MonsterClass* pDesc = CMonsterManagerEx::GetInstance()->GetClassByName(m_szOriginalName.data());
 		SetOwner(nullptr);
 		m_bSetOwner = FALSE;
 		SetDesc(pDesc);// 重置怪类属性
@@ -282,7 +287,6 @@ VOID CMonsterEx::Update()
 			{
 				m_xAttackObj.Clear();
 				SetTarget(nullptr);
-				pTarget = nullptr;
 			}
 			return;
 		}
@@ -380,7 +384,7 @@ VOID CMonsterEx::Update()
 				}
 				else//走到目标点
 				{
-					if (m_pMap->IsBlocked(ix, iy)) m_pCurFocusItem = nullptr;
+					if (m_pMap == nullptr || m_pMap->IsBlocked(ix, iy)) m_pCurFocusItem = nullptr;
 					else if (DISTANCE(getX(), getY(), ix, iy) >= 15) m_pCurFocusItem = nullptr;
 					else GotoPosition(ix, iy);
 				}
@@ -389,8 +393,9 @@ VOID CMonsterEx::Update()
 	}
 	//隐藏状态, 不移动
 	if (IsSystemFlagSeted(SF_HIDED)) return;
+	BOOL bIsMoving = (m_ActionType == AT_WALK || m_ActionType == AT_RUN);
 	//设定怪物脱离目标时, 返回自己出生点
-	if (pTarget == nullptr && GetType() != OBJ_PET)
+	if (!bIsMoving && pTarget == nullptr && GetType() != OBJ_PET)
 		if (m_bGotoPoint) GotoPosition(m_wGotoX, m_wGotoY);
 	//移动方式
 	switch (m_pDesc->aiset.MoveStyle)
@@ -482,7 +487,7 @@ int	CMonsterEx::GetPropValue(PROP_INDEX index)
 	return value;
 }
 
-void CMonsterEx::DecPropValue(PROP_INDEX index, int value)
+VOID CMonsterEx::DecPropValue(PROP_INDEX index, int value)
 {
 	switch (index)
 	{
@@ -511,7 +516,7 @@ void CMonsterEx::DecPropValue(PROP_INDEX index, int value)
 	}
 }
 
-void CMonsterEx::AddPropValue(PROP_INDEX index, int value)
+VOID CMonsterEx::AddPropValue(PROP_INDEX index, int value)
 {
 	switch (index)
 	{
@@ -563,17 +568,18 @@ VOID CMonsterEx::OnDamage(CAliveObject* pAttacker, int nDamage, damage_type type
 		if ((m_pDesc->sprop.pFlag & SF_MINION) != 0 && Getrand(100) < m_pDesc->sprop.MonsterRate)//随机生效
 		{
 			// 定义8个方向的偏移量
-			const int dirs[8][2] = {
+			const std::array<std::array<int, 2>, 8> dirs = {{
 				{0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}
-			};
+			}};
 			//从名字列表中随机一个
 			xStringsExtracter<3> monsters(m_pDesc->sprop.MonsterName, ",");
 			int nMonster = monsters.getCount();
+			if (nMonster <= 0) return;
 			int monsterIndex = rand() % nMonster;
-			for (int i = 0; i < 6; i++)
+			for (const auto& dir : dirs)
 			{
-				int newX = getX() + dirs[i][0];
-				int newY = getY() + dirs[i][1];
+				int newX = getX() + dir[0];
+				int newY = getY() + dir[1];
 				CMonsterEx* pNewMonster = CMonsterManagerEx::GetInstance()->CreateMonster(monsters[monsterIndex], GetMapId(), newX, newY);
 				if (pNewMonster == nullptr)	break;
 				if (!CGameWorld::GetInstance()->AddMapObject(pNewMonster))
@@ -600,6 +606,7 @@ BOOL CMonsterEx::AttackTarget(e_direction dir)
 	//获取目标
 	CAliveObject* pTarget = GetTarget();
 	if (pTarget == nullptr) return FALSE;
+	if (pTarget->IsSystemFlagSeted(SF_SOULWALL))return FALSE;//目标如果灵魂墙状态，不受攻击
 	// 获取目标的坐标
 	WORD wTargetX = pTarget->getX(), wTargetY = pTarget->getY();
 	int dx = (int)getX() - wTargetX;
@@ -745,16 +752,16 @@ BOOL CMonsterEx::ChangeInto(const char* pszClassName)
 
 BOOL CMonsterEx::CheckChangeInto()
 {
-	for (int i = 0; i < 3; i++)
+	for (auto& change : m_pDesc->changeinto)
 	{
-		if (m_pDesc->changeinto[i].bEnabled)
+		if (change.bEnabled)
 		{
-			if (!CheckSituation(m_pDesc->changeinto[i].situation1) || !CheckSituation(m_pDesc->changeinto[i].situation2))
+			if (!CheckSituation(change.situation1) || !CheckSituation(change.situation2))
 				continue;
-			DPRINT(SUCCESS_GREEN, "%s 变身为 %s\n", m_pDesc->base.szClassName, m_pDesc->changeinto[i].szChangeInto);
+			DPRINT(SUCCESS_GREEN, "%s 变身为 %s\n", m_pDesc->base.szClassName, change.szChangeInto);
 			// 变身前属性值
-			int appendEffect = m_pDesc->changeinto[i].AppendEffect;
-			if (ChangeInto(m_pDesc->changeinto[i].szChangeInto))
+			int appendEffect = change.AppendEffect;
+			if (ChangeInto(change.szChangeInto))
 			{
 				if (appendEffect > 0)
 				{
@@ -848,10 +855,10 @@ VOID CMonsterEx::OnChangeOwner(CAliveObject* pOld, CAliveObject* pNew)
 			return;
 		}
 		m_bSetOwner = FALSE;
-		sprintf(m_szLongName, "%s(%s)", GetName(), pNew->GetName());
+		snprintf(m_szLongName.data(), m_szLongName.size(), "%s(%s)", GetName(), pNew->GetName());
 	}
 	else if (!IsDeath())
-		strcpy(m_szLongName, GetName());
+		o_strncpy(m_szLongName.data(), GetName(), m_szLongName.size() - 1);
 	SetTarget(nullptr);
 	SendChangeName();
 	RefreshViewList();
@@ -880,9 +887,9 @@ BOOL CMonsterEx::SetDesc(MonsterClass* pClass)
 	if (pClass == m_pDesc) return FALSE;
 	if (pClass == nullptr) return FALSE;
 	if (m_pDesc != nullptr)
-		strcpy(m_szOriginalName, m_pDesc->base.szViewName);
+		o_strncpy(m_szOriginalName.data(), m_pDesc->base.szViewName, m_szOriginalName.size() - 1);
 	else
-		strcpy(m_szOriginalName, "");
+		m_szOriginalName.data()[0] = '\0';
 	m_pDesc = pClass;
 	SetMpRecoverTick(m_pDesc->prop.recovermptime * 1000);
 	SetHpRecoverTick(m_pDesc->prop.recoverhptime * 1000);
@@ -902,9 +909,9 @@ BOOL CMonsterEx::SetDesc(MonsterClass* pClass)
 		SetDirection((e_direction)((m_pDesc->aiset.LockDir - 1) % 8));
 	CAliveObject* pOwner = GetOwner();
 	if (pOwner && m_refObjOwner.IsValid())
-		sprintf(m_szLongName, "%s(%s)", m_pDesc->base.szViewName, pOwner->GetName());
+		snprintf(m_szLongName.data(), m_szLongName.size(), "%s(%s)", m_pDesc->base.szViewName, pOwner->GetName());
 	else
-		strcpy(m_szLongName, m_pDesc->base.szViewName);
+		o_strncpy(m_szLongName.data(), m_pDesc->base.szViewName, m_szLongName.size() - 1);
 	if (m_pDesc->sprop.pFlag & (SF_AUTOHIDE | SF_SHOW))
 		SetSystemFlag(SF_HIDED, TRUE);
 	m_pCurFocusItem = nullptr;
@@ -1185,21 +1192,21 @@ VOID CMonsterEx::OnChangeTarget(CAliveObject* pOld, CAliveObject* pNew)
 		if (DISTANCE(pNew->getX(), pNew->getY(), getX(), getY()) > m_pDesc->aiset.ViewDistance) return;
 		if (m_pMap && (m_pDesc->sprop.pFlag & SF_SHARETARGET) != 0) // 同类共享目标
 		{
-			static std::vector<CMonsterEx*> s_monsterCache; // 使用静态缓存避免频繁分配
+			thread_local std::vector<CMonsterEx*> s_monsterCache; // 使用thread_local避免频繁分配，并保证多线程安全
 			s_monsterCache.clear();
 			int nStartX = getX() - m_pDesc->aiset.ViewDistance;
 			int nStartY = getY() - m_pDesc->aiset.ViewDistance;
 			int nEndX = getX() + m_pDesc->aiset.ViewDistance;
 			int nEndY = getY() + m_pDesc->aiset.ViewDistance;
-			nStartX = max(0, nStartX);
-			nStartY = max(0, nStartY);
-			nEndX = min(m_pMap->GetWidth() - 1, nEndX);
-			nEndY = min(m_pMap->GetHeight() - 1, nEndY);
+			nStartX = MAX(0, nStartX);
+			nStartY = MAX(0, nStartY);
+			nEndX = MIN(m_pMap->GetWidth() - 1, nEndX);
+			nEndY = MIN(m_pMap->GetHeight() - 1, nEndY);
 			for (int x = nStartX; x <= nEndX; x++)
 			{
 				for (int y = nStartY; y <= nEndY; y++)
 				{
-					CMapCellInfo* pInfo = m_pMap->GetMapCellInfo(x, y);
+					CMapCellInfo* pInfo = m_pMap->GetMapCellInfoShared(x, y);
 					if (!pInfo) continue;
 					xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
 					while (pNode)
@@ -1262,13 +1269,11 @@ VOID CMonsterEx::OnCuted(CHumanPlayer* pCuter)
 					pCuter->AddGold(GetRangeRand(pDownItem->nCount, pDownItem->nCountMax));
 				else
 				{
-					if (pCuter->GetBagFree() == 0) // 背包满
-						CDownItemMgr::GetInstance()->DropItem(m_pMap, item, getX(), getY(), TRUE, pCuter);
-					else
+					if (CMonItemsMgr::GetInstance()->CreateDownItem(pDownItem, item))
 					{
-						if (CMonItemsMgr::GetInstance()->CreateDownItem(pDownItem, item))
+						if (!pCuter->AddBagItem(item))
 						{
-							if (!pCuter->AddBagItem(item))
+							if (!CDownItemMgr::GetInstance()->DropItem(m_pMap, item, getX(), getY(), TRUE, pCuter))
 								CItemManager::GetInstance()->DeleteItem(item.dwMakeIndex);
 						}
 					}
@@ -1281,8 +1286,8 @@ VOID CMonsterEx::OnCuted(CHumanPlayer* pCuter)
 	{
 		WORD hp = static_cast<WORD>(GetPropValue(PI_CURHP));
 		WORD maxhp = static_cast<WORD>(GetPropValue(PI_MAXHP));
-		DWORD dwParam[3] = { GetFeather(), GetStatus(), (hp << 16) | maxhp };
-		SendAroundMsg(GetId(), 0x21, getX(), getY(), (WORD)GetDirection(), dwParam, sizeof(dwParam));
+		DWORD dwParam[3] = { GetFeather(), GetStatus(), static_cast<DWORD>((hp << 16) | maxhp) };
+		SendAroundMsg(GetId(), 0x21, getX(), getY(), static_cast<WORD>(GetDirection()), dwParam, sizeof(dwParam));
 		SetSystemFlag(SF_BONE, TRUE);
 	}
 }
@@ -1397,9 +1402,7 @@ BOOL CMonsterEx::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 	if (!IsDeath() && GetType() == OBJ_PET && m_pDesc && m_pDesc->petset.Type == APT_CALL)
 	{
 		DWORD dwParams[4] = { GetFeather(), 0, 0, 0 };
-		int tempSize = 0;
-		SmartEncodeMessage(pszMsg, tempSize, GetId(), 0x14, getX(), getY(), (WORD)GetDirection(), (LPVOID)dwParams, sizeof(dwParams));
-		length = tempSize;
+		length = EncodeMsg(pszMsg, GetId(), 0x14, getX(), getY(), (WORD)GetDirection(), (LPVOID)dwParams, sizeof(dwParams));
 	}
 	int alength = 0;
 	BOOL bRet = CAliveObject::GetViewmsg(pszMsg + length, alength, pViewer);
@@ -1409,8 +1412,7 @@ BOOL CMonsterEx::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 	{
 		DWORD dwParam = GetSystemFlagParam(SF_SOULWALL);
 		char szTempBuffer[1024];
-		int tempSize = 0;
-		SmartEncodeMessage(szTempBuffer, tempSize, GetId(), 0x323, 0, 0, 0, &dwParam, sizeof(DWORD));
+		int tempSize = EncodeMsg(szTempBuffer, GetId(), 0x323, 0, 0, 0, &dwParam, sizeof(DWORD));
 		memcpy(pszMsg + length, szTempBuffer, tempSize);
 		length += tempSize;
 	}

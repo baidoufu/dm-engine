@@ -1,6 +1,8 @@
 #pragma once
 #include "localdefine.h"
 #include "scripttarget.h"
+#include <memory>
+#include <vector>
 
 typedef struct tagEventTimeup
 {
@@ -21,10 +23,9 @@ typedef struct tagTimeScript
 {
 	tagTimeScript()
 	{
-		pszScriptPage = nullptr;
 		pNext = nullptr;
 	}
-	char* pszScriptPage;
+	pooled_string_ptr pszScriptPage;
 	EventTimeup m_eTimeUp;
 	tagTimeScript* pNext;
 }TimeScript;
@@ -33,13 +34,13 @@ class CHumanPlayer;
 class CAutoScriptManager : public CTimeEventObject, public xSingletonClass<CAutoScriptManager>
 {
 public:
-	CAutoScriptManager(void);
-	virtual ~CAutoScriptManager(void);
+	CAutoScriptManager(VOID);
+	virtual ~CAutoScriptManager(VOID);
 	VOID Destroy();
 	// 加载自动脚本配置
 	VOID Load(const char* pszSettingFile);
 	//获取自动脚本目标
-	CHumanPlayer* GetScriptTarget() { return m_pScriptTarget; }
+	CHumanPlayer* GetScriptTarget() { return m_pScriptTarget.get(); }
 protected:
 	// 添加时间脚本配置
 	VOID AddTimeScript(EventTimeup* pTimeup, const char* pszPage);
@@ -57,5 +58,5 @@ protected:
 	VOID OnYearChange(CSystemTime& curTime);
 protected:
 	TimeScript* m_pTimeScript;
-	CHumanPlayer* m_pScriptTarget;
+	std::unique_ptr<CHumanPlayer> m_pScriptTarget;
 };

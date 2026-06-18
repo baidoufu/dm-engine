@@ -1,13 +1,14 @@
 #pragma once
 #include "findfile.h"
+#include <array>
 
 class CPhysicsMap;
 
 class CPhysicsMapMgr : public xSingletonClass<CPhysicsMapMgr>
 {
 public:
-	CPhysicsMapMgr(void);
-	virtual ~CPhysicsMapMgr(void);
+	CPhysicsMapMgr(VOID);
+	virtual ~CPhysicsMapMgr(VOID);
 
 	CPhysicsMap* Load(const char* pszName);
 
@@ -15,8 +16,8 @@ public:
 
 	CPhysicsMap* GetPhysicsMapByName(const char* pszMapName);
 private:
-	char m_szPhysicsMapPath[1024];
-	char m_szPhysicsCachePath[1024];
+	std::array<char, 1024> m_szPhysicsMapPath{};
+	std::array<char, 1024> m_szPhysicsCachePath{};
 	xStringList<128> m_xMapList;
 	BOOL m_bUseCache;
 };

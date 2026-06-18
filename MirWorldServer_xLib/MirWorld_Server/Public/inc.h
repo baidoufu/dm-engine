@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <array>
 #include "..\..\MirPublic\MirDefine.h"
 
 //#define /*USE_X_LIB*/
@@ -47,20 +48,20 @@ enum	servertype
 	ST_DATABASESERVER,
 	ST_LOGINSERVER,
 	ST_SELCHARSERVER,
-	ST_GAMESERVER_,
-	ST_LOGINSERVER_,
 	ST_GAMESERVER,
+	ST_RESOURCESERVER,
+	ST_MAX,
 };
-
 
 inline	servertype GetServerTypeByName( const char * pszName )
 {
 	if( pszName == nullptr )return ST_UNKNOWN;
-	if(_stricmp( pszName, "servercenter" ) == 0 )return ST_SERVERCENTER;
-	if(_stricmp( pszName, "databaseserver" ) == 0 )return ST_DATABASESERVER;
-	if(_stricmp( pszName, "loginserver" ) == 0 )return ST_LOGINSERVER;
-	if(_stricmp( pszName, "selcharserver" ) == 0 )return ST_SELCHARSERVER;
-	if(_stricmp( pszName, "gameserver" ) == 0 )return ST_GAMESERVER;
+	if(_stricmp( pszName, "ServerCenter" ) == 0 )return ST_SERVERCENTER;
+	if(_stricmp( pszName, "DatabaseServer" ) == 0 )return ST_DATABASESERVER;
+	if(_stricmp( pszName, "LoginServer" ) == 0 )return ST_LOGINSERVER;
+	if(_stricmp( pszName, "SelcharServer" ) == 0 )return ST_SELCHARSERVER;
+	if(_stricmp( pszName, "GameServer" ) == 0 )return ST_GAMESERVER;
+	if (_stricmp(pszName, "ResourceServer") == 0)return ST_RESOURCESERVER;
 	return ST_UNKNOWN;
 }
 
@@ -78,6 +79,8 @@ inline const char * GetServerTypeNameByType( servertype type )
 		return "角色服务器";
 	case	ST_GAMESERVER:
 		return "游戏世界服务器";
+	case	ST_RESOURCESERVER:
+		return "资源服务器";
 	}
 	return "未知的服务器类型";
 }
@@ -88,11 +91,11 @@ typedef struct tagSERVERADDR
 	{
 		memset( this, 0, sizeof( *this));
 	}
-	char	addr[16];
+	std::array<char, 16>	addr;
 	DWORD	nPort;
-	void	SetAddr( const char * pAddr )
+	VOID	SetAddr( const char * pAddr )
 	{
-		strncpy( addr, pAddr, 16 );
+		strncpy( addr.data(), pAddr, 16 );
 		addr[15] = 0;
 	}
 
@@ -101,7 +104,7 @@ typedef struct tagSERVERADDR
 
 typedef struct tagREGISTER_SERVER_INFO
 {
-	char	szName[64];
+	std::array<char, 64>	szName;
 	ServerId	Id;
 	SERVERADDR	addr;
 }REGISTER_SERVER_INFO;
@@ -109,8 +112,8 @@ typedef struct tagREGISTER_SERVER_INFO
 typedef struct tagREGISTER_SERVER_RESULT
 {
 	ServerId	Id;
-	int			nDbCount;
-	SERVERADDR	DbAddr[2];
+	int			nDbCount = 0;
+	std::array<SERVERADDR, 2>	DbAddr;
 }REGISTER_SERVER_RESULT;
 
 typedef struct tagFINDSERVER_RESULT
@@ -206,7 +209,7 @@ typedef struct tagENTERGAMESERVER
 	{
 		memset( this, 0, sizeof( *this));
 	}
-	char	szAccount[12];
+	std::array<char, 12>	szAccount;
 	UINT	nLoginId;
 	UINT	nSelCharId;
 	union
@@ -215,14 +218,15 @@ typedef struct tagENTERGAMESERVER
 		SERVER_ERROR	result;
 	};
 	DWORD	dwEnterTime;
-	char	szName[32];
+	std::array<char, 32>	szName;
 	DWORD	dwSelectCharServerId;
+	UINT	nListId;	// 在CIndexListEx中的索引ID，用于超时清理
 }ENTERGAMESERVER;
 
 typedef struct tagHUMANINFO
 {
 	DWORD	dwDBId;
-	CHAR	szName[32];
+	std::array<CHAR, 32>	szName;
 
 	WORD wLevel;
 	BYTE btMinDef;	
@@ -268,15 +272,15 @@ struct tQueryPersonInfo
 		if( pszAccount == nullptr )
 			szAccount[0] = 0;
 		else
-			o_strncpy( szAccount, pszAccount, 10 );
+			o_strncpy( szAccount.data(), pszAccount, 10 );
 		if( pszServerName == nullptr )
 			szServerName[0] = 0;
 		else
-			o_strncpy( szServerName, pszServerName, 18 );
+			o_strncpy( szServerName.data(), pszServerName, 18 );
 		if( pszName == nullptr )
 			szName[0] = 0;
 		else
-			o_strncpy( szName, pszName, 18 );
+			o_strncpy( szName.data(), pszName, 18 );
 	}
 	int	GetSize()
 	{
@@ -287,9 +291,9 @@ struct tQueryPersonInfo
 		return (LPVOID)this;
 	}
 	DWORD	dwKey;
-	char	szAccount[12];
-	char	szServerName[20];
-	char	szName[20];
+	std::array<char, 12>	szAccount;
+	std::array<char, 20>	szServerName;
+	std::array<char, 20>	szName;
 };
 
 struct tQueryCharList
@@ -304,11 +308,11 @@ struct tQueryCharList
 		if( pszAccount == nullptr )
 			szAccount[0] = 0;
 		else
-			o_strncpy( szAccount, pszAccount, 10 );
+			o_strncpy( szAccount.data(), pszAccount, 10 );
 		if( pszServerName == nullptr )
 			szServerName[0] = 0;
 		else
-			o_strncpy( szServerName, pszServerName, 18 );
+			o_strncpy( szServerName.data(), pszServerName, 18 );
 	}
 	int	GetSize()
 	{
@@ -319,8 +323,8 @@ struct tQueryCharList
 		return (LPVOID)this;
 	}
 	DWORD	dwKey;
-	char	szAccount[12];
-	char	szServerName[20];
+	std::array<char, 12>	szAccount;
+	std::array<char, 20>	szServerName;
 };
 struct tQueryCharList_Result
 {
@@ -338,12 +342,12 @@ struct tQueryCharList_Result
 	}
 	DWORD	dwKey;
 	int	count;
-	SELECT_CHAR_LIST	charlist[2];
+	std::array<SELECT_CHAR_LIST, MAX_DELCHARLISTCOUNT>	charlist;
 };
 struct tQueryMapPosition_Result
 {
 	DWORD	dwKey;
-	CHAR	szName[32];
+	std::array<CHAR, 32>	szName;
 	WORD	x,y;
 };
 
@@ -359,10 +363,5 @@ enum	e_direction
 	ED_LU, // 左上
 	ED_MAX,
 };
-#define MAKEFEATHER(a,hair,b,c)  (((a&0xff) << 24) | ((hair&0xff) << 16 )|( (b&0xff) << 8 )|(c&0xff))
-
-#define MAX_DELCHARLISTCOUNT	4
-#define MAX_CHARLISTCOUNT	2
-
 #endif
 

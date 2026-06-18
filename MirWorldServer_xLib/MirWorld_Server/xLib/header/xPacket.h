@@ -1,4 +1,6 @@
 #include "xinc.h"
+#include <memory>
+#include <array>
 
 class xPacket
 {
@@ -6,129 +8,117 @@ public:
 	xPacket()
 	{
 		m_pBuf = nullptr;
+		m_pExternalBuf = nullptr;
 		m_iSize = 0;
 		m_iMaxSize = 0;
 		m_bBuildInBuffer = FALSE;
 		m_bAligned = FALSE;
 	}
-
 	xPacket(int nSize)
 	{
 		m_pBuf = nullptr;
+		m_pExternalBuf = nullptr;
 		m_iSize = 0;
 		m_iMaxSize = 0;
 		m_bBuildInBuffer = FALSE;
 		m_bAligned = FALSE;
 		create(nSize);
 	}
-
 	xPacket(char* pbuf, int nSize)
 	{
 		m_pBuf = nullptr;
+		m_pExternalBuf = nullptr;
 		m_iSize = 0;
 		m_iMaxSize = 0;
 		m_bBuildInBuffer = FALSE;
 		m_bAligned = FALSE;
 		create(pbuf, nSize);
 	}
-
-	virtual ~xPacket(void)
+	virtual ~xPacket(VOID)
 	{
 		destroy();
 	}
-
 	BOOL create(char* pbuf, int nSize)
 	{
 		destroy();
 		m_bBuildInBuffer = FALSE;
 		m_bAligned = FALSE;
+		m_pExternalBuf = pbuf;
 		m_pBuf = pbuf;
 		m_iMaxSize = nSize;
 		return TRUE;
 	}
-
 	BOOL create(int nSize)
 	{
+		m_iSize = 0;
+		// 复用已有缓冲区，避免重复分配
+		if (m_bBuildInBuffer && m_pBuf != nullptr && m_iMaxSize >= nSize)
+			return TRUE;
 		destroy();
 		if (nSize > 0)
 		{
 			m_bBuildInBuffer = TRUE;
 			// 使用16字节对齐的内存分配, 提升缓存性能
-			m_pBuf = (char*)_aligned_malloc(nSize, 16);
-			if (m_pBuf) {
+			char* alignedBuf = (char*)_aligned_malloc(nSize, 16);
+			if (alignedBuf)
+			{
+				// 使用自定义删除器管理对齐内存
+				m_pBufAligned = std::unique_ptr<char, AlignedDeleter>(alignedBuf, AlignedDeleter{});
+				m_pBuf = alignedBuf;
 				m_iMaxSize = nSize;
 				m_bAligned = TRUE;
-			} else {
-				// 回退到标准分配
-				m_pBuf = new char[nSize];
-				m_iMaxSize = nSize;
+			}
+			else
+			{
+				// 向上对齐到4KB页边界，减少内存碎片
+				int alignedSize = (nSize + 4095) & ~4095;
+				m_pBufNormal = std::make_unique<char[]>(alignedSize);
+				m_pBuf = m_pBufNormal.get();
+				m_iMaxSize = alignedSize;
 				m_bAligned = FALSE;
 			}
 		}
 		return TRUE;
 	}
-
 	BOOL notcreated()const
 	{
 		return (m_pBuf == nullptr);
 	}
-
 	VOID destroy()
 	{
-		if (m_bBuildInBuffer && m_pBuf) {
+		if (m_bBuildInBuffer)
+		{
 			// 根据分配方式释放内存
-			if (m_bAligned) {
-				_aligned_free(m_pBuf);
-			} else {
-				delete[] m_pBuf;
-			}
+			if (m_bAligned)
+				m_pBufAligned.reset();
+			else
+				m_pBufNormal.reset();
 		}
+		m_pExternalBuf = nullptr;
 		m_pBuf = nullptr;
 		m_iMaxSize = 0;
 		m_iSize = 0;
 		m_bBuildInBuffer = FALSE;
 		m_bAligned = FALSE;
 	}
-
 	BOOL push(LPVOID lpData, int iDatasize)
 	{
 		if (m_iMaxSize - m_iSize < iDatasize)return FALSE;
-		// 优化的内存复制
-		if (iDatasize >= 64 && ((uintptr_t)m_pBuf % 8) == 0 && ((uintptr_t)lpData % 8) == 0) {
-			// 8字节对齐的大块数据, 使用快速复制
-			uint64_t* dst = (uint64_t*)(m_pBuf + m_iSize);
-			const uint64_t* src = (uint64_t*)lpData;
-			int count = iDatasize / 8;
-			for (int i = 0; i < count; ++i) {
-				dst[i] = src[i];
-			}
-			// 处理剩余字节
-			int remaining = iDatasize % 8;
-			if (remaining > 0) {
-				memcpy((char*)dst + count * 8, (char*)src + count * 8, remaining);
-			}
-		} else {
-			// 小块数据或未对齐, 使用标准memcpy
-			memcpy(m_pBuf + m_iSize, lpData, iDatasize);
-		}
-		
+		memcpy(m_pBuf + m_iSize, lpData, iDatasize);
 		m_iSize += iDatasize;
 		return TRUE;
 	}
-
 	BOOL push(const char* pszString)
 	{
 		size_t len = strlen(pszString);
 		return push((LPVOID)pszString, (int)len);
 	}
-
 	BOOL pop(LPVOID lpData, int iDatasize)
 	{
 		if (m_iSize < iDatasize)return FALSE;
 		memcpy(lpData, m_pBuf, iDatasize);
 		return free(iDatasize);
 	}
-
 	BOOL push(int nZero)
 	{
 		if (m_iMaxSize - m_iSize < nZero) return FALSE;
@@ -136,62 +126,27 @@ public:
 		m_iSize += nZero;
 		return TRUE;
 	}
-
 	BOOL peek(LPVOID lpData, int iDatasize)const
 	{
 		if (m_iSize < iDatasize)return FALSE;
 		memcpy(lpData, m_pBuf, iDatasize);
 		return TRUE;
 	}
-
 	BOOL free(int iDatasize)
 	{
 		if (m_iSize < iDatasize)return FALSE;
 		m_iSize -= iDatasize;
-		if (m_iSize != 0) {
-			// 对于小块数据使用 memcpy, 大块数据优化移动策略
-			if (iDatasize < 256) {
-				// 小块数据, 直接移动
-				memmove(m_pBuf, m_pBuf + iDatasize, m_iSize);
-			} else {
-				// 大块数据, 使用更高效的内存移动
-				char* temp = m_pBuf;
-				if (iDatasize < m_iSize) {
-					// 检查是否可以用 8 字节对齐的快速移动
-					if (((uintptr_t)temp & 7) == 0 && ((uintptr_t)(m_pBuf + iDatasize) & 7) == 0) {
-						// 8 字节对齐, 使用快速复制
-						uint64_t* src = (uint64_t*)(m_pBuf + iDatasize);
-						uint64_t* dst = (uint64_t*)m_pBuf;
-						int count = m_iSize / 8;
-						for (int i = 0; i < count; ++i) {
-							dst[i] = src[i];
-						}
-						// 处理剩余字节
-						int remaining = m_iSize % 8;
-						if (remaining > 0) {
-							memcpy((char*)dst + count * 8, (char*)src + count * 8, remaining);
-						}
-					} else {
-						// 回退到标准 memmove
-						memmove(m_pBuf, m_pBuf + iDatasize, m_iSize);
-					}
-				}
-			}
-		}
+		if (m_iSize != 0)
+			memmove(m_pBuf, m_pBuf + iDatasize, m_iSize);
 		return TRUE;
 	}
-
-	VOID clear()
-	{
-		m_iSize = 0;
-	}
-
+	VOID clear(){ m_iSize = 0; }
 	int	getsize()const { return m_iSize; }
 	const char* getbuf()const { return m_pBuf; }
 	const char* getfreebuf()const { return (m_pBuf + m_iSize); }
 	int	getmaxsize()const { return m_iMaxSize; }
 	int	getfreesize()const { return m_iMaxSize - m_iSize; }
-	void setsize(int nSize) { m_iSize = nSize; }
+	VOID setsize(int nSize) { m_iSize = nSize; }
 	BOOL addsize(int nSize)
 	{
 		if (nSize > getfreesize())return FALSE;
@@ -202,9 +157,43 @@ public:
 	xPacket(const xPacket&) = delete;
 	xPacket& operator=(const xPacket&) = delete;
 private:
-	char* m_pBuf;
+	// 对齐内存的自定义删除器
+	struct AlignedDeleter {
+		void operator()(char* p) const { if (p) ::_aligned_free(p); }
+	};
+	std::unique_ptr<char[]> m_pBufNormal;       // 标准内存智能指针
+	std::unique_ptr<char, AlignedDeleter> m_pBufAligned; // 对齐内存智能指针
+	char* m_pExternalBuf;                        // 外部缓冲区(不管理生命周期)
+	char* m_pBuf;                                // 当前工作缓冲区指针
 	int	m_iSize;
 	int	m_iMaxSize;
 	BOOL m_bBuildInBuffer;
 	BOOL m_bAligned;  // 标记是否使用对齐内存分配
+};
+
+//封包对象池
+class xPacketPool
+{
+public:
+	static constexpr int POOL_SIZE = 128; // 线程本地缓存
+	static constexpr int DEFAULT_PACKET_SIZE = 8192;
+	static xPacket* Alloc(int size = DEFAULT_PACKET_SIZE);
+	static xPacket* Alloc(char* pbuf, int size = DEFAULT_PACKET_SIZE);
+	static VOID Free(xPacket* pkt);
+	// RAII 包装类
+	class ScopedPacket
+	{
+		xPacket* m_pkt;
+	public:
+		ScopedPacket(char* pbuf, int size = DEFAULT_PACKET_SIZE) : m_pkt(Alloc(pbuf, size)) {}
+		ScopedPacket(int size = DEFAULT_PACKET_SIZE) : m_pkt(Alloc(size)) {}
+		~ScopedPacket() { if (m_pkt) Free(m_pkt); }
+		xPacket* operator->() { return m_pkt; }
+		xPacket& operator*() { return *m_pkt; }
+		xPacket* get() const { return m_pkt; }
+		xPacket* release() { xPacket* p = m_pkt; m_pkt = nullptr; return p; }
+	};
+private:
+	static thread_local std::array<xPacket*, POOL_SIZE> tl_FreeList;
+	static thread_local int tl_FreeCount;
 };

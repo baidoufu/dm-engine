@@ -10,21 +10,11 @@
 CServerForm g_Form;
 CServer* g_pServer = nullptr;
 
-// 提供额外的崩溃信息
-static const char* GetServerAdditionalInfo()
+// 崩溃前数据保存回调
+static VOID OnPreCrashSave()
 {
-	static char info[512];
-	sprintf_s(info, sizeof(info),
-		"服务器名称: %s"
-		"在线玩家数: %u"
-		"运行时间: %u 秒"
-		"当前地图数: %u",
-		SERVER_NAME,
-		0, // 这里可以添加实际的玩家数量
-		0, // 这里可以添加实际的运行时间
-		0  // 这里可以添加实际的地图数量
-	);
-	return info;
+	if (g_pServer)
+		g_pServer->OnTerminated(TRUE);
 }
 
 static int CheckLicense()
@@ -38,13 +28,13 @@ static int CheckLicense()
 	FILE* fp = nullptr;
 	if (fopen_s(&fp, "license.key", "r") == 0 && fp)
 	{
-		CHAR szSerial[1024] = { 0 };
-		fgets(szSerial, sizeof(szSerial), fp);
+		std::array<CHAR, 1024> szSerial = { 0 };
+		fgets(szSerial.data(), static_cast<int>(szSerial.size()), fp);
 		fclose(fp);
-		size_t len = strlen(szSerial); // 去掉换行符
+		size_t len = strlen(szSerial.data()); // 去掉换行符
 		while (len > 0 && (szSerial[len - 1] == '\n' || szSerial[len - 1] == '\r'))
 			szSerial[--len] = 0;
-		if (VMP_SET_SERIAL_NUMBER(szSerial) != 0) return -1; //序列号无效
+		if (VMP_SET_SERIAL_NUMBER(szSerial.data()) != 0) return -1; //序列号无效
 	}
 	else
 		return 1; //未找到序列号文件
@@ -54,35 +44,30 @@ static int CheckLicense()
 int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, ".936");
-	// 初始化崩溃处理器
-	CRASH_HANDLER_INIT();
-	CRASH_HANDLER_SETPATH("..\\日志\\");
-	CrashHandler::SetAdditionalInfoCallback(GetServerAdditionalInfo);
-
 	TRY_INIT
 	CLogFile::GetInstance()->Init("..\\日志\\龙路引擎");
 	// 组合命令行参数
-	char cmdLine[256] = { 0 };
+	std::array<char, 256> cmdLine = { 0 };
 	for (int i = 1; i < argc; i++)
 	{
-		if (i > 1) strcat(cmdLine, " ");
-		strcat(cmdLine, argv[i]);
+		if (i > 1) strcat(cmdLine.data(), " ");
+		strcat(cmdLine.data(), argv[i]);
 	}
-	g_Form.Create(SERVER_NAME, cmdLine);
+	g_Form.Create(SERVER_NAME, cmdLine.data());
 
 	VMP_PROTECT_BEGIN("许可证");
-	CHAR szHWSerial[256] = { 0 };
-	CHAR szMsg[512] = { 0 };
+	std::array<CHAR, 256> szHWSerial = { 0 };
+	std::array<CHAR, 512> szMsg = { 0 };
 	const char* pszDecryptString = nullptr;
 	DWORD dwColor = 0xFF;
-	VMP_GET_CURRENT_HWID(szHWSerial, 256);
+	VMP_GET_CURRENT_HWID(szHWSerial.data(), 256);
 	int nResult = CheckLicense();
 	switch (nResult)
 	{
 	case 1:
 	{
 		pszDecryptString = VMP_DECRYPT_STRINGA("测试版引擎！\n用户名：测试\n人数：5人\n硬件ID：%s\n");
-		snprintf(szMsg, sizeof(szMsg), pszDecryptString, szHWSerial);
+		snprintf(szMsg.data(), szMsg.size(), pszDecryptString, szHWSerial.data());
 		dwColor = 0xFF00;
 		CHumanPlayerMgr::GetInstance()->SetTestMode();
 	}
@@ -98,13 +83,13 @@ int main(int argc, char* argv[])
 		if (nExpire < nNow)
 		{
 			pszDecryptString = VMP_DECRYPT_STRINGA("错误：许可证已过期！\n硬件ID：%s\n");
-			snprintf(szMsg, sizeof(szMsg), pszDecryptString, szHWSerial);
+			snprintf(szMsg.data(), szMsg.size(), pszDecryptString, szHWSerial.data());
 			nResult = -1;
 		}
 		else
 		{
 			pszDecryptString = VMP_DECRYPT_STRINGA("引擎已注册！\n用户名：%ls\n人数：无限制\n有效期：%u年-%u月-%u日\n硬件ID：%s\n");
-			snprintf(szMsg, sizeof(szMsg), pszDecryptString, sd.wUserName, sd.dtExpire.wYear, sd.dtExpire.bMonth, sd.dtExpire.bDay, szHWSerial);
+			snprintf(szMsg.data(), szMsg.size(), pszDecryptString, sd.wUserName, sd.dtExpire.wYear, sd.dtExpire.bMonth, sd.dtExpire.bDay, szHWSerial.data());
 			dwColor = 0xFF00;
 		}
 	}
@@ -112,23 +97,25 @@ int main(int argc, char* argv[])
 	case -1:
 	{
 		pszDecryptString = VMP_DECRYPT_STRINGA("错误：许可证验证失败！\n硬件ID：%s\n");
-		snprintf(szMsg, sizeof(szMsg), pszDecryptString, szHWSerial);
+		snprintf(szMsg.data(), szMsg.size(), pszDecryptString, szHWSerial.data());
 	}
 	break;
 	case -2:
 	{
 		pszDecryptString = VMP_DECRYPT_STRINGA("错误：程序被恶意修改！\n硬件ID：%s\n");
-		snprintf(szMsg, sizeof(szMsg), pszDecryptString, szHWSerial);
+		snprintf(szMsg.data(), szMsg.size(), pszDecryptString, szHWSerial.data());
 	}
 	break;
 	}
-	g_Form.OutPutStatic(dwColor, szMsg);
+	g_Form.OutPutStatic(dwColor, szMsg.data());
 	VMP_FREE_STRING(pszDecryptString);
 	if (nResult < 0) return -1;
 	VMP_PROTECT_END();
 
 	g_Form.SetArenaReserve(256 * 1024);
 	g_pServer = CServer::GetInstance();
+	// 注册崩溃前数据保存回调
+	CrashHandler::SetPreCrashSaveCallback(OnPreCrashSave);
 	g_pServer->SetServerName(SERVER_NAME);
 	g_pServer->SetIoConsole(&g_Form);
 	g_Form.SetInputListener(g_pServer);

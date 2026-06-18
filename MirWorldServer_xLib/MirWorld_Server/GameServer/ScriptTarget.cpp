@@ -8,16 +8,16 @@
 #include ".\scriptvariable.h"
 #include ".\guildex.h"
 
-CScriptTarget::CScriptTarget(void)
+CScriptTarget::CScriptTarget(VOID)
 {
 	m_pCurScriptObject = nullptr;
 	m_pCurShell = nullptr;
-	m_szToPage[0] = 0;
+	m_szToPage.fill(0);
 	m_pInputShell = nullptr;
 	m_nInputLength = 0;
 }
 
-CScriptTarget::~CScriptTarget(void)
+CScriptTarget::~CScriptTarget(VOID)
 {
 }
 
@@ -25,26 +25,26 @@ VOID CScriptTarget::OnInputConfirm(char* pszInputText)
 {
 	m_xVarList.AddVar("inputtext", pszInputText);
 	if (m_pInputShell)
-		m_pInputShell->Execute(this, m_szToPage, FALSE);
+		m_pInputShell->Execute(this, m_szToPage.data(), FALSE);
 }
 
 VOID CScriptTarget::SetInputPage(const char* pszPage, CScriptShell* pInputShell, UINT nLength)
 {
 	m_nInputLength = nLength;
-	o_strncpy(m_szToPage, pszPage, 60);
+	o_strncpy(m_szToPage.data(), pszPage, 60);
 	this->m_pInputShell = pInputShell;
 }
 
 VOID CScriptTarget::SetPutItemPage(const char* pszPage, CScriptShell* pPutItemShell)
 {
-	o_strncpy(m_szToPage, pszPage, 60);
+	o_strncpy(m_szToPage.data(), pszPage, 60);
 	this->m_pInputShell = pPutItemShell;
 }
 
 VOID CScriptTarget::OnPutItem(UINT nShellId, UINT nMakeIndex)
 {
 	if (m_pInputShell)
-		m_pInputShell->Execute(this, m_szToPage, FALSE);
+		m_pInputShell->Execute(this, m_szToPage.data(), FALSE);
 }
 
 VOID CScriptTarget::SetVariableValue(const char* pszVariable, const char* pszValue)

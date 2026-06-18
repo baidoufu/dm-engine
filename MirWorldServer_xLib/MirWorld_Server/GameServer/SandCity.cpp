@@ -16,23 +16,22 @@
 #include "topmanager.h"
 #include "scriptobject.h"
 
-CSandCity::CSandCity(void) :
+CSandCity::CSandCity(VOID) :
 	m_bIdentifyStart(FALSE), m_dwCastleMapId(0), m_dwCastlePalaceDoorX(0), m_dwCastlePalaceDoorY(0),
 	m_dwHomeMapId(0), m_dwHomeX(0), m_dwHomeY(0), m_dwPalaceDoorX(0), m_dwPalaceDoorY(0), m_dwPalaceMapId(0), 
 	m_dwWarRangeX(0), m_dwWarRangeY(0), m_dwTodayIncome(0), m_dwTotalGold(0), m_pOwnerGuild(nullptr)
 {
-	m_pPalaceDoor = new CSCPalaceDoor;
-	m_pMainGate = new CSCDoor;
-	m_pLeftWall = new CPalaceWall;
-	m_pCenterWall = new CPalaceWall;
-	m_pRightWall = new CPalaceWall;
-	m_szName[0] = 0;
+	m_pPalaceDoor = std::make_unique<CSCPalaceDoor>();
+	m_pMainGate = std::make_unique<CSCDoor>();
+	m_pLeftWall = std::make_unique<CPalaceWall>();
+	m_pCenterWall = std::make_unique<CPalaceWall>();
+	m_pRightWall = std::make_unique<CPalaceWall>();
+	m_szName.fill(0);
 	m_bWarStarted = FALSE;
 	m_pPalaceMap = nullptr;
-	memset(m_pArchers, 0, sizeof(m_pArchers));
-	memset(m_AttackRequest, 0, sizeof(m_AttackRequest));
+	m_AttackRequest.fill({});
 	m_iAttackRequestCount = 0;
-	memset(m_pWarGuild, 0, sizeof(m_pWarGuild));
+	m_pWarGuild.fill(nullptr);
 	m_iWarGuildCount = 0;
 	m_pSabukMaster = nullptr;
 	m_fTexRate = 0.5f;
@@ -40,13 +39,8 @@ CSandCity::CSandCity(void) :
 	m_dwTexRate = 100;
 }
 
-CSandCity::~CSandCity(void)
+CSandCity::~CSandCity(VOID)
 {
-	delete m_pPalaceDoor;
-	delete m_pMainGate;
-	delete m_pLeftWall;
-	delete m_pCenterWall;
-	delete m_pRightWall;
 }
 
 CGuildEx* CSandCity::GetOwnerGuild()
@@ -62,7 +56,7 @@ BOOL CSandCity::Init()
 		setError(1003, "沙城描述文件打不开!");
 		return FALSE;
 	}
-	o_strncpy(m_szName, sf.GetString("Setup", "CastleName", "沙城"), 20);
+	o_strncpy(m_szName.data(), sf.GetString("Setup", "CastleName", "沙城"), 20);
 	char* pszGuild = (char*)sf.GetString("Setup", "OwnGuild", "");
 	if (*pszGuild)
 	{
@@ -130,12 +124,11 @@ BOOL CSandCity::Init()
 
 		if (x == -1 || y == -1 || pszName == nullptr)continue;
 
-		m_pArchers[iArcherCount] = new CSCArcher;
+		m_pArchers[iArcherCount] = std::make_unique<CSCArcher>();
 		sprintf(szValueName, "Archer_%d_Hp", i + 1);
 		if (!m_pArchers[iArcherCount]->Init(pszName, mapid, x, y, sf.GetInteger("Defense", szValueName, 0)))
 		{
-			delete m_pArchers[iArcherCount];
-			m_pArchers[iArcherCount] = nullptr;
+			m_pArchers[iArcherCount].reset();
 		}
 		else
 			iArcherCount++;
@@ -178,7 +171,7 @@ BOOL CSandCity::Init()
 					m_SabukMaster.btClass = (BYTE)StringToInteger(top[2]);
 					m_SabukMaster.btSex = (BYTE)StringToInteger(top[3]);
 					m_SabukMaster.dwDBId = (DWORD)StringToInteger(top[1]);
-					m_SabukMaster.btPerCent = (DWORD)StringToInteger(top[5]);
+					m_SabukMaster.btPerCent = static_cast<BYTE>(StringToInteger(top[5]));
 					o_strncpy(m_SabukMaster.szName, top[0], 16);
 					m_SabukMaster.wLevel = (WORD)StringToInteger(top[4]);
 					GetTimeFromString(m_SabukMaster.stRanking, top[6]);
@@ -485,7 +478,7 @@ VOID CSandCity::Save()
 	}
 	fprintf(fp, "[Setup]\nCastleName=%s\nOwnGuild=%s\nChangeDate=\"%d-%d-%d %d:%02d:%02d\"\n"
 		"WarDate=\"%d-%d-%d %d:%02d:%02d\"\nIncomeToday=\"%d-%d-%d %d:%02d:%02d\"\n"
-		"TotalGold=%u\nTodayIncome=%u\nTexRate=%u\nRebate=%u\n\n", m_szName, m_pOwnerGuild == nullptr ? "" : m_pOwnerGuild->GetName(),
+		"TotalGold=%u\nTodayIncome=%u\nTexRate=%u\nRebate=%u\n\n", m_szName.data(), m_pOwnerGuild == nullptr ? "" : m_pOwnerGuild->GetName(),
 		this->m_ChangeTime.GetYear(), this->m_ChangeTime.GetMonth(), this->m_ChangeTime.GetDay(),
 		this->m_ChangeTime.GetHour(), this->m_ChangeTime.GetMinute(), this->m_ChangeTime.GetSecond(),
 		this->m_WarTime.GetYear(), this->m_WarTime.GetMonth(), this->m_WarTime.GetDay(),
@@ -526,12 +519,14 @@ VOID CSandCity::Save()
 		m_pRightWall->GetDesc() == nullptr ? "皇宫墙右" : m_pRightWall->GetDesc()->base.szClassName,
 		m_pRightWall->getX(), m_pRightWall->getY(), m_pRightWall->GetPropValue(PI_CURHP));
 
-	for (int i = 0; i < 12; i++)
+	int iArcherIdx = 0;
+	for (const auto& pArcher : m_pArchers)
 	{
-		if (m_pArchers[i] == nullptr)continue;
+		if (pArcher == nullptr) { iArcherIdx++; continue; }
 		fprintf(fp, "Archer_%u_Name=%s\nArcher_%u_X=%u\nArcher_%u_Y=%u\nArcher_%u_HP=%u\n\n",
-			i + 1, m_pArchers[i]->GetDesc() == nullptr ? "Archer" : m_pArchers[i]->GetDesc()->base.szClassName,
-			i + 1, m_pArchers[i]->getX(), i + 1, m_pArchers[i]->getY(), i + 1, m_pArchers[i]->GetPropValue(PI_CURHP));
+			iArcherIdx + 1, pArcher->GetDesc() == nullptr ? "Archer" : pArcher->GetDesc()->base.szClassName,
+			iArcherIdx + 1, pArcher->getX(), iArcherIdx + 1, pArcher->getY(), iArcherIdx + 1, pArcher->GetPropValue(PI_CURHP));
+		iArcherIdx++;
 	}
 	fclose(fp);
 }
@@ -602,7 +597,7 @@ VOID CSandCity::PrepareAttackGuild(CSystemTime& curTime)
 			g_AttackRequestT[count++] = m_AttackRequest[i];
 	}
 	if (count > 0)
-		memcpy(m_AttackRequest, g_AttackRequestT, count * sizeof(AttackSabukRequest));
+		std::copy(g_AttackRequestT, g_AttackRequestT + count, m_AttackRequest.begin());
 	m_iAttackRequestCount = count;
 	SaveAttackRequest();
 }
@@ -666,12 +661,13 @@ VOID CSandCity::LoadAttackRequest()
 }
 
 #define PAGEREQUESTCOUNT 8
-int CSandCity::PrePareAttackRequestPage(UINT nPage, char* pBuffer)
+int CSandCity::PrePareAttackRequestPage(UINT nPage, char* pBuffer, int nBufSize)
 {
 	//	每个页面显示
 	if (m_iAttackRequestCount <= 0)
 	{
-		strcpy(pBuffer, "没有攻城请求\\\\\\<知道了/@exit>\\");
+		o_strncpy(pBuffer, "没有攻城请求\\\\\\<知道了/@exit>\\", nBufSize - 1);
+		pBuffer[nBufSize - 1] = 0;
 		return (int)strlen(pBuffer);
 	}
 	UINT nLastPage = (m_iAttackRequestCount + PAGEREQUESTCOUNT - 1) / PAGEREQUESTCOUNT;
@@ -681,27 +677,38 @@ int CSandCity::PrePareAttackRequestPage(UINT nPage, char* pBuffer)
 	int end = nPage * PAGEREQUESTCOUNT + PAGEREQUESTCOUNT;
 	end = end > m_iAttackRequestCount ? m_iAttackRequestCount : end;
 	char szLine[240];
+	int curLen = 0;
 	pBuffer[0] = 0;
 	for (int i = start; i < end; i++)
 	{
-		sprintf(szLine, "%u年-%u月-%u日 %u:%u:%u\"%s\"\\", 
+		snprintf(szLine, sizeof(szLine), "%u年-%u月-%u日 %u:%u:%u\"%s\"\\", 
 			m_AttackRequest[i].stTime.wYear, m_AttackRequest[i].stTime.wMonth, m_AttackRequest[i].stTime.wDay, 
 			m_AttackRequest[i].stTime.wHour, m_AttackRequest[i].stTime.wMinute, m_AttackRequest[i].stTime.wSecond,
 			m_AttackRequest[i].guild);
-		strcat(pBuffer, szLine);
+		int lineLen = (int)strlen(szLine);
+		if (curLen + lineLen >= nBufSize - 1) break;
+		memcpy(pBuffer + curLen, szLine, lineLen);
+		curLen += lineLen;
+		pBuffer[curLen] = 0;
 	}
 	if (nPage != 0)
 	{
-		sprintf(szLine, "<上一页/@AttackRequestPage%u>  ", nPage - 1);
-		strcat(pBuffer, szLine);
+		snprintf(szLine, sizeof(szLine), "<上一页/@AttackRequestPage%u>  ", nPage - 1);
+		int lineLen = (int)strlen(szLine);
+		if (curLen + lineLen < nBufSize - 1) { memcpy(pBuffer + curLen, szLine, lineLen + 1); curLen += lineLen; }
 	}
 	if (end != m_iAttackRequestCount)
 	{
-		sprintf(szLine, "<下一页/@AttackRequestPage%u>  ", nPage + 1);
-		strcat(pBuffer, szLine);
+		snprintf(szLine, sizeof(szLine), "<下一页/@AttackRequestPage%u>  ", nPage + 1);
+		int lineLen = (int)strlen(szLine);
+		if (curLen + lineLen < nBufSize - 1) { memcpy(pBuffer + curLen, szLine, lineLen + 1); curLen += lineLen; }
 	}
-	strcat(pBuffer, "\\<知道了/@exit>\\");
-	return (int)strlen(pBuffer);
+	{
+		const char* szExit = "\\<知道了/@exit>\\";
+		int exitLen = (int)strlen(szExit);
+		if (curLen + exitLen < nBufSize - 1) { memcpy(pBuffer + curLen, szExit, exitLen + 1); curLen += exitLen; }
+	}
+	return curLen;
 }
 
 BOOL CSandCity::SetSabukMaster(CHumanPlayer* m_pPlayer)
@@ -752,7 +759,7 @@ VOID CSandCity::UpdateSabukMasterFigure()
 
 BOOL CSandCity::AddIncoming(DWORD dwIncoming)
 {
-	dwIncoming *= this->m_fTexRate;
+	dwIncoming = static_cast<DWORD>(dwIncoming * this->m_fTexRate);
 	if (!AddTotalGold(dwIncoming))return FALSE;
 	this->m_dwTodayIncome += dwIncoming;
 	CSystemTime t;

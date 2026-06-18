@@ -1,19 +1,20 @@
 #pragma once
+#include <array>
 class CFindFile
 {
 public:
-	CFindFile(void) {}
-	virtual ~CFindFile(void) {}
+	CFindFile(VOID) {}
+	virtual ~CFindFile(VOID) {}
 	BOOL StartFind(const char* pszPath, const char* pszFindName, BOOL bFindSubFolder = FALSE, UINT nParam = 0)
 	{
 		WIN32_FIND_DATA	wfd;
 		HANDLE hFindFile = INVALID_HANDLE_VALUE;
-		CHAR szFileName[1024];
-		CHAR szExt[32];
-		CHAR szExtTest[32];
-		_makepath(szFileName, nullptr, pszPath, "*.*", nullptr);
-		_splitpath(pszFindName, nullptr, nullptr, nullptr, szExt);
-		hFindFile = FindFirstFile(szFileName, &wfd);
+		std::array<CHAR, 1024> szFileName{};
+		std::array<CHAR, 32> szExt{};
+		std::array<CHAR, 32> szExtTest{};
+		_makepath(szFileName.data(), nullptr, pszPath, "*.*", nullptr);
+		_splitpath(pszFindName, nullptr, nullptr, nullptr, szExt.data());
+		hFindFile = FindFirstFile(szFileName.data(), &wfd);
 		if (hFindFile != INVALID_HANDLE_VALUE)
 		{
 			do {
@@ -23,18 +24,18 @@ public:
 					{
 						if (bFindSubFolder)
 						{
-							_makepath(szFileName, nullptr, pszPath, wfd.cFileName, nullptr);
-							StartFind(szFileName, pszFindName, TRUE, nParam);
+							_makepath(szFileName.data(), nullptr, pszPath, wfd.cFileName, nullptr);
+							StartFind(szFileName.data(), pszFindName, TRUE, nParam);
 						}
 					}
 				}
 				else
 				{
-					_splitpath(wfd.cFileName, nullptr, nullptr, nullptr, szExtTest);
-					if (_stricmp(szExtTest, szExt) == 0)
+					_splitpath(wfd.cFileName, nullptr, nullptr, nullptr, szExtTest.data());
+					if (_stricmp(szExtTest.data(), szExt.data()) == 0)
 					{
-						_makepath(szFileName, nullptr, pszPath, wfd.cFileName, nullptr);
-						OnFoundFile(szFileName, nParam);
+						_makepath(szFileName.data(), nullptr, pszPath, wfd.cFileName, nullptr);
+						OnFoundFile(szFileName.data(), nParam);
 					}
 				}
 			} while (FindNextFile(hFindFile, &wfd));

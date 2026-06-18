@@ -1,19 +1,21 @@
 #pragma once
 #include "vmap.h"
+#include <array>
+#include <memory>
 
 class CPhysicsMap
 {
 public:
-	CPhysicsMap(void);
-	virtual ~CPhysicsMap(void);
+	CPhysicsMap(VOID);
+	virtual ~CPhysicsMap(VOID);
 	BOOL LoadMap(const char* pszFilename);
 	BOOL LoadCache(const char* pszCacheFilename);
 	BOOL SaveCache(const char* pszPath);
 	BOOL IsBlocked(int x, int y);
 	int	GetHeight()const { return m_iHeight; }
 	int	GetWidth()const { return m_iWidth; }
-	DWORD* GetBlockLayer() { return m_pBlockLayer; }
-	const char* GetName() { return m_szMapName; }
+	DWORD* GetBlockLayer() { return m_pBlockLayer.get(); }
+	const char* GetName() { return m_szMapName.data(); }
 private:
 	BOOL VerifyPos(int x, int y)const
 	{
@@ -24,7 +26,7 @@ private:
 	DWORD m_dwVer;
 	int m_iWidth;
 	int m_iHeight;
-	DWORD* m_pBlockLayer;
+	std::unique_ptr<DWORD[]> m_pBlockLayer;
 	DWORD m_iMaxBlockElements;
-	char m_szMapName[32];
+	std::array<char, 32> m_szMapName{};
 };

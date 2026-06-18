@@ -5,8 +5,8 @@ class CMapObject;
 class CEventObject : public CMapObject
 {
 public:
-	CEventObject(void);
-	virtual ~CEventObject(void);
+	CEventObject(VOID);
+	virtual ~CEventObject(VOID);
 	// 清理事件对象数据
 	virtual VOID Clean();
 	// 对象进入事件区域（虚函数, 由派生类实现）

@@ -49,7 +49,7 @@ bool MySQLProcess::Start()
 
     // 启动 MySQL
     char cmdLine[MAX_PATH];
-    sprintf_s(cmdLine, sizeof(cmdLine), "\".\\mysqld.exe\" --datadir=\"..\\Data\\MySQL\"");
+    sprintf_s(cmdLine, sizeof(cmdLine), "\".\\mysqld.exe\" --defaults-file=\".\\my.ini\"");
 
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
@@ -60,8 +60,8 @@ bool MySQLProcess::Start()
 
     ZeroMemory(&pi, sizeof(pi));
 
-    if (!CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE, 
-        CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+    if (!CreateProcessA(nullptr, cmdLine, nullptr, nullptr, FALSE, 
+        CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
     {
         DWORD error = GetLastError();
         printf("[MySQL] 启动失败: %d\n", error);
@@ -96,9 +96,9 @@ bool MySQLProcess::Stop()
 
     printf("[MySQL] 正在停止...\n");
 
-    // 使用 taskkill 强制终止 mysqld.exe
+    // 先尝试优雅关闭：通过mysqladmin发送shutdown命令,账号密码root,root
     char cmdLine[256];
-    sprintf_s(cmdLine, sizeof(cmdLine), "taskkill /im mysqld.exe /f");
+    sprintf_s(cmdLine, sizeof(cmdLine), "\".\\mysqladmin.exe\" -u root -p123456 -h 127.0.0.1 -P 8306 shutdown");
 
     STARTUPINFOA si;
     PROCESS_INFORMATION pi;
@@ -109,8 +109,38 @@ bool MySQLProcess::Stop()
 
     ZeroMemory(&pi, sizeof(pi));
 
-    if (!CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE, 
-        CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+    if (CreateProcessA(nullptr, cmdLine, nullptr, nullptr, FALSE, 
+        CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
+    {
+        WaitForSingleObject(pi.hProcess, 10000);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    }
+
+    // 等待mysqld进程自行退出（最多15秒）
+    for (int i = 0; i < 15; i++)
+    {
+        if (!IsMySQLRunning())
+        {
+            printf("[MySQL] 已优雅停止\n");
+            return true;
+        }
+        Sleep(1000);
+    }
+
+    // 优雅关闭超时，使用taskkill作为最后手段
+    printf("[MySQL] 优雅关闭超时，强制终止...\n");
+    sprintf_s(cmdLine, sizeof(cmdLine), "taskkill /im mysqld.exe /f");
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags |= STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+
+    ZeroMemory(&pi, sizeof(pi));
+
+    if (!CreateProcessA(nullptr, cmdLine, nullptr, nullptr, FALSE, 
+        CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
     {
         DWORD error = GetLastError();
         printf("[MySQL] 停止失败: %d\n", error);
@@ -138,14 +168,4 @@ bool MySQLProcess::Stop()
 bool MySQLProcess::IsRunning() const
 {
     return IsMySQLRunning();
-}
-
-bool MySQLProcess::StartMySQLService()
-{
-    return Start();
-}
-
-bool MySQLProcess::StopMySQLService()
-{
-    return Stop();
 }

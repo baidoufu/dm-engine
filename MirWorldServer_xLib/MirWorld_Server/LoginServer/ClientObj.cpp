@@ -2,19 +2,20 @@
 #include <ws2tcpip.h>
 #include ".\clientobj.h"
 #include "server.h"
+#include "loginserver.h"
 
-CClientObj::CClientObj(void)
+CClientObj::CClientObj(VOID)
 { 
 	Clean(); 
 }
-CClientObj::~CClientObj(void)
+CClientObj::~CClientObj(VOID)
 {
 }
 
-void CClientObj::Clean()
+VOID CClientObj::Clean()
 {
 	CClientObject::Clean();
-	m_szAccount[0] = 0;
+	m_szAccount.fill(0);
 	m_nLid = 0;
 	m_nFailCount = 0;
 }
@@ -54,7 +55,6 @@ VOID CClientObj::Update()
 VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 {
 	CServer* pServer = CServer::GetInstance();
-	CIOConsole* pConsole = (CIOConsole*)pServer->GetIoConsole();
 	switch (pMsg->wCmd)
 	{
 	case DM_CHANGEPASSWORD: //修改密码
@@ -73,36 +73,41 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 			else
 				error = -2;
 			SendMsg(static_cast<DWORD>(error), SM_CHANGEPASSWORDFAIL, 0, 0, 0, 0, 0);
-			LG2("修改密码失败：%s, %s, %u\n", getAddress(), m_szAccount, error);
+			LG2("修改密码失败：%s, %s, %u\n", getAddress(), m_szAccount.data(), error);
 		}
 	}
 	break;
 	case DM_CHECKACCOUNT:  //请求检查账号
 	{
-		//pConsole->OutPut( ERROR_RED, "result = %d\n", pMsg->wParam[0] );
-		m_nLid = static_cast<UINT>(Getrand(1000000000));
+		//PRINT( ERROR_RED, "result = %d\n", pMsg->wParam[0] );
+		m_nLid = CServer::GetInstance()->NextLoginId();
 		if (pMsg->wParam[0] == SE_OK)
 		{
 			SendLoginSuccess(m_nLid); //登录成功
-			LG2("登录成功：%s, %s\n", getAddress(), m_szAccount);
-			pConsole->OutPut(SUCCESS_GREEN, "地址: %s 帐号: %s 登陆成功!\n", getAddress(), m_szAccount);
+			CAccountFailCounter::GetInstance().Reset(m_szAccount.data()); // 登录成功，清除账号失败计数
+			LG2("登录成功：%s, %s\n", getAddress(), m_szAccount.data());
+			PRINT(SUCCESS_GREEN, "地址: %s 帐号: %s 登陆成功!\n", getAddress(), m_szAccount.data());
 			char* p = (char*)CServer::GetInstance()->GetLoginOkTips();
 			if (p[0] != 0)
 				SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)p);
 		}
 		else
 		{
+			m_nFailCount++; // 登录失败增加失败计数，防止暴力破解
+			// 增加基于账号的全局失败计数
+			UINT nAccountFails = CAccountFailCounter::GetInstance().Increment(m_szAccount.data());
 			int error = 0;
 			if (pMsg->wParam[0] == SE_LOGIN_ACCOUNTNOTEXIST)
 				error = 0;
 			else if (pMsg->wParam[0] == SE_LOGIN_PASSWORDERROR)
 			{
 				error = -1;
+				LG2("密码错误：%s, 帐号: %s, 累计失败次数: %d\n", getAddress(), m_szAccount.data(), nAccountFails);
 			}
 			else
 				error = -2;
 			SendLoginFail(error);
-			LG2("登录失败：%s, %s, %u\n", getAddress(), m_szAccount, error);
+			LG2("登录失败：%s, %s, %u\n", getAddress(), m_szAccount.data(), error);
 		}
 	}
 	break;
@@ -119,7 +124,7 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 		if (pMsg->wParam[0] == SE_OK)
 		{
 			SendMsg(0, SM_REGISTERACCOUNTOK, 0, 0, 0, nullptr, 0);
-			LG2("创建账号成功：%s, %s\n", getAddress(), m_szAccount);
+			LG2("创建账号成功：%s, %s\n", getAddress(), m_szAccount.data());
 			char* p = (char*)CServer::GetInstance()->GetRegisterTips();
 			if (p[0] != 0)
 				SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)p);
@@ -127,7 +132,7 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 		else
 		{
 			SendMsg(0, SM_REGISTERACCOUNTFAIL, 0, 0, 0, nullptr, 0);
-			LG2("创建账号失败：%s, %s\n", getAddress(), m_szAccount);
+			LG2("创建账号失败：%s, %s\n", getAddress(), m_szAccount.data());
 		}
 	}
 	break;
@@ -143,20 +148,26 @@ VOID CClientObj::OnSCMsg(PMIRMSG pMsg, int datasize)
 		if (pMsg->wParam[0] == SE_OK)
 		{
 			CHAR szData[200];
-			sprintf_s(szData, sizeof(szData), "%u/%u/%s", getId(), m_nLid, m_szAccount);
+			sprintf_s(szData, sizeof(szData), "%u/%u/%s", getId(), m_nLid, m_szAccount.data());
 			//	找到选人服务器
 			m_SelectCharServer = *((FINDSERVER_RESULT*)pMsg->data);
 			//	跟选人服务器说,我要进去
 			CSCClientObj* pObj = (CSCClientObj*)CServer::GetInstance()->GetSCConnection();
 			if (pObj)pObj->SendMsgAcrossServer(0, MAS_ENTERSELCHARSERVER, MST_SINGLE, m_SelectCharServer.Id.bIndex,
 				szData, static_cast<int>(strlen(szData)));
+			else
+			{
+				PRINT(ERROR_RED, "帐号 %s 无法连接服务器中心, MAS_ENTERSELCHARSERVER发送失败!\n", m_szAccount.data());
+				SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)"服务器维护中, 请稍后再试!");
+				Disconnect(3000);
+			}
 		}
 		else
 		{
 			//	找不到服务器就关闭连接
 			//	清理本地分配的东西
-			//Close();
 			SendMsg(0, 0xafa, 0, 0, 0, "您选择的服务器不存在!", static_cast<int>(strlen("您选择的服务器不存在!")));
+			Disconnect(3000);
 		}
 	}
 	break;
@@ -267,20 +278,39 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	case CM_LOGIN:
 	case CM_PTLOGIN:
 	{
+		// 从消息数据中提取账号名，检查是否被锁定
+		const char* pSlash = strchr(pMsg->data, '/');
+		if (pSlash == nullptr)
+		{
+			// 消息格式不正确，缺少账号/密码分隔符
+			SendLoginFail(-4);
+			break;
+		}
+		int accountLen = static_cast<int>(pSlash - pMsg->data);
+		if (accountLen <= 0 || accountLen >= 20)
+		{
+			// 账号长度不合法
+			SendLoginFail(-4);
+			break;
+		}
+		char szCheckAccount[20] = {};
+		strncpy(szCheckAccount, pMsg->data, accountLen);
+		szCheckAccount[accountLen] = 0;
+		// 检查账号是否因多次失败被锁定
+		if (CAccountFailCounter::GetInstance().IsLocked(szCheckAccount))
+		{
+			SendLoginFail(-3); // -3 表示账号被临时锁定
+			LG2("账号锁定：%s, %s, 登录尝试过于频繁\n", getAddress(), szCheckAccount);
+			break;
+		}
 		pMsg->dwFlag = getId();
 		pMsg->wCmd = DM_CHECKACCOUNT;
 		CDBClientObj* pDBClientObject = (CDBClientObj*)pServer->GetDBConnection(0);
 		if (pDBClientObject != nullptr)
 		{
-			// first get account as local account
-			char* p = strchr(pMsg->data, '/');
-			if (p != nullptr)
-			{
-				*p = 0;
-				strncpy(m_szAccount, pMsg->data, 10);
-				m_szAccount[10] = 0;
-				*p = '/';
-			}
+			// 保存账号名到成员变量，用于后续DB回调时记录日志
+			strncpy(m_szAccount.data(), szCheckAccount, 19);
+			m_szAccount[19] = 0;
 			pDBClientObject->SendMsg(pMsg, datasize);
 		}
 		else
@@ -315,7 +345,6 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	default:
 	{
 		bSaveTime = FALSE;
-		m_nFailCount++;
 #ifdef _DEBUG
 		pServer->OnUnknownMsg(pMsg, datasize);
 #endif
@@ -346,12 +375,12 @@ VOID CClientObj::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszDat
 	{
 		//	data = "lid/sid/account"
 		char* Params[5];
-		int nParam = SearchParam((char*)pszData, Params, 5, '/');
+		int nParam = SearchParam((char*)pszData, Params, 5, "/");
 		if (nParam == 3)
 		{
-			if (m_nLid == static_cast<UINT>(atoi(Params[0])) && strcmp(m_szAccount, Params[2]) == 0)
+			if (m_nLid == static_cast<UINT>(strtoul(Params[0], nullptr, 10)) && strcmp(m_szAccount.data(), Params[2]) == 0)
 			{
-				m_nSid = static_cast<UINT>(atoi(Params[1]));
+				m_nSid = static_cast<UINT>(strtoul(Params[1], nullptr, 10));
 				SendSelectServerOk();
 			}
 		}
@@ -367,7 +396,7 @@ VOID CClientObj::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszDat
 VOID CClientObj::SendSelectServerOk()
 {
 	CHAR szData[200];
-	sprintf_s(szData, sizeof(szData), "%s/%u/%u", m_SelectCharServer.addr.addr, m_SelectCharServer.addr.nPort, m_nSid);
+	sprintf_s(szData, sizeof(szData), "%s/%u/%u", m_SelectCharServer.addr.addr.data(), m_SelectCharServer.addr.nPort, m_nSid);
 	SendMsg(getId(), 0xaff, 1, 0, 0); // 1是1.9人物选择界面、3是时长专用
 	SendMsg(0, SM_SELECTSERVEROK, 0, 0, 0, (LPVOID)szData, static_cast<int>(strlen(szData)));
 }

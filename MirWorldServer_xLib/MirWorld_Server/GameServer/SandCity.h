@@ -1,6 +1,9 @@
 #pragma once
 #define	MAX_ATTACKREQUEST 100
 
+#include <memory>
+#include <array>
+
 class CSCPalaceDoor;
 class CSCDoor;
 class CGuildEx;
@@ -16,12 +19,12 @@ class CSandCity :
 	public CTimeEventObject
 {
 public:
-	CSandCity(void);
-	virtual ~CSandCity(void);
+	CSandCity(VOID);
+	virtual ~CSandCity(VOID);
 	BOOL Init();
 	CGuildEx* GetOwnerGuild();
 
-	const char* GetName() { return m_szName; }
+	const char* GetName() { return m_szName.data(); }
 	//	¹¥³ÇÕ½¿ØÖÆ
 	BOOL StartWar();
 	BOOL EndWar();
@@ -52,13 +55,13 @@ public:
 
 	VOID PrepareAttackGuild(CSystemTime& curTime);
 
-	int PrePareAttackRequestPage(UINT nPage, char* pBuffer);
+	int PrePareAttackRequestPage(UINT nPage, char* pBuffer, int nBufSize = 2048);
 
 	BOOL SetSabukMaster(CHumanPlayer* m_pPlayer);
 
 	VOID UpdateSabukMasterFigure();
 	TopCharInfo* GetMasterInfo() { return &m_SabukMaster; }
-	CSCDoor* GetMainGate() { return m_pMainGate; }
+	CSCDoor* GetMainGate() { return m_pMainGate.get(); }
 
 	BOOL AddIncoming(DWORD dwIncoming);
 	BOOL AddTotalGold(DWORD dwAddGold);
@@ -84,18 +87,18 @@ protected:
 	CServerTimer m_tmrIdentify;
 	CServerTimer m_tmrWar;
 
-	CSCPalaceDoor* m_pPalaceDoor;
-	CSCDoor* m_pMainGate;
+	std::unique_ptr<CSCPalaceDoor> m_pPalaceDoor;
+	std::unique_ptr<CSCDoor> m_pMainGate;
 	CGuildEx* m_pOwnerGuild;
 
-	CPalaceWall* m_pLeftWall;
-	CPalaceWall* m_pCenterWall;
-	CPalaceWall* m_pRightWall;
+	std::unique_ptr<CPalaceWall> m_pLeftWall;
+	std::unique_ptr<CPalaceWall> m_pCenterWall;
+	std::unique_ptr<CPalaceWall> m_pRightWall;
 
 	CLogicMap* m_pPalaceMap;
-	CSCArcher* m_pArchers[12];
+	std::array<std::unique_ptr<CSCArcher>, 12> m_pArchers{};
 
-	char m_szName[32];
+	std::array<char, 32> m_szName;
 	DWORD m_dwTotalGold;
 	DWORD m_dwTodayIncome;
 	CSystemTime m_ChangeTime;
@@ -120,8 +123,8 @@ protected:
 	CScriptNpc* m_pSabukMaster;
 	TopCharInfo m_SabukMaster;
 
-	AttackSabukRequest m_AttackRequest[MAX_ATTACKREQUEST];
+	std::array<AttackSabukRequest, MAX_ATTACKREQUEST> m_AttackRequest;
 	int m_iAttackRequestCount;
-	CGuildEx* m_pWarGuild[MAX_ATTACKREQUEST];
+	std::array<CGuildEx*, MAX_ATTACKREQUEST> m_pWarGuild;
 	int m_iWarGuildCount;
 };

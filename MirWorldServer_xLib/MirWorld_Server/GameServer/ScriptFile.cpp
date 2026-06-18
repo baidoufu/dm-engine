@@ -1,22 +1,20 @@
 #include "StdAfx.h"
 #include ".\scriptfile.h"
 
-CScriptFile::CScriptFile(void):m_szFileName{}
+CScriptFile::CScriptFile(VOID):m_szFileName{}
 {
 	m_nLineIndex = 0;
 	m_pData = nullptr;
 }
 
-CScriptFile::~CScriptFile(void)
+CScriptFile::~CScriptFile(VOID)
 {
-	if (m_pData)
-		delete[]m_pData;
 	m_fScript.Destroy();
 }
 
 BOOL CScriptFile::Load(const char* pszFileName)
 {
-	o_strncpy(m_szFileName, pszFileName, 1020);
+	o_strncpy(m_szFileName.data(), pszFileName, 1020);
 	return ProtectedLoad();
 }
 
@@ -77,8 +75,9 @@ UINT CScriptFile::GetCurrentLineNumber()
 BOOL CScriptFile::ProtectedLoad()
 {
 	int iDataSize = 0;
-	m_pData = LoadFile(m_szFileName, iDataSize);
+	m_pData = LoadFile(m_szFileName.data(), iDataSize);
 	if (m_pData == nullptr)return FALSE;
-	BYTE* pData = m_pData;
-	return m_fScript.SetData((char*)pData, iDataSize);
+	// 将内存所有权转移给 m_fScript，避免双重持有
+	char* pRawData = m_pData.release();
+	return m_fScript.SetData(pRawData, iDataSize);
 }

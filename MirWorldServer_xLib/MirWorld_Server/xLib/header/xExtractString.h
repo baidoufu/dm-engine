@@ -3,82 +3,59 @@
 class xCharSet
 {
 public:
-	xCharSet()
-	{
-		clear();
-	}
-
+	xCharSet() { clear(); }
 	xCharSet(const char* pszTable)
 	{
 		clear();
-		for (int i = 0; i < (int)strlen(pszTable); i++)
+		for (int i = 0; i < (int)strlen(pszTable); ++i)
 			addChar(pszTable[i]);
 	}
-
 	xCharSet(DWORD dwFlags[])
 	{
-		for (int i = 0; i < 8; i++)
-		{
+		for (int i = 0; i < 8; ++i)
 			m_dwFlags[i] = dwFlags[i];
-		}
 	}
-
-	~xCharSet()
+	~xCharSet() { }
+	BOOL charIn(char c)
 	{
-	}
-
-	BOOL	charIn(char c)
-	{
-		BYTE	bc = (BYTE)c;
+		BYTE bc = (BYTE)c;
 		int index = bc >> 5;
 		int ptr = bc & 31;
 		if (m_dwFlags[index] & (1 << ptr))
 			return TRUE;
 		return FALSE;
 	}
-
 	VOID addChar(char c)
 	{
-		BYTE	bc = (BYTE)c;
+		BYTE bc = (BYTE)c;
 		int index = bc >> 5;
 		int ptr = bc & 31;
 		m_dwFlags[index] |= 1 << ptr;
 	}
-
-	VOID clear()
-	{
-		memset(m_dwFlags, 0, sizeof(m_dwFlags));
-	}
-
+	VOID clear() { memset(m_dwFlags, 0, sizeof(m_dwFlags)); }
 	xCharSet& operator +(xCharSet& charset)
 	{
-		DWORD dwFlags[8];
-		for (int i = 0; i < 8; i++)
-		{
+		DWORD dwFlags[8] = {};
+		for (int i = 0; i < 8; ++i)
 			dwFlags[i] = m_dwFlags[i] | charset.m_dwFlags[i];
-		}
 		return (xCharSet(dwFlags));
 	}
-
 	xCharSet& operator +=(xCharSet& charset)
 	{
-		for (int i = 0; i < 8; i++)
-		{
+		for (int i = 0; i < 8; ++i)
 			m_dwFlags[i] |= charset.m_dwFlags[i];
-		}
 		return (*this);
 	}
-
 	xCharSet& operator =(xCharSet& charset)
 	{
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 8; ++i)
 		{
 			m_dwFlags[i] = charset.m_dwFlags[i];
 		}
 		return (*this);
 	}
 protected:
-	DWORD	m_dwFlags[8];
+	DWORD m_dwFlags[8];
 };
 
 static xCharSet CharSetWhite(" \t");
@@ -94,16 +71,16 @@ static char* TrimEx(char* pszString, xCharSet& whiteset = CharSetWhite)
 		pszString++;
 	if (pszString[0] == 0)return pszString;
 	char* pWhite = nullptr;
-	int ptr = 0;
-	while (*(pszString + ptr))
+	char* p = pszString;
+	while (*p)
 	{
-		if (whiteset.charIn(*(pszString + ptr)))
+		if (whiteset.charIn(*p))
 		{
-			if (pWhite == nullptr)pWhite = pszString + ptr;
+			if (pWhite == nullptr)pWhite = p;
 		}
 		else
 			pWhite = nullptr;
-		ptr++;
+		p++;
 	}
 	if (pWhite)*pWhite = 0;
 	return pszString;
@@ -168,18 +145,18 @@ public:
 	VOID ExtractString(char* pszString, const char* pszDelimTable = "/", const char* pszWhiteTable = " \t", BOOL	bKeepEmpty = TRUE, BOOL bKeepString = TRUE)
 	{
 		clear();
-		m_nStringCount = (UINT)ExtractStrings(pszString, xCharSet(pszWhiteTable), xCharSet(pszDelimTable), m_pStrings, MaxCount, bKeepEmpty, bKeepString);
+		m_nStringCount = (UINT)ExtractStrings(pszString, xCharSet(pszWhiteTable), xCharSet(pszDelimTable), m_pStrings.data(), MaxCount, bKeepEmpty, bKeepString);
 	}
 
 	VOID ExtractString(char* pszString, int delim)
 	{
 		clear();
-		m_nStringCount = SearchParam(pszString, m_pStrings, MaxCount, delim);
+		m_nStringCount = SearchParam(pszString, m_pStrings.data(), MaxCount, delim);
 	}
 
 	VOID clear()
 	{
-		memset(m_pStrings, 0, sizeof(m_pStrings));
+		m_pStrings.fill(nullptr);
 		m_nStringCount = 0;
 	}
 
@@ -189,7 +166,7 @@ public:
 
 protected:
 	UINT	m_nStringCount;
-	char* m_pStrings[MaxCount];
+	std::array<char*, MaxCount> m_pStrings;
 };
 
 class xStringParse
@@ -245,7 +222,7 @@ protected:
 inline char* filtercopy(char* pDest, const char* pSource, int iMaxSize, xCharSet& filterSet = CharSetWhite)
 {
 	int counter = 0;
-	char* p = (char*)pSource;
+	const char* p = pSource;
 	char c = 0;
 	//iMaxSize -= 1; //	±£¡ÙΩ·Œ≤0
 	while (c = *p++)

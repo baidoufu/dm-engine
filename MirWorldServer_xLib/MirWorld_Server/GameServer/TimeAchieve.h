@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include <array>
 
 struct AchievementData //玩家成就数据
 {
-	BYTE btLevel; // 成就等级
-	DWORD dwExp; // 当前成就进度值
+	BYTE btLevel = 0; // 成就等级
+	DWORD dwExp = 0; // 当前成就进度值
 	std::vector<BYTE>  btStatus;      // 状态: 0未完成, 1已完成/可领取, 2已领取
 	std::vector<DWORD> btRecentCount; // 近期获得成就完成次数
 	std::vector<DWORD> dwCompleteTime;// 完成时间戳
@@ -30,8 +31,8 @@ typedef struct tagTimeAchieveShowProp
 	{
 		FILLSELF(0);
 	}
-	char szName[8]; //属性类型
-	char szShowName[8]; //属性文字显示
+	std::array<char, 8> szName{}; //属性类型
+	std::array<char, 8> szShowName{}; //属性文字显示
 } TIMEACHIEVE_SHOWPROP;
 
 // 单个职业属性 (name -> value)
@@ -41,7 +42,7 @@ typedef struct tagTimeAchieveJobProp
 	{
 		FILLSELF(0);
 	}
-	char szName[8]; //属性类型
+	std::array<char, 8> szName{}; //属性类型
 	TIMEACHIEVE_PROPVALUE xValue; //属性值
 } TIMEACHIEVE_JOBPROP;
 
@@ -54,7 +55,7 @@ typedef struct tagTimeAchieveLevel
 	}
 	DWORD nMaxExp; //成就总进度
 	// job -> (prop_name -> prop_value)
-	std::map<int, std::map<std::string, TIMEACHIEVE_PROPVALUE>> mapJobProps; //成就职业属性
+	std::unordered_map<int, std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>> mapJobProps; //成就职业属性
 } TIMEACHIEVE_LEVEL;
 
 // 成就配置 (Achieve)
@@ -65,7 +66,7 @@ typedef struct tagTimeAchieveItem
 		FILLSELF(0);
 	}
 	WORD nId; //成就ID
-	char szName[32]; //成就名字
+	std::array<char, 32> szName{}; //成就名字
 	DWORD nMaxExp; //成就总进度
 	BYTE nGroup; //成就组ID
 	WORD nPoint; //成就点
@@ -75,8 +76,8 @@ typedef struct tagTimeAchieveItem
 class CTimeAchieve : public xSingletonClass<CTimeAchieve>
 {
 public:
-	CTimeAchieve(void);
-	virtual ~CTimeAchieve(void);
+	CTimeAchieve(VOID);
+	virtual ~CTimeAchieve(VOID);
 
 	VOID Load(const char* pszPath);
 
@@ -87,7 +88,7 @@ public:
 	// 获取某个等级的配置
 	const TIMEACHIEVE_LEVEL* GetLevel(int nLevel) const;
 	// 获取某个等级、某个职业的所有属性加成
-	const std::map<std::string, TIMEACHIEVE_PROPVALUE>* GetJobProps(int nLevel, int nJob) const;
+	const std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>* GetJobProps(int nLevel, int nJob) const;
 	// 获取某个等级、某个职业、某个属性的加成值
 	BOOL GetPropValue(int nLevel, int nJob, const char* pszPropName, TIMEACHIEVE_PROPVALUE& outValue) const;
 	// 获取某个等级升级所需的最大经验 (max_exp)
@@ -106,25 +107,25 @@ public:
 	VOID SendAchieveData(CHumanPlayer* pPlayer);
 private:
 	// job -> ShowProp list
-	std::map<int, std::vector<TIMEACHIEVE_SHOWPROP>> m_mapShowProps;
+	std::unordered_map<int, std::vector<TIMEACHIEVE_SHOWPROP>> m_mapShowProps;
 	// level index -> Level config
 	std::vector<TIMEACHIEVE_LEVEL> m_vecLevels;
 	// Achieve list
 	std::vector<TIMEACHIEVE_ITEM> m_vecAchieves;
 	// Achieve ID -> index (for fast lookup)
-	std::map<int, int> m_mapAchieveIdToIndex;
+	std::unordered_map<int, int> m_mapAchieveIdToIndex;
 	// Group ID -> Achieve index list (for fast lookup)
-	std::map<int, std::vector<int>> m_mapGroupToIndex;
+	std::unordered_map<int, std::vector<int>> m_mapGroupToIndex;
 };
 
 //插入属性块数据
-static void PushPropBlock(xPacket& packet, BYTE btJob, const std::vector<TIMEACHIEVE_SHOWPROP>& vec, const TIMEACHIEVE_LEVEL& level)
+static VOID PushPropBlock(xPacket& packet, BYTE btJob, const std::vector<TIMEACHIEVE_SHOWPROP>& vec, const TIMEACHIEVE_LEVEL& level)
 {
 	DWORD nCount = (DWORD)vec.size();
 	packet.push(&nCount, 4);
 	for (const auto& showProp : vec)
 	{
-		packet.push(showProp.szShowName);
+		packet.push(showProp.szShowName.data());
 		packet.push(1);
 	}
 
@@ -133,7 +134,7 @@ static void PushPropBlock(xPacket& packet, BYTE btJob, const std::vector<TIMEACH
 	const auto& mapProps = itJob->second;
 	for (const auto& showProp : vec)
 	{
-		auto it = mapProps.find(showProp.szName);
+		auto it = mapProps.find(showProp.szName.data());
 		if (it != mapProps.end())
 		{
 			WORD nVal1 = (WORD)it->second.nValue1;

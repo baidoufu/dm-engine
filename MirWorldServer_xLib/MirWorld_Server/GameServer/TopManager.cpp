@@ -6,14 +6,14 @@
 #include "ScriptNpc.h"
 #include "GuildEx.h"
 
-CTopManager::CTopManager(void)
+CTopManager::CTopManager(VOID)
 {
-	memset(&m_ProTopNpc, 0, sizeof(m_ProTopNpc));
-	m_szListFile[0] = 0;
+	m_ProTopNpc.fill(nullptr);
+	m_szListFile.fill(0);
 	m_iTop100Count = 0;
 }
 
-CTopManager::~CTopManager(void)
+CTopManager::~CTopManager(VOID)
 {
 }
 
@@ -119,7 +119,7 @@ BOOL CTopManager::EnterProfessionTop(CHumanPlayer* pPlayer)
 	m_ProfessionTop[index].wLevel = wLevel;
 	GetLocalTime(&m_ProfessionTop[index].stRanking);
 	o_strncpy(m_ProfessionTop[index].szName, pPlayer->GetName(), 16);
-	Save(m_szListFile);
+	Save(m_szListFile.data());
 	if (m_ProTopNpc[index])
 	{
 		char szName[128];
@@ -217,7 +217,7 @@ VOID CTopManager::SendRank(CHumanPlayer* pPlayer, int nType, int StartPos)
 			if (charInfo == nullptr) continue;
 			LevelRankArray[SendCount].wIndex = GetTopIndex(charInfo->szName);
 			o_strncpy(LevelRankArray[SendCount].szName, charInfo->szName, 13);
-			LevelRankArray[SendCount].btLevel = charInfo->wLevel;
+			LevelRankArray[SendCount].btLevel = static_cast<BYTE>(charInfo->wLevel);
 			LevelRankArray[SendCount].btJob = charInfo->btClass;
 			LevelRankArray[SendCount].btSex = charInfo->btSex;
 			if (charInfo->szGuild[0] != '\0')
@@ -235,9 +235,9 @@ VOID CTopManager::SendRank(CHumanPlayer* pPlayer, int nType, int StartPos)
 		int SendCount = 0;
 		DWORD TotlePos = 10;
 		MasterRank MasterRankArray[10];
-		for (int i = 0; i < TotlePos; i++)
+		for (DWORD i = 0; i < TotlePos; i++)
 		{
-			MasterRankArray[i].wIndex = i + 1;
+			MasterRankArray[i].wIndex = static_cast<WORD>(i + 1);
 			o_strncpy(MasterRankArray[i].szName, "名师名字", 13);
 			MasterRankArray[i].wTudiCount = 13;
 			MasterRankArray[i].btLevel = 55;
@@ -256,9 +256,9 @@ VOID CTopManager::SendRank(CHumanPlayer* pPlayer, int nType, int StartPos)
 		int SendCount = 0;
 		DWORD TotlePos = 10;
 		ShadowRank ShadowRankArray[10];
-		for (int i = 0; i < TotlePos; i++)
+		for (DWORD i = 0; i < TotlePos; i++)
 		{
-			ShadowRankArray[SendCount].wIndex = i + 1;
+			ShadowRankArray[SendCount].wIndex = static_cast<WORD>(i + 1);
 			o_strncpy(ShadowRankArray[SendCount].szName, "元神名字", 13);
 			ShadowRankArray[SendCount].btLevel = 7;
 			ShadowRankArray[SendCount].btJob = 0;
@@ -277,11 +277,11 @@ VOID CTopManager::SendRank(CHumanPlayer* pPlayer, int nType, int StartPos)
 		PetRank PetRankArray[10];
 		int SendCount = 0;
 		DWORD TotlePos = 10;
-		for (int i = 0; i < TotlePos; i++)
+		for (DWORD i = 0; i < TotlePos; i++)
 		{
-			PetRankArray[i].wIndex = i + 1;
+			PetRankArray[i].wIndex = static_cast<WORD>(i + 1);
 			o_strncpy(PetRankArray[i].szName, "豹子名称", 13);
-			PetRankArray[i].wLevel = MIN(i, 7);
+			PetRankArray[i].wLevel = static_cast<WORD>(MIN(i, 7));
 			PetRankArray[i].btPerCent = 199;
 			o_strncpy(PetRankArray[i].szFengHao, "天第一豹", 13);
 			o_strncpy(PetRankArray[i].szMaster, "是我", 13);
@@ -310,13 +310,13 @@ VOID CTopManager::SendRank(CHumanPlayer* pPlayer, int nType, int StartPos)
 VOID CTopManager::LoadFigure(const char* pszFile)
 {
 	CSettingFile sf;
-	char szItemName[200];
+	std::array<char, 200> szItemName{};
 	if (sf.Open(pszFile))
 	{
 		for (UINT i = 0; i < 6; i++)
 		{
-			sprintf(szItemName, "top_%u_%u", i / 2, i % 2);
-			char* p = (char*)sf.GetString("npc", szItemName, "");
+			sprintf(szItemName.data(), "top_%u_%u", i / 2, i % 2);
+			char* p = (char*)sf.GetString("npc", szItemName.data(), "");
 			if (p[0] == 0)continue;
 			m_ProTopNpc[i] = CNpcManager::GetInstance()->AddNpc(p);
 		}
@@ -327,22 +327,22 @@ VOID CTopManager::LoadFigure(const char* pszFile)
 VOID CTopManager::Load(const char* pszFile)
 {
 	CSettingFile sf;
-	o_strncpy(m_szListFile, pszFile, 1023);
-	char szItemName[200];
+	o_strncpy(m_szListFile.data(), pszFile, 1023);
+	std::array<char, 200> szItemName{};
 	if (sf.Open(pszFile))
 	{
 		for (UINT i = 0; i < 6; i++)
 		{
 			// name,dbid,class,sex,level,exp,date
-			sprintf(szItemName, "top_%u_%u", i / 2, i % 2);
-			char* p = (char*)sf.GetString("player", szItemName, "");
+			sprintf(szItemName.data(), "top_%u_%u", i / 2, i % 2);
+			char* p = (char*)sf.GetString("player", szItemName.data(), "");
 			if (p[0] == 0)continue;
 			xStringsExtracter<8> top(p, ",");
 			if (top.getCount() < 7)continue;
 			m_ProfessionTop[i].btClass = (BYTE)StringToInteger(top[2]);
 			m_ProfessionTop[i].btSex = (BYTE)StringToInteger(top[3]);
 			m_ProfessionTop[i].dwDBId = (DWORD)StringToInteger(top[1]);
-			m_ProfessionTop[i].btPerCent = (DWORD)StringToInteger(top[5]);
+			m_ProfessionTop[i].btPerCent = static_cast<BYTE>(StringToInteger(top[5]));
 			o_strncpy(m_ProfessionTop[i].szName, top[0], 16);
 			m_ProfessionTop[i].wLevel = (WORD)StringToInteger(top[4]);
 			GetTimeFromString(m_ProfessionTop[i].stRanking, top[6]);
@@ -386,13 +386,6 @@ VOID CTopManager::Save(const char* pszFile)const
 	fclose(fp);
 }
 
-VOID CTopManager::SetTopNpc(CScriptNpc* pNpc, BYTE btPro, BYTE btSex)
-{
-	UINT index = btPro * 2 + btSex;
-	if (index >= 6)return;
-	m_ProTopNpc[index] = pNpc;
-}
-
 BOOL CTopManager::UpdateTopInfo(CHumanPlayer* pPlayer)
 {
 	BYTE btClass = pPlayer->GetPro();
@@ -407,9 +400,9 @@ BOOL CTopManager::UpdateTopInfo(CHumanPlayer* pPlayer)
 			m_ProfessionTop[index].szGuild[0] = 0;
 		WORD wLevel = pPlayer->GetPropValue(PI_LEVEL);
 		DWORD btPerCent = pPlayer->GetPropValue(PI_EXPPERCENT);
-		m_ProfessionTop[index].btPerCent = btPerCent;
+		m_ProfessionTop[index].btPerCent = static_cast<BYTE>(btPerCent);
 		m_ProfessionTop[index].wLevel = wLevel;
-		Save(m_szListFile);
+		Save(m_szListFile.data());
 		return TRUE;
 	}
 	return FALSE;

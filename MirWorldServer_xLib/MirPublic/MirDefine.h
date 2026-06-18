@@ -146,9 +146,6 @@
 
 ///////////////////////////////////////MESSAGE OF GAMEWORLD//////////////////////////////////////////////
 
-//确认第一个提示框
-//cmd = 1018
-#define	CM_CONFIRMFIRSTDIALOG	0x3fa
 // 发送公告
 //cmd = 658
 #define	SM_FIRSTDIALOG			0x292
@@ -161,9 +158,6 @@
 // 版本验证失败
 //cmd = 1106
 #define SM_READY				0x452
-// 请求加载地图
-//cmd = 1033
-#define CM_MAPLOADED			0x409
 // 死亡
 //cmd = 32
 #define SM_DEATH                32
@@ -236,13 +230,6 @@
 //wparam2 = y
 //wparam3 = dir
 #define SM_ATTACK				0x0e
-// 作揖
-//cmd = 3021
-//dwflag = id
-//wparam1 = x
-//wparam2 = y
-//wparam3 = dir
-#define CM_ZUOYI				0xbcd
 // 释放技能 17
 //cmd = 17
 //id向x,y坐标释放技能data
@@ -349,18 +336,8 @@
 //w3 = 0000
 //0x16409fc0 0029 1400 5f01 0000[]
 #define SM_FEATURECHANGED       0x29
-// 请求穿戴物品
-//dwFlag = id
-//w1 = index
-//data = name
-#define CM_TAKEONITEM			1003
 // 名字颜色变化
 #define SM_CHANGENAMECOLOR      656
-// 请求取下穿戴物品
-//dwFlag = id
-//w1 = index
-//data = name
-#define CM_TAKEOFFITEM          1004
 // 穿戴成功
 //0x5f011400 0267 0000 0000 0000[]
 #define SM_TAKEON_OK            615
@@ -373,10 +350,6 @@
 #define SM_TAKEOFF_OK           619
 // 取下穿戴失败
 #define SM_TAKEOFF_FAIL         620
-// 请求丢弃物品
-#define CM_DROPITEM				0x3e8
-// 请求拾取物品
-#define CM_PICKUPITEM			0x3e9
 // 物品显示
 //data droped at x,y
 //w3 = image
@@ -398,12 +371,6 @@
 //w2 = mp
 //w3 = hp
 #define SM_HPMPCHANGED			0x35
-// 请求释放技能
-//flag = y | x
-//w2 = 技能索引
-//w1 = target id low word
-//w3 = target id hi word
-#define CM_SPELLSKILL			0xbc9
 // 技能经验更新
 //flag = 技能索引
 //w1 = 1		等级
@@ -414,9 +381,6 @@
 //w1 = pos
 //w2 = maxdura
 #define SM_ITEMDURACHANGED		0x282
-// 客户端停止移动
-//服务器发送 flag = id cc的消息给周围, 不发给自己
-#define CM_STOP					0xbcc
 // 好友列表
 //w1 = 1 师傅
 //w1 = 0 好友
@@ -441,12 +405,6 @@
 //@ident表示选择的ident
 //@@ident表示输入的ident
 #define SM_NPCPAGE				0x283
-// 选择超级链接
-//flag = npcid
-//data = @ident
-//或者 @@ident[0d]输入的内容
-//关闭窗口要发@exit
-#define CM_SELECTLINK			0x3f3
 // 说话
 //cmd = 3030
 //data = 话
@@ -470,57 +428,20 @@
 //wParam[0] = b1 = prof b2 = hair wparam[1] = b1 = sex
 //data = 
 #define SM_UPDATEPROP			0x34
-// 请求跑
-//wCmd = bc5(跑)bc3(走)bc6(攻击)bc2(转身)bc4(挖肉)bcd(作揖, dwFlag =0)
-//dwFlag = y<<16|x (将要走去的坐标或者做动作的坐标)
-//wParam[1] = 方向
-#define CM_RUN					0xbc5
-// 请求走
-#define CM_WALK					0xbc3
-// 请求普通攻击
-#define CM_ATTACK				0xbc6
-// 请求转身
-#define CM_TURN					0xbc2
-// 挖肉
-#define CM_GETMEAL				0xbc4
 // 发送已穿戴物品
 #define SM_EQUIPMENTS			0x26d
-// 请求查看摆摊信息返回
-//dwFlag = 0;
-//dword( w1 w2 ) = 行会旗帜id
-//w3 = 0xff
-//GET /woool/getpic.asp?Area=62&Server=龙隐&Pid=2000008d HTTP/1.1
-//Accept: image/gif, image/x-xbitmap, application/x-shockware-flash, */*
-//Host: qizhi.woool.com
-//Cache-Control: no-cache
-//end of http query
-#define CM_QUERYSTARTPRIVATESHOP	0x5eb1
 
 /////////////////////////-=[交易相关]=-/////////////////////////
 
-// 请求开始交易
-#define CM_QUERYTRADE			0x401
 // 交易开始
 //data = 对方名字
 #define SM_TRADESTART			0x2a1
-// 放入物品
-//dwFlag = 物品id
-//w3 = 1
-//data = 物品名字
-#define CM_PUTTRADEITEM			0x402
 // 放入物品成功
 #define SM_PUTTRADEITEMOK		0x2a3
 // 放入物品失败
 #define SM_PUTTRADEITEMFAIL		0x2a4
-// 交易按钮
-#define CM_QUERYTRADEEND		0x406
 // 交易结束
 #define SM_TRADEEND				0x2af
-// 请求放入金币、元宝
-//dwflag = count
-//w1 = 0 放入金钱
-//w1 = 1 放入元宝
-#define CM_PUTTRADEGOLD			0x405
 // 放入金币、元宝成功
 //dwflag = 放入数量
 //w1w2 = 剩下数量
@@ -553,8 +474,6 @@
 //flag = id
 //data = array of ITEM
 #define SM_BAGINFO				0xc9
-// 取消交易
-#define CM_CANCELTRADE			0x404
 // 交易被取消681
 #define SM_TRADECANCELED		0x2a9
 // 负重改变
@@ -565,15 +484,9 @@
 
 ///////////////-=[组队]=-///////////////////////////////
 
-// 切换组队状态
-//w1 = bGroup
-#define CM_CHANGEGROUPMODE		0x3fb
 // 组队状态
 //w1 = bGroup
 #define SM_GROUPMODE			0x293
-// 请求组队
-//data = 人名
-#define CM_QUERYADDGROUPMEMBER	0x3fc
 // 创建小组
 #define	SM_GROUPCREATE			0x294
 // 更新编组人位置
@@ -582,9 +495,6 @@
 // 组队列表
 //data = 人名/人名/
 #define SM_GROUPMEMBERLIST		0x29b
-// 删除组队人
-//data = 人名
-#define CM_DELETEGROUPMEMBER	0x3fe
 // 删除成功
 //data = ab 6c 63 4a ac 3a
 #define SM_DELETECHARACTEROK	0x297
@@ -631,6 +541,11 @@
 #define	FILLSELF(fill) memset( this, (BYTE)(fill), sizeof( *this )) //将当前对象的所有内存空间填充为指定值
 
 #define ONE_DAY_SECONDS 86400 // 1天的秒数
+
+#define MAKEFEATHER(a,hair,b,c)  (((a&0xff) << 24) | ((hair&0xff) << 16 )|( (b&0xff) << 8 )|(c&0xff))
+
+#define MAX_DELCHARLISTCOUNT 4
+#define MAX_CHARLISTCOUNT 2
 
 ///////////////-=[消息结构体]=-///////////////////////////////
 
@@ -820,22 +735,6 @@ typedef struct tagBASEITEM
 	DWORD nPrice; // 价格
 }BASEITEM;
 
-typedef struct tagPLAYERACTION
-{
-	tagPLAYERACTION()
-	{
-		action = PS_STANDING;
-		x = 0;
-		y = 0;
-		dir = 0;
-		dwStartTime = timeGetTime();
-	}
-	DWORD dwStartTime;
-	EM_PLAYERSTATE action;
-	WORD x, y;
-	BYTE dir;
-}PLAYERACTION;
-
 typedef struct tagITEM
 {
 	tagITEM()
@@ -902,7 +801,7 @@ typedef struct tagITEM
 	// 设置物品扩展名字
 	VOID SetExName(const char* szName)
 	{
-		if (szName == nullptr) return;
+		if (szName == NULL) return;
 		strncpy_s((char*)&btItemExt[122], 20, szName, _TRUNCATE);
 	}
 }ITEM;
@@ -1545,10 +1444,6 @@ enum dbmsg
 	//	w3 = count
 	//	data = MAGICDB[count]
 	DM_QUERYMAGIC,
-	//	dwFlag = serverid
-	//	w1 = state
-	//	data = account
-	DM_UPDATEACCOUNTSTATE,
 	//	w1 = count
 	//	w2 = flag
 	//	data = BAGITEMPOS*xxx
@@ -2020,13 +1915,13 @@ inline int _CodeGameCode(BYTE* pIn, int size, BYTE* pOut)
 }
 
 //加密消息
-inline int EncodeMsg(char* buffer, DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpdata = nullptr, int datasize = -1)
+inline int EncodeMsg(char* buffer, DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpdata = NULL, int datasize = -1)
 {
 	MIRMSGHEADER header(dwFlag, wCmd, w1, w2, w3);   //包头数据, 这个函数用组包
 	int	codedsize = 1;
 	buffer[0] = '#';
 	codedsize += _CodeGameCode((BYTE*)&header, sizeof(header), (BYTE*)buffer + codedsize);
-	if (lpdata != nullptr)
+	if (lpdata != NULL)
 	{
 		if (datasize < 0)
 			datasize = (int)strlen((char*)lpdata);

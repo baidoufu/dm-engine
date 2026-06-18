@@ -25,6 +25,7 @@
 #include "scripttimermanager.h"
 #include "monstermanagerex.h"
 #include "systemscript.h"
+#include <array>
 
 extern BOOL	g_bDebugScript;
 CFunctionRegisterAgent::CFunctionRegisterAgent(const char* pszName, fnCommandProc proc)
@@ -165,13 +166,13 @@ DEFINE_SCRIPT_FUNCTION(NOWDATE) {
 DEFINE_SCRIPT_FUNCTION(DELAY){
 	if (nParam < 2)return 0;
 	int seconds = Params[0].nParam;
-	char szPage[256];
+	std::array<char, 256> szPage{};
 	char* p = strchr(Params[1].pszParam, '.');
 	if (p == nullptr && pShell->GetTitleId() == (UINT)-1)
-		sprintf(szPage, "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[1].pszParam);
+		sprintf(szPage.data(), "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[1].pszParam);
 	else
-		o_strncpy(szPage, Params[1].pszParam, 250);
-	pPlayer->AddProcess(EP_OPENSCRIPTPAGE, pShell->GetTitleId(), 0, 0, 0, seconds * 1000, 1, szPage);
+		o_strncpy(szPage.data(), Params[1].pszParam, 250);
+	pPlayer->AddProcess(EP_OPENSCRIPTPAGE, pShell->GetTitleId(), 0, 0, 0, seconds * 1000, 1, szPage.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -183,18 +184,18 @@ DEFINE_SCRIPT_FUNCTION(GOTO){
 	CSe_Page* pPage = pTarget->getCurScriptObject()->GetPage(Params[0].pszParam);
 	if (pPage)
 	{
-		char szPage[256];
+		std::array<char, 256> szPage{};
 		if (pShell->GetTitleId() == (UINT)-1)
 		{
 			char* p = strchr(Params[0].pszParam, '.');
 			if (p == nullptr)
-				sprintf(szPage, "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[0].pszParam);
+				sprintf(szPage.data(), "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[0].pszParam);
 			else
-				o_strncpy(szPage, Params[0].pszParam, 250);
+				o_strncpy(szPage.data(), Params[0].pszParam, 250);
 		}
 		else
-			o_strncpy(szPage, Params[0].pszParam, 250);
-		return pPlayer->AddProcess(EP_OPENSCRIPTPAGE, pShell->GetTitleId(), 0, 0, 0, Params[1].nParam * 1000, 1, szPage);
+			o_strncpy(szPage.data(), Params[0].pszParam, 250);
+		return pPlayer->AddProcess(EP_OPENSCRIPTPAGE, pShell->GetTitleId(), 0, 0, 0, Params[1].nParam * 1000, 1, szPage.data());
 	}
 	else
 		return FALSE;
@@ -242,7 +243,7 @@ DEFINE_SCRIPT_FUNCTION(CHECKCHARNAMELIST){
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 //		描述：检查背包物品是否有指定数量物品
-//		注释：
+//		注释：参数1：物品名称，参数2：数量，参数3：是否有(0为没有，1为有)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(CHECKBAGITEM){
 	if (nParam == 0) return 0;
@@ -252,6 +253,11 @@ DEFINE_SCRIPT_FUNCTION(CHECKBAGITEM){
 	if (nParam > 1)
 		count = Params[1].nParam;
 	CItemBox& bag = pPlayer->GetBag();
+	if (nParam > 2)
+	{
+		if (Params[2].nParam == 0)
+			return (count > bag.GetItemCount(pszItemName));
+	}
 	return (count <= bag.GetItemCount(pszItemName));
 }END_SCRIPT_FUNCTION
 
@@ -514,9 +520,9 @@ DEFINE_SCRIPT_FUNCTION(CHECKEQUIPMENT){
 	if (pItem == 0)return FALSE;
 	if (nParam > 1)
 	{
-		char szName[20];
-		o_strncpy(szName, pItem->baseitem.szName, 14);
-		if (strcmp(szName, Params[1].pszParam) == 0)
+		std::array<char, 20> szName{};
+		o_strncpy(szName.data(), pItem->baseitem.szName, 14);
+		if (strcmp(szName.data(), Params[1].pszParam) == 0)
 			return TRUE;
 		return FALSE;
 	}
@@ -915,9 +921,9 @@ DEFINE_SCRIPT_FUNCTION(MONGEN){
 		c = Params[5].nParam;
 	}
 	CMonsterGenManager* monGenManager = CMonsterGenManager::GetInstance();
-	char szTemp[128];
-	sprintf_s(szTemp, sizeof(szTemp), "%s,%u,%u,%u,%u,%u,%u,%s", pMonsterName, mapid, x, y, r, c, 0, Params[6].pszParam);
-	MONSTERGEN* monGen = monGenManager->AddMonsterGen(szTemp); // 这个需要一个常驻刷怪配置, 因为特殊刷怪需要管理怪列表指针.
+	std::array<char, 128> szTemp{};
+	sprintf_s(szTemp.data(), szTemp.size(), "%s,%u,%u,%u,%u,%u,%u,%s", pMonsterName, mapid, x, y, r, c, 0, Params[6].pszParam);
+	MONSTERGEN* monGen = monGenManager->AddMonsterGen(szTemp.data()); // 这个需要一个常驻刷怪配置, 因为特殊刷怪需要管理怪列表指针.
 	if (r <= 1000)
 	{
 		static CRandomRangeSpawnStrategy strategy;
@@ -957,18 +963,18 @@ DEFINE_SCRIPT_FUNCTION(ISGROUPLEADER){
 DEFINE_SCRIPT_FUNCTION(SCROLLMSG){
 	if (nParam == 1)
 	{
-		char szText[1024];
-		ProcFmtText(Params[0].pszParam, szText, 1024, pTarget);
-		CGameWorld::GetInstance()->AddGlobeProcess(EP_SCROLLTEXT, 0, 0, 0, 0, 50, 1, szText);
+		std::array<char, 1024> szText{};
+		ProcFmtText(Params[0].pszParam, szText.data(), 1024, pTarget);
+		CGameWorld::GetInstance()->AddGlobeProcess(EP_SCROLLTEXT, 0, 0, 0, 0, 50, 1, szText.data());
 	}
 	else if (nParam > 1)
 	{
 		CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[0].pszParam);
 		if (p)
 		{
-			char szText[1024];
-			ProcFmtText(Params[1].pszParam, szText, 1024, pTarget);
-			p->SendScrollText(szText);
+			std::array<char, 1024> szText{};
+			ProcFmtText(Params[1].pszParam, szText.data(), 1024, pTarget);
+			p->SendScrollText(szText.data());
 		}
 	}
 }END_SCRIPT_FUNCTION
@@ -980,18 +986,18 @@ DEFINE_SCRIPT_FUNCTION(SCROLLMSG){
 DEFINE_SCRIPT_FUNCTION(SYSTEM10MSG) {
 	if (nParam == 1)
 	{
-		char szText[1024];
-		ProcFmtText(Params[0].pszParam, szText, 1024, pTarget);
-		CGameWorld::GetInstance()->PostSystem10Message(szText);
+		std::array<char, 1024> szText{};
+		ProcFmtText(Params[0].pszParam, szText.data(), 1024, pTarget);
+		CGameWorld::GetInstance()->PostSystem10Message(szText.data());
 	}
 	else if (nParam > 1)
 	{
 		CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[0].pszParam);
 		if (p)
 		{
-			char szText[1024];
-			ProcFmtText(Params[1].pszParam, szText, 1024, pTarget);
-			p->SaySystem10(szText);
+			std::array<char, 1024> szText{};
+			ProcFmtText(Params[1].pszParam, szText.data(), 1024, pTarget);
+			p->SaySystem10(szText.data());
 		}
 	}
 }END_SCRIPT_FUNCTION
@@ -1003,18 +1009,18 @@ DEFINE_SCRIPT_FUNCTION(SYSTEM10MSG) {
 DEFINE_SCRIPT_FUNCTION(SYSTEMMSG){
 	if (nParam == 1)
 	{
-		char szText[1024];
-		ProcFmtText(Params[0].pszParam, szText, 1024, pTarget);
-		CGameWorld::GetInstance()->PostSystemMessage(szText);
+		std::array<char, 1024> szText{};
+		ProcFmtText(Params[0].pszParam, szText.data(), 1024, pTarget);
+		CGameWorld::GetInstance()->PostSystemMessage(szText.data());
 	}
 	else if (nParam > 1)
 	{
 		CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[0].pszParam);
 		if (p)
 		{
-			char szText[1024];
-			ProcFmtText(Params[1].pszParam, szText, 1024, pTarget);
-			p->SaySystem(szText);
+			std::array<char, 1024> szText{};
+			ProcFmtText(Params[1].pszParam, szText.data(), 1024, pTarget);
+			p->SaySystem(szText.data());
 		}
 	}
 }END_SCRIPT_FUNCTION
@@ -1163,9 +1169,9 @@ DEFINE_SCRIPT_FUNCTION(INC){
 		nValue += Params[1].nParam;
 	else
 		nValue++;
-	char szBuffer[20];
-	sprintf(szBuffer, "%u", nValue);
-	pTarget->SetVariableValue(Params[0].pszParam, szBuffer);
+	std::array<char, 20> szBuffer{};
+	sprintf(szBuffer.data(), "%u", nValue);
+	pTarget->SetVariableValue(Params[0].pszParam, szBuffer.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1182,9 +1188,9 @@ DEFINE_SCRIPT_FUNCTION(DEC){
 		nValue -= Params[1].nParam;
 	else
 		nValue--;
-	char szBuffer[20];
-	sprintf(szBuffer, "%u", nValue);
-	pTarget->SetVariableValue(Params[0].pszParam, szBuffer);
+	std::array<char, 20> szBuffer{};
+	sprintf(szBuffer.data(), "%u", nValue);
+	pTarget->SetVariableValue(Params[0].pszParam, szBuffer.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1201,9 +1207,9 @@ DEFINE_SCRIPT_FUNCTION(MUL) {
 		nValue *= Params[1].nParam;
 	else
 		nValue *= 2;
-	char szBuffer[20];
-	sprintf(szBuffer, "%u", nValue);
-	pTarget->SetVariableValue(Params[0].pszParam, szBuffer);
+	std::array<char, 20> szBuffer{};
+	sprintf(szBuffer.data(), "%u", nValue);
+	pTarget->SetVariableValue(Params[0].pszParam, szBuffer.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1220,9 +1226,9 @@ DEFINE_SCRIPT_FUNCTION(DIV) {
 		nValue /= Params[1].nParam;
 	else
 		nValue /= 2;
-	char szBuffer[20];
-	sprintf(szBuffer, "%u", nValue);
-	pTarget->SetVariableValue(Params[0].pszParam, szBuffer);
+	std::array<char, 20> szBuffer{};
+	sprintf(szBuffer.data(), "%u", nValue);
+	pTarget->SetVariableValue(Params[0].pszParam, szBuffer.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1274,18 +1280,18 @@ DEFINE_SCRIPT_FUNCTION(HUMONLINE){
 DEFINE_SCRIPT_FUNCTION(INPUTTEXT){
 	if (nParam < 3)return 0;
 	//	p0 = tips, p1 = length, p2 = page
-	char	szPage[256];
+	std::array<char, 256> szPage{};
 	if (pShell->GetTitleId() == (UINT)-1)
 	{
 		char* p = strchr(Params[2].pszParam, '.');
 		if (p == nullptr)
-			sprintf(szPage, "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[2].pszParam);
+			sprintf(szPage.data(), "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[2].pszParam);
 		else
-			o_strncpy(szPage, Params[2].pszParam, 250);
+			o_strncpy(szPage.data(), Params[2].pszParam, 250);
 	}
 	else
-		o_strncpy(szPage, Params[2].pszParam, 250);
-	pTarget->SetInputPage(szPage, pShell, Params[1].nParam);
+		o_strncpy(szPage.data(), Params[2].pszParam, 250);
+	pTarget->SetInputPage(szPage.data(), pShell, Params[1].nParam);
 	WORD w1 = ((Params[1].nParam & 0xff) << 8) | 2;
 	pPlayer->SendMsg(0, 0x1213, w1, 0, 0, (LPVOID)Params[0].pszParam);
 }END_SCRIPT_FUNCTION
@@ -1418,18 +1424,18 @@ DEFINE_SCRIPT_FUNCTION(SYSTEMMSGEX){
 	if (nParam < 2)return 0;
 	if (nParam == 2)
 	{
-		char szText[1024];
-		ProcFmtText(Params[1].pszParam, szText, 1024, pTarget);
-		CGameWorld::GetInstance()->PostSystemMessage(Params[0].nParam, szText);
+		std::array<char, 1024> szText{};
+		ProcFmtText(Params[1].pszParam, szText.data(), 1024, pTarget);
+		CGameWorld::GetInstance()->PostSystemMessage(Params[0].nParam, szText.data());
 	}
 	else if (nParam > 2)
 	{
 		CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[1].pszParam);
 		if (p)
 		{
-			char szText[1024];
-			ProcFmtText(Params[2].pszParam, szText, 1024, pTarget);
-			p->SaySystemAttrib(Params[0].nParam, szText);
+			std::array<char, 1024> szText{};
+			ProcFmtText(Params[2].pszParam, szText.data(), 1024, pTarget);
+			p->SaySystemAttrib(Params[0].nParam, szText.data());
 		}
 	}
 }END_SCRIPT_FUNCTION
@@ -1571,9 +1577,9 @@ DEFINE_SCRIPT_FUNCTION(MULTICHECKMAPHUM){
 		UINT nCount = pMap->GetObjectCount(OBJ_PLAYER);
 		if (CompareValue(nCount, Params[3].pszParam, Params[4].nParam))
 		{
-			char szValue[20];
-			sprintf(szValue, "%u", nMapId);
-			pTarget->SetVariableValue(Params[0].pszParam, szValue);
+			std::array<char, 20> szValue{};
+			sprintf(szValue.data(), "%u", nMapId);
+			pTarget->SetVariableValue(Params[0].pszParam, szValue.data());
 			return 1;
 		}
 	}
@@ -1651,18 +1657,18 @@ DEFINE_SCRIPT_FUNCTION(MULTIMAPHUMTELEPORT){
 DEFINE_SCRIPT_FUNCTION(MSGBOX){
 	if (nParam == 1)
 	{
-		char szText[1024];
-		ProcFmtText(Params[0].pszParam, szText, 1024, pTarget);
-		pPlayer->SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)szText);
+		std::array<char, 1024> szText{};
+		ProcFmtText(Params[0].pszParam, szText.data(), 1024, pTarget);
+		pPlayer->SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)szText.data());
 	}
 	else if (nParam > 1)
 	{
 		CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[0].pszParam);
 		if (p)
 		{
-			char szText[1024];
-			ProcFmtText(Params[1].pszParam, szText, 1024, pTarget);
-			p->SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)szText);
+			std::array<char, 1024> szText{};
+			ProcFmtText(Params[1].pszParam, szText.data(), 1024, pTarget);
+			p->SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)szText.data());
 		}
 	}
 }END_SCRIPT_FUNCTION
@@ -1722,15 +1728,15 @@ DEFINE_SCRIPT_FUNCTION(REMOVEDYNAMICNPC){
 DEFINE_SCRIPT_FUNCTION(SYSTEMDELAY){
 	if (nParam < 2)return 0;
 	int seconds = Params[0].nParam;
-	char szPage[256];
+	std::array<char, 256> szPage{};
 	char* p = strchr(Params[1].pszParam, '.');
 	if (p == nullptr && pShell->GetTitleId() == (UINT)-1)
-		sprintf(szPage, "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[1].pszParam);
+		sprintf(szPage.data(), "@%s.%s", pTarget->getCurScriptObject()->getName(), Params[1].pszParam);
 	else
-		o_strncpy(szPage, Params[1].pszParam, 250);
+		o_strncpy(szPage.data(), Params[1].pszParam, 250);
 	CHumanPlayer* pTargetP = CAutoScriptManager::GetInstance()->GetScriptTarget();
 	if (pTargetP == nullptr)return 0;
-	return pTargetP->AddProcess(EP_OPENSCRIPTPAGE, pShell->GetTitleId(), 0, 0, 0, seconds * 1000, 1, szPage);
+	return pTargetP->AddProcess(EP_OPENSCRIPTPAGE, pShell->GetTitleId(), 0, 0, 0, seconds * 1000, 1, szPage.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1808,6 +1814,7 @@ DEFINE_SCRIPT_FUNCTION(SETTASKVALUE) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(RELOADTASK){
 	CTaskManager::GetInstance()->Load(".\\Data\\Task");
+	pPlayer->SaySystem("重新加载任务完成!");
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1879,9 +1886,9 @@ DEFINE_SCRIPT_FUNCTION(ISFIRSTGUILDMASTER){
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(FORMATSTRING) {
 	if (nParam < 2)return 0;
-	char szText[1024];
-	ProcFmtText(Params[1].pszParam, szText, 1024, pTarget);
-	pTarget->SetVariableValue(Params[0].pszParam, szText);
+	std::array<char, 1024> szText{};
+	ProcFmtText(Params[1].pszParam, szText.data(), 1024, pTarget);
+	pTarget->SetVariableValue(Params[0].pszParam, szText.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2019,9 +2026,9 @@ DEFINE_SCRIPT_FUNCTION(SENDGUILDSOS){
 	//0x229d1d38 0064 38ff 0038 0400
 	if (nParam < 1)return 0;
 	if (pPlayer->GetGuild() == nullptr)return 0;
-	char szText[1024];
-	ProcFmtText(Params[0].pszParam, szText, 1024, pTarget);
-	pPlayer->GetGuild()->SendMsg(pPlayer->GetId(), 0x64, 0x38ff, 0x38, 0x400, (LPVOID)szText);
+	std::array<char, 1024> szText{};
+	ProcFmtText(Params[0].pszParam, szText.data(), 1024, pTarget);
+	pPlayer->GetGuild()->SendMsg(pPlayer->GetId(), 0x64, 0x38ff, 0x38, 0x400, (LPVOID)szText.data());
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------

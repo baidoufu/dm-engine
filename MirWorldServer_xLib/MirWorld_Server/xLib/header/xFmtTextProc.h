@@ -1,5 +1,6 @@
 #pragma once
 #include "xExtractString.h"
+#include <array>
 
 class xVariableProvider
 {
@@ -12,38 +13,39 @@ public:
 
 inline int ProcFmtText(const char* pszText, char* pszOutBuffer, int iOutBufferSize, xVariableProvider* pVariableProvider)
 {
-	char* p = (char*)pszText;
 	BOOL bCatch = FALSE;
 	BOOL bStartCommand = FALSE;
-	char szCommand[256] = "";
-	char szTemp[512] = "";
+	std::array<char, 256> szCommand = {};
+	std::array<char, 512> szTemp = {};
 	int catchtargetptr = 0;
 	int targetptr = 0;
 	int cmdptr = 0;
 	iOutBufferSize -= 1;	//	保留一个0结尾
 
-	for (int i = 0; i < (int)strlen(pszText); i++)
+	const int textLen = static_cast<int>(strlen(pszText));
+	for (int i = 0; i < textLen; ++i)
 	{
-		if (*(pszText + i) == '<')
+		char ch = pszText[i];
+		if (ch == '<')
 		{
 			bCatch = TRUE;
 			catchtargetptr = targetptr;
 		}
-		else if (*(pszText + i) == '>' && bCatch)
+		else if (ch == '>' && bCatch)
 		{
 			bCatch = FALSE;
 			if (bStartCommand)
 			{
 				szCommand[cmdptr] = 0;
 
-				char* p = pVariableProvider->GetVariableValue(TrimEx(szCommand));
+				char* p = pVariableProvider->GetVariableValue(TrimEx(szCommand.data()));
 
 				if (p == nullptr)
 				{
-					sprintf(szTemp, "<$%s>", szCommand);
-					p = szTemp;
+					sprintf(szTemp.data(), "<$%s>", szCommand.data());
+					p = szTemp.data();
 				}
-				cmdptr = (int)strlen(p);
+				cmdptr = static_cast<int>(strlen(p));
 				if ((cmdptr + targetptr) >= iOutBufferSize)
 				{
 					break;
@@ -54,7 +56,7 @@ inline int ProcFmtText(const char* pszText, char* pszOutBuffer, int iOutBufferSi
 				continue;
 			}
 		}
-		else if (*(pszText + i) == '$' && bCatch)
+		else if (ch == '$' && bCatch)
 		{
 			if (!bStartCommand)
 			{
@@ -64,7 +66,7 @@ inline int ProcFmtText(const char* pszText, char* pszOutBuffer, int iOutBufferSi
 				continue;
 			}
 		}
-		else if (*(pszText + i) != ' ' && *(pszText + i) != '\t')
+		else if (ch != ' ' && ch != '\t')
 		{
 			if (!bStartCommand)
 			{
@@ -73,11 +75,11 @@ inline int ProcFmtText(const char* pszText, char* pszOutBuffer, int iOutBufferSi
 		}
 		if (bStartCommand)
 		{
-			szCommand[cmdptr++] = *(pszText + i);
+			szCommand[cmdptr++] = ch;
 		}
 		else
 		{
-			pszOutBuffer[targetptr++] = *(pszText + i);
+			pszOutBuffer[targetptr++] = ch;
 			if (targetptr >= iOutBufferSize)
 				break;
 		}

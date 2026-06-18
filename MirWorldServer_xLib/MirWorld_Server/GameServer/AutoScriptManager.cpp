@@ -1,24 +1,22 @@
 #include "StdAfx.h"
-#include ".\autoscriptmanager.h"
-#include ".\timesystem.h"
-#include ".\SystemScript.h"
-#include ".\HumanPlayerMgr.h"
-#include ".\humanplayer.h"
+#include "autoscriptmanager.h"
+#include "timesystem.h"
+#include "SystemScript.h"
+#include "HumanPlayerMgr.h"
+#include "humanplayer.h"
+#include <array>
 
-CAutoScriptManager::CAutoScriptManager(void)
+CAutoScriptManager::CAutoScriptManager(VOID)
 {
 	m_pTimeScript = nullptr;
 	CTimeSystem::GetInstance()->RegisterTimeEvent(this);
-	m_pScriptTarget = new CHumanPlayer;
+	m_pScriptTarget = std::make_unique<CHumanPlayer>();
 }
 
-CAutoScriptManager::~CAutoScriptManager(void)
+CAutoScriptManager::~CAutoScriptManager(VOID)
 {
-	if (CTimeSystem::GetInstance())
-		CTimeSystem::GetInstance()->UnRegisterTimeEvent(this);
+	CTimeSystem::GetInstance()->UnRegisterTimeEvent(this);
 	Destroy();
-	if (m_pScriptTarget)
-		delete m_pScriptTarget;
 }
 
 VOID CAutoScriptManager::Destroy()
@@ -27,26 +25,25 @@ VOID CAutoScriptManager::Destroy()
 	while (p)
 	{
 		m_pTimeScript = p->pNext;
-		if (p->pszScriptPage)
-			delete[]p->pszScriptPage;
 		delete p;
 		p = m_pTimeScript;
 	}
 	m_pTimeScript = nullptr;
 }
 
-static void MakeTimeup(char* pszTime1, char* pszTime2, char* pszTime3, EventTimeup& timeup)
+static VOID MakeTimeup(char* pszTime1, char* pszTime2, char* pszTime3, EventTimeup& timeup)
 {
 	memset(&timeup, 0xff, sizeof(timeup));
-	char szTimeBuf[16];
+	std::array<char, 16> szTimeBuf{};
 	if (pszTime1 && *pszTime1 == '[')
 	{
 		pszTime1++;
-		strcpy(szTimeBuf, pszTime1);
+		o_strncpy(szTimeBuf.data(), pszTime1, szTimeBuf.size() - 1);
+		szTimeBuf[szTimeBuf.size() - 1] = 0;
 		xStringsExtracter<4> utime(pszTime1, "-:", " \t");
 		if (utime.getCount() == 3)
 		{
-			if (strchr(szTimeBuf, ':') != nullptr)
+			if (strchr(szTimeBuf.data(), ':') != nullptr)
 			{
 				if (*utime[0] != '*')
 					timeup.wHour = (WORD)StringToInteger(utime[0]);
@@ -81,11 +78,12 @@ static void MakeTimeup(char* pszTime1, char* pszTime2, char* pszTime3, EventTime
 	if (pszTime2 && *pszTime2 == '[')
 	{
 		pszTime2++;
-		strcpy(szTimeBuf, pszTime2);
+		o_strncpy(szTimeBuf.data(), pszTime2, szTimeBuf.size() - 1);
+		szTimeBuf[szTimeBuf.size() - 1] = 0;
 		xStringsExtracter<4> utime(pszTime2, "-:", " \t");
 		if (utime.getCount() == 3)
 		{
-			if (strchr(szTimeBuf, ':') != nullptr)
+			if (strchr(szTimeBuf.data(), ':') != nullptr)
 			{
 				if (*utime[0] != '*')
 					timeup.wHour = (WORD)StringToInteger(utime[0]);
@@ -120,11 +118,12 @@ static void MakeTimeup(char* pszTime1, char* pszTime2, char* pszTime3, EventTime
 	if (pszTime3 && *pszTime3 == '[')
 	{
 		pszTime3++;
-		strcpy(szTimeBuf, pszTime3);
+		o_strncpy(szTimeBuf.data(), pszTime3, szTimeBuf.size() - 1);
+		szTimeBuf[szTimeBuf.size() - 1] = 0;
 		xStringsExtracter<4> utime(pszTime3, "-:", " \t");
 		if (utime.getCount() == 3)
 		{
-			if (strchr(szTimeBuf, ':') != nullptr)
+			if (strchr(szTimeBuf.data(), ':') != nullptr)
 			{
 				if (*utime[0] != '*')
 					timeup.wHour = (WORD)StringToInteger(utime[0]);
@@ -197,30 +196,30 @@ VOID CAutoScriptManager::Load(const char* pszSettingFile)
 
 VOID CAutoScriptManager::AddTimeScript(EventTimeup* pTimeup, const char* pszPage)
 {
-	static const char* weekname[7] = { "日", "一", "二", "三", "四", "五", "六" };
-	char szYear[20], szMonth[20], szDay[20], szHour[20], szMinute[20], szSecond[20], szWeek[32];
-	if (pTimeup->wYear != 0xffff)sprintf(szYear, "%u", pTimeup->wYear);
-	if (pTimeup->wMonth != 0xffff)sprintf(szMonth, "%u", pTimeup->wMonth);
-	if (pTimeup->wDay != 0xffff)sprintf(szDay, "%u", pTimeup->wDay);
-	if (pTimeup->wHour != 0xffff)sprintf(szHour, "%u", pTimeup->wHour);
-	if (pTimeup->wMinute != 0xffff)sprintf(szMinute, "%u", pTimeup->wMinute);
-	if (pTimeup->wSecond != 0xffff)sprintf(szSecond, "%u", pTimeup->wSecond);
-	if (pTimeup->wDayOfWeek != 0xffff)sprintf(szWeek, "星期%s", weekname[pTimeup->wDayOfWeek % 7]);
+	static constexpr std::array<const char*, 7> weekname = { "日", "一", "二", "三", "四", "五", "六" };
+	std::array<char, 20> szYear{}, szMonth{}, szDay{}, szHour{}, szMinute{}, szSecond{};
+	std::array<char, 32> szWeek{};
+	if (pTimeup->wYear != 0xffff)sprintf(szYear.data(), "%u", pTimeup->wYear);
+	if (pTimeup->wMonth != 0xffff)sprintf(szMonth.data(), "%u", pTimeup->wMonth);
+	if (pTimeup->wDay != 0xffff)sprintf(szDay.data(), "%u", pTimeup->wDay);
+	if (pTimeup->wHour != 0xffff)sprintf(szHour.data(), "%u", pTimeup->wHour);
+	if (pTimeup->wMinute != 0xffff)sprintf(szMinute.data(), "%u", pTimeup->wMinute);
+	if (pTimeup->wSecond != 0xffff)sprintf(szSecond.data(), "%u", pTimeup->wSecond);
+	if (pTimeup->wDayOfWeek != 0xffff)sprintf(szWeek.data(), "星期%s", weekname[pTimeup->wDayOfWeek % 7]);
 	PRINT(STRING_GREEN, "注册%s年%s月%s日%s - %s时%s分%s秒 - 自动执行脚本 %s\n",
-		pTimeup->wYear == 0xffff ? "每" : szYear,
-		pTimeup->wMonth == 0xffff ? "每" : szMonth,
-		pTimeup->wDay == 0xffff ? "每" : szDay,
-		pTimeup->wDayOfWeek == 0xffff ? "" : szWeek,
-		pTimeup->wHour == 0xffff ? "每" : szHour,
-		pTimeup->wMinute == 0xffff ? "每" : szMinute,
-		pTimeup->wSecond == 0xffff ? "每" : szSecond,
+		pTimeup->wYear == 0xffff ? "每" : szYear.data(),
+		pTimeup->wMonth == 0xffff ? "每" : szMonth.data(),
+		pTimeup->wDay == 0xffff ? "每" : szDay.data(),
+		pTimeup->wDayOfWeek == 0xffff ? "" : szWeek.data(),
+		pTimeup->wHour == 0xffff ? "每" : szHour.data(),
+		pTimeup->wMinute == 0xffff ? "每" : szMinute.data(),
+		pTimeup->wSecond == 0xffff ? "每" : szSecond.data(),
 		pszPage);
 	TimeScript* p = new TimeScript();
-	p->pszScriptPage = nullptr;
 	p->pNext = m_pTimeScript;
 	m_pTimeScript = p;
 	p->m_eTimeUp = *pTimeup;
-	p->pszScriptPage = copystring(pszPage);
+	p->pszScriptPage.reset(copystring(pszPage));
 }
 
 VOID CAutoScriptManager::OnSecondChange(CSystemTime& curTime)
@@ -232,6 +231,7 @@ VOID CAutoScriptManager::OnSecondChange(CSystemTime& curTime)
 	WORD wHour = curTime.GetHour();
 	WORD wMinute = curTime.GetMinute();
 	WORD wSecond = curTime.GetSecond();
+	auto* pSystemScript = CSystemScript::GetInstance();
 	for (TimeScript* p = m_pTimeScript; p != nullptr; p = p->pNext)
 	{
 		if (p->m_eTimeUp.wYear != 0xffff && p->m_eTimeUp.wYear != wYear)
@@ -248,7 +248,7 @@ VOID CAutoScriptManager::OnSecondChange(CSystemTime& curTime)
 			continue;
 		if (p->m_eTimeUp.wSecond != 0xffff && p->m_eTimeUp.wSecond != wSecond)
 			continue;
-		CSystemScript::GetInstance()->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage, FALSE);
+		pSystemScript->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage.get(), FALSE);
 	}
 }
 
@@ -260,6 +260,7 @@ VOID CAutoScriptManager::OnMinuteChange(CSystemTime& curTime)
 	WORD wDayOfWeek = curTime.GetDayOfWeek();
 	WORD wHour = curTime.GetHour();
 	WORD wMinute = curTime.GetMinute();
+	auto* pSystemScript = CSystemScript::GetInstance();
 	for (TimeScript* p = m_pTimeScript; p != nullptr; p = p->pNext)
 	{
 		if (p->m_eTimeUp.wYear != 0xffff && p->m_eTimeUp.wYear != wYear)
@@ -274,7 +275,7 @@ VOID CAutoScriptManager::OnMinuteChange(CSystemTime& curTime)
 			continue;
 		if (p->m_eTimeUp.wMinute != 0xffff && p->m_eTimeUp.wMinute != wMinute)
 			continue;
-		CSystemScript::GetInstance()->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage, FALSE);
+		pSystemScript->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage.get(), FALSE);
 	}
 }
 
@@ -285,6 +286,7 @@ VOID CAutoScriptManager::OnHourChange(CSystemTime& curTime)
 	WORD wDay = curTime.GetDay();
 	WORD wDayOfWeek = curTime.GetDayOfWeek();
 	WORD wHour = curTime.GetHour();
+	auto* pSystemScript = CSystemScript::GetInstance();
 	for (TimeScript* p = m_pTimeScript; p != nullptr; p = p->pNext)
 	{
 		if (p->m_eTimeUp.wYear != 0xffff && p->m_eTimeUp.wYear != wYear)
@@ -297,7 +299,7 @@ VOID CAutoScriptManager::OnHourChange(CSystemTime& curTime)
 			continue;
 		if (p->m_eTimeUp.wHour != 0xffff && p->m_eTimeUp.wHour != wHour)
 			continue;
-		CSystemScript::GetInstance()->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage, FALSE);
+		pSystemScript->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage.get(), FALSE);
 	}
 }
 
@@ -307,6 +309,7 @@ VOID CAutoScriptManager::OnDayChange(CSystemTime& curTime)
 	WORD wMonth = curTime.GetMonth();
 	WORD wDay = curTime.GetDay();
 	WORD wDayOfWeek = curTime.GetDayOfWeek();
+	auto* pSystemScript = CSystemScript::GetInstance();
 	for (TimeScript* p = m_pTimeScript; p != nullptr; p = p->pNext)
 	{
 		if (p->m_eTimeUp.wYear != 0xffff && p->m_eTimeUp.wYear != wYear)
@@ -317,7 +320,7 @@ VOID CAutoScriptManager::OnDayChange(CSystemTime& curTime)
 			continue;
 		if (p->m_eTimeUp.wDayOfWeek != 0xffff && p->m_eTimeUp.wDayOfWeek != wDayOfWeek)
 			continue;
-		CSystemScript::GetInstance()->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage, FALSE);
+		pSystemScript->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage.get(), FALSE);
 	}
 }
 
@@ -325,23 +328,25 @@ VOID CAutoScriptManager::OnMonthChange(CSystemTime& curTime)
 {
 	WORD wYear = curTime.GetYear();
 	WORD wMonth = curTime.GetMonth();
+	auto* pSystemScript = CSystemScript::GetInstance();
 	for (TimeScript* p = m_pTimeScript; p != nullptr; p = p->pNext)
 	{
 		if (p->m_eTimeUp.wYear != 0xffff && p->m_eTimeUp.wYear != wYear)
 			continue;
 		if (p->m_eTimeUp.wMonth != 0xffff && p->m_eTimeUp.wMonth != wMonth)
 			continue;
-		CSystemScript::GetInstance()->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage, FALSE);
+		pSystemScript->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage.get(), FALSE);
 	}
 }
 
 VOID CAutoScriptManager::OnYearChange(CSystemTime& curTime)
 {
 	WORD wYear = curTime.GetYear();
+	auto* pSystemScript = CSystemScript::GetInstance();
 	for (TimeScript* p = m_pTimeScript; p != nullptr; p = p->pNext)
 	{
 		if (p->m_eTimeUp.wYear != 0xffff && p->m_eTimeUp.wYear != wYear)
 			continue;
-		CSystemScript::GetInstance()->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage, FALSE);
+		pSystemScript->Execute(m_pScriptTarget->GetScriptTarget(), p->pszScriptPage.get(), FALSE);
 	}
 }

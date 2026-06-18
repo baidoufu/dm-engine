@@ -36,7 +36,6 @@
 #include "TriggerEvent.h"
 #include "FengHaoGrowManager.h"
 
-static thread_local char g_szTempBuffer[65536];
 extern DWORD g_dwActionDelay[AT_MAX];
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 //		描述：创建掉落物品
@@ -129,13 +128,13 @@ DEFINE_SCRIPT_FUNCTION(SETBIGBAG) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(SENDSINGLEMSG) {
 	if (nParam != 2)return FALSE;
-	std::vector<char> szMsg(65536);
+	thread_local char szMsg[65536]; // 使用thread_local复用缓冲区，避免每帧64KB堆分配
 	CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[0].pszParam);
 	if (p != nullptr)
 	{
-		int size = GetMsgFromString(Params[0].pszParam, szMsg.data());
+		int size = GetMsgFromString(Params[0].pszParam, szMsg);
 		if (size > 0)
-			p->OnAroundMsg(pPlayer, szMsg.data(), size);
+			p->OnAroundMsg(pPlayer, szMsg, size);
 	}
 }END_SCRIPT_FUNCTION
 
@@ -145,10 +144,10 @@ DEFINE_SCRIPT_FUNCTION(SENDSINGLEMSG) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(SENDMSG) {
 	if (nParam != 1)return FALSE;
-	std::vector<char> szMsg(65536);
-	int size = GetMsgFromString(Params[0].pszParam, szMsg.data());
+	thread_local char szMsg[65536]; // 使用thread_local复用缓冲区，避免每帧64KB堆分配
+	int size = GetMsgFromString(Params[0].pszParam, szMsg);
 	if (size > 0)
-		pPlayer->OnAroundMsg(pPlayer, szMsg.data(), size);
+		pPlayer->OnAroundMsg(pPlayer, szMsg, size);
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -256,7 +255,7 @@ DEFINE_SCRIPT_FUNCTION(CALLMON) {
 		if (nParam > 1)
 			nCount = Params[1].nParam > 0 ? Params[1].nParam : 1;
 #ifdef	_DEBUG
-		UINT rnCount = pPlayer->GetMap()->CountAllMonsters();
+		UINT rnCount = pPlayer->GetMap() ? pPlayer->GetMap()->CountAllMonsters() : 0;
 #endif
 		ITEM* pItem = nullptr;
 		int temp = 0;
@@ -302,7 +301,7 @@ DEFINE_SCRIPT_FUNCTION(CALLMON) {
 				pPlayer->SaySystemAttrib(CC_REDPET, "你的从林豹处于饥饿状态!");
 		}
 #ifdef	_DEBUG
-		PRINT(SUCCESS_GREEN, "召唤前怪数量:%u, 召唤后怪数量:%u\n", rnCount, pPlayer->GetMap()->CountAllMonsters() );
+		PRINT(SUCCESS_GREEN, "召唤前怪数量:%u, 召唤后怪数量:%u\n", rnCount, pPlayer->GetMap() ? pPlayer->GetMap()->CountAllMonsters() : 0 );
 #endif
 	}
 }END_SCRIPT_FUNCTION
@@ -380,25 +379,32 @@ DEFINE_SCRIPT_FUNCTION(RELOADCONFIG) {
 	if (nParam >= 1)
 	{
 		if (_stricmp(Params[0].pszParam, "serverconfig") == 0)
+		{
 			CGameWorld::GetInstance()->LoadServerConfig();
+			pPlayer->SaySystem("重新加载服务器配置完成!");
+		}
 		else if (_stricmp(Params[0].pszParam, "item") == 0)
 		{
 			CItemManager::GetInstance()->ClearItemData();
 			CItemManager::GetInstance()->Load(".\\Data\\Config\\BaseItem.csv");
+			pPlayer->SaySystem("重新加载物品数据完成!");
 		}
 		else if (_stricmp(Params[0].pszParam, "monster") == 0)
 		{
 			CMonsterManagerEx::GetInstance()->ClearMonsterData();
 			CMonsterManagerEx::GetInstance()->LoadMonsters(".\\Data\\Monsters");
+			pPlayer->SaySystem("重新加载怪物数据完成!");
 		}
-		else if (_stricmp(Params[0].pszParam, "skill") == 0){
+		else if (_stricmp(Params[0].pszParam, "skill") == 0)
+		{
 			CMagicManager::GetInstance()->ClearMagicData();
 			CMagicManager::GetInstance()->LoadMaigc(".\\Data\\Config\\BaseMagic.csv");
-			CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv", TRUE);
+			CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv");
 			CMagicManager::GetInstance()->LoadMaigcskill(".\\Data\\Config\\MagicSkill.xml");
 			// 重新加载技能数据后, 需要更新所有在线玩家的技能指针
 			CMagicManager::GetInstance()->ReloadAllPlayerSkills();
-		}		
+			pPlayer->SaySystem("重新加载技能数据完成!");
+		}
 	}
 }END_SCRIPT_FUNCTION
 
@@ -427,7 +433,7 @@ DEFINE_SCRIPT_FUNCTION(CLRSTATUS) {
 DEFINE_SCRIPT_FUNCTION(REST) {
 	if (pPlayer->GetPetCount() == 0)
 		return FALSE;
-	pPlayer->SetPetsActive(!pPlayer->IsPetsActive());
+	pPlayer->SetPetsActive();
 	if (pPlayer->IsPetsActive())
 		pPlayer->SaySystem("宠物行动!");
 	else
@@ -675,6 +681,7 @@ DEFINE_SCRIPT_FUNCTION(QUITGUILD) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(RELOADNOTICE) {
 	CGameWorld::GetInstance()->LoadNotice();
+	pPlayer->SaySystem("重新加载公告完成!");
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -751,8 +758,10 @@ DEFINE_SCRIPT_FUNCTION(RELOADSCRIPT) {
 		CScriptObject* pObject = CScriptObjectMgr::GetInstance()->GetScriptObject(Params[0].pszParam);
 		if (pObject)
 		{
-			pObject->Reload();
-			pPlayer->SaySystem("重新加载 %s 结束!", Params[0].pszParam);
+			if (pObject->Reload())
+				pPlayer->SaySystem("重新加载 %s.txt 脚本成功!", Params[0].pszParam);
+			else
+				pPlayer->SaySystem("重新加载 %s.txt 脚本失败!", Params[0].pszParam);
 		}
 		else
 			pPlayer->SaySystem("系统中不存在名字为 %s 的脚本对象, 无法重新加载!", Params[0].pszParam);
@@ -897,9 +906,9 @@ DEFINE_SCRIPT_FUNCTION(SHOWINFO) {
 				p->GetPropValue(PI_MINDC), p->GetPropValue(PI_MAXDC), p->GetPropValue(PI_MINMC),
 				p->GetPropValue(PI_MAXMC), p->GetPropValue(PI_MINSC), p->GetPropValue(PI_MAXSC),
 				p->GetPropValue(PI_MINAC), p->GetPropValue(PI_MAXAC), p->GetPropValue(PI_MINMAC), p->GetPropValue(PI_MAXMAC));
-			xPacket packet(g_szTempBuffer, 65536);
-			p->GetViewDetail(packet);
-			pPlayer->SendMsg(p->GetId(), 0x2ef, 0, MAKEWORD(0, _U_MAX), MAKEWORD(0, 1), (LPVOID)packet.getbuf(), packet.getsize());
+			xPacketPool::ScopedPacket packet(65536);
+			p->GetViewDetail(*packet);
+			pPlayer->SendMsg(p->GetId(), 0x2ef, 0, MAKEWORD(0, _U_MAX), MAKEWORD(0, 1), (LPVOID)packet->getbuf(), packet->getsize());
 		}
 		else
 			pPlayer->SaySystem("%s 不在线!", Params[0].pszParam);
@@ -1229,7 +1238,7 @@ DEFINE_SCRIPT_FUNCTION(RELOADMAGIC){
 //		注释：
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(RELOADMAGICEXT)
-	CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv", TRUE);
+	CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv");
 END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1873,7 +1882,7 @@ DEFINE_SCRIPT_FUNCTION(CHANGEACHIEVEPOINT) {
 DEFINE_SCRIPT_FUNCTION(EXCHANGEBOX) {
 	if (nParam == 2)
 	{
-		xPacket packet(g_szTempBuffer, 65536);
+		xPacketPool::ScopedPacket packet(65536);
 		xStringsExtracter<11> items(Params[1].pszParam, "|");
 		int nCount = items.getCount();
 		if (nCount <= 0) return FALSE;
@@ -1899,10 +1908,10 @@ DEFINE_SCRIPT_FUNCTION(EXCHANGEBOX) {
 				continue;
 			if (itemFields.getCount() > 2 && itemFields[2] != nullptr)
 				pBoxItem.btGoodType = StringToInteger(itemFields[2]); // 发光标识
-			packet.push((LPVOID)&pBoxItem, sizeof(pBoxItem));
+			packet->push((LPVOID)&pBoxItem, sizeof(pBoxItem));
 		}
 		// w1 MAKEWORD[阶段(银界面3,4 / 金界面5,6),轮次(1-4)]、w2 物品数量、w3 宝箱类型、lpdata 物品数据
-		pPlayer->SendMsg(pPlayer->GetId(), 0x273, MAKEWORD(5, 1), nCount, Params[0].nParam, (LPVOID)packet.getbuf(), packet.getsize());
+		pPlayer->SendMsg(pPlayer->GetId(), 0x273, MAKEWORD(5, 1), nCount, Params[0].nParam, (LPVOID)packet->getbuf(), packet->getsize());
 		pPlayer->AddProcess(EP_EXCHANGEBOX, nLooks, 1, 0, 0, 10000, 1, szItem);
 		return TRUE;
 	}

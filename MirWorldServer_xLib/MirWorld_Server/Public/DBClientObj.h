@@ -5,9 +5,9 @@ class CDBClientObj :
 	public CClientObject
 {
 public:
-	CDBClientObj(void);
-	virtual ~CDBClientObj(void);
-	void Update();
+	CDBClientObj(VOID);
+	virtual ~CDBClientObj(VOID);
+	VOID Update();
 	VOID SendQueryCharlist(UINT id, UINT key, const char* pszAccount, const char* pszServerName);
 	VOID SendQueryCreateChar(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName, BYTE btClass, BYTE btSex, BYTE btHair);
 	VOID SendQueryDelChar(UINT id, UINT key, const char* pszAccount, const char* pszServerName, const char* pszName);
@@ -25,7 +25,6 @@ public:
 	VOID SendQueryItem(UINT id, UINT key, DWORD dwDBId, BYTE btFlag, WORD wMaxCount);
 	VOID SendUpdateMagic(DWORD dwDBId, int count, MAGICDB* pArray);
 	VOID SendQueryMagic(UINT id, UINT key, DWORD dwDBId);
-	VOID UpdateAccountState(DWORD dwServerId, const char* pszAccount, UINT state);
 	VOID UpdateCommunity(DWORD dwOwner, const char* pszCommunity);
 	VOID QueryCommunity(UINT id, DWORD dwKey, DWORD dwOwner);
 	VOID SendBreakFriend(const char* friend1, const char* friend2);

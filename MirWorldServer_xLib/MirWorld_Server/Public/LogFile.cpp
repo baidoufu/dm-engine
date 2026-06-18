@@ -2,12 +2,12 @@
 #include "inc.h"
 #include ".\logfile.h"
 
-CLogFile::CLogFile(void)
+CLogFile::CLogFile(VOID)
 {
-	m_fpLog = nullptr;
+	m_fpLog.reset();
 	memset(&m_stFileTime, 0, sizeof(m_stFileTime));
-	memset(m_szCache, 0, sizeof(m_szCache));
-	memset(m_szFile, 0, sizeof(m_szFile));
+	m_szCache.fill(0);
+	m_szFile.fill(0);
 
 	if (!PathIsFolder("..\\»’÷æ"))
 	{
@@ -18,10 +18,8 @@ CLogFile::CLogFile(void)
 	}
 }
 
-CLogFile::~CLogFile(void)
+CLogFile::~CLogFile(VOID)
 {
-	if (m_fpLog != nullptr)
-		fclose(m_fpLog);
 }
 
 BOOL CLogFile::Init(const char* pszPath)
@@ -31,7 +29,7 @@ BOOL CLogFile::Init(const char* pszPath)
 		if (!CreateDirectory(pszPath, nullptr))
 			return FALSE;
 	}
-	o_strncpy(m_szFile, pszPath, 1023);
+	o_strncpy(m_szFile.data(), pszPath, 1023);
 	ChangeLogFile();
 	return TRUE;
 }
@@ -46,109 +44,62 @@ VOID CLogFile::LogDate()
 VOID CLogFile::LogText(const char* pszString, ...)
 {
 	THREAD_PROTECT;
-	if (m_fpLog == nullptr)return;
+	if (!m_fpLog)return;
 	va_list	vl;
 	va_start(vl, pszString);
-	vsprintf(m_szCache, pszString, vl);
+	vsnprintf(m_szCache.data(), m_szCache.size(), pszString, vl);
 	va_end(vl);
-	fputs(m_szCache, m_fpLog);
-	fflush(m_fpLog);
+	m_szCache[m_szCache.size() - 1] = 0;
+	fputs(m_szCache.data(), m_fpLog.get());
+	fflush(m_fpLog.get());
 }
 
 VOID CLogFile::LogTextRt(const char* pszString, ...)
 {
 	THREAD_PROTECT;
-	if (m_fpLog == nullptr)return;
+	if (!m_fpLog)return;
 	va_list	vl;
 	va_start(vl, pszString);
-	vsprintf(m_szCache, pszString, vl);
+	vsnprintf(m_szCache.data(), m_szCache.size(), pszString, vl);
 	va_end(vl);
-	fputs(m_szCache, m_fpLog);
-	fputs("\n", m_fpLog);
-	fflush(m_fpLog);
+	m_szCache[m_szCache.size() - 1] = 0;
+	fputs(m_szCache.data(), m_fpLog.get());
+	fputs("\n", m_fpLog.get());
+	fflush(m_fpLog.get());
 }
 
 VOID CLogFile::LogTextWithDate(const char* pszString, ...)
 {
 	THREAD_PROTECT;
-	if (m_fpLog == nullptr)return;
+	if (!m_fpLog)return;
 	LogDate();
 	va_list	vl;
 	va_start(vl, pszString);
-	vsprintf(m_szCache, pszString, vl);
+	vsnprintf(m_szCache.data(), m_szCache.size(), pszString, vl);
 	va_end(vl);
-	fputs(m_szCache, m_fpLog);
-	fflush(m_fpLog);
-}
-
-VOID CLogFile::LogBinary(LPVOID lpData, int nSize, int nLineSize)
-{
-	THREAD_PROTECT;
-	BYTE* pString = (BYTE*)lpData;
-	char szAscii[20] = { 0 };
-	szAscii[1] = 0;
-	if (m_fpLog == nullptr || lpData == nullptr)return;
-
-	LogDate();
-	NextLine();
-
-	fprintf(m_fpLog, "binary data( 0x%p ) size: %d\n<start>\n", lpData, nSize);
-	int iLineCount = 0;
-	for (int i = 0;i < nSize;i++)
-	{
-		if (*(pString + i) <= 0x20)
-		{
-			fputc('.', m_fpLog);
-		}
-		else
-		{
-			fputc(*(pString + i), m_fpLog);
-		}
-		iLineCount++;
-		if (iLineCount >= nLineSize)
-		{
-			fprintf(m_fpLog, "\n");
-			iLineCount = 0;
-		}
-	}
-	fprintf(m_fpLog, "\n<end>\n");
-	fflush(m_fpLog);
-
-	fprintf(m_fpLog, "hex code of binary data\n<start>\n");
-	for (int i = 0;i < nSize;i++)
-	{
-		fprintf(m_fpLog, "%02x ", *(pString + i));
-		iLineCount++;
-		if (iLineCount >= nLineSize)
-		{
-			fprintf(m_fpLog, "\n");
-			iLineCount = 0;
-		}
-	}
-	fprintf(m_fpLog, "\n<end>\n");
-	fflush(m_fpLog);
+	m_szCache[m_szCache.size() - 1] = 0;
+	fputs(m_szCache.data(), m_fpLog.get());
+	fflush(m_fpLog.get());
 }
 
 VOID CLogFile::NextLine()
 {
-	if (m_fpLog != 0)
-		fprintf(m_fpLog, "\n");
+	if (m_fpLog)
+		fprintf(m_fpLog.get(), "\n");
 }
 
 VOID CLogFile::ChangeLogFile()
 {
 	THREAD_PROTECT;
 	SYSTEMTIME stNow;
-	CriticalSectionProtector m_Protector;
 	GetLocalTime(&stNow);
-	if (stNow.wDay != m_stFileTime.wDay || m_fpLog == nullptr)
+	if (stNow.wDay != m_stFileTime.wDay || !m_fpLog)
 	{
-		CHAR szFile1[256];
-		CHAR szFile[1024];
-		sprintf(szFile1, "%04u-%02u-%02u.log", stNow.wYear, stNow.wMonth, stNow.wDay);
-		_makepath(szFile, nullptr, m_szFile, szFile1, nullptr);
-		if (m_fpLog)fclose(m_fpLog);
-		m_fpLog = fopen(szFile, "a");
+		std::array<char, 256> szFile1{};
+		std::array<char, 1024> szFile{};
+		sprintf(szFile1.data(), "%04u-%02u-%02u.log", stNow.wYear, stNow.wMonth, stNow.wDay);
+		_makepath(szFile.data(), nullptr, m_szFile.data(), szFile1.data(), nullptr);
+		m_fpLog.reset(fopen(szFile.data(), "a"));
 		m_stFileTime = stNow;
 	}
 }

@@ -5,8 +5,8 @@ class CAliveObject;
 class CDamageEvent : public CEventProcessor
 {
 public:
-	CDamageEvent(void);
-	virtual ~CDamageEvent(void);
+	CDamageEvent(VOID);
+	virtual ~CDamageEvent(VOID);
 	CDamageEvent(const CDamageEvent&) = delete;           // ½ûÖ¹¿½±´¹¹Ôì
 	CDamageEvent& operator=(const CDamageEvent&) = delete; // ½ûÖ¹¿½±´¸³Öµ
 	static CDamageEvent* Create(UINT mapid, int x, int y, UINT nRange, UINT nView, DWORD dwParam1, DWORD dwParam2, UINT nDamage, damage_type damagetype, CAliveObject* pOwner, UINT nKeepTime, UINT nRunTime);

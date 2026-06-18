@@ -3,20 +3,20 @@
 
 xSocket::xSocket() : m_state(SS_UNINITED), m_Socket(INVALID_SOCKET), m_nPort(0)
 {
-	m_szAddress[0] = 0;
+	m_szAddress.fill(0);
 	memset(&m_stats, 0, sizeof(m_stats));
 	m_stats.connection_time = getCurrentTime();
 }
 
 xSocket::xSocket(SOCKET Socket) : m_state(SS_UNINITED), m_Socket(INVALID_SOCKET), m_nPort(0)
 {
-	m_szAddress[0] = 0;
+	m_szAddress.fill(0);
 	setSocket(Socket);
 	memset(&m_stats, 0, sizeof(m_stats));
 	m_stats.connection_time = getCurrentTime();
 }
 
-xSocket::~xSocket(void)
+xSocket::~xSocket(VOID)
 {
 	close();
 }
@@ -31,14 +31,6 @@ BOOL xSocket::makeSocket(int af, int type, int protocol)
 		return FALSE;
 	}
 	setState(SS_UNUSED);
-	
-	// 自动应用性能优化设置
-	setReuseAddr(TRUE);
-	setTcpNoDelay(TRUE);
-	setKeepAlive(TRUE, 30, 5);
-	setSendBuffer(8192);     // 8KB发送缓冲区（低延迟优先）
-	setRecvBuffer(65536);    // 64KB接收缓冲区
-	
 	return TRUE;
 }
 
@@ -49,7 +41,7 @@ BOOL xSocket::setSocket(SOCKET Socket)
 		setState(SS_UNUSED);
 	else
 	{
-		m_szAddress[0] = 0;
+		m_szAddress.fill(0);
 		m_nPort = 0;
 		setState(SS_UNINITED);
 	}
@@ -58,11 +50,23 @@ BOOL xSocket::setSocket(SOCKET Socket)
 
 VOID xSocket::close()
 {
-	//m_szAddress[0] = 0;
-	m_nPort = 0;
-	closesocket(m_Socket);
+	if (m_Socket != INVALID_SOCKET)
+	{
+		HANDLE hFile = reinterpret_cast<HANDLE>(static_cast<INT_PTR>(m_Socket));
+		if (!CancelIoEx(hFile, nullptr))
+		{
+			DWORD dwError = GetLastError();
+			if (dwError != ERROR_NOT_FOUND)
+			{
+				setError(static_cast<int>(dwError), 
+					"CancelIoEx 失败 (socket=%d, error=%d), 残留的 IOCP 完成通知可能访问已释放对象",
+					static_cast<int>(m_Socket), static_cast<int>(dwError));
+			}
+		}
+		closesocket(m_Socket);
+	}
 	m_Socket = INVALID_SOCKET;
-	setState(SS_UNINITED);
+	setState(SS_DISCONNECTED);
 }
 
 BOOL xSocket::sendEx(LPVOID lpData, int nDatasize, DWORD& dwBytesSent, DWORD dwFlag, LPOVERLAPPED lpOverlapped)
@@ -93,7 +97,7 @@ BOOL xSocket::sendEx(LPVOID lpData, int nDatasize, DWORD& dwBytesSent, DWORD dwF
 
 BOOL xSocket::recvEx(LPVOID lpDataBuf, int nBufsize, DWORD& dwBytesReceived, DWORD& dwFlag, LPOVERLAPPED lpOverlapped)
 {
-	WSABUF	wsabuf;
+	WSABUF wsabuf{};
 	wsabuf.buf = static_cast<char*>(lpDataBuf);
 	wsabuf.len = nBufsize;
 
@@ -138,11 +142,15 @@ BOOL xSocket::acceptEx(xSocket& sAccept, LPVOID lpDataBuf, DWORD dwRecvBufferLen
 
 BOOL xSocket::connect(const char* cp, UINT nPort)
 {
-	struct	sockaddr_in ServAddr;
-	LPHOSTENT m_pHost = gethostbyname(cp);
-	if (m_pHost == nullptr)
+	struct addrinfo hints = {};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	struct addrinfo* result = nullptr;
+	if (getaddrinfo(cp, nullptr, &hints, &result) != 0 || result == nullptr)
 	{
-		setError(WSAGetLastError(), "connect() 中 gethostbyname( %s ) 失败!", cp);
+		setError(WSAGetLastError(), "connect() 中 getaddrinfo( %s ) 失败!", cp);
 		return FALSE;
 	}
 
@@ -152,19 +160,78 @@ BOOL xSocket::connect(const char* cp, UINT nPort)
 		makeSocket();
 	}
 
+	struct sockaddr_in ServAddr = {};
 	ServAddr.sin_family = AF_INET;
-	ServAddr.sin_addr.s_addr = *reinterpret_cast<ULONG*>(m_pHost->h_addr_list[0]);
+	ServAddr.sin_addr.s_addr = reinterpret_cast<struct sockaddr_in*>(result->ai_addr)->sin_addr.s_addr;
 	ServAddr.sin_port = htons(nPort);
+	freeaddrinfo(result);
 
-	int erri = ::connect(m_Socket, (struct sockaddr*)&ServAddr, sizeof(ServAddr));
+	// 设置为非阻塞模式
+	setNoBlocking();
+
+	int erri = ::connect(m_Socket, reinterpret_cast<struct sockaddr*>(&ServAddr), sizeof(ServAddr));
 	if (erri == SOCKET_ERROR)
 	{
-		setError(WSAGetLastError(), "connect() 中 connect() 失败!");
-		return FALSE;
+		int code = WSAGetLastError();
+		if (code != WSAEWOULDBLOCK)  // 非阻塞连接正常返回此错误
+		{
+			setError(code, "connect() 失败!");
+			return FALSE;
+		}
+		// WSAEWOULDBLOCK 表示连接正在进行中，不在此处阻塞等待
+		// 调用方应使用 pollConnectResult() 检查连接结果
+		setEndPoint(cp, nPort);
+		setState(SS_CONNECTING);
+		return TRUE;
 	}
 	setEndPoint(cp, nPort);
 	setState(SS_CONNECTED);
-	return	TRUE;
+	return TRUE;
+}
+
+BOOL xSocket::pollConnectResult(UINT timeoutMs)
+{
+	if (getState() != SS_CONNECTING)
+		return FALSE;
+
+	fd_set writeSet{};
+	fd_set errSet{};
+	FD_ZERO(&writeSet);
+	FD_ZERO(&errSet);
+	FD_SET(m_Socket, &writeSet);
+	FD_SET(m_Socket, &errSet);
+	timeval tv = { static_cast<long>(timeoutMs / 1000), static_cast<long>((timeoutMs % 1000) * 1000) };
+
+	int ret = select(0, nullptr, &writeSet, &errSet, &tv);
+	if (ret <= 0)
+	{
+		// 超时或 select 失败
+		setError(WSAGetLastError(), "pollConnectResult() 超时!");
+		return FALSE;
+	}
+
+	// 检查是否有错误（连接被拒绝等）
+	if (FD_ISSET(m_Socket, &errSet))
+	{
+		int optval = 0;
+		int optlen = sizeof(optval);
+		getsockopt(m_Socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&optval), &optlen);
+		setError(optval, "pollConnectResult() 连接失败!");
+		return FALSE;
+	}
+
+	// 连接成功，检查 SO_ERROR 确认（某些情况下 writeSet 也可能触发但连接失败）
+	int optval = 0;
+	int optlen = sizeof(optval);
+	getsockopt(m_Socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&optval), &optlen);
+	if (optval != 0)
+	{
+		setError(optval, "pollConnectResult() 连接失败!");
+		return FALSE;
+	}
+
+	setState(SS_CONNECTED);
+	return TRUE;
 }
 
 BOOL xSocket::listen(UINT nPort)
@@ -176,7 +243,9 @@ BOOL xSocket::listen(UINT nPort)
 		makeSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	}
 
-	memset(static_cast<void*>(&serveraddr), 0, sizeof(struct sockaddr_in));
+	setReuseAddr(TRUE);
+
+	memset(static_cast<VOID*>(&serveraddr), 0, sizeof(struct sockaddr_in));
 
 	serveraddr.sin_family = PF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -199,11 +268,15 @@ BOOL xSocket::listen(UINT nPort)
 
 BOOL xSocket::listen(const char* cp, UINT nPort)
 {
-	struct	sockaddr_in	serveraddr;
-	LPHOSTENT m_pHost = gethostbyname(cp);
-	if (m_pHost == nullptr)
+	struct addrinfo hints = {};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	struct addrinfo* result = nullptr;
+	if (getaddrinfo(cp, nullptr, &hints, &result) != 0 || result == nullptr)
 	{
-		setError(WSAGetLastError(), "listen( %s, %u ) 中 gethostbyname( %s ) 失败!", cp, nPort, cp);
+		setError(WSAGetLastError(), "listen( %s, %u ) 中 getaddrinfo( %s ) 失败!", cp, nPort, cp);
 		return FALSE;
 	}
 
@@ -213,11 +286,13 @@ BOOL xSocket::listen(const char* cp, UINT nPort)
 		makeSocket();
 	}
 
-	memset(static_cast<void*>(&serveraddr), 0, sizeof(struct sockaddr_in));
+	setReuseAddr(TRUE);
 
+	struct sockaddr_in serveraddr = {};
 	serveraddr.sin_family = PF_INET;
-	serveraddr.sin_addr.s_addr = *reinterpret_cast<ULONG*>(m_pHost->h_addr_list[0]);
+	serveraddr.sin_addr.s_addr = reinterpret_cast<struct sockaddr_in*>(result->ai_addr)->sin_addr.s_addr;
 	serveraddr.sin_port = htons(nPort);
+	freeaddrinfo(result);
 
 	if (::bind(m_Socket, reinterpret_cast<struct sockaddr*>(&serveraddr), sizeof(struct sockaddr_in)) == SOCKET_ERROR)
 	{
@@ -302,7 +377,7 @@ BOOL xSocket::setRecvBuffer(UINT size)
 	return setSocketOption(SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
 }
 
-BOOL xSocket::setSocketOption(int level, int optname, const void* optval, int optlen)
+BOOL xSocket::setSocketOption(int level, int optname, const VOID* optval, int optlen)
 {
 	if (setsockopt(m_Socket, level, optname, static_cast<const char*>(optval), optlen) == SOCKET_ERROR) {
 		setError(WSAGetLastError(), "setSocketOption() 失败!level=%d, optname=%d", level, optname);

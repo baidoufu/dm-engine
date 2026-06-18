@@ -7,11 +7,11 @@
 #include ".\eventmanager.h"
 
 xObjectPool<FireRainEvent> FireRainEvent::m_xPool;
-FireRainEvent::FireRainEvent(void) : m_pVisibleEvent(nullptr), m_pOwner(nullptr), m_dwOwnerInstanceKey(0), m_nDamage(0), m_nRange(0)
+FireRainEvent::FireRainEvent(VOID) : m_pVisibleEvent(nullptr), m_pOwner(nullptr), m_dwOwnerInstanceKey(0), m_nDamage(0), m_nRange(0)
 {
 }
 
-FireRainEvent::~FireRainEvent(void)
+FireRainEvent::~FireRainEvent(VOID)
 {
 	Destroy();
 }
@@ -25,8 +25,9 @@ FireRainEvent* FireRainEvent::Create(CAliveObject* pOwner, int x, int y, UINT nR
 	if (y >= pMap->GetHeight())return nullptr;
 	FireRainEvent* pEvent = NewEvent();
 	if (pEvent == nullptr)return nullptr;
-	if (!CEventManager::GetInstance()->CheckNearEvent(pMap, x, y, 1, VE_FIRERAIN))
-		pEvent->m_pVisibleEvent = CEventManager::GetInstance()->NewVisibleEvent(pMap, x, y, VE_FIRERAIN, nRunTime, nKeepTime, pEvent);
+	auto* pEventManager = CEventManager::GetInstance();
+	if (!pEventManager->CheckNearEvent(pMap, x, y, 1, VE_FIRERAIN))
+		pEvent->m_pVisibleEvent = pEventManager->NewVisibleEvent(pMap, x, y, VE_FIRERAIN, nRunTime, nKeepTime, pEvent);
 	if (pEvent->m_pVisibleEvent == nullptr)
 	{
 		DeleteEvent(pEvent);
@@ -36,7 +37,7 @@ FireRainEvent* FireRainEvent::Create(CAliveObject* pOwner, int x, int y, UINT nR
 	if (pOwner)pEvent->m_dwOwnerInstanceKey = pOwner->GetInstanceKey();
 	pEvent->m_nDamage = nDamage;
 	pEvent->m_nRange = nRange;
-	CEventManager::GetInstance()->AddEventProcessor(pEvent);
+	pEventManager->AddEventProcessor(pEvent);
 	return pEvent;
 }
 
@@ -86,7 +87,7 @@ VOID FireRainEvent::OnUpdate(CVisibleEvent* pEvent)
 	{
 		for (int y = nStartY; y <= nEndY; y++)
 		{
-			pInfo = pMap->GetMapCellInfo(x, y);
+			pInfo = pMap->GetMapCellInfoShared(x, y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 			{
 				xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();

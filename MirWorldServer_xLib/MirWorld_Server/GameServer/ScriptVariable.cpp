@@ -1,10 +1,11 @@
 #include "StdAfx.h"
 #include "scriptvariable.h"
+#include <array>
 
 CVariableFile::CVariableFile()
 {
 	m_bModified = FALSE;
-	m_pFilename = nullptr;
+	m_pFilename.reset();
 	m_szName[0] = 0;
 	if (!PathIsFolder(".\\Data\\Variables"))
 		CreateDirectory(".\\Data\\Variables", nullptr);
@@ -32,9 +33,8 @@ BOOL CVariableFile::Load(const char* pszFilename)
 		else
 			m_xVarList.AddVar(val[0], "");
 	}
-	if (this->m_pFilename)delete[]m_pFilename;
-	m_pFilename = copystring(pszFilename);
-	_splitpath(m_pFilename, nullptr, nullptr, m_szName, nullptr);
+	m_pFilename.reset(copystring(pszFilename));
+	_splitpath(m_pFilename.get(), nullptr, nullptr, m_szName.data(), nullptr);
 	return TRUE;
 }
 
@@ -42,7 +42,7 @@ BOOL CVariableFile::Reload()
 {
 	if (m_pFilename == nullptr)return FALSE;
 	m_xVarList.ClearVars();
-	CStringFile sf(m_pFilename);
+	CStringFile sf(m_pFilename.get());
 	char* pLine = nullptr;
 	for (UINT i = 0; i < (UINT)sf.GetLineCount(); i++)
 	{
@@ -58,25 +58,25 @@ BOOL CVariableFile::Reload()
 	return TRUE;
 }
 
-static thread_local char g_szFilename[1024];
+static thread_local std::array<char, 1024> g_szFilename{};
 BOOL CVariableFile::Save()
 {
 	if (m_pFilename == nullptr)
 	{
 		if (m_szName[0] == 0)return FALSE;
-		sprintf(g_szFilename, ".\\Data\\Variables\\%s.txt", m_szName);
-		m_pFilename = copystring(g_szFilename);
+		sprintf(g_szFilename.data(), ".\\Data\\Variables\\%s.txt", m_szName.data());
+		m_pFilename.reset(copystring(g_szFilename.data()));
 	}
-	FILE* fp = fopen(m_pFilename, "w");
+	FILE* fp = fopen(m_pFilename.get(), "w");
 	if (fp == nullptr)return FALSE;
 	xStringList<32>* p = m_xVarList.GetList();
 	for (UINT n = 0; n < p->GetCount(); n++)
 	{
 		xVarList<32>::Variable* var = (xVarList<32>::Variable*)(*p)[n]->lpObject;
-		char* pVal = var->pszValue;
+		char* pVal = var->pszValue.get();
 		if (pVal == nullptr)
 			pVal = "";
-		fprintf(fp, "%s = \"%s\"\n", (*p)[n]->pszString, pVal);
+		fprintf(fp, "%s = \"%s\"\n", (*p)[n]->pszString.get(), pVal);
 	}
 	fclose(fp);
 	return TRUE;
@@ -84,22 +84,22 @@ BOOL CVariableFile::Save()
 
 const char* CVariableFile::GetVariableValue(const char* pszName)
 {
-	return this->m_xVarList.GetVarValue(pszName);
+	return m_xVarList.GetVarValue(pszName);
 }
 
 VOID CVariableFile::SetVariableValue(const char* pszName, const char* pszValue)
 {
-	this->m_xVarList.AddVar(pszName, (char*)pszValue);
+	m_xVarList.AddVar(pszName, (char*)pszValue);
 }
 
 VOID CVariableFile::DelVariable(const char* pszName)
 {
-	this->m_xVarList.DelVar(pszName);
+	m_xVarList.DelVar(pszName);
 }
 
 VOID CVariableFile::Clear()
 {
-	this->m_xVarList.ClearVars();
+	m_xVarList.ClearVars();
 }
 
 CVariableRegisterAgent::CVariableRegisterAgent(const char* pszName, fnGetVariable fnGet)
@@ -111,23 +111,23 @@ CVariableRegisterAgent::CVariableRegisterAgent(const char* pszName, fnGetVariabl
 CScriptVariableManager::CScriptVariableManager() : m_xVarList(TRUE)
 {
 	m_nCachePtr = 0;
-	memset(m_xStringCache, 0, sizeof(m_xStringCache));
+	memset(m_xStringCache.data(), 0, sizeof(m_xStringCache));
 }
 
 BOOL CScriptVariableManager::AddVariable(const char* pszName, fnGetVariable fnGet)
 {
-	if (this->m_xVarList.Add(pszName, (LPVOID)fnGet) == -1)return FALSE;
+	if (m_xVarList.Add(pszName, (LPVOID)fnGet) == -1)return FALSE;
 	return TRUE;
 }
 
 BOOL CScriptVariableManager::GetVariable(const char* pszName, CHumanPlayer* pPlayer, GetVariableStruct& var)
 {
 	BOOL boOK = FALSE;
-	char szTemp[256];
-	strcpy_s(szTemp, sizeof(szTemp), pszName);
+	std::array<char, 256> szTemp{};
+	strcpy_s(szTemp.data(), szTemp.size(), pszName);
 	char* Params[5];
-	CallParamEx* callParams = new CallParamEx[4];
-	int nParam = SearchParam(szTemp, Params, 5, '*');
+	auto callParams = std::make_unique<CallParamEx[]>(4);
+	int nParam = SearchParam(szTemp.data(), Params, 5, "*");
 	if (nParam > 0)
 	{
 		for (int i = 1; i < nParam; i++)
@@ -138,11 +138,10 @@ BOOL CScriptVariableManager::GetVariable(const char* pszName, CHumanPlayer* pPla
 		fnGetVariable fnGet = (fnGetVariable)m_xVarList.ObjectOf(Params[0]);
 		if (fnGet)
 		{
-			fnGet(Params[0], callParams, nParam - 1, var, pPlayer);
+			fnGet(Params[0], callParams.get(), nParam - 1, var, pPlayer);
 			boOK = TRUE;
 		}
 	}
-	if (callParams) delete[] callParams;
 	if (boOK) return TRUE;
 	return FALSE;
 }
@@ -156,7 +155,7 @@ VOID CScriptVariableManager::OnFoundFile(const char* pszFilename, UINT nParam)
 		DeleteVariableFile(pFile);
 		return;
 	}
-	if (this->m_xVarGroupList.Add(pFile->GetName(), (LPVOID)pFile) == -1)
+	if (m_xVarGroupList.Add(pFile->GetName(), (LPVOID)pFile) == -1)
 	{
 		DeleteVariableFile(pFile);
 		return;
@@ -165,13 +164,13 @@ VOID CScriptVariableManager::OnFoundFile(const char* pszFilename, UINT nParam)
 
 CVariableFile* CScriptVariableManager::NewVariableFile()
 {
-	return this->m_xVarGroupPool.newObject();
+	return m_xVarGroupPool.newObject();
 }
 
 VOID CScriptVariableManager::DeleteVariableFile(CVariableFile* pFile)
 {
 	pFile->Clear();
-	this->m_xVarGroupPool.deleteObject(pFile);
+	m_xVarGroupPool.deleteObject(pFile);
 }
 
 BOOL CScriptVariableManager::SetVariable(const char* pszName, const char* pszVarName, const char* pszValue)
@@ -182,7 +181,7 @@ BOOL CScriptVariableManager::SetVariable(const char* pszName, const char* pszVar
 		pFile = NewVariableFile();
 		if (pFile == nullptr)return FALSE;
 		pFile->SetName(pszName);
-		if (this->m_xVarGroupList.Add(pFile->GetName(), (LPVOID)pFile) == -1)
+		if (m_xVarGroupList.Add(pFile->GetName(), (LPVOID)pFile) == -1)
 		{
 			DeleteVariableFile(pFile);
 			return FALSE;

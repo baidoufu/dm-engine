@@ -3,14 +3,14 @@
 #include ".\gameworld.h"
 #include ".\guildex.h"
 
-CGuildWarManager::CGuildWarManager(void)
+CGuildWarManager::CGuildWarManager(VOID)
 {
 	memset(m_pGuildWars, 0, sizeof(m_pGuildWars));
 	m_nWarCount = 0;
 	m_nUpdatePtr = 0;
 }
 
-CGuildWarManager::~CGuildWarManager(void)
+CGuildWarManager::~CGuildWarManager(VOID)
 {
 }
 

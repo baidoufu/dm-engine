@@ -1,5 +1,6 @@
 #pragma once
 #include "findfile.h"
+#include <array>
 
 typedef struct tagDownItem
 {
@@ -21,7 +22,7 @@ typedef struct tagDownItem
 		}
 		return FALSE;
 	}
-	char szName[32];
+	std::array<char, 32> szName{};
 	int	nCount;
 	int nCountMax;
 	int	nMax;
@@ -30,7 +31,7 @@ typedef struct tagDownItem
 	int	nCycleMax;
 	bool bRandomUpgradeItem; // 是否按自定义随机物品属性.
 	bool bGold;
-	BYTE btFlag[2];
+	std::array<BYTE, 2> btFlag{};
 	tagDownItem* pNext;
 }DOWNITEM;
 
@@ -41,15 +42,15 @@ typedef struct tagMonItems
 		FILLSELF(0);
 	}
 	DOWNITEM* pItems;
-	char szMonName[32];
-	char szFilename[256];
+	std::array<char, 32> szMonName{};
+	std::array<char, 256> szFilename{};
 }MONITEMS;
 
 class CMonItemsMgr : public CFindFile, public xSingletonClass<CMonItemsMgr>
 {
 public:
-	CMonItemsMgr(void);
-	virtual ~CMonItemsMgr(void);
+	CMonItemsMgr(VOID);
+	virtual ~CMonItemsMgr(VOID);
 	BOOL LoadMonItems(const char* pszPath);
 	MONITEMS* GetMonItems(const char* pMonsterName)
 	{

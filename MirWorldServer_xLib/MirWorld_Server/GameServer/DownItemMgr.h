@@ -6,8 +6,8 @@ class CHumanPlayer;
 class CDownItemMgr : public xSingletonClass<CDownItemMgr>
 {
 public:
-	CDownItemMgr(void);
-	virtual ~CDownItemMgr(void);
+	CDownItemMgr(VOID);
+	virtual ~CDownItemMgr(VOID);
 	//新建掉落物品对象
 	CDownItemObject* NewDownItemObject(ITEM& item, WORD x, WORD y, DWORD dwOwner = 0);
 	//删除掉落物品对象
@@ -25,10 +25,7 @@ public:
 	//更新删除物品对象
 	VOID UpdateDeletedObject();
 	//获取掉落物品数量
-	int	getCount()
-	{
-		return m_xDownItemList.getCount();
-	}
+	int	getCount() { return m_xDownItemList.getCount(); }
 	//更新掉落物品
 	VOID UpdateDownItem();
 protected:
@@ -38,5 +35,5 @@ private:
 	UINT m_nCurFreeIndex;
 	xObjectPool<CDownItemObject> m_xDownItemPool;
 	xIndexPtrList<CDownItemObject> m_xDownItemList;
-	xPtrQueue<CDownItemObject>	m_xDelItemQueue;
+	xMpscQueue<CDownItemObject, 65536>	m_xDelItemQueue;
 };

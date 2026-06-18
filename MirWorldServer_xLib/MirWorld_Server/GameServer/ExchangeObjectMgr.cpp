@@ -3,21 +3,21 @@
 #include ".\exchangeobj.h"
 
 xObjectPool<CExchangeObj> CExchangeObjectMgr::m_xExchangeObjPool;
-CExchangeObjectMgr::CExchangeObjectMgr(void)
+CExchangeObjectMgr::CExchangeObjectMgr(VOID)
 {
 }
 
-CExchangeObjectMgr::~CExchangeObjectMgr(void)
+CExchangeObjectMgr::~CExchangeObjectMgr(VOID)
 {
 }
 
-BOOL CExchangeObjectMgr::BeginExchange(CHumanPlayer* p1, CHumanPlayer* p2)
+CExchangeObj* CExchangeObjectMgr::BeginExchange(CHumanPlayer* p1, CHumanPlayer* p2)
 {
 	CExchangeObj* pObj = newObject();
-	if (pObj == nullptr)return FALSE;
-	if (pObj->Begin(p1, p2))return TRUE;
+	if (pObj == nullptr)return nullptr;
+	if (pObj->Begin(p1, p2))return pObj;
 	deleteObject(pObj);
-	return FALSE;
+	return nullptr;
 }
 
 VOID CExchangeObjectMgr::EndExchange(CExchangeObj* pObj)

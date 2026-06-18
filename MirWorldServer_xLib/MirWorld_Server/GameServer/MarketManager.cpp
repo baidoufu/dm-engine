@@ -5,16 +5,17 @@
 #include ".\ItemManager.h"
 #include ".\submarket.h"
 
-CMarketManager::CMarketManager(void) : m_pMarketArray{}
+CMarketManager::CMarketManager(VOID)
 {
 	m_xItemList.Create(100000);
 	m_pszScrollText = nullptr;
 	m_nMarketCount = 0;
 }
 
-CMarketManager::~CMarketManager(void)
+CMarketManager::~CMarketManager(VOID)
 {
 	m_xItemList.Destroy();
+	m_pszScrollText.reset();
 }
 
 MarketItem* CMarketManager::newItem()
@@ -38,23 +39,21 @@ MarketItem* CMarketManager::getItem(UINT nId)
 
 VOID CMarketManager::LoadScrollText(const char* pszFilename)
 {
-	if (m_pszScrollText)
-	{
-		delete[]m_pszScrollText;
-		m_pszScrollText = nullptr;
-	}
-
-	this->m_pszScrollText = (char*)LoadFile(pszFilename);
+	m_pszScrollText = LoadFile(pszFilename);
 	if (m_pszScrollText == nullptr)
-		m_pszScrollText = "欢迎光临\\\\精彩等着您";
+	{
+		m_pszScrollText = std::make_unique<char[]>(256);
+		strcpy(m_pszScrollText.get(), "欢迎光临\\\\精彩等着您");
+	}
 	else
 	{
-		UINT nLength = (UINT)strlen(m_pszScrollText);
+		char* pData = reinterpret_cast<char*>(m_pszScrollText.get());
+		UINT nLength = (UINT)strlen(pData);
 		for (UINT i = 0; i < nLength; i++)
 		{
-			if (m_pszScrollText[i] == '\n' ||
-				m_pszScrollText[i] == '\r')
-				m_pszScrollText[i] = '\\';
+			if (pData[i] == '\n' ||
+				pData[i] == '\r')
+				pData[i] = '\\';
 		}
 	}
 }
@@ -102,7 +101,10 @@ BOOL CMarketManager::LoadMarkets(const char* pszFilename)
 		for (UINT i = 0; i < m_nMarketCount; i++)
 		{
 			if (this->m_pMarketArray[i])
+			{
 				delete this->m_pMarketArray[i];
+				this->m_pMarketArray[i] = nullptr;
+			}
 		}
 		m_nMarketCount = 0;
 	}
@@ -127,27 +129,26 @@ BOOL CMarketManager::LoadMarkets(const char* pszFilename)
 	return TRUE;
 }
 
-static thread_local char g_szTempString[65536];
 VOID CMarketManager::OpenMarket(CHumanPlayer* pPlayer)
 {
-	xPacket packet(g_szTempString, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	UINT id = pPlayer->GetId();
 	//	first send scrolltexts
 	pPlayer->SendMsg(id, 0x1000, 0, 0, 0, (LPVOID)this->GetMarketScrollText());
 	//	second send toplist
-	packet.push((LPVOID)"&", 1);
+	packet->push((LPVOID)"&", 1);
 	for (UINT i = 0; i < 5; i++)
 	{
 		MarketItem* pItem = getItem(i + 1);
 		if (pItem)
 		{
 			//&50101266|825|100|灵符(包)|5
-			sprintf((char*)packet.getfreebuf(), "%u%u%u|%u|100|%s|%u&",
-				pItem->nMarketId, pItem->nSubMarketId, pItem->nId, pItem->nImage, pItem->szName, pItem->wPrice);
-			packet.addsize((int)strlen(packet.getfreebuf()));
+			sprintf((char*)packet->getfreebuf(), "%u%u%u|%u|100|%s|%u&",
+				pItem->nMarketId, pItem->nSubMarketId, pItem->nId, pItem->nImage, pItem->szName.data(), pItem->wPrice);
+			packet->addsize((int)strlen(packet->getfreebuf()));
 		}
 	}
-	pPlayer->SendMsg(id, 0x1000, 1, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	pPlayer->SendMsg(id, 0x1000, 1, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	if (this->m_nMarketCount > 0 && this->m_pMarketArray[0])
 		QueryMarket(pPlayer, m_pMarketArray[0]->GetId());
 }
@@ -170,13 +171,13 @@ VOID CMarketManager::QueryMarket(CHumanPlayer* pPlayer, UINT nMarketId)
 VOID CMarketManager::QueryItemTips(CHumanPlayer* pPlayer, UINT nItemId)
 {
 	MarketItem* pItem = getItem(nItemId);
-	xPacket packet(g_szTempString, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	if (pItem)
 	{
-		sprintf((char*)packet.getbuf(), "%u&", pItem->nId);
-		packet.addsize((int)strlen(packet.getbuf()));
-		packet.push((LPVOID)pItem->pszTips, (int)strlen(pItem->pszTips));
-		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 4, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+		sprintf((char*)packet->getbuf(), "%u&", pItem->nId);
+		packet->addsize((int)strlen(packet->getbuf()));
+		packet->push((LPVOID)pItem->pszTips, (int)strlen(pItem->pszTips));
+		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 4, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	}
 	else
 	{
@@ -184,7 +185,7 @@ VOID CMarketManager::QueryItemTips(CHumanPlayer* pPlayer, UINT nItemId)
 	}
 }
 
-VOID CMarketManager::QueryBuyItem(CHumanPlayer* pPlayer, UINT nItemId)
+BOOL CMarketManager::QueryBuyItem(CHumanPlayer* pPlayer, UINT nItemId)
 {
 	MarketItem* pItem = getItem(nItemId);
 	if (pItem)
@@ -192,17 +193,17 @@ VOID CMarketManager::QueryBuyItem(CHumanPlayer* pPlayer, UINT nItemId)
 		if (pItem->wPrice > pPlayer->GetMoney(MT_YUANBAO))
 		{
 			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"你身上的元宝不够!");
-			return;
+			return FALSE;
 		}
 		if ((int)pItem->wCount > pPlayer->GetBag().GetFree())
 		{
 			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"你的背包没有足够空间!");
-			return;
+			return FALSE;
 		}
 		if (!pPlayer->CostMoney(MT_YUANBAO, pItem->wPrice))
 		{
 			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"你身上的元宝不够!");
-			return;
+			return FALSE;
 		}
 		for (UINT i = 0; i < pItem->wCount; i++)
 		{
@@ -212,11 +213,12 @@ VOID CMarketManager::QueryBuyItem(CHumanPlayer* pPlayer, UINT nItemId)
 			pPlayer->AddBagItem(item, 0, 0, 0);
 		}
 		pPlayer->SendWeightChanged();
-		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"恭喜您购买成功");
+		return TRUE;
 	}
 	else
 	{
 		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"该商城道具不存在");
+		return FALSE;
 	}
 }
 
@@ -233,16 +235,23 @@ VOID CMarketManager::OnClientMsg(CHumanPlayer* pPlayer, WORD wCmd, WORD wParam1,
 		if (str.find('&') != std::string::npos)
 		{
 			char* Params[2];
-			int nParam = SearchParam(pszData, Params, 2, '&');
+			int nParam = SearchParam(pszData, Params, 2, "&");
 			iItemId = StringToInteger(Params[0]);
 			iCount = StringToInteger(Params[1]);
 		}
 		else
 			iItemId = StringToInteger(pszData);
+		BOOL bSuccess = TRUE;
 		for (int i = 0; i < iCount; i++)
 		{
-			QueryBuyItem(pPlayer, iItemId);
+			if (!QueryBuyItem(pPlayer, iItemId))
+			{
+				bSuccess = FALSE;
+				break;
+			}
 		}
+		if (bSuccess)
+			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"恭喜您购买成功");
 	}
 	break;
 	case 1: // 商城-打开

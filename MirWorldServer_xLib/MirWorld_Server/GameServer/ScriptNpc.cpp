@@ -15,8 +15,9 @@
 #include <rapidjson/stringbuffer.h>
 #include <string>  
 #include <cctype>
+#include <array>
 
-CScriptNpc::CScriptNpc(void)
+CScriptNpc::CScriptNpc(VOID)
 {
 	m_szName[0] = 0;
 	m_pSellGoodsList = nullptr;
@@ -24,10 +25,9 @@ CScriptNpc::CScriptNpc(void)
 	Clean();
 	m_fBuyPercent = 1.0f;
 	m_fSellPercent = 0.5f;
-	m_xQProcess.create(CGameWorld::GetInstance()->GetNpcQueue());
 }
 
-CScriptNpc::~CScriptNpc(void)
+CScriptNpc::~CScriptNpc(VOID)
 {
 }
 
@@ -73,8 +73,8 @@ BOOL CScriptNpc::Init(UINT dbid, const char* pszName, int view, int x, int y, DW
 	}
 	else
 		m_fSandCityMerchant = FALSE;
-	o_strncpy(m_szName, pszName, 31);
-	o_strncpy(m_szLongName, m_szName, 31);
+	o_strncpy(m_szName.data(), pszName, 31);
+	o_strncpy(m_szLongName.data(), m_szName.data(), 31);
 	m_fChanged = FALSE;
 	Goods* pGoodList = nullptr;
 	if (m_pScriptObject && m_pScriptObject->getGoodsList() && m_pScriptObject->getGoodsList()->getList())
@@ -122,9 +122,9 @@ BOOL CScriptNpc::InitGoods(tagGoods* pGoodsList)
 		{
 			pGoodsListTail->defaultcount = p->wCount;
 			pGoodsListTail->refreshtime = p->wRefreshTime;
-			o_strncpy(pGoodsListTail->szTemplate, p->szName, 31);
+			o_strncpy(pGoodsListTail->szTemplate.data(), p->szName.data(), 31);
 
-			pItemClass = CItemManager::GetInstance()->GetItemClassByName(pGoodsListTail->szTemplate);
+			pItemClass = CItemManager::GetInstance()->GetItemClassByName(pGoodsListTail->szTemplate.data());
 			if (pItemClass == nullptr)
 				continue;
 
@@ -140,11 +140,6 @@ VOID CScriptNpc::QueryTalk(CHumanPlayer* pPlayer)
 	QuerySelectLink(pPlayer, nullptr);
 }
 
-BOOL CScriptNpc::OnPageShow(CScriptTarget* pTarget, CScriptView* pView, const char* pszPage)
-{
-	return TRUE;
-}
-
 VOID CScriptNpc::QuerySelectLink(CHumanPlayer* pPlayer, const char* pLink, BOOL bHumanQuery)
 {
 	if (pLink != nullptr)
@@ -156,12 +151,12 @@ VOID CScriptNpc::QuerySelectLink(CHumanPlayer* pPlayer, const char* pLink, BOOL 
 		}
 		else if (_strnicmp(pLink, "@AttackRequestPage", 18) == 0)
 		{
-			char szbuffer[2096];
+			std::array<char, 2096> szbuffer{};
 			UINT id = StringToInteger(pLink + 18);
-			sprintf(szbuffer, "%s/", m_szName);
-			int len = static_cast<int>(strlen(szbuffer));
-			int length = CSandCity::GetInstance()->PrePareAttackRequestPage(id, szbuffer + len);
-			pPlayer->SendMsg(GetId(), 0x283, 0, 0, 0, (LPVOID)szbuffer, length + len);
+			sprintf(szbuffer.data(), "%s/", m_szName.data());
+			int len = static_cast<int>(strlen(szbuffer.data()));
+			int length = CSandCity::GetInstance()->PrePareAttackRequestPage(id, szbuffer.data() + len);
+			pPlayer->SendMsg(GetId(), 0x283, 0, 0, 0, (LPVOID)szbuffer.data(), length + len);
 			return;
 		}
 	}
@@ -250,45 +245,6 @@ VOID CScriptNpc::QuerySelectLink(CHumanPlayer* pPlayer, const char* pLink, BOOL 
 	}
 }
 
-static thread_local char gs_Temp[65535];
-int CScriptNpc::ProcPageVars(CHumanPlayer* pPlayer, char* pszPage, int size, int maxsize)
-{
-	int tptr = 0;
-	gs_Temp[0] = 0;
-
-	char tempcmd[200] = "";
-	int cmdptr = 0;
-	BOOL bGetCommand = FALSE;
-	for (int i = 0; i < size; i++)
-	{
-		if (pszPage[i] == '<' && pszPage[i + 1] == '$')
-		{
-			//处理
-			bGetCommand = TRUE;
-			cmdptr = 0;
-			continue;
-		}
-		if (bGetCommand && pszPage[i] == '>')
-		{
-			bGetCommand = FALSE;
-			tempcmd[cmdptr] = 0;
-			gs_Temp[tptr] = 0;
-			char* p = (char*)pPlayer->GetScriptVarValue(tempcmd + 1);
-			strcat(gs_Temp, p);
-			tptr += (int)strlen(p);
-			continue;
-		}
-		if (!bGetCommand)
-			gs_Temp[tptr++] = pszPage[i];
-		else
-			tempcmd[cmdptr++] = pszPage[i];
-	}
-	gs_Temp[tptr] = 0;
-	tptr = tptr > maxsize ? maxsize : tptr;
-	o_strncpy(pszPage, gs_Temp, tptr);
-	return tptr;
-}
-
 //关闭NPC对话框
 VOID CScriptNpc::SendClosePage(CHumanPlayer* pPlayer)
 {
@@ -301,7 +257,7 @@ NpcGoodsList* CScriptNpc::FindGoodsList(const char* pszName)
 	int namelen = (int)strlen(pszName);
 	for (pList = m_pSellGoodsList; pList != nullptr; pList = pList->pNext)
 	{
-		if (strcmp(pList->szTemplate, pszName) == 0)
+		if (strcmp(pList->szTemplate.data(), pszName) == 0)
 			return pList;
 	}
 	return nullptr;
@@ -310,11 +266,11 @@ NpcGoodsList* CScriptNpc::FindGoodsList(const char* pszName)
 NpcGoodsList* CScriptNpc::FindGoodsList(ITEM& item)
 {
 	NpcGoodsList* pList = nullptr;
-	char szName[30];
-	o_strncpy(szName, item.baseitem.szName, 14);
+	std::array<char, 30> szName{};
+	o_strncpy(szName.data(), item.baseitem.szName, 14);
 	for (pList = m_pSellGoodsList; pList != nullptr; pList = pList->pNext)
 	{
-		if (strcmp(szName, pList->szTemplate) == 0)
+		if (strcmp(szName.data(), pList->szTemplate.data()) == 0)
 			return pList;
 	}
 	return nullptr;
@@ -325,7 +281,7 @@ BOOL CScriptNpc::AddItem(ITEM& item)
 	NpcGoodsItemList* pItemList = CNpcManager::GetInstance()->AllocGoodsItemList();
 	if (pItemList == nullptr)return FALSE;
 	pItemList->item = item;
-	pItemList->dwPutTime = timeGetTime();
+	pItemList->dwPutTime = CFrameTime::GetFrameTime();
 	NpcGoodsList* pList = FindGoodsList(item);
 	if (pList && pList->defaultcount == 0)
 		return CItemManager::GetInstance()->DeleteItem(item.dwMakeIndex);
@@ -337,7 +293,7 @@ BOOL CScriptNpc::AddItem(ITEM& item)
 			CNpcManager::GetInstance()->FreeGoodsItemList(pItemList);
 			return FALSE;
 		}
-		o_strncpy(pList->szTemplate, item.baseitem.szName, 14);
+		o_strncpy(pList->szTemplate.data(), item.baseitem.szName, 14);
 #ifdef	_DEBUG
 		PRINT(SUCCESS_GREEN, "szTemplate的名字:%s\n", pList->szTemplate);
 #endif
@@ -362,23 +318,22 @@ BOOL CScriptNpc::AddItem(ITEM& item)
 
 VOID CScriptNpc::SendGoodsList(CHumanPlayer* pPlayer)
 {
-	char szBuffer[4096];
-	memset(szBuffer, 0, sizeof(szBuffer));
-	char* p = szBuffer;
+	std::array<char, 4096> szBuffer{};
+	char* p = szBuffer.data();
 	int count = 0;
 	for (NpcGoodsList* pList = m_pSellGoodsList; pList != nullptr; pList = pList->pNext)
 	{
 		if (pList->dwTemplatePrice > 100000 || pList->dwTemplatePrice == 0)
 			continue;
-		size_t len = strlen(pList->szTemplate);
+		size_t len = strlen(pList->szTemplate.data());
 		if (len < 4) continue;
-		if (containschar(pList->szTemplate)) continue;
-		sprintf(p, "%s/%u/%u/%u/", pList->szTemplate, pList->defaultcount != 0, pList->dwTemplatePrice, pList->currentcount);
+		if (containschar(pList->szTemplate.data())) continue;
+		sprintf(p, "%s/%u/%u/%u/", pList->szTemplate.data(), pList->defaultcount != 0, pList->dwTemplatePrice, pList->currentcount);
 		p += strlen(p);
 		count++;
 	}
 	*p = 0;
-	pPlayer->SendMsg(GetId(), 0x285, count, 0, 0, (LPVOID)szBuffer, (int)(p - szBuffer));
+	pPlayer->SendMsg(GetId(), 0x285, count, 0, 0, (LPVOID)szBuffer.data(), (int)(p - szBuffer.data()));
 }
 
 bool CScriptNpc::containschar(const std::string& str)
@@ -390,32 +345,9 @@ bool CScriptNpc::containschar(const std::string& str)
 	return false; // 未找到非标准字符, 返回false  
 }
 
-VOID CScriptNpc::SendGoodsItemList(CHumanPlayer* pPlayer, const char* pTemplate, int ptr)
-{
-	ITEM item;
-	o_strncpy(item.baseitem.szName, pTemplate, 14);
-	NpcGoodsList* pList = FindGoodsList(item);
-	if (pList == nullptr)return;
-
-	NpcGoodsItemList* pItemList = pList->pItemList;
-	CDQueue<ITEM, 10> queue;
-	ITEMCLIENT items[10];
-	int i = 0;
-	for (i = 0; i < 10; i++)
-	{
-		if (pItemList == nullptr)
-			break;
-		items[i] = *(ITEMCLIENT*)&pItemList->item;
-		pItemList = pItemList->pNext;
-	}
-
-	if (i == 0)return;
-	pPlayer->SendMsg(GetId(), 0x28c, i, 0, 0, (LPVOID)items, sizeof(ITEMCLIENT) * i);
-}
-
 VOID CScriptNpc::Update()
 {
-	DWORD dwCurTime = timeGetTime();
+	DWORD dwCurTime = CFrameTime::GetFrameTime();
 	if (m_tmrUpdateItem.IsTimeOut(m_dwTimeOut))
 	{
 		if (m_dwTimeOut == 0)m_dwTimeOut = Getrand(9000) + 1000;
@@ -429,7 +361,7 @@ VOID CScriptNpc::Update()
 				if (pList->currentcount < pList->defaultcount)
 				{
 					ITEM item;
-					if (CItemManager::GetInstance()->MakeupTemplateItem(pList->szTemplate, item))
+					if (CItemManager::GetInstance()->MakeupTemplateItem(pList->szTemplate.data(), item))
 					{
 						int count = pList->defaultcount - pList->currentcount;
 						for (int i = 0; i < count; i++)
@@ -442,7 +374,7 @@ VOID CScriptNpc::Update()
 							}
 							else
 							{
-								pItemNode->dwPutTime = timeGetTime();
+								pItemNode->dwPutTime = CFrameTime::GetFrameTime();
 								pItemNode->item = item;
 								pItemNode->pNext = pList->pItemList;
 								pList->pItemList = pItemNode;
@@ -469,17 +401,85 @@ BOOL CScriptNpc::BeAttack(CAliveObject* pAttacker, int nDamage)
 
 DWORD CScriptNpc::GetItemSellPrice(ITEM& item)
 {
+	//判断是否此物品可用在此NPC出售 在NPC脚本头部的 +btStdMode 值。例如：+40 这是肉类
 	if (this->m_pScriptObject == nullptr || !m_pScriptObject->IsItemTradeble(item.baseitem.btStdMode))
 		return 0;
-	//	fixme:使用标准的物品价格计算公式~
-	return ROUND(m_fSellPercent * item.baseitem.nPrice);
+	DWORD n10 = item.baseitem.nPrice;
+	if (n10 <= 0) return 0;
+	// 需要增加某些物品有纯度的物品
+	if (item.baseitem.btStdMode == 40) //肉
+	{
+		if (item.wMaxDura / item.wCurDura > 2)
+		{
+			int n20 = ((n10 * item.wCurDura) / item.wMaxDura) / 2;
+			n10 = MAX(2, ROUND(n10 - n20));
+		}
+		else
+			n10 = n10 + ROUND((n10 * 2.0 * item.wCurDura) / item.wMaxDura);
+		if (n10 > 0)
+			return static_cast<DWORD>(m_fSellPercent * n10);
+		else
+			return 0;
+	}
+	else if (item.baseitem.btStdMode == 43) //铁矿
+	{
+		if (item.wMaxDura / item.wCurDura > 2)
+		{
+			int n20 = ((n10 * item.wCurDura) / item.wMaxDura) / 2;
+			n10 = MAX(2, ROUND(n10 - n20));
+		}
+		else
+			n10 = n10 + ROUND((n10 * 1.3 * item.wCurDura) / item.wMaxDura);
+		if (n10 > 0)
+			return static_cast<DWORD>(m_fSellPercent * n10);
+		else
+			return 0;
+	}
+	else if (item.baseitem.btStdMode > 4)
+	{
+		int n14 = 0;
+		int nC = 0;
+		while (true)
+		{
+			//武器根据 0攻击、1魔法、2道术、3幸运、4诅咒、5命中、6攻击速度、7强度 值进行计算价格
+			if (item.baseitem.btStdMode == 5 || item.baseitem.btStdMode == 6) // 武器物品
+			{
+				if (nC != 4) // 4是诅咒
+				{
+					if (nC == 6)
+					{
+						if (item.btItemExt[nC] > 10)
+							n14 += (item.btItemExt[nC] - 10) * 2;
+					}
+					else
+						n14 += item.btItemExt[nC];
+				}
+			}
+			else
+				n14 += item.btItemExt[nC];
+			++nC;
+			if (nC >= 8) break;
+		}
+		if (n14 > 0)
+			n10 = n10 / 5 * n14;
+		if (item.wMaxDura / item.wCurDura > 2)
+		{
+			int n20 = ((n10 * item.wCurDura) / item.wMaxDura) / 2;
+			n10 = MAX(2, ROUND(n10 - n20));
+		}
+		else
+			n10 = n10 + ROUND((n10 * 1.3 * item.wCurDura) / item.wMaxDura);
+		return static_cast<DWORD>(m_fSellPercent * n10);
+	}
+	else
+		return static_cast<DWORD>(ROUND(m_fSellPercent * item.baseitem.nPrice)); //	使用标准的物品价格计算公式~
 }
 
 DWORD CScriptNpc::GetItemBuyPrice(ITEM& item)
 {
-	char szName[32];
-	o_strncpy(szName, item.baseitem.szName, item.baseitem.btNameLength);
-	NpcGoodsList* pList = FindGoodsList(szName);
+	std::array<char, 32> szName{};
+	o_strncpy(szName.data(), item.baseitem.szName, item.baseitem.btNameLength);
+	NpcGoodsList* pList = FindGoodsList(szName.data());
 	if (pList)
 		return ROUND(pList->dwTemplatePrice);
 	else
@@ -742,7 +742,7 @@ BOOL CScriptNpc::BuyItem(CHumanPlayer* pPlayer, const char* pszName, DWORD dwMak
 						else
 						{
 							ITEM item;
-							if (CItemManager::GetInstance()->MakeupTemplateItem(pList->szTemplate, item))
+							if (CItemManager::GetInstance()->MakeupTemplateItem(pList->szTemplate.data(), item))
 							{
 								for (int i = 0; i < pList->defaultcount; i++)
 								{
@@ -754,7 +754,7 @@ BOOL CScriptNpc::BuyItem(CHumanPlayer* pPlayer, const char* pszName, DWORD dwMak
 									}
 									else
 									{
-										pItemNode->dwPutTime = timeGetTime();
+										pItemNode->dwPutTime = CFrameTime::GetFrameTime();
 										pItemNode->item = item;
 										pItemNode->pNext = pList->pItemList;
 										pList->pItemList = pItemNode;
@@ -816,7 +816,6 @@ VOID CScriptNpc::DeleteNpcGoodsItemList(NpcGoodsList* pList, NpcGoodsItemList* p
 	}
 }
 
-static char szTempBuffer[65536];
 VOID CScriptNpc::SaveItems()
 {
 	if (!m_fChanged)return;
@@ -828,7 +827,7 @@ VOID CScriptNpc::SaveItems()
 		PRINT(ERROR_RED, "存储 %s 商店信息出错~\n", szFilename);
 		return;
 	}
-	xPacket packet(szTempBuffer, 65536);
+	xPacketPool::ScopedPacket packet(65536);
 	NpcGoodsList* pList = this->m_pSellGoodsList;
 	while (pList)
 	{
@@ -837,19 +836,19 @@ VOID CScriptNpc::SaveItems()
 			NpcGoodsItemList* pItemList = pList->pItemList;
 			while (pItemList)
 			{
-				if (!packet.push((LPVOID)&pItemList->item, sizeof(ITEM)))
+				if (!packet->push((LPVOID)&pItemList->item, sizeof(ITEM)))
 				{
-					fwrite((LPVOID)packet.getbuf(), packet.getsize(), 1, fp);
-					packet.clear();
-					packet.push((LPVOID)&pItemList->item, sizeof(ITEM));
+					fwrite((LPVOID)packet->getbuf(), packet->getsize(), 1, fp);
+					packet->clear();
+					packet->push((LPVOID)&pItemList->item, sizeof(ITEM));
 				}
 				pItemList = pItemList->pNext;
 			}
 		}
 		pList = pList->pNext;
 	}
-	if (packet.getsize() > 0)
-		fwrite((LPVOID)packet.getbuf(), packet.getsize(), 1, fp);
+	if (packet->getsize() > 0)
+		fwrite((LPVOID)packet->getbuf(), packet->getsize(), 1, fp);
 	fclose(fp);
 	m_fChanged = FALSE;
 }
@@ -868,7 +867,7 @@ VOID CScriptNpc::LoadItems()
 	while (size > 100)
 	{
 		size -= 100;
-		fread((void*)items_t, sizeof(ITEM) * 100, 1, fp);
+		fread((VOID*)items_t, sizeof(ITEM) * 100, 1, fp);
 		for (int i = 0; i < 100; i++)
 		{
 			if (CItemManager::GetInstance()->IsTempItem(items_t[i].dwMakeIndex))
@@ -878,7 +877,7 @@ VOID CScriptNpc::LoadItems()
 	}
 	if (size > 0)
 	{
-		fread((void*)items_t, sizeof(ITEM) * size, 1, fp);
+		fread((VOID*)items_t, sizeof(ITEM) * size, 1, fp);
 		for (int i = 0; i < size; i++)
 		{
 			if (CItemManager::GetInstance()->IsTempItem(items_t[i].dwMakeIndex))
@@ -894,7 +893,6 @@ VOID CScriptNpc::OnEnterMap(CLogicMap* pMap)
 	CAliveObject::OnEnterMap(pMap);
 }
 
-static thread_local char g_szTempBuffer[65536];
 using namespace rapidjson;
 VOID CScriptNpc::SendMerChantJsonMsg(CScriptTarget* pTarget, const char* pWords, UINT nType)
 {
@@ -927,28 +925,28 @@ VOID CScriptNpc::SendDayExpMain(CHumanPlayer* pPlayer, const char* pWords)
 	doc.Parse(pWords);
 	if (doc.HasParseError()) return;
 
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet;
 	const char* s1C = "expback2020";
-	packet.push(s1C);
-	packet.push(2);
+	packet->push(s1C);
+	packet->push(2);
 	int nValue = 0x01;
-	packet.push((LPVOID)&nValue, 4);
-	packet.push(doc["注意事项"].GetString());
-	packet.push(1);
+	packet->push((LPVOID)&nValue, 4);
+	packet->push(doc["注意事项"].GetString());
+	packet->push(1);
 	nValue = 0x07;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = doc["今日可以获得经验下限"].GetInt();
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = doc["今日可以获得经验上限"].GetInt();
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = doc["今日可追赶经验"].GetInt();
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = doc["累积可追赶经验"].GetInt();
-	packet.push((LPVOID)&nValue, 4);
-	packet.push(8);
+	packet->push((LPVOID)&nValue, 4);
+	packet->push(8);
 	nValue = doc["开服天数"].GetInt();
-	packet.push((LPVOID)&nValue, 4);
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nValue, 4);
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CScriptNpc::SendDayExpHelp(CHumanPlayer* pPlayer, const char* pWords)
@@ -957,17 +955,17 @@ VOID CScriptNpc::SendDayExpHelp(CHumanPlayer* pPlayer, const char* pWords)
 	doc.Parse(pWords);
 	if (doc.HasParseError()) return;
 
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet;
 	const char* s1C = "expback2020";
-	packet.push(s1C);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
 	int nValue = 0x02;
-	packet.push((LPVOID)&nValue, 1);
+	packet->push((LPVOID)&nValue, 1);
 	nValue = 0x01;
-	packet.push((LPVOID)&nValue, 4);
-	packet.push(doc["帮助说明"].GetString());
-	packet.push(1);
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nValue, 4);
+	packet->push(doc["帮助说明"].GetString());
+	packet->push(1);
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CScriptNpc::SendActivityMain(CHumanPlayer* pPlayer, const char* pWords)
@@ -976,75 +974,75 @@ VOID CScriptNpc::SendActivityMain(CHumanPlayer* pPlayer, const char* pWords)
 	doc.Parse(pWords);
 	if (doc.HasParseError()) return;
 
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	int nValue = 0x00;
-	packet.push((LPVOID)&nValue, 2);
+	packet->push((LPVOID)&nValue, 2);
 
 	int nDayActivity = doc["今日活跃度"].GetInt();
-	packet.push((LPVOID)&nDayActivity, 4);
+	packet->push((LPVOID)&nDayActivity, 4);
 
 	int nWeekActivity = doc["本周累计活跃度"].GetInt();
-	packet.push((LPVOID)&nWeekActivity, 4);
+	packet->push((LPVOID)&nWeekActivity, 4);
 
 	int nBoxCount = doc["宝箱"].Size();
-	packet.push((LPVOID)&nBoxCount, 4);
+	packet->push((LPVOID)&nBoxCount, 4);
 
 	for (int i = 0; i < nBoxCount; i++)
 	{
 		const rapidjson::Value& box = doc["宝箱"][i];
 		const char* szReward = box["奖励"].GetString();
-		packet.push(szReward);
-		packet.push(1);
+		packet->push(szReward);
+		packet->push(1);
 	}
-	packet.push(4);
-	packet.push((LPVOID)&nBoxCount, 4);
+	packet->push(4);
+	packet->push((LPVOID)&nBoxCount, 4);
 	for (int i = 0; i < nBoxCount; i++)
 	{
 		const rapidjson::Value& box = doc["宝箱"][i];
 		int nStatus = box["状态"].GetInt();
-		packet.push((LPVOID)&nStatus, 4);
+		packet->push((LPVOID)&nStatus, 4);
 	}
-	packet.push((LPVOID)&nBoxCount, 4);
+	packet->push((LPVOID)&nBoxCount, 4);
 	for (int i = 0; i < nBoxCount; i++)
 	{
 		const rapidjson::Value& box = doc["宝箱"][i];
 		int nRequire = box["需求"].GetInt();
-		packet.push((LPVOID)&nRequire, 4);
+		packet->push((LPVOID)&nRequire, 4);
 	}
 
 	int nTaskCount = doc["任务"].Size();
-	packet.push((LPVOID)&nTaskCount, 4);
+	packet->push((LPVOID)&nTaskCount, 4);
 
 	for (int i = 0; i < nTaskCount; i++)
 	{
 		const rapidjson::Value& task = doc["任务"][i];
 		const char* szName = task["名称"].GetString();
-		packet.push(szName);
-		packet.push(1);
+		packet->push(szName);
+		packet->push(1);
 	}
-	packet.push((LPVOID)&nTaskCount, 4);
+	packet->push((LPVOID)&nTaskCount, 4);
 	for (int i = 0; i < nTaskCount; i++)
 	{
 		const rapidjson::Value& task = doc["任务"][i];
 		int nCount = task["次数"].GetInt();
-		packet.push((LPVOID)&nCount, 4);
+		packet->push((LPVOID)&nCount, 4);
 	}
 
-	pPlayer->SendMsg(pPlayer->GetId(), 0x836, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	pPlayer->SendMsg(pPlayer->GetId(), 0x836, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CScriptNpc::SendCreateGuildHelp(CHumanPlayer* pPlayer, const char* pWords)
 {
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet;
 	const char* s1C = "guildmgr";
-	packet.push(s1C);
-	packet.push(1);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
+	packet->push(1);
 	int nValue = 0x01;
-	packet.push((LPVOID)&nValue, 4);
-	packet.push(pWords);
-	packet.push(21);
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nValue, 4);
+	packet->push(pWords);
+	packet->push(21);
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CScriptNpc::SendCustomUIWnd(CHumanPlayer* pPlayer, const char* pWords)
@@ -1053,33 +1051,33 @@ VOID CScriptNpc::SendCustomUIWnd(CHumanPlayer* pPlayer, const char* pWords)
 	doc.Parse(pWords);
 	if (doc.HasParseError()) return;
 
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	const char* pszWndName = doc["WndName"].GetString();
-	packet.push(pszWndName);
-	packet.push(1);
+	packet->push(pszWndName);
+	packet->push(1);
 	int pMsgType = doc["MsgType"].GetInt();
-	packet.push((LPVOID)&pMsgType, 1);
+	packet->push((LPVOID)&pMsgType, 1);
 
-	int nListStrCount = doc["StrList"].Size();
-	packet.push((LPVOID)&nListStrCount, 4);
-	char szFinal[512];
+	int nListStrCount = doc.HasMember("StrList") ? doc["StrList"].Size() : 0;
+	packet->push((LPVOID)&nListStrCount, 4);
+	std::array<char, 512> szFinal{};
 	for (int i = 0; i < nListStrCount; i++)
 	{
 		const rapidjson::Value& task = doc["StrList"][i];
 		const char* pszStr = task.GetString();
-		ProcFmtText(pszStr, szFinal, 512, pPlayer->GetScriptTarget());
-		packet.push(szFinal);
-		packet.push(1);
+		ProcFmtText(pszStr, szFinal.data(), 512, pPlayer->GetScriptTarget());
+		packet->push(szFinal.data());
+		packet->push(1);
 	}
 
-	int nListIntCount = doc["NumList"].Size();
-	packet.push((LPVOID)&nListIntCount, 4);
+	int nListIntCount = doc.HasMember("NumList") ? doc["NumList"].Size() : 0;
+	packet->push((LPVOID)&nListIntCount, 4);
 	for (int i = 0; i < nListIntCount; i++)
 	{
 		const rapidjson::Value& task = doc["NumList"][i];
 		int pInt = task.GetInt();
-		packet.push(&pInt, 4);
+		packet->push(&pInt, 4);
 	}
-	packet.push(12);
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push(12);
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }

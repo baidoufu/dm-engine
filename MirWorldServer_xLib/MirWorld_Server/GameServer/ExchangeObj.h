@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 class CHumanPlayer;
 
 enum e_endtype
@@ -17,7 +18,7 @@ enum e_exchangestate
 struct exchange_side
 {
 	CHumanPlayer* player = nullptr;
-	ITEM m_Items[10] = {};
+	std::array<ITEM, 10> m_Items{};
 	DWORD dwGold = 0;
 	DWORD dwYuanbao = 0;
 	BOOL bReady = FALSE;
@@ -27,7 +28,7 @@ class CExchangeObj
 {
 public:
 	CExchangeObj();
-	virtual ~CExchangeObj(void);
+	virtual ~CExchangeObj(VOID);
 	//- Begin( CPlayer * player1, CPlayer * player2 )
 	BOOL Begin(CHumanPlayer* p1, CHumanPlayer* p2);
 	//- PutItem( player, ITEM & item )
@@ -58,21 +59,21 @@ public:
 private:
 	exchange_side* GetSide(CHumanPlayer* p)
 	{
-		if (m_Sides->player == p)return m_Sides;
-		if ((m_Sides + 1)->player == p)return (m_Sides + 1);
+		if (m_Sides[0].player == p)return &m_Sides[0];
+		if (m_Sides[1].player == p)return &m_Sides[1];
 		return nullptr;
 	}
 	exchange_side* GetOtherSide(CHumanPlayer* p)
 	{
-		if (m_Sides->player == p)return (m_Sides + 1);
-		if ((m_Sides + 1)->player == p)return m_Sides;
+		if (m_Sides[0].player == p)return &m_Sides[1];
+		if (m_Sides[1].player == p)return &m_Sides[0];
 		return nullptr;
 	}
 
 	BOOL DoExchange(exchange_side* pActionSide, exchange_side* pOtherSide);
 	BOOL DoCancel(exchange_side* pActionSide, exchange_side* pOtherSide);
 	BOOL m_boFastExchange; //是否是快速交易, 就是用头像框右键开始交易
-	exchange_side m_Sides[2];
+	std::array<exchange_side, 2> m_Sides;
 	char* m_pErrorMsg;
 	e_exchangestate m_State;
 };

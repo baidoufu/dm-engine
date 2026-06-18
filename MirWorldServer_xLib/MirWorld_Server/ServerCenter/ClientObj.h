@@ -1,7 +1,7 @@
 #pragma once
 typedef struct tagREGISTEREDSERVER
 {
-	char szName[64];
+	std::array<char, 64> szName;
 	ServerId Ident;
 	SERVERADDR Addr;
 	int iSendDBCount;
@@ -12,10 +12,11 @@ class CClientObj :
 	public CClientObject
 {
 public:
-	CClientObj(void);
-	virtual ~CClientObj(void);
+	CClientObj(VOID);
+	virtual ~CClientObj(VOID);
 	VOID Clean();
 	VOID Update();
+	VOID OnConnection();
 	VOID OnUnCodeMsg(xClientObject* pObject, const char* pszMsg, int size);
 	VOID OnCodedMsg(xClientObject* pObject, PMIRMSG	pMsg, int datasize);
 	REGISTEREDSERVER* GetRegInfo() { return &m_RegInfo; }

@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 class CFlagEventListener;
 
 typedef struct stFlagEventEx
@@ -16,7 +17,7 @@ class CFlagEventEx
 {
 public:
 	CFlagEventEx(UINT id = 0, CFlagEventListener* pListener = nullptr, UINT nCount = 0);
-	virtual ~CFlagEventEx(void);
+	virtual ~CFlagEventEx(VOID);
 	BOOL Create(UINT nCount);
 	VOID Destroy();
 	BOOL IsSeted(UINT index);
@@ -40,7 +41,7 @@ public:
 	DWORD GetFlagValue(UINT nOffset);
 protected:
 	CFlagEventListener* m_pListener;
-	FlagEventEx* m_xFlags;
+	std::unique_ptr<FlagEventEx[]> m_xFlags;
 	UINT m_nMaxCount;
 	UINT m_nId;
 };

@@ -1,13 +1,14 @@
 #pragma once
 #include "eventprocessor.h"
+#include <array>
 
 class CAliveObject;
 // 用于创建一个触发事件
 class TriggerEvent : public CEventProcessor
 {
 public:
-	TriggerEvent(void);
-	virtual ~TriggerEvent(void);
+	TriggerEvent(VOID);
+	virtual ~TriggerEvent(VOID);
 	TriggerEvent(const TriggerEvent&) = delete;           // 禁止拷贝构造
 	TriggerEvent& operator=(const TriggerEvent&) = delete; // 禁止拷贝赋值
 	// 静态方法：脚本命令创建事件
@@ -25,8 +26,8 @@ public:
 protected:
 	CAliveObject* m_pOwner;
 	DWORD m_dwOwnerInstanceKey;
-	char m_szMapName[64];
-	char m_szPage[64];
+	std::array<char, 64> m_szMapName{};
+	std::array<char, 64> m_szPage{};
 	CVisibleEvent* m_pVisibleEvent;
 	static TriggerEvent* NewEvent() { return m_xPool.newObject(); }
 	static VOID DeleteEvent(TriggerEvent* e) { e->Destroy(); m_xPool.deleteObject(e); }

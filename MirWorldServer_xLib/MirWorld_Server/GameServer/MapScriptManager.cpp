@@ -2,11 +2,11 @@
 #include ".\mapscriptmanager.h"
 #include "scriptevent.h"
 
-CMapScriptManager::CMapScriptManager(void)
+CMapScriptManager::CMapScriptManager(VOID)
 {
 }
 
-CMapScriptManager::~CMapScriptManager(void)
+CMapScriptManager::~CMapScriptManager(VOID)
 {
 }
 
@@ -45,7 +45,7 @@ VOID CMapScriptManager::Load(const char* pszFilename)
 	int nParam;
 	char* Params[4];
 	EventMapPosition pos;
-	for (UINT i = 0; i < sf.GetLineCount(); i++)
+	for (int i = 0; i < static_cast<int>(sf.GetLineCount()); i++)
 	{
 		pLine = TrimEx(sf[i]);
 		if (*pLine == '#' || *pLine == 0)continue;

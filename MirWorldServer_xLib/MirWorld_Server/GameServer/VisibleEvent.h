@@ -10,8 +10,8 @@ class CEventProcessor;
 class CVisibleEvent : public CEventObject
 {
 public:
-	CVisibleEvent(void);
-	virtual ~CVisibleEvent(void);
+	CVisibleEvent(VOID);
+	virtual ~CVisibleEvent(VOID);
 	/**
 	 * 创建可见事件
 	 * @param pMap 事件所在地图

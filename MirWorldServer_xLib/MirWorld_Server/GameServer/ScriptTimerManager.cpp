@@ -1,26 +1,26 @@
 #include "StdAfx.h"
 #include ".\scripttimermanager.h"
 
-CScriptTimerManager::CScriptTimerManager(void)
+CScriptTimerManager::CScriptTimerManager(VOID)
 {
-	memset(this->m_xTimer, 0, sizeof(this->m_xTimer));
+	m_xTimer.fill({});
 }
 
-CScriptTimerManager::~CScriptTimerManager(void)
+CScriptTimerManager::~CScriptTimerManager(VOID)
 {
 }
 
 BOOL CScriptTimerManager::StartTimer(UINT nIndex)
 {
 	if (nIndex > 256 || nIndex == 0)return FALSE;
-	this->m_xTimer[nIndex - 1].dwStartTime = timeGetTime();
+	this->m_xTimer[nIndex - 1].dwStartTime = CFrameTime::GetFrameTime();
 	return TRUE;
 }
 
 BOOL CScriptTimerManager::StopTimer(UINT nIndex)
 {
 	if (nIndex > 256 || nIndex == 0)return FALSE;
-	this->m_xTimer[nIndex - 1].dwStopTime = timeGetTime();
+	this->m_xTimer[nIndex - 1].dwStopTime = CFrameTime::GetFrameTime();
 	return TRUE;
 }
 

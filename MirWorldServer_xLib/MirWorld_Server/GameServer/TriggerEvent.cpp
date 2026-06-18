@@ -9,13 +9,13 @@
 #include "systemscript.h"
 
 xObjectPool<TriggerEvent> TriggerEvent::m_xPool;
-TriggerEvent::TriggerEvent(void) : m_pVisibleEvent(nullptr)
+TriggerEvent::TriggerEvent(VOID) : m_pVisibleEvent(nullptr)
 {
-	m_szMapName[0] = '\0';
-	m_szPage[0] = '\0';
+	m_szMapName.fill(0);
+	m_szPage.fill(0);
 }
 
-TriggerEvent::~TriggerEvent(void)
+TriggerEvent::~TriggerEvent(VOID)
 {
 	Destroy();
 }
@@ -37,8 +37,8 @@ TriggerEvent* TriggerEvent::Create(CAliveObject* pOwner, const char* szMapName, 
 	}
 	pEvent->m_pOwner = pOwner;
 	if (pOwner)pEvent->m_dwOwnerInstanceKey = pOwner->GetInstanceKey();
-	o_strncpy(pEvent->m_szMapName, szMapName, 64);
-	o_strncpy(pEvent->m_szPage, m_szPage, 64);
+	o_strncpy(pEvent->m_szMapName.data(), szMapName, 64);
+	o_strncpy(pEvent->m_szPage.data(), m_szPage, 64);
 	CEventManager::GetInstance()->AddEventProcessor(pEvent);
 	return pEvent;
 }
@@ -67,7 +67,7 @@ VOID TriggerEvent::OnUpdate(CVisibleEvent* pEvent)
 	CLogicMap* pMap = pEvent->GetMap();
 	if (pMap == nullptr)return;
 	int dx = pEvent->getX(), dy = pEvent->getY();
-	CMapCellInfo* pInfo = pMap->GetMapCellInfo(dx, dy);
+	CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(dx, dy);
 	if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -79,7 +79,7 @@ VOID TriggerEvent::OnUpdate(CVisibleEvent* pEvent)
 				if (pAObj->GetType() == OBJ_PLAYER && !pAObj->IsDeath())
 				{
 					CHumanPlayer* pPlayer = (CHumanPlayer*)pAObj;
-					CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), this->m_szPage, FALSE);
+					CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), this->m_szPage.data(), FALSE);
 				}
 			}
 			pNode = pNode->getNext();

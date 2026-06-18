@@ -4,8 +4,8 @@
 class CAiObjectEx : public CAliveObject
 {
 public:
-	CAiObjectEx(void);
-	virtual ~CAiObjectEx(void);
+	CAiObjectEx(VOID);
+	virtual ~CAiObjectEx(VOID);
 protected:
 	BOOL Init(int x, int y);
 	virtual BOOL AiWalk(int dir, BOOL bCheckRun = FALSE) { return FALSE; }

@@ -1,14 +1,15 @@
 #include "StdAfx.h"
 #include ".\scdoor.h"
 #include "LogicMap.h"
+#include <array>
 
-CSCDoor::CSCDoor(void)
+CSCDoor::CSCDoor(VOID)
 {
 	Clean();
 	m_bOpened = FALSE;
 }
 
-CSCDoor::~CSCDoor(void)
+CSCDoor::~CSCDoor(VOID)
 {
 }
 
@@ -97,13 +98,13 @@ VOID CSCDoor::Repair()
 {
 	if (m_bDead)
 	{
-		char szMsg[1024];
+		std::array<char, 1024> szMsg{};
 		int length = 0;
-		if (this->GetOutViewmsg(szMsg, length))
-			SendAroundMsg(szMsg, length);
+		if (this->GetOutViewmsg(szMsg.data(), length))
+			SendAroundMsg(szMsg.data(), length);
 		m_bDead = FALSE;
-		if (this->GetViewmsg(szMsg, length))
-			SendAroundMsg(szMsg, length);
+		if (this->GetViewmsg(szMsg.data(), length))
+			SendAroundMsg(szMsg.data(), length);
 	}
 	CMonsterEx::m_wCurHp = GetPropValue(PI_MAXHP);
 	ChangeOpenState();

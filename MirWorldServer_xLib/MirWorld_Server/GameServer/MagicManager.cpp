@@ -8,14 +8,12 @@
 #include "tinyxml.h"
 #include "humanplayermgr.h"
 
-CMagicManager::CMagicManager(void)
+CMagicManager::CMagicManager(VOID)
 {
-	m_xMagicClassList = nullptr;
-	memset(m_pMagicArray, 0, sizeof(m_pMagicArray));
-	m_pErrorMsg = { 0 };
+	m_pMagicArray.fill(nullptr);
 }
 
-CMagicManager::~CMagicManager(void)
+CMagicManager::~CMagicManager(VOID)
 {
 }
 
@@ -37,9 +35,8 @@ VOID CMagicManager::ClearMagicData()
 	m_xMagicClassList.~xListHost<MAGICCLASS>();
 	new (&m_xMagicClassList) xListHost<MAGICCLASS>();
 
-	m_MagicClassHash.~CNameHash();
-	new (&m_MagicClassHash) CNameHash();
-	memset(m_pMagicArray, 0, sizeof(m_pMagicArray));
+	m_MagicClassHash.Clear();
+	m_pMagicArray.fill(nullptr);
 }
 
 VOID CMagicManager::ReloadAllPlayerSkills()const
@@ -79,13 +76,10 @@ VOID CMagicManager::LoadMaigc(const char* pszMagicFile)
 	}
 }
 
-BOOL CMagicManager::AddMagicClassString(const char* pszMagicClassDesc)
+BOOL CMagicManager::AddMagicClassString(char* pszMagicClassDesc)
 {
-	char szBuffer[549];
-	o_strncpy(szBuffer, pszMagicClassDesc, 548);
-
 	char* Params[16];
-	int nParam = SearchParam(szBuffer, Params, 16, ',');
+	int nParam = SearchParam(pszMagicClassDesc, Params, 16, ",");
 	//#name/id/job/effecttype/effectvalue/needlv1/lv1exp/needlv2/lv2exp/needlv3/lv3exp/spl/dspl/delay/needmagic/mutexmagic
 	if (nParam < 16) return FALSE;
 
@@ -308,20 +302,20 @@ BOOL CMagicManager::AddMagicClass(MAGICCLASS* pMagicclass)
 	pNode = new xListHost<MAGICCLASS>::xListNode(pTemp);
 	if (pNode == nullptr)
 	{
-		m_pErrorMsg = "分配node失败!";
+		m_strErrorMsg = "分配node失败!";
 		delete pTemp;
 		return FALSE;
 	}
 	if (!m_xMagicClassList.addNode(pNode))
 	{
-		m_pErrorMsg = "添加node失败!";
+		m_strErrorMsg = "添加node失败!";
 		delete pTemp;
 		delete pNode;
 		return FALSE;
 	}
 	if (!m_MagicClassHash.HAdd(pTemp->szName, (LPVOID)pNode))
 	{
-		m_pErrorMsg = "加入到名字表中失败!";
+		m_strErrorMsg = "加入到名字表中失败!";
 		m_xMagicClassList.removeNode(pNode);
 		delete pTemp;
 		delete pNode;
@@ -339,7 +333,7 @@ BOOL CMagicManager::CreateMagic(const char* pszName, MAGIC& magic)
 	if (pClass == nullptr)return FALSE;
 
 	o_strncpy(magic.szName, pClass->szName, 12);
-	magic.btNameLength = strlen(magic.szName);
+	magic.btNameLength = static_cast<BYTE>(strlen(magic.szName));
 	magic.btLevel = 0;
 	magic.wDelayTime = pClass->wDelay;
 	magic.btNeedLevel[0] = pClass->btNeedLv[0];
@@ -367,40 +361,14 @@ BOOL CMagicManager::CreateMagic(UINT id, MAGIC& magic)
 {
 	MAGICCLASS* pClass = GetClassById(id);
 	if (pClass == nullptr)return FALSE;
-
-	o_strncpy(magic.szName, pClass->szName, 12);
-	magic.btNameLength = strlen(magic.szName);
-
-	magic.btLevel = 0;
-	magic.wDelayTime = pClass->wDelay;
-	magic.btNeedLevel[0] = pClass->btNeedLv[0];
-	magic.btNeedLevel[1] = pClass->btNeedLv[1];
-	magic.btNeedLevel[2] = pClass->btNeedLv[2];
-	magic.btNeedLevel[3] = pClass->btNeedLv[3];
-	magic.iLevelupExp[0] = pClass->dwNeedExp[0];
-	magic.iLevelupExp[1] = pClass->dwNeedExp[1];
-	magic.iLevelupExp[2] = pClass->dwNeedExp[2];
-	magic.iLevelupExp[3] = pClass->dwNeedExp[3];
-
-	magic.btEffectType = pClass->btEffectType;
-	magic.btEffect = pClass->btEffectValue;
-
-	magic.wSpell = pClass->GetSpellPoint(0);
-
-	magic.cKey = 0;
-	magic.job = pClass->btJob;
-
-	magic.wId = (WORD)pClass->id;
-
+	GetMagicFromClass(pClass, magic);
 	return TRUE;
 }
 
 VOID CMagicManager::GetMagicFromClass(MAGICCLASS* pClass, MAGIC& magic)
 {
-	if (pClass == nullptr)return;
-
 	o_strncpy(magic.szName, pClass->szName, 12);
-	magic.btNameLength = strlen(magic.szName);
+	magic.btNameLength = static_cast<BYTE>(strlen(magic.szName));
 
 	magic.btLevel = 0;
 	magic.wDelayTime = pClass->wDelay;
@@ -436,10 +404,13 @@ Magic& CMagicManager::GetMagic(WORD wMagicId)
 	auto it = magics.find(wMagicId);
 	if (it != magics.end())
 		return it->second;
-	return magics.begin()->second;
+	static Magic s_emptyMagic{0, {}};
+	if (!magics.empty())
+		return magics.begin()->second;
+	return s_emptyMagic;
 }
 
-VOID CMagicManager::LoadMagicExt(const char* pszMagicExtFile, BOOL bCSV)
+VOID CMagicManager::LoadMagicExt(const char* pszMagicExtFile)
 {
 	struct tagMagicExt
 	{
@@ -453,8 +424,8 @@ VOID CMagicManager::LoadMagicExt(const char* pszMagicExtFile, BOOL bCSV)
 		WORD	wStrawManCount; // 耗雄稻草人(男)
 		WORD	wStrawWomanCount; // 耗雌稻草人(女)
 		char	szSpecial[256]; // 附加参数
-	}MagicExt;
-	CFmtTextFile ftfMagicExt("s20d3w5s256", pszMagicExtFile, bCSV);
+	}MagicExt{};
+	CFmtTextFile ftfMagicExt("s20d3w5s256", pszMagicExtFile, TRUE);
 
 	for (int i = 0; i < ftfMagicExt.GetCount(); i++)
 	{

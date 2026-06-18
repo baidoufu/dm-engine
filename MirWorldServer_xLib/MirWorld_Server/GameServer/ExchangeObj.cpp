@@ -3,22 +3,22 @@
 #include "humanplayer.h"
 #include ".\exchangeobjectmgr.h"
 
-CExchangeObj::CExchangeObj(void) :m_State(EE_PUTITEMS)
+CExchangeObj::CExchangeObj(VOID) :m_State(EE_PUTITEMS)
 {
 	m_pErrorMsg = "交易成功";
 	m_State = EE_PUTITEMS;
-	memset(m_Sides, 0, sizeof(m_Sides));
+	m_Sides.fill({});
 	m_boFastExchange = FALSE;
 }
 
-CExchangeObj::~CExchangeObj(void)
+CExchangeObj::~CExchangeObj(VOID)
 {
 }
 
 BOOL CExchangeObj::Begin(CHumanPlayer* p1, CHumanPlayer* p2)
 {
 	if (p1 == nullptr || p2 == nullptr)return FALSE;
-	memset(m_Sides, 0, sizeof(m_Sides));
+	m_Sides.fill({});
 	m_Sides[0].player = p1;
 	m_Sides[1].player = p2;
 	m_State = EE_PUTITEMS;
@@ -43,7 +43,7 @@ BOOL CExchangeObj::PutItem(CHumanPlayer* p, ITEM& item)
 		p->SendMsg(0, 0x2a4, 0, 0, 0);
 		return FALSE;
 	}
-	for (int i = 0; i < 10; i++)
+	for (i = 0; i < 10; i++)
 	{
 		if (pSide->m_Items[i].dwMakeIndex == 0)
 		{
@@ -85,14 +85,17 @@ BOOL CExchangeObj::TakeMoney(CHumanPlayer* p, money_type type, DWORD dwCount)
 
 BOOL CExchangeObj::DoExchange(exchange_side* pActionSide, exchange_side* pOtherSide)
 {
-	//	check item space
+	//	检查背包空间
 	int itemcount1 = 0;
 	int itemcount2 = 0;
-	for (int i = 0; i < 10; i++)
+	for (const auto& item : pActionSide->m_Items)
 	{
-		if (pActionSide->m_Items[i].dwMakeIndex != 0)
+		if (item.dwMakeIndex != 0)
 			itemcount1++;
-		if (pOtherSide->m_Items[i].dwMakeIndex != 0)
+	}
+	for (const auto& item : pOtherSide->m_Items)
+	{
+		if (item.dwMakeIndex != 0)
 			itemcount2++;
 	}
 	if (itemcount1 > pOtherSide->player->GetBag().GetFree())
@@ -105,7 +108,39 @@ BOOL CExchangeObj::DoExchange(exchange_side* pActionSide, exchange_side* pOtherS
 		pOtherSide->player->SaySystem("对方的背包无法容纳这么多物品!");
 		return FALSE;
 	}
-	//	check money space
+	// 检查重量限制
+	UINT weight1 = 0, weight2 = 0;
+	for (const auto& item : pActionSide->m_Items)
+	{
+		if (item.dwMakeIndex != 0)
+			weight1 += item.baseitem.btWeight;
+	}
+	for (const auto& item : pOtherSide->m_Items)
+	{
+		if (item.dwMakeIndex != 0)
+			weight2 += item.baseitem.btWeight;
+	}
+	if (weight2 > 0)
+	{
+		int maxWeight1 = pActionSide->player->GetPropValue(PI_MAXBAGWEIGHT);
+		int curWeight1 = pActionSide->player->GetPropValue(PI_CURBAGWEIGHT);
+		if (curWeight1 + (int)weight2 > maxWeight1)
+		{
+			pOtherSide->player->SaySystem("对方负重不够, 无法容纳这些物品!");
+			return FALSE;
+		}
+	}
+	if (weight1 > 0)
+	{
+		int maxWeight2 = pOtherSide->player->GetPropValue(PI_MAXBAGWEIGHT);
+		int curWeight2 = pOtherSide->player->GetPropValue(PI_CURBAGWEIGHT);
+		if (curWeight2 + (int)weight1 > maxWeight2)
+		{
+			pActionSide->player->SaySystem("对方负重不够, 无法容纳这些物品!");
+			return FALSE;
+		}
+	}
+	// 检查钱数量
 	if (pActionSide->dwGold > 0)
 	{
 		if (!pOtherSide->player->TestAddGold(pActionSide->dwGold))
@@ -138,47 +173,74 @@ BOOL CExchangeObj::DoExchange(exchange_side* pActionSide, exchange_side* pOtherS
 			return FALSE;
 		}
 	}
-	//	then do exchange~
-	for (int i = 0; i < 10; i++)
+	// 物品已在PutTradeItem时从背包移除，金币已在PutTradeMoney时扣除
+	// 直接将物品添加到对方背包
+	for (auto& item : pActionSide->m_Items)
 	{
-		if (pActionSide->m_Items[i].dwMakeIndex != 0)
-			pOtherSide->player->AddBagItem(pActionSide->m_Items[i], FALSE, TRUE, FALSE);
-		if (pOtherSide->m_Items[i].dwMakeIndex != 0)
-			pActionSide->player->AddBagItem(pOtherSide->m_Items[i], FALSE, TRUE, FALSE);
+		if (item.dwMakeIndex != 0)
+			pOtherSide->player->AddBagItem(item, FALSE, TRUE, FALSE);
+	}
+	for (auto& item : pOtherSide->m_Items)
+	{
+		if (item.dwMakeIndex != 0)
+			pActionSide->player->AddBagItem(item, FALSE, TRUE, FALSE);
 	}
 	pActionSide->player->SendWeightChanged();
 	pOtherSide->player->SendWeightChanged();
-	pActionSide->player->AddGold(pOtherSide->dwGold);
-	pOtherSide->player->AddGold(pActionSide->dwGold);
-	pActionSide->player->AddMoney(MT_YUANBAO, pOtherSide->dwYuanbao);
-	pOtherSide->player->AddMoney(MT_YUANBAO, pActionSide->dwYuanbao);
+	// 金币已在PutTradeMoney时扣除，只需添加对方付出的金币
+	if (pOtherSide->dwGold > 0)
+		pActionSide->player->AddGold(pOtherSide->dwGold);
+	if (pActionSide->dwGold > 0)
+		pOtherSide->player->AddGold(pActionSide->dwGold);
+	if (pOtherSide->dwYuanbao > 0)
+		pActionSide->player->AddMoney(MT_YUANBAO, pOtherSide->dwYuanbao);
+	if (pActionSide->dwYuanbao > 0)
+		pOtherSide->player->AddMoney(MT_YUANBAO, pActionSide->dwYuanbao);
 
 	pActionSide->player->SendMsg(0, SM_TRADEEND, 0, 0, 0);
 	pActionSide->player->SaySystemAttrib(CC_EXCHANGE, "交易成功");
 	pOtherSide->player->SendMsg(0, SM_TRADEEND, 0, 0, 0);
 	pOtherSide->player->SaySystemAttrib(CC_EXCHANGE, "交易成功");
 
-	//pActionSide->player->SetExchangeObject( nullptr );
-	//pOtherSide->player->SetExchangeObject( nullptr );
-
 	return TRUE;
 }
 
 BOOL CExchangeObj::DoCancel(exchange_side* pActionSide, exchange_side* pOtherSide)
 {
-	for (int i = 0; i < 10; i++)
+	// 交易过程中PutItem已从背包移除物品，取消时需要返还
+	for (auto& item : pActionSide->m_Items)
 	{
-		if (pActionSide->m_Items[i].dwMakeIndex != 0)
-			pActionSide->player->AddBagItem(pActionSide->m_Items[i], TRUE, FALSE, FALSE);
-		if (pOtherSide->m_Items[i].dwMakeIndex != 0)
-			pOtherSide->player->AddBagItem(pOtherSide->m_Items[i], TRUE, FALSE, FALSE);
+		if (item.dwMakeIndex != 0)
+		{
+			if (!pActionSide->player->AddBagItem(item, TRUE, FALSE, FALSE))
+			{
+				// 背包已满，物品掉落到地面
+				pActionSide->player->DropItem(item);
+			}
+		}
+	}
+	for (auto& item : pOtherSide->m_Items)
+	{
+		if (item.dwMakeIndex != 0)
+		{
+			if (!pOtherSide->player->AddBagItem(item, TRUE, FALSE, FALSE))
+			{
+				// 背包已满，物品掉落到地面
+				pOtherSide->player->DropItem(item);
+			}
+		}
 	}
 	pActionSide->player->SendWeightChanged();
 	pOtherSide->player->SendWeightChanged();
-	pActionSide->player->AddGold(pActionSide->dwGold, FALSE);
-	pActionSide->player->AddMoney(MT_YUANBAO, pActionSide->dwYuanbao, FALSE);
-	pOtherSide->player->AddGold(pOtherSide->dwGold, FALSE);
-	pOtherSide->player->AddMoney(MT_YUANBAO, pOtherSide->dwYuanbao, FALSE);
+	// 返还金币（PutMoney时已从玩家扣除，取消时需返还）
+	if (pActionSide->dwGold > 0)
+		pActionSide->player->AddGold(pActionSide->dwGold, FALSE);
+	if (pActionSide->dwYuanbao > 0)
+		pActionSide->player->AddMoney(MT_YUANBAO, pActionSide->dwYuanbao, FALSE);
+	if (pOtherSide->dwGold > 0)
+		pOtherSide->player->AddGold(pOtherSide->dwGold, FALSE);
+	if (pOtherSide->dwYuanbao > 0)
+		pOtherSide->player->AddMoney(MT_YUANBAO, pOtherSide->dwYuanbao, FALSE);
 
 	pActionSide->player->SendMsg(0, SM_TRADECANCELED, 0, 0, 0);
 	pActionSide->player->SaySystemAttrib(CC_EXCHANGE, "交易取消");
@@ -192,7 +254,7 @@ BOOL CExchangeObj::End(CHumanPlayer* p, e_endtype type)
 {
 	exchange_side* pside = GetSide(p);
 	exchange_side* potherside = GetOtherSide(p);
-	if (pside == nullptr)
+	if (pside == nullptr || potherside == nullptr)
 	{
 		m_pErrorMsg = "您现在不在交易状态!";
 		return FALSE;

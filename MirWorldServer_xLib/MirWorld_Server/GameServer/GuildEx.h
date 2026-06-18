@@ -1,6 +1,7 @@
 #pragma once
-#include <list>
 #include <string>
+#include <array>
+#include <vector>
 #include "GuildManagerEx.h"
 class CHumanPlayer;
 
@@ -13,7 +14,7 @@ typedef struct tagListNode
 	BOOL bTitle;
 	UINT nParam;
 	LPVOID lpData;
-	char szName[64];
+	std::array<char, 64> szName{};
 }GuildListNode;
 
 class CGuildMemberEx;
@@ -35,7 +36,7 @@ public:
 	BOOL IsRefValid();
 	VOID SetRefPlayer(CHumanPlayer* pPlayer);
 
-	const char* GetName() { return m_szCharName; }
+	const char* GetName() { return m_szCharName.data(); }
 	UINT GetExp()const { return m_nExp; }
 	VOID AddExp(UINT nExp) { m_nExp += nExp; }
 	VOID SetExp(UINT nExp) { m_nExp = nExp; }
@@ -58,7 +59,7 @@ public:
 	VOID SetNoSay() { m_boNoSay = !m_boNoSay; };
 protected:
 	GUILDMEMBERNODE* m_pNode;
-	char m_szCharName[20];
+	std::array<char, 20> m_szCharName;
 	WORD m_wLevel; //玩家缓存等级
 	BYTE m_btJob; //玩家缓存职业
 	UINT m_nExp;
@@ -79,8 +80,8 @@ public:
 	VOID RemoveMember(CGuildMemberEx* pMember);
 	VOID ConfirmMembers();
 
-	const char* GetName() { return m_szName; }
-	VOID SetName(const char* pszName) { o_strncpy(m_szName, pszName, 60); }
+	const char* GetName() { return m_szName.data(); }
+	VOID SetName(const char* pszName) { o_strncpy(m_szName.data(), pszName, 60); }
 
 	UINT GetLevel()const { return m_nLevel; }
 	VOID SetLevel(UINT nLevel) { m_nLevel = nLevel; }
@@ -107,7 +108,7 @@ protected:
 	UINT m_nLevel; // 行会分组等级，大于10的分组可以进行显示编辑
 	static xObjectPool<GUILDMEMBERNODE> m_xGuildMemberNodePool;
 	xListHost<CGuildMemberEx> m_xMemberList;
-	char m_szName[64];
+	std::array<char, 64> m_szName;
 };
 
 class CGuildEx;
@@ -127,8 +128,8 @@ class CGuildEx :
 	public xError
 {
 public:
-	CGuildEx(void);
-	virtual ~CGuildEx(void);
+	CGuildEx(VOID);
+	virtual ~CGuildEx(VOID);
 
 	CGuildMemberEx* GetMember(const char* pszName);
 	CGuildMemberEx* GetMember(CHumanPlayer* pMember);
@@ -156,8 +157,8 @@ public:
 
 	VOID RefreshMemberName();
 	VOID RefreshMemberTitle();
-	const char* GetName() { return m_szName; }
-	VOID SetName(const char* pszName) { o_strncpy(m_szName, pszName, 60); }
+	const char* GetName() { return m_szName.data(); }
+	VOID SetName(const char* pszName) { o_strncpy(m_szName.data(), pszName, 60); }
 
 	BOOL IsNoSay(const char* pszCharName);
 	VOID SetNoSay(const char* pszCharName);
@@ -175,8 +176,8 @@ public:
 	VOID SetAttackSabuk(BOOL fAttack) { m_fAttackSabuk = fAttack; }
 	BOOL IsAttackSabuk()const { return m_fAttackSabuk; }
 
-	const char* GetNotice() { return m_szNotice; }
-	VOID SetNotice(const char* pszNotice) { o_strncpy(m_szNotice, pszNotice, MAX_GUILD_NOTICE_LENGTH - 1); }
+	const char* GetNotice() { return m_szNotice.data(); }
+	VOID SetNotice(const char* pszNotice) { o_strncpy(m_szNotice.data(), pszNotice, MAX_GUILD_NOTICE_LENGTH - 1); }
 
 	BOOL SendFirstPage(CHumanPlayer* pPlayer);//xPacket & packet );
 	//时光区-成员列表
@@ -232,7 +233,7 @@ public:
 	const char* GetFirstOwnerName();
 	VOID SetRecruitState(BOOL boRecruitState) { m_boRecruitState = boRecruitState; }
 	BOOL GetRecruitState()const { return m_boRecruitState; }
-	void SetDeclarationList(std::string sNotict)
+	VOID SetDeclarationList(std::string sNotict)
 	{
 		m_DeclarationList.clear();
 		std::string sNotictTemp = sNotict;
@@ -265,7 +266,7 @@ public:
 			if (boBreak) szTemp += "\r";
 		}
 		szTemp += "";
-		return szTemp;
+		return std::move(szTemp);
 	}
 public: // 行会组管理
 	//创建行会组
@@ -303,25 +304,25 @@ public: // 行会组管理
 protected:
 	BOOL AddMemberInternal(const char* pszName, WORD wLevel, BYTE btJob, CHumanPlayer* pRefPlayer = nullptr);
 	xStringList<50> m_xMemberNameList;
-	CGuildGroupEx* m_xGroups[100];
+	std::array<CGuildGroupEx*, 100> m_xGroups{};
 	UINT m_nGroupCount;
 	xStringList<50> m_xApplyPlayers;
 	static xObjectPool<CGuildMemberEx> m_xMemberPool;
 	static xObjectPool<CGuildGroupEx> m_xGroupPool;
-	char m_szName[64];
-	char m_szNotice[MAX_GUILD_NOTICE_LENGTH];
-	char m_szFilename[1024];
+	std::array<char, 64> m_szName;
+	std::array<char, MAX_GUILD_NOTICE_LENGTH> m_szNotice;
+	std::array<char, 1024> m_szFilename;
 	UINT m_nLevel; // 行会等级等=通灵塔等级
 	UINT m_nExp; // 行会经验
 	UINT m_nGold; // 行会金币数量
 	UINT m_nMaxMemberCount;
 	BOOL m_boAllNoSay; // 是否全行会聊天禁言
-	GuildRef m_sAllyGuilds[10];
-	GuildRef m_sKillGuilds[10];
+	std::array<GuildRef, 10> m_sAllyGuilds{};
+	std::array<GuildRef, 10> m_sKillGuilds{};
 	UINT m_nKillGuildCount;
 	UINT m_nAllyGuildCount;
 	BOOL m_fAttackSabuk;
 	BOOL m_boRecruitState; // 招募状态-时长区
-	std::list<std::string> m_DeclarationList; // 行会宣言-时长区
+	std::vector<std::string> m_DeclarationList; // 行会宣言-时长区
 	xVarList<32> m_xVarList;
 };

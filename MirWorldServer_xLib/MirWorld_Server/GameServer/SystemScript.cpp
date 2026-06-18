@@ -1,17 +1,16 @@
 #include "StdAfx.h"
 #include ".\systemscript.h"
 
-CSystemScript::CSystemScript(void)
+CSystemScript::CSystemScript(VOID)
 {
 	m_pScriptObject = nullptr;
 }
 
-CSystemScript::~CSystemScript(void)
+CSystemScript::~CSystemScript(VOID)
 {
 }
 
-BOOL CSystemScript::Init(CScriptObject* pScriptObject)
+VOID CSystemScript::Init(CScriptObject* pScriptObject)
 {
-	this->m_pScriptObject = pScriptObject;
-	return TRUE;
+	m_pScriptObject = pScriptObject;
 }

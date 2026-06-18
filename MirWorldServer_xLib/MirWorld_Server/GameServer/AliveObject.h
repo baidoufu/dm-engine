@@ -2,6 +2,8 @@
 #include "mapobject.h"
 #include <mutex>
 #include <memory>
+#include <unordered_map>
+#include <array>
 
 enum process_type
 {
@@ -88,8 +90,8 @@ typedef xListHost<VISIBLE_OBJECT> VISIBLE_OBJECT_LIST;
 class CAliveObject : public CMapObject
 {
 public:
-	CAliveObject(void);
-	virtual ~CAliveObject(void);
+	CAliveObject(VOID);
+	virtual ~CAliveObject(VOID);
 	virtual VOID Clean();
 	BOOL Walk(int dir, DWORD dwDelay = 0);
 	BOOL WalkXY(int x, int y, int dir, DWORD dwDelay = 0);
@@ -98,7 +100,7 @@ public:
 	//发包告诉客户端停止动作执行
 	VOID Stop();
 	BOOL Turn(int dir);
-	BOOL Attack(int dir, DWORD dwDelay = 0, e_humanattackmode mode = HAM_ALL);
+	BOOL Attack(int dir, DWORD dwDelay = 0, e_humanattackmode mode = HAM_ALL, damage_type curAttackType = DT_PHYSICS);
 	BOOL BeAttack(CAliveObject* pAttacker, int nDamage, damage_type damagetype = DT_PHYSICS, DWORD dwFlag = 0, damage_ReType damageReType = DRT_NONE);
 	virtual int  getdir() { return 0; }
 	BOOL GetMeal(int dir);
@@ -182,7 +184,7 @@ public:
 	WORD GetDeInvisibleLevel() { return m_wDeInvisibleLevel; }
 	e_direction GetDirection()const { return m_Direction; }
 	e_direction GetValidDirection(int dir) { return static_cast<e_direction>((static_cast<int>(dir) + ED_MAX) % ED_MAX); }
-	void SetDirection(e_direction dir)
+	VOID SetDirection(e_direction dir)
 	{
 		m_Direction = dir;
 		m_ActionDirection = dir;
@@ -213,9 +215,9 @@ public:
 		int nMax = GetPropValue(PI_MAXDC);
 		int lucky = GetPropValue(PI_LUCKY) - GetPropValue(PI_DAWN);
 		if (lucky > 0 && Getrand(100) < g_pLucky[lucky])
-			nMin = nMax - (nMax - nMin) * max(10 - lucky, 0) / 10;
+			nMin = nMax - (nMax - nMin) * MAX(10 - lucky, 0) / 10;
 		else if (lucky < 0)
-			nMax = nMin + (nMax - nMin) * max(lucky + 10, 0) / 10;
+			nMax = nMin + (nMax - nMin) * MAX(lucky + 10, 0) / 10;
 		return GetRangeRand(nMin, nMax);
 	}
 	inline BOOL IsFullHp()
@@ -326,8 +328,8 @@ public:
 		}
 		return m_AddProp[index];
 	}
-	virtual void DecPropValue(PROP_INDEX index, int value) {}
-	virtual void AddPropValue(PROP_INDEX index, int value) {}
+	virtual VOID DecPropValue(PROP_INDEX index, int value) {}
+	virtual VOID AddPropValue(PROP_INDEX index, int value) {}
 	//回复血, 蓝, 回复时间
 	virtual int GetAutoRecoverHp() { return 0; }
 	virtual int GetAutoRecoverMp() { return 0; }
@@ -356,16 +358,25 @@ public:
 	VOID RefreshViewList();
 	VOID UpdateViewObjectList(xListHost<CMapObject>* pList);
 	VOID UpdateOutViewObjectList(xListHost<CMapObject>* pList);
-	VOID UpdateMonster(UINT ox, UINT oy);
 	VOID OnMoveTo(UINT ox, UINT oy, UINT nx, UINT ny) { UpdateViewRange(ox, oy); }
 
-#ifdef USE_FREE_MEMORY
-	VISIBLE_OBJECT* NewVisibleObject() { VISIBLE_OBJECT* p = new VISIBLE_OBJECT; return p; }
-	VOID DeleteVisibleObject(VISIBLE_OBJECT* pVisibleObject) { if (pVisibleObject->pObject)pVisibleObject->pObject->DecRef(); delete pVisibleObject; }
-#else
-	VISIBLE_OBJECT* NewVisibleObject() { VISIBLE_OBJECT* p = m_xVisibleObjectPool.newObject(); if (p) { p->pObject = nullptr; }return p; }
-	VOID DeleteVisibleObject(VISIBLE_OBJECT* pVisibleObject) { if (pVisibleObject->pObject)pVisibleObject->pObject->DecRef(); m_xVisibleObjectPool.deleteObject(pVisibleObject); }
-#endif
+	VISIBLE_OBJECT* NewVisibleObject() 
+	{ 
+		VISIBLE_OBJECT* pVisibleObject = m_xVisibleObjectPool.newObject();
+		if (pVisibleObject)
+			pVisibleObject->pObject = nullptr;
+		return pVisibleObject;
+	}
+	VOID DeleteVisibleObject(VISIBLE_OBJECT* pVisibleObject) 
+	{
+		if (!pVisibleObject) return;
+		if (pVisibleObject->pObject)
+		{
+			pVisibleObject->pObject->DecRef();
+			pVisibleObject->pObject = nullptr;
+		}
+		m_xVisibleObjectPool.deleteObject(pVisibleObject); 
+	}
 
 	DWORD GetVisibleObjectFlag()const { return m_nVisibleObjectFlag; }
 	VOID AddVisibleObjectType(e_object_type type)
@@ -449,7 +460,7 @@ public:
 
 	DWORD GetInstanceKey()const { return m_dwInstanceKey; }
 	BOOL IsPetsActive()const { return m_bPetsActive; }
-	virtual VOID SetPetsActive(BOOL bActive) { m_bPetsActive = bActive; }
+	VOID SetPetsActive() { m_bPetsActive = !m_bPetsActive; }
 	virtual DWORD GetOwnerKey() { return 0; }
 	virtual VOID OnStatusSet(int index, DWORD dwParam = 0);
 	virtual VOID OnStatusClr(int index, DWORD dwParam = 0);
@@ -554,15 +565,14 @@ public:
 	virtual BOOL WillDie() { return TRUE; }
 	virtual BOOL CanBePushed(CAliveObject* pAttacker);
 protected:
-	char m_szLongName[128];
+	std::array<char, 128> m_szLongName;
 	//DWORD	m_dwSystemFlag;
 	xStatus	m_SystemFlag;
+	//检查隐身状态，如果有则清除
 	VOID CheckClearCloak()
 	{
-		if (IsStatusSet(SI_CLOAK) && m_Status.GetTimeOut(SI_CLOAK) != 0xffffffff)
-			AddProcess(EP_CLRSTATUS, SI_CLOAK);
+		if (IsStatusSet(SI_CLOAK)) ClrStatus(SI_CLOAK);
 	}
-
 	DWORD m_dwAddHp; // 增加生命值数量
 	DWORD m_dwAddHpSpeed; // 增加生命值速度
 	CServerTimer m_AddHpTimer; // 加生命值定时器
@@ -585,7 +595,7 @@ protected:
 	BOOL m_bNoDamage;
 	xStatus	m_Status;
 
-	xPtrQueue<OBJECTPROCESS> m_xQProcess;
+	xMpscQueue<OBJECTPROCESS, 64> m_xQProcess;
 	unsigned long long m_dwProcessFlags;  // 64个bit可以表示64种process
 
 	e_direction	m_Direction;
@@ -606,11 +616,14 @@ protected:
 	xListHost<VISIBLE_OBJECT> m_xVisibleObjectList;
 	xListHost<VISIBLE_OBJECT> m_xVisibleItemsList;
 
+	std::unordered_map<CMapObject*, VISIBLE_OBJECT*> m_mapVisibleObject; // 活体对象快速查找
+	std::unordered_map<CMapObject*, VISIBLE_OBJECT*> m_mapVisibleItems; // 物品对象快速查找
+
 	BOOL m_bDead;
 	BOOL m_bPosLocked;
 
 	static xObjectPool<VISIBLE_OBJECT>	m_xVisibleObjectPool;
-	int m_AddProp[PI_PROP_COUNT];
+	std::array<int, PI_PROP_COUNT> m_AddProp;
 
 	VOID AddProp(int index, int value)
 	{
@@ -664,12 +677,12 @@ public:
 		{
 		case 6:
 			if (m_skill6Timer.IsTimeOut(m_dwSkill6)) return TRUE;
+		break;
 		case 45:
 			if (m_skill45Timer.IsTimeOut(m_dwSkill45)) return TRUE;
-		default:
-			return FALSE;
-			break;
+		break;
 		}
+		return FALSE;
 	}
 	//设置多少时间内不中技能伤害
 	VOID SetSkillTime(int wMagicId, DWORD nTime)
@@ -707,10 +720,6 @@ public:
 			break;
 		}
 	}
-	// 设置当前攻击类型
-	VOID SetCurAttackType(damage_type curAttackType) { m_CurAttackType = curAttackType; }
-	// 获取当前攻击类型
-	damage_type GetCurAttackType() const { return m_CurAttackType; }
 private:
 	CServerTimer m_skill6Timer; // 不中施毒术计时器
 	DWORD m_dwSkill6; // 不中施毒术时间
@@ -718,5 +727,4 @@ private:
 	DWORD m_dwSkill45; // 不中诅咒术时间
 	CServerTimer m_status26Timer; // 不中麻痹状态计时器
 	DWORD m_dwStatus26; // 不中麻痹状态时间
-	damage_type m_CurAttackType; // 当前攻击类型
 };

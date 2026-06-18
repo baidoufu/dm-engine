@@ -66,12 +66,11 @@ BOOL CHumanPlayer::PutItemToPetBag(DWORD dwMakeIndex)
 
 VOID CHumanPlayer::SendPetName(ITEM* pItem)
 {
-	char szTempBuffer[32]{};
-	xPacket packet(szTempBuffer, 31);
-	packet.push((LPVOID)&pItem->dwMakeIndex, 4);
-	packet.push(pItem->GetExName());
-	packet.push(1);
-	SendMsg(GetId(), 206, pItem->dwMakeIndex, 0, 1, (LPVOID)packet.getbuf(), packet.getsize());
+	xPacketPool::ScopedPacket packet;
+	packet->push((LPVOID)&pItem->dwMakeIndex, 4);
+	packet->push(pItem->GetExName());
+	packet->push(1);
+	SendMsg(GetId(), 206, static_cast<WORD>(pItem->dwMakeIndex), 0, 1, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CHumanPlayer::SendOutPetInfo(ITEM* pItem, BYTE Type)
@@ -84,30 +83,31 @@ VOID CHumanPlayer::SendOutPetInfo(ITEM* pItem, BYTE Type)
 		dwCurHp = m_pPet->GetPropValue(PI_CURHP);
 		dwMaxHp = m_pPet->GetPropValue(PI_MAXHP);
 	}
-	else // 骑乘类 马
+	else if (m_pHorse) // 骑乘类 马
 	{
 		dwCurHp = m_pHorse->GetPropValue(PI_CURHP);
 		dwMaxHp = m_pHorse->GetPropValue(PI_MAXHP);
 	}
-	char szTempBuffer[128]{};
-	xPacket packet(szTempBuffer, 127);
+	else
+		return;
+	xPacketPool::ScopedPacket packet;
 	DWORD nValue = pItem->dwMakeIndex;
-	packet.push((LPVOID)&nValue, 4);
-	packet.push(20);
+	packet->push((LPVOID)&nValue, 4);
+	packet->push(20);
 	nValue = pItem->GetPetTime(); // 最后喂养时间
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = 4;
-	packet.push((LPVOID)&nValue, 1);
-	packet.push(8);
+	packet->push((LPVOID)&nValue, 1);
+	packet->push(8);
 	nValue = (dwCurHp / dwMaxHp) * 100; // 血条百分比
-	byHPPercent = nValue;
-	packet.push((LPVOID)&nValue, 1);
-	packet.push(16);
+	byHPPercent = static_cast<BYTE>(nValue);
+	packet->push((LPVOID)&nValue, 1);
+	packet->push(16);
 	nValue = Type; // 0未释放、1释放出来跟随、2本体骑乘、3摆摊、4下马、5改变颜色、6本体骑战、100特殊状态
-	packet.push((LPVOID)&nValue, 1);
-	packet.push((LPVOID)&dwCurHp, 2); // 当前生命值
-	packet.push((LPVOID)&dwMaxHp, 2); // 最大生命值
-	SendMsg(0, 0x88a1, MAKEWORD(byHPPercent, Type), 1, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nValue, 1);
+	packet->push((LPVOID)&dwCurHp, 2); // 当前生命值
+	packet->push((LPVOID)&dwMaxHp, 2); // 最大生命值
+	SendMsg(0, 0x88a1, MAKEWORD(byHPPercent, Type), 1, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CHumanPlayer::PetEatItem(DWORD nPetItemIdx, DWORD nItemIdx)

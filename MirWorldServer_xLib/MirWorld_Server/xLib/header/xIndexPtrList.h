@@ -1,191 +1,123 @@
 #pragma once
+#include <memory>
+#include <vector>
+#include <stack>
+#include <unordered_map>
 
-template<class T>
-class xQueue
-{
-public:
-	xQueue()
-	{
-		m_varArray = nullptr;
-		m_iMax = 0;
-		clear();
-	}
-
-	~xQueue()
-	{
-		clear();
-		destroy();
-	}
-
-	BOOL create(int size)
-	{
-		destroy();
-		if (size > 0)
-		{
-			m_iMax = size;
-			m_varArray = new T[m_iMax];
-			clear();
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	VOID destroy()
-	{
-		if (m_varArray != nullptr)
-		{
-			delete[]m_varArray;
-			m_varArray = nullptr;
-		}
-		m_iMax = 0;
-	}
-
-	VOID clear()
-	{
-		m_iPut = 0;
-		m_iGet = 0;
-		m_bFull = FALSE;
-	}
-
-	BOOL pop(T& var)
-	{
-		if (m_varArray == nullptr)return FALSE;
-		if (m_iGet == m_iPut && m_bFull == FALSE)return FALSE;
-		var = m_varArray[m_iGet];
-		m_iGet++;
-		m_iGet %= m_iMax;
-		if (m_bFull)m_bFull = FALSE;
-		return TRUE;
-	}
-	BOOL push(T var)
-	{
-		if (m_varArray == nullptr)return FALSE;
-		if (m_bFull)return FALSE;
-		m_varArray[m_iPut] = var;
-		m_iPut++;
-		m_iPut %= m_iMax;
-		if (m_iPut == m_iGet)m_bFull = TRUE;
-		return TRUE;
-	}
-
-private:
-	BOOL m_bFull;
-	int m_iGet;
-	int m_iPut;
-	int	m_iMax;
-	T* m_varArray;
-};
-
+// ======================================================================================
+// xIndexPtrList — 基于 STL 的高性能版本
+// 使用 std::vector + std::unordered_map + std::stack 替换原始数组+线性查找
+// ======================================================================================
 template<class T>
 class xIndexPtrList
 {
 public:
-	xIndexPtrList(void)
+	xIndexPtrList(VOID)
 	{
-		m_varArray = nullptr;
 		m_iMax = 0;
 		m_iArrayPtr = 0;
 		m_nCount = 0;
 	}
-
-	virtual ~xIndexPtrList(void)
-	{
-		destroy();
-	}
-
+	virtual ~xIndexPtrList(VOID) { destroy(); }
 	BOOL create(int nSize)
 	{
 		if (nSize > 0)
 		{
 			destroy();
-			if (!m_freeQueue.create(nSize))
-				return FALSE;
-			m_varArray = new T * [nSize];
-			memset(m_varArray, 0, sizeof(T*) * nSize);
+			m_varArray.resize(nSize, nullptr);
 			m_iMax = nSize;
+			// 预留 hash map 空间以减少 rehash
+			m_ptrToId.reserve(nSize);
 			return TRUE;
 		}
 		return FALSE;
 	}
-
 	VOID destroy()
 	{
-		if (m_varArray != nullptr)
-		{
-			delete[]m_varArray;
-			m_varArray = nullptr;
-		}
-		m_freeQueue.destroy();
+		m_varArray.clear();
+		m_varArray.shrink_to_fit();
+		while (!m_freeIds.empty())
+			m_freeIds.pop();
+		m_ptrToId.clear();
 		m_iMax = 0;
+		m_iArrayPtr = 0;
 		m_nCount = 0;
 	}
-
 	UINT addObject(T* pt)
 	{
-		UINT id = 0;
 		if (pt == nullptr)return 0;
-		id = findObject(pt);
-		if (id > 0)return id;
-		if (m_iArrayPtr >= m_iMax)
+		auto it = m_ptrToId.find(pt);
+		if (it != m_ptrToId.end())
+			return it->second;
+
+		UINT id = 0;
+		if (m_iArrayPtr >= (UINT)m_iMax)
 		{
-			if (!m_freeQueue.pop(id))
+			// 数组已满，从空闲栈中取一个回收的 ID
+			if (m_freeIds.empty())
 				return 0;
+			id = m_freeIds.top();
+			m_freeIds.pop();
 		}
 		else
+		{
 			id = ++m_iArrayPtr;
+		}
+
 		m_varArray[id - 1] = pt;
-		this->m_nCount++;
+		m_ptrToId[pt] = id;
+		m_nCount++;
 		return id;
 	}
-
 	BOOL delObject(UINT id)
 	{
-		if (getObject(id) == nullptr)return FALSE;
+		T* pt = getObject(id);
+		if (pt == nullptr)return FALSE;
+
 		m_varArray[id - 1] = nullptr;
+		m_ptrToId.erase(pt);
+
 		if (id == m_iArrayPtr)
 			m_iArrayPtr--;
 		else
-			m_freeQueue.push(id);
+			m_freeIds.push(id);
+
 		m_nCount--;
 		return TRUE;
 	}
-
 	BOOL delObject(T* pt)
 	{
-		UINT	id = findObject(pt);
-		if (id == 0)return FALSE;
-		return delObject(id);
+		auto it = m_ptrToId.find(pt);
+		if (it == m_ptrToId.end())
+			return FALSE;
+		return delObject(it->second);
 	}
-
 	T* getObject(UINT id)
 	{
 		if (id == 0 || id > m_iMax)return nullptr;
 		return m_varArray[id - 1];
 	}
-
 	UINT findObject(T* pt)
 	{
-		for (UINT i = 0; i < m_iArrayPtr; i++)
-		{
-			if (m_varArray[i] == pt)return (i + 1);
-		}
+		auto it = m_ptrToId.find(pt);
+		if (it != m_ptrToId.end())
+			return it->second;
 		return 0;
 	}
-
-	UINT getCount()
-	{
-		return m_nCount;
-	}
+	UINT getCount() { return m_nCount; }
 public:
 	UINT getMax() { return m_iMax; }
 	UINT getCurPtr() { return m_iArrayPtr; }
+	const std::vector<T*>& getArray() const { return m_varArray; }
 private:
-	xQueue<UINT>	m_freeQueue;
-	T** m_varArray;
+	std::vector<T*> m_varArray;                   // 主存储：ID-1 为索引，O(1) 随机访问
+	std::stack<UINT> m_freeIds;                   // 空闲 ID 栈，O(1) 回收复用
+	std::unordered_map<T*, UINT> m_ptrToId;       // 反向索引：T* -> ID，O(1) 查找
 	UINT m_iMax;
 	UINT m_iArrayPtr;
 	UINT m_nCount;
 };
+
 
 template<class T>
 class xIndexPtrListHelper

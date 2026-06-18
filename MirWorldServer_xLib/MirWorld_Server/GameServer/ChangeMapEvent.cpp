@@ -5,12 +5,12 @@
 #include ".\humanplayer.h"
 
 xObjectPool<CChangeMapEvent> CChangeMapEvent::m_xObjectPool;
-CChangeMapEvent::CChangeMapEvent(void)
+CChangeMapEvent::CChangeMapEvent(VOID)
 {
 	Clean();
 }
 
-CChangeMapEvent::~CChangeMapEvent(void)
+CChangeMapEvent::~CChangeMapEvent(VOID)
 {
 }
 
@@ -25,8 +25,9 @@ VOID CChangeMapEvent::Clean()
 
 CChangeMapEvent* CChangeMapEvent::Create(int mapid, int x, int y, int tomapid, int tox, int toy)
 {
-	CLogicMap* pToMap = CLogicMapMgr::GetInstance()->GetLogicMapById(tomapid);
-	CLogicMap* pFromMap = CLogicMapMgr::GetInstance()->GetLogicMapById(mapid);
+	auto* pLogicMapMgr = CLogicMapMgr::GetInstance();
+	CLogicMap* pToMap = pLogicMapMgr->GetLogicMapById(tomapid);
+	CLogicMap* pFromMap = pLogicMapMgr->GetLogicMapById(mapid);
 	if (pToMap == nullptr || pFromMap == nullptr)
 		return nullptr;
 	CChangeMapEvent* pEvent = newObject();
@@ -42,8 +43,9 @@ CChangeMapEvent* CChangeMapEvent::Create(int mapid, int x, int y, int tomapid, i
 
 BOOL CChangeMapEvent::Init(int mapid, int x, int y, int tomapid, int tox, int toy)
 {
-	CLogicMap* pToMap = CLogicMapMgr::GetInstance()->GetLogicMapById(tomapid);
-	CLogicMap* pFromMap = CLogicMapMgr::GetInstance()->GetLogicMapById(mapid);
+	auto* pLogicMapMgr = CLogicMapMgr::GetInstance();
+	CLogicMap* pToMap = pLogicMapMgr->GetLogicMapById(tomapid);
+	CLogicMap* pFromMap = pLogicMapMgr->GetLogicMapById(mapid);
 	if (pToMap == nullptr || pFromMap == nullptr)
 		return FALSE;
 	Clean();

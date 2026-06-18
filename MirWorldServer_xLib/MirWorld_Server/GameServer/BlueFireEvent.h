@@ -8,8 +8,8 @@ class CAliveObject;
 class CBlueFireEvent : public CEventProcessor
 {
 public:
-	CBlueFireEvent(void);
-	virtual ~CBlueFireEvent(void);
+	CBlueFireEvent(VOID);
+	virtual ~CBlueFireEvent(VOID);
 	CBlueFireEvent(const CBlueFireEvent&) = delete;           // 禁止拷贝构造
 	CBlueFireEvent& operator=(const CBlueFireEvent&) = delete; // 禁止拷贝赋值
 	// 事件更新处理
@@ -37,6 +37,6 @@ private:
 	CVisibleEvent* m_pEvents[BLUEFIRE_EVENT_NUM]; // 事件数组
 	// 对象池相关方法
 	static CBlueFireEvent* NewObject() { return m_xEventPool.newObject(); } // 创建新对象
-	static void RemoveObject(CBlueFireEvent* pObject) { pObject->Destroy(); m_xEventPool.deleteObject(pObject); } // 删除对象
+	static VOID RemoveObject(CBlueFireEvent* pObject) { pObject->Destroy(); m_xEventPool.deleteObject(pObject); } // 删除对象
 	static xObjectPool<CBlueFireEvent>	m_xEventPool; // 对象池
 };

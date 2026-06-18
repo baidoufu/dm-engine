@@ -41,7 +41,7 @@ VOID CTrapperEvent::LeaveMap()
 
 VOID CTrapperEvent::OnLeaveMap(CLogicMap* pMap)
 {
-	CMapCellInfo* pInfo = pMap->GetMapCellInfo(getX(), getY());
+	CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(getX(), getY());
 	if (pInfo)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -69,7 +69,7 @@ VOID CTrapperEvent::OnLeaveMap(CLogicMap* pMap)
 VOID CTrapperEvent::OnEnterMap(CLogicMap* pMap)
 {
 	CMapObject::OnEnterMap(pMap);
-	CMapCellInfo* pInfo = pMap->GetMapCellInfo(getX(), getY());
+	CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(getX(), getY());
 	if (pInfo)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -97,7 +97,7 @@ VOID CTrapperEvent::OnEnterMap(CLogicMap* pMap)
 
 
 xObjectPool<CMonsterTrapper> CMonsterTrapper::m_xEventPool;
-CMonsterTrapper::CMonsterTrapper(void):
+CMonsterTrapper::CMonsterTrapper(VOID):
 	m_dwMonsterCount(0),
 	m_bFailed(FALSE),
 	m_nDamage(0),
@@ -105,14 +105,14 @@ CMonsterTrapper::CMonsterTrapper(void):
 	m_dwOwnerInstanceKey(0),
 	m_pOwner(nullptr)
 {
-	memset(m_pEvents, 0, sizeof(m_pEvents));
-	for (int i = 0; i < 9; i++)
+	m_pEvents.fill(0);
+	for (auto& trapped : m_pTrapped)
 	{
-		m_pTrapped[i] = new CTrapperEvent(this);
+		trapped = new CTrapperEvent(this);
 	}
 }
 
-CMonsterTrapper::~CMonsterTrapper(void)
+CMonsterTrapper::~CMonsterTrapper(VOID)
 {
 }
 
@@ -123,12 +123,12 @@ VOID CMonsterTrapper::OnUpdate(CVisibleEvent* pEvent)
 VOID CMonsterTrapper::OnClose(CVisibleEvent* pEvent)
 {
 	int	count = 0;
-	for (int i = 0; i < 8; i++)
+	for (auto& event : m_pEvents)
 	{
-		if (m_pEvents[i] != nullptr)
+		if (event != nullptr)
 		{
-			if (m_pEvents[i] == pEvent)
-				m_pEvents[i] = nullptr;
+			if (event == pEvent)
+				event = nullptr;
 			else
 				count++;
 		}
@@ -137,17 +137,17 @@ VOID CMonsterTrapper::OnClose(CVisibleEvent* pEvent)
 		Destroy();
 }
 
-static const POINT ptVE[8] =
-{
+static const std::array<POINT, 8> ptVE =
+{{
 	{ -1, -2}, { -2, -1}, { -2, 1}, { -1, 2 },
 	{ 2, -1}, { 1, -2 }, { 2, 1}, { 1, 2 }
-};
+}};
 
-static const POINT ptEE[9] =
-{
+static const std::array<POINT, 9> ptEE =
+{{
 	{0, 0 }, {1, 0}, {1,1 }, {1, -1},
 	{ 0, 1}, { 0, -1}, { -1, 1 }, { -1, 0 }, { -1, -1 }
-};
+}};
 
 CMonsterTrapper* CMonsterTrapper::Create(CHumanPlayer* pOwner, int x, int y, int nDamage, DWORD dwColor, DWORD dwLastTime)
 {
@@ -173,7 +173,7 @@ CMonsterTrapper* CMonsterTrapper::Create(CHumanPlayer* pOwner, int x, int y, int
 		return nullptr;
 	}
 
-	memset(pEvent->m_pEvents, 0, sizeof(pEvent->m_pEvents));
+	pEvent->m_pEvents.fill(0);
 	int successcount = 0;
 	for (int i = 0; i < 8; i++)
 	{
@@ -192,18 +192,18 @@ CMonsterTrapper* CMonsterTrapper::Create(CHumanPlayer* pOwner, int x, int y, int
 
 VOID CMonsterTrapper::Destroy()
 {
-	for (int i = 0; i < 8; i++)
+	for (auto& event : m_pEvents)
 	{
-		if (m_pEvents[i])
+		if (event)
 		{
-			m_pEvents[i]->Close();
-			m_pEvents[i] = nullptr;
+			event->Close();
+			event = nullptr;
 		}
 	}
-	for (int i = 0; i < 9; i++)
+	for (auto& trapped : m_pTrapped)
 	{
-		if (this->m_pTrapped[i])
-			this->m_pTrapped[i]->LeaveMap();
+		if (trapped)
+			trapped->LeaveMap();
 	}
 	m_nDamage = 0;
 	m_pOwner = nullptr;
@@ -214,9 +214,9 @@ VOID CMonsterTrapper::Destroy()
 
 VOID CMonsterTrapper::Update()
 {
-	for (int i = 0; i < 8; i++)
+	for (auto& event : m_pEvents)
 	{
-		if (m_pEvents[i])
-			m_pEvents[i]->UpdateValid();
+		if (event)
+			event->UpdateValid();
 	}
 }

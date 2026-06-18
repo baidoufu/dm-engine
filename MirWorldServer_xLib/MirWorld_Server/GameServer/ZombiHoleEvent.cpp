@@ -7,7 +7,7 @@
 #include "eventmanager.h"
 
 xObjectPool<ZombiHoleEvent>	ZombiHoleEvent::m_xPool;
-ZombiHoleEvent::ZombiHoleEvent(void)
+ZombiHoleEvent::ZombiHoleEvent(VOID)
 {
 	m_nDamage = 0;
 	m_pOwner = nullptr;
@@ -15,7 +15,7 @@ ZombiHoleEvent::ZombiHoleEvent(void)
 	m_pVisibleEvent = nullptr;
 }
 
-ZombiHoleEvent::~ZombiHoleEvent(void)
+ZombiHoleEvent::~ZombiHoleEvent(VOID)
 {
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "eventprocessor.h"
 #include "eventobject.h"
+#include <array>
 
 class CMonsterTrapper;
 class CLogicMap;
@@ -35,8 +36,8 @@ class CAliveObject;
 class CMonsterTrapper : public CEventProcessor
 {
 public:
-	CMonsterTrapper(void);
-	virtual ~CMonsterTrapper(void);
+	CMonsterTrapper(VOID);
+	virtual ~CMonsterTrapper(VOID);
 	CMonsterTrapper(const CMonsterTrapper&) = delete;           // 禁止拷贝构造
 	CMonsterTrapper& operator=(const CMonsterTrapper&) = delete; // 禁止拷贝赋值
 	// 事件更新处理
@@ -76,10 +77,10 @@ private:
 	DWORD m_dwLastTime; // 持续时间
 	DWORD m_dwOwnerInstanceKey; // 所有者实例键值
 	CHumanPlayer* m_pOwner; // 陷阱所有者
-	CVisibleEvent* m_pEvents[8]; // 事件数组
-	CTrapperEvent* m_pTrapped[9]; // 被捕获的怪物数组
+	std::array<CVisibleEvent*, 8> m_pEvents{}; // 事件数组
+	std::array<CTrapperEvent*, 9> m_pTrapped{}; // 被捕获的怪物数组
 	// 对象池相关方法
 	static CMonsterTrapper* NewObject() { return m_xEventPool.newObject(); } // 创建新对象
-	static void RemoveObject(CMonsterTrapper* pObject) { m_xEventPool.deleteObject(pObject); } // 删除对象
+	static VOID RemoveObject(CMonsterTrapper* pObject) { m_xEventPool.deleteObject(pObject); } // 删除对象
 	static xObjectPool<CMonsterTrapper>	m_xEventPool; // 对象池
 };

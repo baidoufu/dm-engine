@@ -1,9 +1,11 @@
 #pragma once
 #include <WinSock2.h>
+#include <ws2tcpip.h>
 #include <Mstcpip.h>
 #include "xsupport.h"
 #include "xerror.h"
 #include <atomic>
+#include <array>
 
 class xSocket : public xError
 {
@@ -13,6 +15,7 @@ public:
 		SS_UNINITED,
 		SS_UNUSED,
 		SS_ACCEPTED,
+		SS_CONNECTING,   // 非阻塞连接正在进行中
 		SS_CONNECTED,
 		SS_LISTENING,
 		SS_DISCONNECTED,
@@ -21,7 +24,7 @@ public:
 	xSocket();
 	xSocket(SOCKET Socket);
 
-	virtual ~xSocket(void);
+	virtual ~xSocket(VOID);
 
 	BOOL makeSocket(int af = AF_INET, int type = SOCK_STREAM, int protocol = IPPROTO_TCP);
 	BOOL setSocket(SOCKET Socket);
@@ -29,12 +32,15 @@ public:
 	BOOL setSocket(xSocket& socket) { if (!setSocket(socket.getSocketFd()))return FALSE; setState(socket.getState()); setEndPoint(socket.getAddress(), socket.getPort()); return TRUE; }
 	BOOL steelSocket(xSocket& socket)
 	{
-		if (!setSocket(socket)) return FALSE;
-		socket.clear();
+		if (!setSocket(socket.getSocketFd())) return FALSE;
+		setState(socket.getState()); // 继承 SS_ACCEPTED 状态
+		setEndPoint(socket.getAddress(), socket.getPort()); // 继承地址端口
+		socket.clear(); // 清空源 socket（fd 置为 INVALID_SOCKET）
 		return TRUE;
 	}
 
 	BOOL connect(const char* cp, UINT nPort);
+	BOOL pollConnectResult(UINT timeoutMs = 100);
 
 	BOOL listen(const char* cp, UINT nPort);
 	BOOL listen(UINT nPort);
@@ -44,7 +50,7 @@ public:
 	SOCKET getSocketFd()const { return m_Socket; }
 
 	socket_state getState() { return m_state.load(); }
-	void setState(socket_state state) { m_state.store(state); }
+	VOID setState(socket_state state) { m_state.store(state); }
 
 	VOID close();
 	VOID clear() { setSocket(INVALID_SOCKET); }
@@ -53,9 +59,9 @@ public:
 	BOOL recvEx(LPVOID lpDataBuf, int nBufsize, DWORD& dwBytesReceived, DWORD& dwFlag, LPOVERLAPPED lpOverlapped);
 	BOOL acceptEx(xSocket& sAccept, LPVOID lpDataBuf, DWORD dwRecvBufferLength, DWORD& dwBytesReceived, LPOVERLAPPED lpOverlapped);
 
-	void setEndPoint(const char* cp, UINT nPort) { strncpy_s(m_szAddress, sizeof(m_szAddress), cp, _TRUNCATE); m_nPort = nPort; }
+	VOID setEndPoint(const char* cp, UINT nPort) { strncpy_s(m_szAddress.data(), m_szAddress.size(), cp, _TRUNCATE); m_nPort = nPort; }
 
-	const char* getAddress() { return m_szAddress; }
+	const char* getAddress() { return m_szAddress.data(); }
 	UINT getPort() { return m_nPort; }
 
 	// 设置 socket 选项
@@ -75,22 +81,22 @@ public:
 		DWORD last_activity = 0;
 	};
 	SocketStats getStats() const { return m_stats; }
-	
 	// 获取连接时长（毫秒）
 	DWORD getConnectionAge() const;
-	
 	// 检查连接是否超时
 	BOOL isConnectionTimeout(DWORD timeout_ms) const;
-	
 	// 检查空闲时间（毫秒）
 	DWORD getIdleTime() const;
+	// 获取当前时间（毫秒）
+	DWORD getCurrentTime() const;
+protected:
+	std::atomic<socket_state> m_state;  // 可直接用CAS操作
+	SocketStats m_stats;  // 统计状态信息
 private:
-	char m_szAddress[40];
+	std::array<char, 40> m_szAddress;
 	UINT m_nPort;
 	SOCKET m_Socket;
-	std::atomic<socket_state> m_state;
-	SocketStats m_stats;  // 统计状态信息
 	// 辅助函数
-	BOOL setSocketOption(int level, int optname, const void* optval, int optlen);
-	DWORD getCurrentTime() const;
+	BOOL setSocketOption(int level, int optname, const VOID* optval, int optlen);
+	
 };

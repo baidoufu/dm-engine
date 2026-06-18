@@ -1,24 +1,37 @@
 #include "..\header\xPacket.h"
 
-// 静态成员初始化
-bool xPacketPool::s_pool_enabled = false; // 默认禁用内存池
+thread_local std::array<xPacket*, xPacketPool::POOL_SIZE> xPacketPool::tl_FreeList = {};
+thread_local int xPacketPool::tl_FreeCount = 0;
 
-// xPacketPool 方法实现 - 简化版本，直接使用标准分配
-void* xPacketPool::alloc(size_t size) {
-    // 直接使用标准分配
-    return static_cast<void*>(new char[size]);
+xPacket* xPacketPool::Alloc(int size)
+{
+	if (tl_FreeCount > 0)
+	{
+		xPacket* pkt = tl_FreeList[--tl_FreeCount];
+		if (pkt->notcreated() || pkt->getmaxsize() < size)
+			pkt->create(size);
+		return pkt;
+	}
+	return new xPacket(size);
 }
 
-void xPacketPool::dealloc(void* ptr) {
-    if (ptr) {
-        delete[] static_cast<char*>(ptr);
-    }
+xPacket* xPacketPool::Alloc(char* pbuf, int size)
+{
+	if (tl_FreeCount > 0)
+	{
+		xPacket* pkt = tl_FreeList[--tl_FreeCount];
+		pkt->create(pbuf, size);
+		return pkt;
+	}
+	return new xPacket(pbuf, size);
 }
 
-void xPacketPool::setPoolEnabled(bool enabled) {
-    s_pool_enabled = enabled; // 设置但不启用，因为简化版本不支持
-}
-
-bool xPacketPool::isPoolEnabled() {
-    return s_pool_enabled;
+VOID xPacketPool::Free(xPacket* pkt)
+{
+	if (!pkt) return;
+	pkt->clear();
+	if (tl_FreeCount < POOL_SIZE)
+		tl_FreeList[tl_FreeCount++] = pkt;
+	else
+		delete pkt;
 }

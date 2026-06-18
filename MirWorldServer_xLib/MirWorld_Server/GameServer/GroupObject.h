@@ -4,8 +4,8 @@ class CHumanPlayer;
 class CGroupObject
 {
 public:
-	CGroupObject(void);
-	virtual ~CGroupObject(void);
+	CGroupObject(VOID);
+	virtual ~CGroupObject(VOID);
 	BOOL Create(CHumanPlayer* pLeader, CHumanPlayer* pFirstMember);
 	BOOL AddMember(CHumanPlayer* pMember);
 	BOOL IsMember(CHumanPlayer* pPlayer);

@@ -1,12 +1,12 @@
 #include "..\header\xiocpserver.h"
 #include "..\header\xserverobject.h"
 
-xServerObject::xServerObject(void)
+xServerObject::xServerObject(VOID)
 {
 	m_pxIocpServer = nullptr;
 }
 
-xServerObject::~xServerObject(void)
+xServerObject::~xServerObject(VOID)
 {
 	m_pxIocpServer = nullptr;
 }

@@ -542,50 +542,6 @@ DEFINE_SCRIPT_VAR(VPARAM) {
 		return FALSE;
 }END_SCRIPT_VAR
 
-DEFINE_SCRIPT_VAR(CUSTOMACTNAME) {
-	const char* pszActName = pPlayer->GetScriptTarget()->GetVariableValue("CustomActName");
-	result.SetValue(pszActName);
-}END_SCRIPT_VAR
-
-DEFINE_SCRIPT_VAR(CUSTOMACTTYPE) {
-	const char* pszActType = pPlayer->GetScriptTarget()->GetVariableValue("CustomActType");
-	result.SetValue(pszActType);
-}END_SCRIPT_VAR
-
-DEFINE_SCRIPT_VAR(CUSTOMSTRCOUNT) {
-	const char* pszStrCount = pPlayer->GetScriptTarget()->GetVariableValue("CustomStrCount");
-	result.SetValue(pszStrCount);
-}END_SCRIPT_VAR
-
-DEFINE_SCRIPT_VAR(CUSTOMINTCOUNT) {
-	const char* pszIntCount = pPlayer->GetScriptTarget()->GetVariableValue("CustomIntCount");
-	result.SetValue(pszIntCount);
-}END_SCRIPT_VAR
-
-DEFINE_SCRIPT_VAR(CUSTOMSTR) {
-	if (nParam == 1)
-	{
-		char szVar[8];
-		sprintf(szVar, "CustomS%d", Params[0].nParam);
-		const char* pszStrVar = pPlayer->GetScriptTarget()->GetVariableValue(szVar);
-		result.SetValue(pszStrVar);
-	}
-	else
-		return FALSE;
-}END_SCRIPT_VAR
-
-DEFINE_SCRIPT_VAR(CUSTOMINT) {
-	if (nParam == 1)
-	{
-		char szVar[8];
-		sprintf(szVar, "CustomN%d", Params[0].nParam);
-		const char* pszIntVar = pPlayer->GetScriptTarget()->GetVariableValue(szVar);
-		result.SetValue(pszIntVar);
-	}
-	else
-		return FALSE;
-}END_SCRIPT_VAR
-
 DEFINE_SCRIPT_VAR(TASKVALUES) {
 	if (nParam == 2)
 	{

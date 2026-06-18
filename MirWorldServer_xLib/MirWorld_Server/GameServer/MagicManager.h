@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <unordered_map>
+#include <array>
 
 struct Skill {
 	int level;
@@ -21,29 +22,27 @@ struct Magic {
 class CMagicManager : public xSingletonClass<CMagicManager>
 {
 public:
-	CMagicManager(void);
-	virtual ~CMagicManager(void);
+	CMagicManager(VOID);
+	virtual ~CMagicManager(VOID);
 	//清空技能数据
 	VOID ClearMagicData();
 	//重新加载技能数据后更新所有在线玩家的技能指针
 	VOID ReloadAllPlayerSkills()const;
-	BOOL AddMagicClassString(const char* pszMagicClassDesc);
-
+	//添加解析技能字符串
+	BOOL AddMagicClassString(char* pszMagicClassDesc);
+	//创建技能
 	BOOL CreateMagic(const char* pszName, MAGIC& magic);
 	BOOL CreateMagic(UINT id, MAGIC& magic);
-
-	VOID LoadMagicExt(const char* pszMagicExtFile, BOOL bCSV);
+	//加载技能扩展数据
+	VOID LoadMagicExt(const char* pszMagicExtFile);
 	//加载技能BaseMagic.csv数据
 	VOID LoadMaigc(const char* pszMagicFile);
 	//加载技能MagicSkill.xml属性值
 	VOID LoadMaigcskill(const char* pszMagicFile);
 	//获取错误文字
-	const char* GetErrorMsg() { return m_pErrorMsg; }
+	const char* GetErrorMsg() { return m_strErrorMsg.c_str(); }
 	//通过Id获取技能类
-	MAGICCLASS* GetClassById(int id)const
-	{
-		return m_pMagicArray[id];
-	}
+	MAGICCLASS* GetClassById(int id)const { return m_pMagicArray[id]; }
 	//通过名字获取技能类
 	MAGICCLASS* GetClassByName(const char* pszMagic);
 	//通过技能Id获取技能
@@ -53,10 +52,12 @@ public:
 	//从数据库删除玩家的技能
 	BOOL DeleteMagicFromDB(DWORD dwOwner, WORD wMagicId);
 private:
+	// 添加技能模板
 	BOOL AddMagicClass(MAGICCLASS* pMagicclass);
-	char* m_pErrorMsg;
+private:
+	std::string m_strErrorMsg;
 	xListHost<MAGICCLASS> m_xMagicClassList;
 	CNameHash m_MagicClassHash;
-	MAGICCLASS* m_pMagicArray[512];
+	std::array<MAGICCLASS*, 512> m_pMagicArray{};
 	std::unordered_map<WORD, Magic> magics;
 };

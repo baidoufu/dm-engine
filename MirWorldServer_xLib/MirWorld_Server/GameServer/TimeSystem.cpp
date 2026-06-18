@@ -2,7 +2,7 @@
 #include ".\timesystem.h"
 #include "gameworld.h"
 
-CTimeSystem::CTimeSystem(void)
+CTimeSystem::CTimeSystem(VOID)
 {
 	m_tmrUpdate.Savetime();
 	m_startupTime = CSystemTime();
@@ -10,7 +10,7 @@ CTimeSystem::CTimeSystem(void)
 	m_wTime = m_startupTime.GetHour() * 4 + m_startupTime.GetMinute() / 15;
 }
 
-CTimeSystem::~CTimeSystem(void)
+CTimeSystem::~CTimeSystem(VOID)
 {
 }
 

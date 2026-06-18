@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "ServerManager.h"
+#include <array>
 
-static void PrintHelp()
+static VOID PrintHelp()
 {
     printf("\n================================ 服务器管理器 ================================\n");
     printf("命令列表:\n");
@@ -38,7 +39,7 @@ int main()
     // 设置默认颜色为白字黑底, 确保输入文字可见
     SetConsoleTextAttribute(m_hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     // 设置控制台标题
-    SetConsoleTitleA("龙陆引擎 - 管理器");
+    SetConsoleTitleA("达摩引擎 - 管理器");
     // 设置窗口大小（单位：字符）
     // 先设置窗口大小, 再设置缓冲区大小（缓冲区必须 >= 窗口）
     SMALL_RECT windowSize{};
@@ -66,23 +67,23 @@ int main()
     SetConsoleOutputCP(GetACP());
     SetConsoleCP(GetACP());
     // 禁用标准输出缓冲, 确保实时显示
-    setvbuf(stdout, NULL, _IONBF, 0);
-    setvbuf(stderr, NULL, _IONBF, 0);
+    setvbuf(stdout, nullptr, _IONBF, 0);
+    setvbuf(stderr, nullptr, _IONBF, 0);
 
     printf("\n");
     printf("******************************************************************************\n");
-    printf("*                              龙陆引擎 管理器                               *\n");
+    printf("*                              达摩引擎 管理器                               *\n");
     printf("*                                版本 Ver1.00                                *\n");
     printf("******************************************************************************\n\n");
 
     ServerManager manager;
-    char command[512];
+    std::array<char, 512> command;
     bool bRunning = true;
     if (!manager.Initialize())
     {
         bRunning = false;
         printf("按任意键退出...");
-        _getch();
+        (void)_getch();
         return 0;
     }
 
@@ -91,20 +92,20 @@ int main()
     while (bRunning)
     {
         printf("> ");
-        if (fgets(command, sizeof(command), stdin) == NULL)
+        if (fgets(command.data(), static_cast<int>(command.size()), stdin) == nullptr)
             break;
         // 移除换行符
-        size_t len = strlen(command);
+        size_t len = strlen(command.data());
         if (len > 0 && command[len - 1] == '\n')
             command[len - 1] = '\0';
         // 跳过空命令
-        if (strlen(command) == 0)
+        if (strlen(command.data()) == 0)
             continue;
         // 解析命令
         char cmd[64] = { 0 };
         char param1[128] = { 0 };
         char param2[256] = { 0 };
-        int count = sscanf(command, "%63s %127s %255[^\n]", cmd, param1, param2);
+        int count = sscanf(command.data(), "%63s %127s %255[^\n]", cmd, param1, param2);
 
         if (_stricmp(cmd, "start") == 0)
         {
@@ -166,6 +167,6 @@ int main()
     // 确保所有服务器都已停止
     manager.StopAll();
     printf("按任意键退出...");
-    _getch();
+    (void)_getch();
     return 0;
 }

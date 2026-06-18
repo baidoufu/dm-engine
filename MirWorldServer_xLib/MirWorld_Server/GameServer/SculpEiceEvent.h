@@ -6,8 +6,8 @@ class CAliveObject;
 class SculpEiceEvent : public CEventProcessor
 {
 public:
-	SculpEiceEvent(void);
-	virtual ~SculpEiceEvent(void);
+	SculpEiceEvent(VOID);
+	virtual ~SculpEiceEvent(VOID);
 	SculpEiceEvent(const SculpEiceEvent&) = delete;           // 禁止拷贝构造
 	SculpEiceEvent& operator=(const SculpEiceEvent&) = delete; // 禁止拷贝赋值
 	// 更新可见事件状态

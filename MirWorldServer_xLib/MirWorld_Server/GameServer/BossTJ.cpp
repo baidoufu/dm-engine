@@ -5,14 +5,14 @@
 #include "SystemScript.h"
 #include "AutoScriptManager.h"
 
-CBossTJ::CBossTJ(void)
+CBossTJ::CBossTJ(VOID)
 {
 	m_tmrUpdate.Savetime();
 	m_nBossTJCount = 0;
-	memset(m_pBossTJList, 0, sizeof(m_pBossTJList));
+	m_pBossTJList.fill(nullptr);
 }
 
-CBossTJ::~CBossTJ(void)
+CBossTJ::~CBossTJ(VOID)
 {
 	Clear();
 }
@@ -31,7 +31,7 @@ VOID CBossTJ::Clear()
 				delete pItem;
 				pItem = pBossTJ->pItems;
 			}
-			m_BossTJHash.HDel(pBossTJ->szName);
+			m_BossTJHash.HDel(pBossTJ->szName.data());
 			delete pBossTJ;
 		}
 		m_pBossTJList[i] = nullptr;
@@ -66,7 +66,7 @@ VOID CBossTJ::Load(const char* pszFilename)
 			delete pBossTJ;
 			continue;
 		}
-		o_strncpy(pBossTJ->szName, pszName, 63);
+		o_strncpy(pBossTJ->szName.data(), pszName, 63);
 
 		bossElem->QueryIntAttribute("cate", &pBossTJ->nCate);
 		bossElem->QueryIntAttribute("enable", &pBossTJ->nEnable);
@@ -88,7 +88,7 @@ VOID CBossTJ::Load(const char* pszFilename)
 			{
 				pBossTJ->nTime = 0;//用于计算nTimeType=1的时间中,按次数计算
 			}
-			o_strncpy(pBossTJ->szTime, pszTime, 255);
+			o_strncpy(pBossTJ->szTime.data(), pszTime, 255);
 		}
 		
 		bossElem->QueryIntAttribute("lv_recomm", &pBossTJ->nLvRecomm);
@@ -97,7 +97,7 @@ VOID CBossTJ::Load(const char* pszFilename)
 		const char* pszMap = bossElem->Attribute("map");
 		if (pszMap != nullptr)
 		{
-			o_strncpy(pBossTJ->szMap, pszMap, 63);
+			o_strncpy(pBossTJ->szMap.data(), pszMap, 63);
 		}
 
 		bossElem->QueryIntAttribute("fresh_time", &pBossTJ->nFreshTime);
@@ -107,13 +107,13 @@ VOID CBossTJ::Load(const char* pszFilename)
 		const char* pszOpenDesc = bossElem->Attribute("open_desc");
 		if (pszOpenDesc != nullptr)
 		{
-			o_strncpy(pBossTJ->szOpenDesc, pszOpenDesc, 255);
+			o_strncpy(pBossTJ->szOpenDesc.data(), pszOpenDesc, 255);
 		}
 
 		const char* pszDesc = bossElem->Attribute("desc");
 		if (pszDesc != nullptr)
 		{
-			o_strncpy(pBossTJ->szDesc, pszDesc, 511);
+			o_strncpy(pBossTJ->szDesc.data(), pszDesc, 511);
 		}
 
 		BOSSITEM* pLastItem = nullptr;
@@ -125,13 +125,13 @@ VOID CBossTJ::Load(const char* pszFilename)
 			const char* pszShowName = itemElem->Attribute("show_name");
 			if (pszShowName != nullptr)
 			{
-				o_strncpy(pItem->szShowName, pszShowName, 63);
+				o_strncpy(pItem->szShowName.data(), pszShowName, 63);
 			}
 
 			const char* pszItemName = itemElem->Attribute("name");
 			if (pszItemName != nullptr)
 			{
-				o_strncpy(pItem->szName, pszItemName, 63);
+				o_strncpy(pItem->szName.data(), pszItemName, 63);
 			}
 
 			if (pLastItem == nullptr)
@@ -148,7 +148,7 @@ VOID CBossTJ::Load(const char* pszFilename)
 		if (m_nBossTJCount < MAXBOSSTJ)
 		{
 			m_pBossTJList[m_nBossTJCount++] = pBossTJ;
-			m_BossTJHash.HAdd(pBossTJ->szName, (LPVOID)pBossTJ);
+			m_BossTJHash.HAdd(pBossTJ->szName.data(), (LPVOID)pBossTJ);
 		}
 		else
 		{
@@ -158,15 +158,14 @@ VOID CBossTJ::Load(const char* pszFilename)
 	}
 }
 
-static char g_szTempBuffer[65536];
 VOID CBossTJ::SendBossList(CHumanPlayer* pPlayer) const
 {
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	const char* s1C = "LianYu18";
-	packet.push(s1C);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
 	int nVal1 = 1;
-	packet.push((LPVOID)&nVal1, 1);
+	packet->push((LPVOID)&nVal1, 1);
 
 	struct TempStatus
 	{
@@ -174,6 +173,7 @@ VOID CBossTJ::SendBossList(CHumanPlayer* pPlayer) const
 		int nCate;
 	};
 	std::vector<TempStatus> TempsStatus;//缓存BOSS状态
+	TempsStatus.reserve(m_nBossTJCount); // 预分配：最大可能条目数为m_nBossTJCount
 	for (int i = 0; i < m_nBossTJCount; i++) //插入列表
 	{
 		BOSS_TJ* pBossTJ = m_pBossTJList[i];
@@ -182,35 +182,35 @@ VOID CBossTJ::SendBossList(CHumanPlayer* pPlayer) const
 			if (pPlayer->GetPropValue(PI_LEVEL) < pBossTJ->nEnterLv)//如果玩家小于进入时间
 				continue;
 			TempStatus ti{};
-			_snprintf(ti.szName, sizeof(ti.szName), "%s", pBossTJ->szName);
+			_snprintf(ti.szName, sizeof(ti.szName), "%s", pBossTJ->szName.data());
 			ti.nCate = pBossTJ->nCate;
 			TempsStatus.push_back(ti);
 		}
 	}
 	int nNum = (int)TempsStatus.size();
-	packet.push(&nNum, 4);
+	packet->push(&nNum, 4);
 	for (const auto& ti : TempsStatus) //插入名字列表
 	{
-		packet.push(ti.szName);
-		packet.push(1);
+		packet->push(ti.szName);
+		packet->push(1);
 	}
-	packet.push(&nNum, 4);
+	packet->push(&nNum, 4);
 	for (const auto& ti : TempsStatus) //插入分类列表
 	{
 		int nCate = ti.nCate;
-		packet.push(&nCate, 4);
+		packet->push(&nCate, 4);
 	}
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CBossTJ::SendBoss(CHumanPlayer* pPlayer, const char* pszName)
 {
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	const char* s1C = "LianYu18";
-	packet.push(s1C);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
 	int nVal1 = 2;
-	packet.push((LPVOID)&nVal1, 1);
+	packet->push((LPVOID)&nVal1, 1);
 
 	BOSS_TJ* pBoss = (BOSS_TJ*)m_BossTJHash.HGet(pszName);
 	if (pBoss == nullptr) return;
@@ -225,82 +225,82 @@ VOID CBossTJ::SendBoss(CHumanPlayer* pPlayer, const char* pszName)
 	{
 		TempItem ti{};
 		_snprintf(ti.szName, sizeof(ti.szName), "%s,%s",
-			pItem->szShowName, pItem->szName);
+			pItem->szShowName.data(), pItem->szName.data());
 		tempItems.push_back(ti);
 		pItem = pItem->pNext;
 	}
 	int nItemCount = (int)tempItems.size();
-	packet.push((LPVOID)&nItemCount, 4);
+	packet->push((LPVOID)&nItemCount, 4);
 	for (const auto& ti : tempItems)
 	{
-		packet.push(ti.szName);
-		packet.push(1);
+		packet->push(ti.szName);
+		packet->push(1);
 	}
 	nVal1 = 5;
-	packet.push((LPVOID)&nVal1, 4);
-	packet.push((LPVOID)&pBoss->nLvRecomm, 4);
-	packet.push((LPVOID)&pBoss->nFreshTime, 4);
-	packet.push((LPVOID)&pBoss->nPic, 4);
+	packet->push((LPVOID)&nVal1, 4);
+	packet->push((LPVOID)&pBoss->nLvRecomm, 4);
+	packet->push((LPVOID)&pBoss->nFreshTime, 4);
+	packet->push((LPVOID)&pBoss->nPic, 4);
 	nVal1 = 1;
-	packet.push((LPVOID)&nVal1, 4);
+	packet->push((LPVOID)&nVal1, 4);
 	if (pBoss->nCate == 0)
 		nVal1 = 72;
 	if (pBoss->nCate == 1)
 		nVal1 = 368;
-	packet.push((LPVOID)&nVal1, 4);
+	packet->push((LPVOID)&nVal1, 4);
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 6;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 1;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	packet.push(pBoss->szDesc);
-	packet.push(1);
+	packet->push((LPVOID)&nVal1, 4);//固定
+	packet->push(pBoss->szDesc.data());
+	packet->push(1);
 	nVal1 = 2;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	packet.push(pBoss->szName);
-	packet.push(1);
+	packet->push((LPVOID)&nVal1, 4);//固定
+	packet->push(pBoss->szName.data());
+	packet->push(1);
 	nVal1 = 3;
-	packet.push((LPVOID)&nVal1, 1);//固定
+	packet->push((LPVOID)&nVal1, 1);//固定
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 4;
-	packet.push((LPVOID)&nVal1, 1);//固定
+	packet->push((LPVOID)&nVal1, 1);//固定
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 5;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	packet.push(pBoss->szMap);
-	packet.push(1);
+	packet->push((LPVOID)&nVal1, 4);//固定
+	packet->push(pBoss->szMap.data());
+	packet->push(1);
 	nVal1 = 6;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 49;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 2);//固定
+	packet->push((LPVOID)&nVal1, 2);//固定
 	nVal1 = 5;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	packet.push((LPVOID)&pBoss->nLvRecomm, 4);
+	packet->push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&pBoss->nLvRecomm, 4);
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	packet.push((LPVOID)&pBoss->nFreshTime, 4);
+	packet->push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&pBoss->nFreshTime, 4);
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	packet.push((LPVOID)&pBoss->nPic, 4);
+	packet->push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&pBoss->nPic, 4);
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 1;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	if (pBoss->nCate == 0)
 		nVal1 = 72;
 	if (pBoss->nCate == 1)
 		nVal1 = 368;
-	packet.push((LPVOID)&nVal1, 4);//固定
+	packet->push((LPVOID)&nVal1, 4);//固定
 	nVal1 = 0;
-	packet.push((LPVOID)&nVal1, 4);//固定
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nVal1, 4);//固定
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CBossTJ::Update()
@@ -308,6 +308,8 @@ VOID CBossTJ::Update()
 	if (m_tmrUpdate.IsTimeOut(1000)) // 每秒更新
 	{
 		m_tmrUpdate.Savetime();
+		auto* pAutoScriptManager = CAutoScriptManager::GetInstance();
+		if (pAutoScriptManager == nullptr) return;
 		for (int i = 0; i < m_nBossTJCount; i++) // 更新列表中BOSS刷新时间
 		{
 			BOSS_TJ* pBossTJ = m_pBossTJList[i];
@@ -316,18 +318,20 @@ VOID CBossTJ::Update()
 				pBossTJ->nFreshTime--;
 				if (pBossTJ->nFreshTime <= 0)
 				{
-					CHumanPlayer* pAuto = CAutoScriptManager::GetInstance()->GetScriptTarget();
-					pAuto->setSParam(0, pBossTJ->szName); // BOSS名字
-					pAuto->setSParam(1, pBossTJ->szMap); // 地图名字
-					pAuto->setSParam(2, pBossTJ->szDesc); // 简单描述
-					CSystemScript::GetInstance()->Execute(pAuto->GetScriptTarget(), "BOSS图鉴.刷怪");
-
+					CHumanPlayer* pAuto = pAutoScriptManager->GetScriptTarget();
+					if (pAuto)
+					{
+						pAuto->setSParam(0, pBossTJ->szName.data()); // BOSS名字
+						pAuto->setSParam(1, pBossTJ->szMap.data()); // 地图名字
+						pAuto->setSParam(2, pBossTJ->szDesc.data()); // 简单描述
+						CSystemScript::GetInstance()->Execute(pAuto->GetScriptTarget(), "BOSS图鉴.刷怪");
+					}
 					if (pBossTJ->nTimeType == 0)
-						pBossTJ->nFreshTime = atoi(pBossTJ->szTime);
+						pBossTJ->nFreshTime = atoi(pBossTJ->szTime.data());
 					else if (pBossTJ->nTimeType == 1)//时间类型1, time="0,3600,7200,10800,14400"
 					{
 						char* Params[24]; //最大24次时间
-						int nParam = SearchParam(pBossTJ->szTime, Params, 24, ',');
+						int nParam = SearchParam(pBossTJ->szTime.data(), Params, 24, ",");
 						if (nParam == 0) continue;
 						if (pBossTJ->nTime >= nParam)//重置次数
 							pBossTJ->nTime = 0;

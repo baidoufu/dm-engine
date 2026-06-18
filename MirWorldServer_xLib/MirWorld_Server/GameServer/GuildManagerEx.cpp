@@ -3,11 +3,11 @@
 #include "GuildManagerEx.h"
 #include "GuildEx.h"
 
-CGuildManagerEx::CGuildManagerEx(void)
+CGuildManagerEx::CGuildManagerEx(VOID)
 {
 }
 
-CGuildManagerEx::~CGuildManagerEx(void)
+CGuildManagerEx::~CGuildManagerEx(VOID)
 {
 }
 
@@ -59,7 +59,7 @@ VOID CGuildManagerEx::LoadGuildUpExp(const char* pszfile, DWORD dwCount)
 	if (!sfGuild.Open(pszfile)) return;
 	char sectionName[64];
 	sprintf(sectionName, "GuildUpExp");
-	for (int i = 0; i <= dwCount; i++)
+	for (DWORD i = 0; i <= dwCount; i++)
 	{
 		char itemName[5];
 		sprintf(itemName, "lv%d", i);
@@ -94,11 +94,11 @@ VOID CGuildManagerEx::SaveAll()
 	}
 }
 
-VOID CGuildManagerEx::GuildsRankInfo(GuildRankInfo*& pTempArray, int& nValidCount)
+VOID CGuildManagerEx::GuildsRankInfo(std::unique_ptr<GuildRankInfo[]>& pTempArray, int& nValidCount)
 {
 	int guildListCount = this->m_xGuildList.GetCount();
 	// 创建临时数组存储所有行会信息
-	pTempArray = new GuildRankInfo[guildListCount];
+	pTempArray = std::make_unique<GuildRankInfo[]>(guildListCount);
 	// 收集所有有效的行会
 	for (int i = 0; i < guildListCount; i++)
 	{
@@ -134,7 +134,7 @@ VOID CGuildManagerEx::GetPlayerTopGuild(CGuildEx* pGuild, GuildRank& pGuildRank)
 {
 	if (pGuild == nullptr) return;
 	// 获取临时数组存储所有行会排序信息
-	GuildRankInfo* pTempArray = nullptr;
+	std::unique_ptr<GuildRankInfo[]> pTempArray;
 	int nValidCount = 0;
 	GuildsRankInfo(pTempArray, nValidCount);
 	if (pTempArray == nullptr) return;
@@ -153,14 +153,13 @@ VOID CGuildManagerEx::GetPlayerTopGuild(CGuildEx* pGuild, GuildRank& pGuildRank)
 			break;
 		}
 	}
-	delete[] pTempArray;
 }
 
 int CGuildManagerEx::GetTopGuilds(GuildRank* pGuilds, int maxCount)
 {
 	if (pGuilds == nullptr || maxCount == 0) return 0;
 	// 获取临时数组存储所有行会排序信息
-	GuildRankInfo* pTempArray = nullptr;
+	std::unique_ptr<GuildRankInfo[]> pTempArray;
 	int nValidCount = 0;
 	GuildsRankInfo(pTempArray, nValidCount);
 	if (pTempArray == nullptr) return 0;
@@ -176,7 +175,6 @@ int CGuildManagerEx::GetTopGuilds(GuildRank* pGuilds, int maxCount)
 		pGuilds[i].dwExp = pTempArray[i].pGuild->GetExp();
 		pGuilds[i].wLevel = pTempArray[i].pGuild->GetLevel();
 	}
-	delete[] pTempArray;
 	return nResult;
 }
 
@@ -184,6 +182,8 @@ std::string CGuildManagerEx::GetRecruitStateList()
 {
 	std::string sGuildList;
 	int guildListCount = this->m_xGuildList.GetCount();
+	// 预分配字符串空间：每行约256字节，避免多次重新分配+拷贝
+	sGuildList.reserve(guildListCount * 256);
 	for (int i = 0; i < guildListCount; i++)
 	{
 		if (this->m_xGuildList[i]->lpObject)
@@ -199,5 +199,5 @@ std::string CGuildManagerEx::GetRecruitStateList()
 			}
 		}
 	}
-	return sGuildList;
+	return std::move(sGuildList);
 }

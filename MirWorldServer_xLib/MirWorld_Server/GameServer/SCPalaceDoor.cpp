@@ -3,12 +3,12 @@
 #include "SandCity.h"
 #include "HumanPlayer.h"
 
-CSCPalaceDoor::CSCPalaceDoor(void)
+CSCPalaceDoor::CSCPalaceDoor(VOID)
 {
 	Clean();
 }
 
-CSCPalaceDoor::~CSCPalaceDoor(void)
+CSCPalaceDoor::~CSCPalaceDoor(VOID)
 {
 }
 

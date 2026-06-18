@@ -2,13 +2,13 @@
 #include ".\logicmapmgr.h"
 #include "logicmap.h"
 
-CLogicMapMgr::CLogicMapMgr(void)
+CLogicMapMgr::CLogicMapMgr(VOID)
 {
 	m_pLoadingMap = nullptr;
 	memset(m_pMaps, 0, sizeof(m_pMaps));
 }
 
-CLogicMapMgr::~CLogicMapMgr(void)
+CLogicMapMgr::~CLogicMapMgr(VOID)
 {
 }
 
@@ -49,7 +49,10 @@ VOID CLogicMapMgr::Load(const char* pszPath)
 	StartFind(pszPath, "*.ini");
 	//	如果最后一个指针读取失败, 删除最后一个指针.
 	if (m_pLoadingMap != nullptr)
+	{
 		delete m_pLoadingMap;
+		m_pLoadingMap = nullptr;
+	}
 	for (int i = 0; i < MAX_LOGIC_MAP; i++)
 	{
 		if (m_pMaps[i] != nullptr)

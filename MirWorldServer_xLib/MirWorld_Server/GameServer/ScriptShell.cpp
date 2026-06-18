@@ -6,7 +6,7 @@
 #include ".\scriptelement.h"
 #include <memory>
 
-CScriptShell::CScriptShell(void)
+CScriptShell::CScriptShell(VOID)
 {
 	m_pScriptObject = nullptr;
 	m_ExecuteResult = ER_OK;
@@ -14,7 +14,7 @@ CScriptShell::CScriptShell(void)
 	m_pCallParams = nullptr;
 }
 
-CScriptShell::~CScriptShell(void)
+CScriptShell::~CScriptShell(VOID)
 {
 }
 
@@ -42,9 +42,9 @@ BOOL CScriptShell::Execute(CScriptTarget* pTarget, const char* pszPage1, BOOL bU
 {
 	CParamStackHelper paramstack;
 
-	char szPage[1024];
+	std::array<char, 1024> szPage{};
 	char* pszPage = nullptr;
-	CallParamEx params[MAX_CALL_PARAMS];
+	std::array<CallParamEx, MAX_CALL_PARAMS> params{};
 	setExecuteResult(ER_OK);
 	if (m_pScriptObject == nullptr)return FALSE;
 	//	如果是第一次进入该SHELL
@@ -60,8 +60,8 @@ BOOL CScriptShell::Execute(CScriptTarget* pTarget, const char* pszPage1, BOOL bU
 	}
 	else
 	{
-		o_strncpy(szPage, pszPage1, 1020);
-		xStringsExtracter<MAX_CALL_PARAMS + 1> queryparam(szPage, "&");
+		o_strncpy(szPage.data(), pszPage1, 1020);
+		xStringsExtracter<MAX_CALL_PARAMS + 1> queryparam(szPage.data(), "&");
 		for (UINT n = 1; n < queryparam.getCount(); n++)
 		{
 			params[n - 1] = queryparam[n];
@@ -79,8 +79,8 @@ BOOL CScriptShell::Execute(CScriptTarget* pTarget, const char* pszPage1, BOOL bU
 			}
 		}
 		if (queryparam.getCount() > 1)
-			this->m_pCallParams = params;
-		pszPage = (char*)szPage;
+			this->m_pCallParams = params.data();
+		pszPage = szPage.data();
 	}
 	//	如果当前SHELL不是本SHELL
 	if (pTarget->getCurShell() != this)
@@ -114,8 +114,6 @@ BOOL CScriptShell::Execute(CScriptTarget* pTarget, const char* pszPage1, BOOL bU
 	DWORD viewParam = view.get()->GetParam();
 	if (viewParam != 0)
 		dwParam = viewParam;
-	//	呼叫派生类对特殊PAGEID的处理.
-	if (!OnPageShow(pTarget, view.get(), pszPage)) return FALSE;
 	//	否则, 发送页面
 	view->SendPageToTarget(pTarget, dwParam);
 	return TRUE;

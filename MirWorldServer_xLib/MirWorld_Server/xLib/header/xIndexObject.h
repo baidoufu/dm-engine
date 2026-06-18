@@ -3,7 +3,7 @@
 class xIndexObject
 {
 public:
-	xIndexObject(void)
+	xIndexObject(VOID)
 	{
 		Clean();
 	}

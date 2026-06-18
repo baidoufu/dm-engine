@@ -4,11 +4,14 @@
 //	3- 单个IP支持
 //	4- 支持重新读取
 //	5-	多线程支持
+#include <vector>
+#include <algorithm>
+
 typedef struct tagRangeAddress
 {
-	DWORD	dwStart;
-	DWORD	dwEnd;
-	BOOL	AddrIn(DWORD dwAddr1)
+	DWORD dwStart;
+	DWORD dwEnd;
+	BOOL AddrIn(DWORD dwAddr1) const
 	{
 		return ((dwAddr1 >= dwStart) && (dwAddr1 <= dwEnd));
 	}
@@ -16,9 +19,9 @@ typedef struct tagRangeAddress
 
 typedef struct tagMaskAddress
 {
-	DWORD	dwAddr;
-	DWORD	dwMask;
-	BOOL	AddrIn(DWORD dwAddr1)
+	DWORD dwAddr;
+	DWORD dwMask;
+	BOOL AddrIn(DWORD dwAddr1) const
 	{
 		return ((dwAddr1)&dwMask) == dwAddr;
 	}
@@ -27,16 +30,16 @@ typedef struct tagMaskAddress
 class CIpListEx
 {
 public:
-	CIpListEx(void);
-	virtual ~CIpListEx(void);
+	CIpListEx(VOID);
+	virtual ~CIpListEx(VOID);
 	BOOL Load(const char* pszFilename);
 	BOOL AddressIn(const char* pszIpAddress);
 
 	BOOL IsEmpty()
 	{
-		return ((m_pNormalAddress == nullptr) &&
-			(m_pRangeAddress == nullptr) &&
-			(m_pMaskAddress == nullptr));
+		return (m_vNormalAddress.empty() &&
+			m_vRangeAddress.empty() &&
+			m_vMaskAddress.empty());
 	}
 protected:
 	BOOL AddRangeAddr(DWORD dwStart, DWORD dwEnd);
@@ -47,10 +50,7 @@ protected:
 	BOOL AddressInRangeAddr(DWORD dwAddr);
 
 	THREAD_PROTECT_DEFINE;
-	DWORD* m_pNormalAddress;
-	DWORD m_dwNormalAddressCount;
-	RangeAddress* m_pRangeAddress;
-	DWORD m_dwRangeAddressCount;
-	MaskAddress* m_pMaskAddress;
-	DWORD m_dwMaskAddressCount;
+	std::vector<DWORD> m_vNormalAddress;
+	std::vector<RangeAddress> m_vRangeAddress;
+	std::vector<MaskAddress> m_vMaskAddress;
 };

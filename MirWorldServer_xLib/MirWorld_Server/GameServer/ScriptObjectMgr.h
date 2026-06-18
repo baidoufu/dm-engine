@@ -11,8 +11,8 @@ class CScriptObjectMgr : public xSingletonClass<CScriptObjectMgr>,
 	public CFindFile, public xVariableProvider
 {
 public:
-	CScriptObjectMgr(void);
-	virtual ~CScriptObjectMgr(void);
+	CScriptObjectMgr(VOID);
+	virtual ~CScriptObjectMgr(VOID);
 	VOID Load(const char* pszPath);
 	VOID OnFoundFile(const char* pszFilename, UINT nParam = 0);
 	char* GetVariableValue(const char* pszVariable);

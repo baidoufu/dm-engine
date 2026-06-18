@@ -8,8 +8,8 @@ class CLogicMapMgr : public xSingletonClass<CLogicMapMgr>,
 	public CFindFile
 {
 public:
-	CLogicMapMgr(void);
-	virtual ~CLogicMapMgr(void);
+	CLogicMapMgr(VOID);
+	virtual ~CLogicMapMgr(VOID);
 
 	VOID Load(const char* pszPath);
 	CLogicMap* GetLogicMapByTitle(const char* pszTitleName);

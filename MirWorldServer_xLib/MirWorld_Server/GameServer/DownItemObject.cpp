@@ -9,12 +9,12 @@
 #include "autoscriptmanager.h"
 #include "humanplayer.h"
 
-CDownItemObject::CDownItemObject(void)
+CDownItemObject::CDownItemObject(VOID)
 {
 	Clean();
 }
 
-CDownItemObject::~CDownItemObject(void)
+CDownItemObject::~CDownItemObject(VOID)
 {
 }
 
@@ -29,19 +29,15 @@ VOID CDownItemObject::Clean()
 
 BOOL CDownItemObject::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
-	int tempSize = 0;
-	SmartEncodeMessage(pszMsg, tempSize, m_Item.dwMakeIndex, SM_DOWNITEMAPPEAR,
+	length = EncodeMsg(pszMsg, m_Item.dwMakeIndex, SM_DOWNITEMAPPEAR,
 		m_wX, m_wY, m_Item.baseitem.wImageIndex,
 		m_Item.baseitem.szName, m_Item.baseitem.btNameLength);    //23.9.6暂时改成14, 后续更新
-	length = tempSize;
 	return TRUE;
 }
 
 BOOL CDownItemObject::GetOutViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
-	int tempSize = 0;
-	SmartEncodeMessage(pszMsg, tempSize, m_Item.dwMakeIndex, SM_DOWNITEMDISAPPEAR, m_wX, m_wY, 0, nullptr);
-	length = tempSize;
+	length = EncodeMsg(pszMsg, m_Item.dwMakeIndex, SM_DOWNITEMDISAPPEAR, m_wX, m_wY, 0, nullptr);
 	return TRUE;
 }
 
@@ -114,7 +110,7 @@ VOID CDownItemObject::OnEnterMap(CLogicMap* pMap)
 	{
 		for (int y = -12; y <= 12; y++)
 		{
-			CMapCellInfo* pInfo = pMap->GetMapCellInfo(mx + x, my + y);
+			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 			{
 				xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -141,7 +137,7 @@ VOID CDownItemObject::OnLeaveMap(CLogicMap* pMap)
 	{
 		for (int y = -12; y <= 12; y++)
 		{
-			CMapCellInfo* pInfo = pMap->GetMapCellInfo(mx + x, my + y);
+			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 			{
 				xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();

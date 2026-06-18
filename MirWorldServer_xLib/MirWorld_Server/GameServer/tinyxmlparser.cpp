@@ -218,7 +218,7 @@ void TiXmlParsingData::Stamp( const char* now, TiXmlEncoding encoding )
 		switch (*pU) {
 			case 0:
 				// We *should* never get here, but in case we do, don't
-				// advance past the terminating null character, ever
+				// advance past the terminating nullptr character, ever
 				return;
 
 			case '\r':

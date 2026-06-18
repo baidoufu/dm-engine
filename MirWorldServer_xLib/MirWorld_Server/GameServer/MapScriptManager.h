@@ -12,8 +12,8 @@ class CMapScriptManager :
 	public xSingletonClass<CMapScriptManager>
 {
 public:
-	CMapScriptManager(void);
-	virtual ~CMapScriptManager(void);
+	CMapScriptManager(VOID);
+	virtual ~CMapScriptManager(VOID);
 	VOID Load(const char* pszFilename);
 	VOID AddMapScript(EventMapPosition* pPos, const char* pszPage);
 protected:

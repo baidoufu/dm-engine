@@ -1,9 +1,12 @@
 #include "..\header\xsupport.h"
 
-#define STONEDAY	86400
-#define STONEYEAR299	31622400
-#define	 STONEYEARNO299	31536000 
-static DWORD	stMonth_no299[12] =
+// CFrameTime 静态成员定义（所有线程共享，主线程写入，工作线程读取）
+std::atomic<DWORD> CFrameTime::s_dwFrameTime{0};
+
+constexpr auto STONEDAY = 86400;
+constexpr auto STONEYEAR299 = 31622400;
+constexpr auto STONEYEARNO299 = 31536000;
+static std::array<DWORD, 12> stMonth_no299 =
 {
 		0,																	//	1
 		STONEDAY * (31),													//	2
@@ -19,7 +22,7 @@ static DWORD	stMonth_no299[12] =
 		STONEDAY * (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30),	//	12
 };
 
-static DWORD	stMonth_299[12] =
+static std::array<DWORD, 12> stMonth_299 =
 {
 	0,																		//	1
 		STONEDAY * (31),													//	2
@@ -35,9 +38,10 @@ static DWORD	stMonth_299[12] =
 		STONEDAY * (31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30),	//	12
 };
 
-DWORD	GetT1toT2Second(SYSTEMTIME& t1, SYSTEMTIME& t2)// SYSTEMTIME & tresult )
+DWORD GetT1toT2Second(SYSTEMTIME& t1, SYSTEMTIME& t2)// SYSTEMTIME & tresult )
 {
-	DWORD	st1 = 0, st2 = 0;
+	DWORD	st1 = 0;
+	unsigned __int64 st2 = 0;
 	if (t1.wYear == t2.wYear)
 	{
 		if (IsRunYear(t1.wYear))
@@ -47,8 +51,8 @@ DWORD	GetT1toT2Second(SYSTEMTIME& t1, SYSTEMTIME& t2)// SYSTEMTIME & tresult )
 		}
 		else
 		{
-			st1 = stMonth_no299[t1.wMonth - 1] + t1.wDay * STONEDAY + t1.wHour * 3600 + t1.wMinute * 60 + t1.wSecond;
-			st2 = stMonth_no299[t2.wMonth - 1] + t2.wDay * STONEDAY + t2.wHour * 3600 + t2.wMinute * 60 + t2.wSecond;
+			st1 = stMonth_no299[t1.wMonth - 1] + (t1.wDay - 1) * STONEDAY + t1.wHour * 3600 + t1.wMinute * 60 + t1.wSecond;
+			st2 = stMonth_no299[t2.wMonth - 1] + (t2.wDay - 1) * STONEDAY + t2.wHour * 3600 + t2.wMinute * 60 + t2.wSecond;
 		}
 		st2 -= st1;
 		//	计算t1过了一年的多少秒, t2过了多少秒, 然后t2 - t1;
@@ -65,7 +69,7 @@ DWORD	GetT1toT2Second(SYSTEMTIME& t1, SYSTEMTIME& t2)// SYSTEMTIME & tresult )
 		else
 			st2 = (stMonth_no299[t2.wMonth - 1] + (t2.wDay - 1) * STONEDAY + (t2.wHour) * 3600 + (t2.wMinute) * 60 + t2.wSecond);
 		st2 += st1;
-		for (int i = t1.wYear + 1; i < t2.wYear; i++)
+		for (int i = t1.wYear + 1; i < t2.wYear; ++i)
 		{
 			if (IsRunYear(i))
 				st2 += STONEYEAR299;
@@ -73,7 +77,5 @@ DWORD	GetT1toT2Second(SYSTEMTIME& t1, SYSTEMTIME& t2)// SYSTEMTIME & tresult )
 				st2 += STONEYEARNO299;
 		}
 	}
-	return st2;
+	return static_cast<DWORD>(st2);
 }
-
-RAND_ARRAY	RandObject::m_RandArray[RESULT_TIMES];

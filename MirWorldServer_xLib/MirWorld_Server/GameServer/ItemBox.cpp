@@ -1,20 +1,18 @@
 #include "StdAfx.h"
 #include "ItemBox.h"
 #include "ItemManager.h"
-#ifndef USE_FREE_MEMORY
-xObjectPool<ITEM> CItemBox::m_ItemObjectPool;
-#endif
 
-CItemBox::CItemBox(void)
+xObjectPool<ITEM> CItemBox::m_ItemObjectPool;
+CItemBox::CItemBox(VOID)
 {
 	m_iCountLimit = 0;
-	m_iCount = 0;
 	m_pCachedItem = nullptr;
 	m_iCachedIndex = -1;
 	m_nCacheWeight = 0;
+	m_bCacheDirty = true;
 }
 
-CItemBox::~CItemBox(void)
+CItemBox::~CItemBox(VOID)
 {
 }
 
@@ -26,10 +24,10 @@ VOID CItemBox::Clean()
 	}
 	m_ItemArray.Clean();
 	m_iCountLimit = m_ItemArray.GetMaxCount();
-	m_iCount = 0;
 	m_pCachedItem = nullptr;
 	m_iCachedIndex = -1;
 	m_nCacheWeight = 0;
+	m_bCacheDirty = true;
 }
 
 BOOL CItemBox::Create(int size)
@@ -51,12 +49,7 @@ int CItemBox::FindItems(DWORD dwMakeIndex, ITEM** pItems, int maxcount, BOOL IsB
 	{
 		if (m_ItemArray[i] && m_ItemArray[i]->dwMakeIndex == dwMakeIndex)
 		{
-			if (IsBind && m_ItemArray[i]->IsBind())
-			{
-				pItems[rcount++] = m_ItemArray[i];
-				if (rcount >= maxcount) return rcount;
-			}
-			else
+			if (!IsBind || m_ItemArray[i]->IsBind())
 			{
 				pItems[rcount++] = m_ItemArray[i];
 				if (rcount >= maxcount) return rcount;
@@ -76,15 +69,15 @@ int CItemBox::FindItems(const char* pszName, ITEM** pItems, int maxcount, BOOL I
 	int rcount = 0;
 	for (UINT i = 0; i < m_ItemArray.GetCount(); i++)
 	{
-		char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i])->szFullName;
-		if (m_ItemArray[i] && strcmp(szFullName, pszName) == 0)
+		if (m_ItemArray[i] == nullptr)
+			continue;
+		ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i]);
+		if (pItemClass == nullptr)
+			continue;
+		char* szFullName = pItemClass->szFullName;
+		if (strcmp(szFullName, pszName) == 0)
 		{
-			if (IsBind && m_ItemArray[i]->IsBind())
-			{
-				pItems[rcount++] = m_ItemArray[i];
-				if (rcount >= maxcount) return rcount;
-			}
-			else
+			if (!IsBind || m_ItemArray[i]->IsBind())
 			{
 				pItems[rcount++] = m_ItemArray[i];
 				if (rcount >= maxcount) return rcount;
@@ -94,9 +87,8 @@ int CItemBox::FindItems(const char* pszName, ITEM** pItems, int maxcount, BOOL I
 	return rcount;
 }
 
-BOOL CItemBox::RemoveItem(DWORD dwMakeIndex)
+BOOL CItemBox::RemoveItem(ITEM* pItem)
 {
-	ITEM* pItem = FindItemByIndex(dwMakeIndex);
 	if (pItem)
 	{
 		if (pItem == m_pCachedItem && m_ItemArray[m_iCachedIndex] == pItem)
@@ -107,25 +99,24 @@ BOOL CItemBox::RemoveItem(DWORD dwMakeIndex)
 		else
 		{
 			if (pItem == m_pCachedItem)
-			{
 				ClrCache();
-			}
 			m_ItemArray.Del(pItem);
 		}
-		if (m_nCacheWeight > pItem->baseitem.btWeight)
-		{
+		if (!m_bCacheDirty && m_nCacheWeight > pItem->baseitem.btWeight)
 			m_nCacheWeight -= pItem->baseitem.btWeight;
-		}
 		else
-		{
-			m_nCacheWeight = 0;
-			m_nCacheWeight = CalcWeight();
-		}
+			m_bCacheDirty = true;
 		pItem->dwMakeIndex = 0;
 		DeleteItem(pItem);
 		return TRUE;
 	}
 	return FALSE;
+}
+
+BOOL CItemBox::RemoveItem(DWORD dwMakeIndex)
+{
+	ITEM* pItem = FindItemByIndex(dwMakeIndex);
+	return RemoveItem(pItem);
 }
 
 BOOL CItemBox::AddItem(ITEM& item)
@@ -140,8 +131,23 @@ BOOL CItemBox::AddItem(ITEM& item)
 		DeleteItem(pItem);
 		return FALSE;
 	}
-	m_nCacheWeight += pItem->baseitem.btWeight;
+	if (m_bCacheDirty)
+		m_nCacheWeight = CalcWeight();
+	else
+		m_nCacheWeight += pItem->baseitem.btWeight;
+	m_bCacheDirty = false;
 	return TRUE;
+}
+
+BOOL CItemBox::AddItems(ITEM* pItems, int count)
+{
+	BOOL IsSuccess = TRUE;
+	for (int i = 0; i < count; i++)
+	{
+		if (!AddItem(pItems[i]))
+			IsSuccess = FALSE;
+	}
+	return IsSuccess;
 }
 
 ITEM* CItemBox::FindItemByIndex(DWORD dwMakeIndex, BOOL IsBind)
@@ -152,12 +158,7 @@ ITEM* CItemBox::FindItemByIndex(DWORD dwMakeIndex, BOOL IsBind)
 	{
 		if (m_ItemArray[i] && m_ItemArray[i]->dwMakeIndex == dwMakeIndex)
 		{
-			if (IsBind && m_ItemArray[i]->IsBind())
-			{
-				SetCache(m_ItemArray[i], i);
-				return m_ItemArray[i];
-			}
-			else
+			if (!IsBind || m_ItemArray[i]->IsBind())
 			{
 				SetCache(m_ItemArray[i], i);
 				return m_ItemArray[i];
@@ -169,20 +170,23 @@ ITEM* CItemBox::FindItemByIndex(DWORD dwMakeIndex, BOOL IsBind)
 
 ITEM* CItemBox::FindItemByName(const char* pszName, BOOL IsBind)
 {
-	char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*m_pCachedItem)->szFullName;
-	if (m_pCachedItem != nullptr && strcmp(pszName, szFullName) == 0)
-		return m_pCachedItem;
+	if (m_pCachedItem != nullptr)
+	{
+		ITEMCLASS* pCachedClass = CItemManager::GetInstance()->GetItemClassPtr(*m_pCachedItem);
+		if (pCachedClass != nullptr && strcmp(pszName, pCachedClass->szFullName) == 0)
+			return m_pCachedItem;
+	}
 	for (UINT i = 0; i < m_ItemArray.GetCount(); i++)
 	{
-		char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i])->szFullName;
-		if (m_ItemArray[i] && strcmp(pszName, szFullName) == 0)
+		if (m_ItemArray[i] == nullptr)
+			continue;
+		ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i]);
+		if (pItemClass == nullptr)
+			continue;
+		char* szFullName = pItemClass->szFullName;
+		if (strcmp(pszName, szFullName) == 0)
 		{
-			if (IsBind && m_ItemArray[i]->IsBind())
-			{
-				SetCache(m_ItemArray[i], i);
-				return m_ItemArray[i];
-			}
-			else
+			if (!IsBind || m_ItemArray[i]->IsBind())
 			{
 				SetCache(m_ItemArray[i], i);
 				return m_ItemArray[i];
@@ -190,15 +194,6 @@ ITEM* CItemBox::FindItemByName(const char* pszName, BOOL IsBind)
 		}
 	}
 	return nullptr;
-}
-
-BOOL CItemBox::SetItems(ITEM* pItems, int count)
-{
-	for (int i = 0; i < count; i++)
-	{
-		AddItem(pItems[i]);
-	}
-	return TRUE;
 }
 
 int CItemBox::GetItems(ITEM* pItems, int maxcount)
@@ -250,8 +245,13 @@ int	CItemBox::GetItemCount(const char* pszName)
 	int count = 0;
 	for (UINT i = 0; i < m_ItemArray.GetCount(); i++)
 	{
-		char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i])->szFullName;
-		if (m_ItemArray[i] && strcmp(szFullName, pszName) == 0)
+		if (m_ItemArray[i] == nullptr)
+			continue;
+		ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i]);
+		if (pItemClass == nullptr)
+			continue;
+		char* szFullName = pItemClass->szFullName;
+		if (strcmp(szFullName, pszName) == 0)
 			count++;
 	}
 	return count;
@@ -262,8 +262,13 @@ BOOL CItemBox::TakeItemCount(const char* pszName, int count, ITEM* pArray)
 	int rcount = 0;
 	for (UINT i = 0; i < m_ItemArray.GetCount(); i++)
 	{
-		char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i])->szFullName;
-		if (m_ItemArray[i] && strcmp(szFullName, pszName) == 0)
+		if (m_ItemArray[i] == nullptr)
+			continue;
+		ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(*m_ItemArray[i]);
+		if (pItemClass == nullptr)
+			continue;
+		char* szFullName = pItemClass->szFullName;
+		if (strcmp(szFullName, pszName) == 0)
 		{
 			pArray[rcount++] = *m_ItemArray[i];
 			if (rcount >= count)break;

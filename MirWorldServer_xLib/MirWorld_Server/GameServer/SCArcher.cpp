@@ -4,12 +4,12 @@
 #include "monstermanagerex.h"
 #include "gameworld.h"
 
-CSCArcher::CSCArcher(void)
+CSCArcher::CSCArcher(VOID)
 {
 	Clean();
 }
 
-CSCArcher::~CSCArcher(void)
+CSCArcher::~CSCArcher(VOID)
 {
 }
 

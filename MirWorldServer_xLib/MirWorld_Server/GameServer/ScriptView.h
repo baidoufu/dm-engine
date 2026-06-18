@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 class CScriptShell;
 class CScriptTarget;
 
@@ -6,7 +7,7 @@ class CScriptView
 {
 public:
 	CScriptView(CScriptShell* pShell);
-	virtual ~CScriptView(void);
+	virtual ~CScriptView(VOID);
 
 	virtual BOOL AppendWords(const char* pszWords) { return TRUE; }
 
@@ -26,7 +27,7 @@ public:
 protected:
 	CScriptShell* m_pShell;
 	xPacket m_xScriptPacket;
-	char m_szBuffer[65536];
+	std::unique_ptr<char[]> m_szBuffer;
 	DWORD m_dwParam;
 	UINT m_nPageSize;
 };

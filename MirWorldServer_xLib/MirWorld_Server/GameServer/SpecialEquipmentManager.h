@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+#include <array>
 enum match_state
 {
 	MS_MATCHGROUP,
@@ -9,8 +11,8 @@ enum match_state
 class CSpecialEquipmentManager : public xSingletonClass<CSpecialEquipmentManager>
 {
 public:
-	CSpecialEquipmentManager(void);
-	virtual ~CSpecialEquipmentManager(void);
+	CSpecialEquipmentManager(VOID);
+	virtual ~CSpecialEquipmentManager(VOID);
 	//加载套装触发SpecialItem.txt
 	VOID LoadSpecialEquipmentFunction(const char* pszFilename);
 	//匹配套装
@@ -31,7 +33,7 @@ public:
 		return m_SpecialFunctionDefine[func].pParams[paramindex];
 	}
 protected:
-	SpecialEquipmentFunction m_SpecialFunctionDefine[SEF_MAX];
-	SpecialEquipment* m_pSpecialEquipmentArray;
+	std::array<SpecialEquipmentFunction, SEF_MAX> m_SpecialFunctionDefine;
+	std::unique_ptr<SpecialEquipment[]> m_pSpecialEquipmentArray;
 	int	m_iSpecialEquipmentCount;
 };

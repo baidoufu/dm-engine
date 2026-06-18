@@ -1,10 +1,12 @@
 #include "StdAfx.h"
 #include "mimalloc-new-delete.h"
+#include "mimalloc-override.h"
 #include "serverform.h"
 #include <iostream>
 #include <conio.h>
 #include <time.h>
 #include "EventBus.h"
+#include "CrashHandler.h"
 
 // 初始化 mimalloc, 替换系统内存分配器 - 基于 mimalloc v3.2.8 官方文档和最佳实践
 struct MimallocInitializer {
@@ -146,11 +148,9 @@ struct MimallocInitializer {
 } g_mimalloc_init;
 
 CServerForm* CServerForm::s_pInstance = nullptr;
-CServerForm::CServerForm(void)
+CServerForm::CServerForm(VOID)
 {
 	m_pServer = nullptr;
-	m_pCmdLine = nullptr;
-	m_pszServerName = nullptr;
 	m_hConsole = nullptr;
 	m_wOriginalAttributes = 0;
 	m_bRunning = FALSE;
@@ -160,12 +160,12 @@ CServerForm::CServerForm(void)
 
 // 设置 Arena 预留内存大小（单位：KB）
 // 需要在 Create() 之后、StartServer() 之前调用
-void CServerForm::SetArenaReserve(size_t kbSize)
+VOID CServerForm::SetArenaReserve(size_t kbSize)
 {
 	mi_option_set(mi_option_e::mi_option_arena_reserve, kbSize);
 }
 
-CServerForm::~CServerForm(void)
+CServerForm::~CServerForm(VOID)
 {
 	if (m_hConsole)
 		SetConsoleTextAttribute(m_hConsole, m_wOriginalAttributes);
@@ -174,9 +174,13 @@ CServerForm::~CServerForm(void)
 
 BOOL CServerForm::Create(const char* pszTitle, const char* pszCmdLine)
 {
+	// 关闭 Windows 错误报告弹窗
+	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
+	// 异常处理
+	CRASH_HANDLER_INIT();
 	TRY_BEGIN
-	m_pszServerName = (char*)pszTitle;
-	m_pCmdLine = (char*)pszCmdLine;
+	m_strServerName = pszTitle ? pszTitle : "";
+	m_strCmdLine = pszCmdLine ? pszCmdLine : "";
 	bool bNoConsole = (pszCmdLine && strstr(pszCmdLine, "--noconsole") != nullptr);
 	if (!bNoConsole)
 	{
@@ -205,7 +209,7 @@ BOOL CServerForm::Create(const char* pszTitle, const char* pszCmdLine)
 	// 设置控制台标题（仅在非静默模式下）
 	if (!bNoConsole)
 	{
-		SetConsoleTitleA(pszTitle);
+		SetConsoleTitleA(m_strServerName.c_str());
 		// 设置窗口大小（单位：字符）
 		// 先设置窗口大小, 再设置缓冲区大小（缓冲区必须 >= 窗口）
 		SMALL_RECT windowSize{};
@@ -329,11 +333,11 @@ VOID CServerForm::OnTimer()
 	}
 	
 	// 设置控制台标题显示状态
-	char title[256];
-	sprintf(title, "%s - %s | 连接:%d 发送:%u 接收:%u", 
-		m_pszServerName, serverstate.pServerDescript,
+	std::array<char, 256> title{};
+	sprintf(title.data(), "%s - %s | 连接:%d 发送:%u 接收:%u", 
+		m_strServerName.c_str(), serverstate.pServerDescript,
 		serverstate.numConnection, serverstate.dwSendBytes, serverstate.dwRecvBytes);
-	SetConsoleTitleA(title);
+	SetConsoleTitleA(title.data());
 }
 
 WORD CServerForm::GetConsoleColor(DWORD dwColor)
@@ -375,7 +379,7 @@ WORD CServerForm::GetConsoleColor(DWORD dwColor)
 	}
 }
 
-void CServerForm::SetConsoleColor(WORD color) const
+VOID CServerForm::SetConsoleColor(WORD color) const
 {
 	if (m_hConsole)
 		SetConsoleTextAttribute(m_hConsole, color);
@@ -409,7 +413,7 @@ int CServerForm::EnterMessageLoop()
 			}, this, 0, &dwTimerThreadId);
 	}
 	// 主循环：读取用户输入（支持键盘和管道输入）
-	char szInput[1024];
+	std::array<char, 1024> szInput{};
 	HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
 	// 检查是否是管道输入（StartServer 启动时）
 	bool bIsPipeInput = false;
@@ -439,17 +443,17 @@ int CServerForm::EnterMessageLoop()
 		else if (bIsPipeInput && hStdIn != INVALID_HANDLE_VALUE)
 		{
 			DWORD dwAvail = 0;
-			if (PeekNamedPipe(hStdIn, NULL, 0, NULL, &dwAvail, NULL) && dwAvail > 0)
+			if (PeekNamedPipe(hStdIn, nullptr, 0, nullptr, &dwAvail, nullptr) && dwAvail > 0)
 			{
 				bHasInput = true;
 			}
 		}
 		if (bHasInput)
 		{
-			if (fgets(szInput, sizeof(szInput), stdin) != nullptr)
+			if (fgets(szInput.data(), static_cast<int>(szInput.size()), stdin) != nullptr)
 			{
 				// 去掉换行符
-				size_t len = strlen(szInput);
+				size_t len = strlen(szInput.data());
 				if (len > 0 && (szInput[len - 1] == '\n' || szInput[len - 1] == '\r'))
 				{
 					szInput[len - 1] = '\0';
@@ -457,19 +461,19 @@ int CServerForm::EnterMessageLoop()
 						szInput[len - 2] = '\0';
 				}
 				// 处理命令
-				if (_stricmp(szInput, "start") == 0)
+				if (_stricmp(szInput.data(), "start") == 0)
 					OnCommand(10000);
-				else if (_stricmp(szInput, "stop") == 0)
+				else if (_stricmp(szInput.data(), "stop") == 0)
 					OnCommand(10001);
-				else if (_stricmp(szInput, "quit") == 0 || _stricmp(szInput, "exit") == 0)
+				else if (_stricmp(szInput.data(), "quit") == 0 || _stricmp(szInput.data(), "exit") == 0)
 				{
 					if (OnClose())break;
 				}
-				else if (strlen(szInput) > 0)
+				else if (strlen(szInput.data()) > 0)
 				{
 					// 将输入字符串传递给输入监听器
 					if (m_pInputListener)
-						m_pInputListener->OnInput(szInput);
+						m_pInputListener->OnInput(szInput.data());
 				}
 			}
 		}
@@ -480,6 +484,7 @@ int CServerForm::EnterMessageLoop()
 	{
 		WaitForSingleObject(hTimerThread, 1000);
 		CloseHandle(hTimerThread);
+		hTimerThread = nullptr;
 	}
 	FreeConsole();
 	return 0;

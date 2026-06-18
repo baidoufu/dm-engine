@@ -6,8 +6,8 @@ class FireRainEvent :
 	public CEventProcessor
 {
 public:
-	FireRainEvent(void);
-	virtual ~FireRainEvent(void);
+	FireRainEvent(VOID);
+	virtual ~FireRainEvent(VOID);
 	FireRainEvent(const FireRainEvent&) = delete;           // ½ûÖ¹¿½±´¹¹Ôì
 	FireRainEvent& operator=(const FireRainEvent&) = delete; // ½ûÖ¹¿½±´¸³Öµ
 	static FireRainEvent* Create(CAliveObject* pOwner, int x, int y, UINT nRange, UINT nDamage, UINT nKeepTime, UINT nRunTime);

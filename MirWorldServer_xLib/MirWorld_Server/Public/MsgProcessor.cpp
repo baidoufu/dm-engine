@@ -1,9 +1,9 @@
 #include ".\msgprocessor.h"
 
-//CMsgProcessor::CMsgProcessor(void)
+//CMsgProcessor::CMsgProcessor(VOID)
 //{
 //}
 //
-//CMsgProcessor::~CMsgProcessor(void)
+//CMsgProcessor::~CMsgProcessor(VOID)
 //{
 //}

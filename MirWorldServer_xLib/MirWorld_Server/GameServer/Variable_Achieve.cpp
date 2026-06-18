@@ -18,10 +18,10 @@ DEFINE_SCRIPT_VAR(ACHIEVEPOINT) {
 DEFINE_SCRIPT_VAR(ACHIEVE_NAME) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			const TIMEACHIEVE_ITEM* pAchieveItem = CTimeAchieve::GetInstance()->FindAchieveById(Params[0].nParam);
-			result.SetValue(pAchieveItem->szName);
+			result.SetValue(pAchieveItem->szName.data());
 		}
 		else
 			return FALSE;
@@ -37,7 +37,7 @@ DEFINE_SCRIPT_VAR(ACHIEVE_NAME) {
 DEFINE_SCRIPT_VAR(ACHIEVE_EXP) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			DWORD pExp = pPlayer->GetAchieveExpById(Params[0].nParam);
 			result.SetValue(pExp);
@@ -56,7 +56,7 @@ DEFINE_SCRIPT_VAR(ACHIEVE_EXP) {
 DEFINE_SCRIPT_VAR(ACHIEVE_MAXEXP) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			const TIMEACHIEVE_ITEM* pAchieveItem = CTimeAchieve::GetInstance()->FindAchieveById(Params[0].nParam);
 			result.SetValue(pAchieveItem->nMaxExp);
@@ -75,7 +75,7 @@ DEFINE_SCRIPT_VAR(ACHIEVE_MAXEXP) {
 DEFINE_SCRIPT_VAR(ACHIEVE_STATE) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			BYTE pState = pPlayer->GetAchieveStateById(Params[0].nParam);
 			result.SetValue(pState);
@@ -94,7 +94,7 @@ DEFINE_SCRIPT_VAR(ACHIEVE_STATE) {
 DEFINE_SCRIPT_VAR(ACHIEVE_TIME) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			DWORD pCompleteTime = pPlayer->GetAchieveCompleteTimeById(Params[0].nParam);
 			result.SetValue(pCompleteTime);
@@ -113,7 +113,7 @@ DEFINE_SCRIPT_VAR(ACHIEVE_TIME) {
 DEFINE_SCRIPT_VAR(ACHIEVE_POINT) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			const TIMEACHIEVE_ITEM* pAchieveItem = CTimeAchieve::GetInstance()->FindAchieveById(Params[0].nParam);
 			result.SetValue(pAchieveItem->nPoint);
@@ -132,7 +132,7 @@ DEFINE_SCRIPT_VAR(ACHIEVE_POINT) {
 DEFINE_SCRIPT_VAR(ACHIEVE_GROUP) {
 	if (nParam == 1)
 	{
-		if (Params[0].nParam < CTimeAchieve::GetInstance()->GetAchieveCount())
+		if (static_cast<int>(Params[0].nParam) < CTimeAchieve::GetInstance()->GetAchieveCount())
 		{
 			const TIMEACHIEVE_ITEM* pAchieveItem = CTimeAchieve::GetInstance()->FindAchieveById(Params[0].nParam);
 			result.SetValue(pAchieveItem->nGroup);

@@ -10,6 +10,8 @@
 #include <random>
 #include <mutex>
 #include <unordered_map>
+#include <memory>
+#include <array>
 #include "monstermanagerex.h"
 #include "monsterex.h"
 #include "ScriptNpc.h"
@@ -21,9 +23,9 @@ class CGroupObject;
 class CMonsterEx;
 class CScriptNpc;
 
-typedef char S_PARAM[128];
+typedef std::array<char, 128> S_PARAM;
 typedef DWORD V_PARAM;
-typedef char S_CHARNAME[20];
+typedef std::array<char, 20> S_CHARNAME;
 typedef struct tagCREATEHUMANDESC
 {
 	tagCREATEHUMANDESC()
@@ -52,11 +54,13 @@ class CGuildEx;
 class CHumanPlayer : public CAliveObject
 {
 public:
-	CHumanPlayer(void);
-	virtual ~CHumanPlayer(void);
+	CHumanPlayer(VOID);
+	virtual ~CHumanPlayer(VOID);
 	VOID Clean();
 	BOOL Init(CREATEHUMANDESC& desc);
 	e_object_type GetType() { return OBJ_PLAYER; }
+	// 是否为机器人（子类CBotPlayer重写返回TRUE）
+	virtual BOOL IsBot() const { return FALSE; }
 	VOID OnAroundMsg(CMapObject* pSender, const char* pszCodedMsg, int size);
 	VOID OnEnterMap(CLogicMap* pMap);
 	VOID OnLeaveMap(CLogicMap* pMap);
@@ -66,7 +70,7 @@ public:
 	//这里还有个GETSHPE
 	BYTE GetShape(DWORD dwMakeIndex);
 	VOID Sendfirstdlg(const char* pszString);
-	VOID OnDeath(DWORD dwKiller);
+	virtual VOID OnDeath(DWORD dwKiller);
 	VOID CleanPets();
 	// 获取玩家外观特征值
 	DWORD GetFeather();
@@ -81,17 +85,17 @@ public:
 	BYTE GetSex() { return m_Humandesc.dbinfo.btSex; }
 	//获取玩家职业
 	BYTE GetPro() const { return m_Humandesc.dbinfo.btClass; }
-	VOID Update();
+	virtual VOID Update();
 	VOID DropGold(DWORD dwCount);
 	BOOL GetDBInfo(CHARDBINFO& info);
 	//玩家在数据库中的ID
 	DWORD GetDBId() const { return m_Humandesc.dbinfo.dwDBId; }
 	const char* GetName() { return m_Humandesc.dbinfo.szName; }
-	const char* GetViewName() { return m_szLongName; }
+	const char* GetViewName() { return m_szLongName.data(); }
 	BOOL GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer = nullptr);
 
 	BOOL CanRecover() { return (!m_bDead && m_ActionType == AT_STAND); }
-	BOOL CanRecvMsg()
+	virtual BOOL CanRecvMsg()
 	{
 		if (m_pClientObj == nullptr)return FALSE;
 		return TRUE;
@@ -168,7 +172,7 @@ public:
 	BOOL HasUpgradeWeapon()const { return (m_UpgradeItem.dwMakeIndex != 0); }
 	ITEM& GetUpgradeWeapon() { return m_UpgradeItem; }
 	int GetVarValue(const char* pszVar) const;
-	void SetVarValue(const char* pszVar, int value) {}
+	VOID SetVarValue(const char* pszVar, int value) {}
 	BOOL CreateBagItem(const char* pszName, BOOL IsBing = FALSE);
 	VOID AddExp(DWORD dwExp, int level = 0, DWORD dwId = 0);
 	VOID WinExp(DWORD dwExp, BOOL bNoBonus = FALSE, DWORD dwId = 0);
@@ -197,9 +201,9 @@ public:
 		CSystemTime curtime;
 		return m_LoginTime.GetToTimeSecond(curtime);
 	}
-	const char* GetMaster() { return m_sMaster; }
-	const char* GetMarriage() { return m_sWife; }
-	const char* GetStudent(UINT nIndex) { if (nIndex >= 3)return ""; return m_sStudents[nIndex]; }
+	const char* GetMaster() { return m_sMaster.data(); }
+	const char* GetMarriage() { return m_sWife.data(); }
+	const char* GetStudent(UINT nIndex) { if (nIndex >= 3)return ""; return m_sStudents[nIndex].data(); }
 	const char* GetGuildName();
 public:
 	DWORD GetLevelupExp();
@@ -228,6 +232,18 @@ public:
 	BOOL EquipItem(int pos, DWORD dwMakeIndex);
 	BOOL UnEquipItem(int pos, DWORD dwMakeIndex);
 
+	// 频率限制检查(防加速外挂)
+	BOOL CanmMine() { return m_tmrMine.IsTimeOut(800); }
+	VOID SaveMineTime() { m_tmrMine.Savetime(); }
+	BOOL CanUseItem() { return m_tmrUseItem.IsTimeOut(250); }
+	VOID SaveUseItemTime() { m_tmrUseItem.Savetime(); }
+	BOOL CanPickupItem() { return m_tmrPickupItem.IsTimeOut(300); }
+	VOID SavePickupItemTime() { m_tmrPickupItem.Savetime(); }
+	BOOL CanDropItem() { return m_tmrDropItem.IsTimeOut(200); }
+	VOID SaveDropItemTime() { m_tmrDropItem.Savetime(); }
+	BOOL CanEquipChange() { return m_tmrEquipChange.IsTimeOut(200); }
+	VOID SaveEquipChangeTime() { m_tmrEquipChange.Savetime(); }
+
 	BOOL Trade(CHumanPlayer* pPlayer = nullptr);
 	BOOL PutTradeItem(DWORD dwMakeIndex);
 	BOOL PutTradeMoney(money_type type, DWORD dwCount);
@@ -236,18 +252,19 @@ public:
 
 	ITEM* FindBagItem(DWORD dwMakeIndex);
 	BOOL DeleteBagItem(DWORD dwMakeIndex);
+	BOOL DeleteBagItem(ITEM* item);
 
 	CItemBox& GetBag() { return m_ItemBox; }
 	int	GetPropValue(PROP_INDEX index);
-	void DecPropValue(PROP_INDEX index, int value);
-	void AddPropValue(PROP_INDEX index, int value);
+	VOID DecPropValue(PROP_INDEX index, int value);
+	VOID AddPropValue(PROP_INDEX index, int value);
 
 	int GetAutoRecoverHp();
 	int GetAutoRecoverMp();
 	int GetAutoRecoverHptime() { return 6000; }
 	int GetAutoRecoverMptime() { return 15000; }
 	//设置活力值
-	void SetHuoLi(int h) { m_iHuoli = h; }
+	VOID SetHuoLi(int h) { m_iHuoli = h; }
 	//施放技能或者魔法, x, y 是鼠标的坐标
 	BOOL SpellCast(int x, int y, UINT nTarget, WORD wMagicId);
 	//战士技能攻击
@@ -295,7 +312,7 @@ public:
 	VOID DamageMaterialDura(int pos, int nDura);
 	//增加技能经验
 	BOOL TrainMagic(USERMAGIC* pMagic, int exp = 0);
-
+	//检查玩家负重
 	BOOL CanBearItem(ITEM& item);
 
 	BOOL DoUpgradeWeapon();
@@ -459,26 +476,26 @@ public:
 
 	VOID setVParam(UINT index, DWORD dwParam)
 	{
-		if (index > 9)return;
+		if (index >= m_vParam.size()) return;
 		m_vParam[index] = dwParam;
 	}
 
 	DWORD getVParam(UINT index)
 	{
-		if (index > 9)return 0;
+		if (index >= m_vParam.size()) return 0;
 		return m_vParam[index];
 	}
 
 	VOID setSParam(UINT index, const char* pszParam)
 	{
-		if (index > 9)return;
-		o_strncpy(m_sParam[index], pszParam, 128);
+		if (index >= m_sParam.size()) return;
+		o_strncpy(m_sParam[index].data(), pszParam, 128);
 	}
 
 	const char* getSParam(UINT index)
 	{
-		if (index > 9)return "<OUT_OF_INDEX>";
-		return m_sParam[index];
+		if (index >= m_sParam.size()) return "<OUT_OF_INDEX>";
+		return m_sParam[index].data();
 	}
 
 	BOOL getSelfFlag(int index)const
@@ -549,11 +566,11 @@ public:
 	VOID SetWisperTarget(const char* pszName)
 	{
 		if (m_ChatChannel != CCH_WISPER)return;
-		if (strcmp(pszName, m_szCurWisperTarget) == 0)return;
-		o_strncpy(m_szCurWisperTarget, pszName, 31);
+		if (strcmp(pszName, m_szCurWisperTarget.data()) == 0)return;
+		o_strncpy(m_szCurWisperTarget.data(), pszName, 31);
 		SaySystemAttrib(CC_GREEN, "%s 被设置成当前密谈对象", pszName);
 	}
-	const char* GetWisperTarget() { if (m_szCurWisperTarget[0] == 0)return nullptr; return m_szCurWisperTarget; }
+	const char* GetWisperTarget() { if (m_szCurWisperTarget[0] == 0)return nullptr; return m_szCurWisperTarget.data(); }
 
 	VOID ChannelSay(e_chatchannel channel, const char* pszParam, const char* pszWords/*, ... */);
 	BOOL ChannelHear(e_chatchannel channel, DWORD dwParam, const char* pszWords, ...);
@@ -583,7 +600,7 @@ public:
 	//护身等级或者金刚等级
 	int hushenleve = 0;
 	//护身等级颜色或金刚等级颜色数组
-	int hushenbuff[4] = { 255, 254, 147, 154 };
+	static constexpr std::array<int, 4> hushenbuff = { 255, 254, 147, 154 };
 	//子类实现, 用于获取护身等级
 	int getHushenbuf() { return hushenbuff[hushenleve]; }
 	//获取魔法盾和金刚护体免伤的百分比
@@ -639,7 +656,7 @@ public:
 	VOID AcceptAddFriendRequest(CHumanPlayer* pFriend);
 
 	CMonsterEx* GetHorse() { return m_pHorse; }
-	void SetHorse(CMonsterEx* pHorse) { m_pHorse = pHorse; if (m_pHorse == nullptr)m_bRideHorse = FALSE; }
+	VOID SetHorse(CMonsterEx* pHorse) { m_pHorse = pHorse; if (m_pHorse == nullptr)m_bRideHorse = FALSE; }
 
 	ITEM* GetWeapon();
 	ITEM* GetDress();
@@ -657,7 +674,7 @@ public:
 
 	VOID UpdateItemsToDB();
 	const char* GetScriptVarValue(const char* pszName);
-	const char* GetGuildTitle() { return m_szGuildTitle; }
+	const char* GetGuildTitle() { return m_szGuildTitle.data(); }
 
 	VOID OnEnterSafeArea();
 	VOID OnLeaveSafeArea();
@@ -670,7 +687,7 @@ public:
 	VOID OnSystemFlagSeted(int index, DWORD dwParam = 0);
 
 	//马鞭抓马
-	BOOL DoTrainHorse(int dir);
+	BOOL DoTrainHorse(int dir, int x, int y);
 	BOOL CanEnterMap(CLogicMap* pMap);
 	BOOL EscapeMap();
 	BOOL SetPrivateShop(int iCount, PRIVATESHOPQUERY* pQuery);
@@ -688,7 +705,7 @@ public:
 	VOID OnCommunityInfo(const char* pszCommunityInfo);
 	int	GetCommunityInfo(char* pszCommunityBuffer, int iSize);
 	VOID UpdateCommunityInfoToClient(BOOL bNoticeOnline = TRUE);
-	VOID SetPetsActive(BOOL bActive) { CAliveObject::SetPetsActive(bActive); SetPetTarget(nullptr); }
+
 	BOOL AddFriend(CHumanPlayer* pFriend);
 	BOOL DeleteFriend(const char* pszName);
 
@@ -753,7 +770,7 @@ public:
 	VOID DamageSpecialEquipment(special_equipment_func func, int iDamage);
 	WORD GetBodyEffect();
 	VOID SendBodyEffectChanged();
-	BOOL DoMine(int dir);
+	BOOL DoMine(int dir, int x, int y);
 	BOOL IsGodBlessEffectivable(special_godbless type, CAliveObject* pObject);
 	BOOL Damage(DWORD dwHitter, int value);
 	VOID SendUpdateItem(ITEM& item);
@@ -824,7 +841,7 @@ public:
 			return m_ItemBox.FindItem(makeindex);
 		return nullptr;
 	}
-	VOID SetPetName(const char* pszName)const { strcpy(petname, pszName); }
+	VOID SetPetName(const char* pszName)const { strcpy(petname.data(), pszName); }
 	VOID SetUsingItem(ITEM* pItem) { m_pUsingItem = pItem; if (pItem)pItem->dwParam[3] = UR_NORESULT; }
 	VOID OnPutItem(DWORD dwShellId, DWORD dwMakeIndex);
 
@@ -845,9 +862,9 @@ public:
 	//冰泉圣水修复穿戴物品持久
 	BOOL RepairEquipment(UINT pos, UINT nCount = 1);
 
-	DWORD GetParam(UINT nIndex)const { if (nIndex >= 4)return 0; return m_dwParams[nIndex]; }
-	VOID SetParam(UINT nIndex, DWORD dwParam) { if (nIndex >= 4)return; m_dwParams[nIndex] = dwParam; }
-	VOID ClearParam()const { memset(m_dwParams, 0, sizeof(m_dwParams)); }
+	DWORD GetParam(UINT nIndex)const { if (nIndex >= m_dwParams.size()) return 0; return m_dwParams[nIndex]; }
+	VOID SetParam(UINT nIndex, DWORD dwParam) { if (nIndex >= m_dwParams.size()) return; m_dwParams[nIndex] = dwParam; }
+	VOID ClearParam()const { m_dwParams.fill(0); }
 
 	//玩家登录时, 请求获取任务数据
 	VOID OnTaskInfo(TASKINFO* pInfo);
@@ -951,7 +968,7 @@ public: //成就相关函数
 	//调整玩家成就点
 	BOOL ChangeAchievePoint(BYTE btType, DWORD dwExp);
 	//组包玩家的成就数据
-	VOID PacketAchieve(xPacket& packet, BYTE btType, int nAchieveCount);
+	VOID PacketAchieve(xPacket& packet, BYTE btType, DWORD nAchieveCount);
 	//获取玩家当前的成就进度
 	DWORD GetAchieveExp() const { return m_Achievement.dwExp; }
 	//获取玩家当前的成就等级
@@ -967,7 +984,7 @@ public: //成就相关函数
 protected:
 	VOID SendClientfunction();
 	DWORD m_dwForgePoint;
-	mutable DWORD m_dwParams[4];
+	mutable std::array<DWORD, 4> m_dwParams;
 
 	CScriptTargetForPlayer m_ScriptTarget;
 	VOID GetPrivateShopView(PRIVATESHOPHEADER& header)const;
@@ -979,7 +996,7 @@ protected:
 	CServerTimer m_tmrGameTime; // 时长区-计时
 
 	CSystemTime m_LoginTime;
-	char m_szTempScriptVarValue[256];
+	std::array<char, 256> m_szTempScriptVarValue{};
 
 	DWORD m_dwPkValue;
 	CServerTimer m_tmrPkTimer;
@@ -993,20 +1010,20 @@ protected:
 	DWORD m_dwAddToGuildRequesterInstanceKey;
 	CServerTimer m_AddToGuildTimer;
 	CGuildEx* m_pGuild;
-	char m_szGuildTitle[64];
+	std::array<char, 64> m_szGuildTitle{};
 	int	 m_iGuildTitleLevel;
 	//被动技能重新计算增加属性
-	void RecalcHitSpeed();
+	VOID RecalcHitSpeed();
 
 	BOOL MagMakeDefenceArea(int x, int y, int nRange, int nSec, int nState);
 
 	CItemBox m_ItemBank; // 仓库
 	CItemBox m_ItemPetBag; // 宠物背包
 
-	BOOL m_bChatChannelDisabled[CCH_MAX];
-	CServerTimer m_ChatChannelTimer[CCH_MAX];
+	std::array<BOOL, CCH_MAX> m_bChatChannelDisabled;
+	std::array<CServerTimer, CCH_MAX> m_ChatChannelTimer;
 	e_chatchannel m_ChatChannel;
-	char m_szCurWisperTarget[32];
+	std::array<char, 32> m_szCurWisperTarget{};
 
 	INT	m_iHuoli;
 
@@ -1017,7 +1034,7 @@ protected:
 	HUMANDATADESC* m_pHumanDataDesc; // 玩家配置的数据
 	CItemBox m_ItemBox;
 	CEquipment m_Equipments;//穿戴物品
-	CExchangeObj* m_pExchangeObj;//交易对象
+	CExchangeObj* m_pExchangeObj = nullptr;//交易对象
 	CGroupObject* m_pGroupObject;//组队对象
 	USERMAGIC* m_pMagic;
 
@@ -1025,26 +1042,26 @@ protected:
 	CServerTimer m_DBTimer; // 保存数据检查
 	CServerTimer m_StaminaTimer; // 精力值检查
 
-	CMonsterEx* m_pPets[5]; // 宠物对象列表
+	std::array<CMonsterEx*, 5> m_pPets{}; // 宠物对象列表
 	CMonsterEx* m_pPet;//豹子对象
 	DWORD m_dwPetKey;
 	WORD m_wPetSkill;
 	int	m_iPetCount;
 	DWORD m_dwStartPointIndex;
 	BOOL m_bFirstEnterMap;
-	char m_szCurrentTitle[200];
+	std::array<char, 200> m_szCurrentTitle{};
 	int	m_iCurrentTitleIndex;
 
-	S_PARAM m_sParam[10]; // 个人变量
-	V_PARAM m_vParam[10]; // 个人变量
+	std::array<S_PARAM, 10> m_sParam{}; // 个人变量
+	std::array<V_PARAM, 10> m_vParam{}; // 个人变量
 
-	USERMAGIC* m_pAutoMagic[8];
+	std::array<USERMAGIC*, 8> m_pAutoMagic;
 	int	m_iAutoMagicCount;
 	USERMAGIC* m_pExpMagic;
 	USERMAGIC* m_pTimeOutDeActiveMagic;
 	FLOAT m_fExpFactor;
 	CMonsterEx* m_pHorse; //骑乘类对象
-	mutable char petname[20];//豹子的名字
+	mutable std::array<char, 20> petname{};//豹子的名字
 	BOOL ISzhaohuan;//是否召唤出来
 	DWORD m_baozhiID;
 	int ResMag_Count = 0;//魔法盾抵抗次数
@@ -1057,19 +1074,24 @@ protected:
 	CServerTimer m_PkPointTimer;
 
 	int	m_iPrivateShopItemCount;
-	PrivateShopItemCache m_PrivateShopCache[10];
-	char m_szPrivateShopName[64];
+	std::array<PrivateShopItemCache, 10> m_PrivateShopCache;
+	std::array<char, 64> m_szPrivateShopName{};
 
 	S_CHARNAME m_sWife; // 妻子
 	S_CHARNAME m_sMaster; // 师傅
-	S_CHARNAME m_sStudents[3]; // 3个徒弟
-	S_CHARNAME m_sFriends[32]; // 32个好友
+	std::array<S_CHARNAME, 3> m_sStudents; // 3个徒弟
+	std::array<S_CHARNAME, 32> m_sFriends; // 32个好友
 
-	DWORD m_dwSpecialEquipmentFunctionFlags[SEF_MAX];
+	std::array<DWORD, SEF_MAX> m_dwSpecialEquipmentFunctionFlags;
 	DWORD m_dwMineCounter;
-	CServerTimer m_tmrMine;
-	CServerTimer m_tmrSpecialAttackSkill;
-	CServerTimer m_tmrRelive;
+
+	CServerTimer m_tmrSpecialAttackSkill; // 战士技能使用频率限制
+	CServerTimer m_tmrMine; // 挖矿频率限制
+	CServerTimer m_tmrRelive;		// 复活频率限制
+	CServerTimer m_tmrUseItem;		// 物品使用频率限制
+	CServerTimer m_tmrPickupItem;	// 拾取物品频率限制
+	CServerTimer m_tmrDropItem;		// 丢弃物品频率限制
+	CServerTimer m_tmrEquipChange;	// 装备穿脱频率限制
 	ITEM m_UpgradeItem;
 	BOOL m_bHorseRest; // 马是否休息
 
@@ -1093,7 +1115,7 @@ private:
 	// 任务哈希表, 用于快速查找任务ID对应的索引
 	std::unordered_map<WORD, int> m_TaskIdToIndexMap;
 	// 重建任务哈希表, 从指定起始索引开始
-	void RebuildTaskIdIndexMap(int startIndex = 0);
+	VOID RebuildTaskIdIndexMap(int startIndex = 0);
 	// 解析任务系统的 @PS0 和 @PI0 这类动态变量（使用玩家特定参数）
 	VOID ParseTaskParams(const char* pszText, char* pszOutBuffer, int iOutBufferSize, TASKNODE* pTaskNode);
 private:

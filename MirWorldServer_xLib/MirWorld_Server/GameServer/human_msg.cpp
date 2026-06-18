@@ -56,7 +56,7 @@ VOID CHumanPlayer::SendCloseScriptPage(UINT nId)
 VOID CHumanPlayer::SendPage(CScriptShell* pShell, CScriptView* pView)
 {
 	UINT id = pShell == nullptr ? 0xffffffff : pShell->GetTitleId();
-	SendMsg(id, 0x283, pView->GetParam(), 0, 1, (LPVOID)pView->getPacket().getbuf(), pView->getPacket().getsize());
+	SendMsg(id, 0x283, static_cast<WORD>(pView->GetParam()), 0, 1, (LPVOID)pView->getPacket().getbuf(), pView->getPacket().getsize());
 }
 
 VOID CHumanPlayer::SendClosePage(CScriptShell* pShell)
@@ -88,9 +88,9 @@ VOID CHumanPlayer::SendTimeWeatherChanged()
 	SendMsg(m_pMap->GetWeather().dwBGColor, SM_SETGAMEDATETIME, wTime, wWeather, wFlag, &dwWeatherColor, sizeof(DWORD));
 }
 
-static DBITEM items_t2[100];
-static ITEM	items_t1[100];
-static BAGITEMPOS itemspos_t1[100];
+static thread_local std::array<DBITEM, 100> items_t2{};
+static thread_local std::array<ITEM, 100> items_t1{};
+static thread_local std::array<BAGITEMPOS, 100> itemspos_t1{};
 VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 {
 	CHARDBINFO info;
@@ -121,8 +121,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	// 已学习技能数据
 	if (this->m_fMagicLoaded)
 	{
-		MAGICDB	array[255];
-		memset(array, 0, sizeof(array));
+		std::array<MAGICDB, 255> array{};
 		USERMAGIC* pMagic = m_pMagic;
 		int	count = 0;
 		while (pMagic)
@@ -132,7 +131,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		}
 		if (count > 0)
 		{
-			length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEMAGIC, 0, 0, count, (LPVOID)array, sizeof(MAGICDB) * count);
+			length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEMAGIC, 0, 0, count, (LPVOID)array.data(), sizeof(MAGICDB) * count);
 			packet.addsize(length);
 		}
 	}
@@ -144,7 +143,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	packet.addsize(length);
 	// 背包数据
 	int count = 0;
-	count = m_ItemBox.GetItems(items_t1, 100);
+	count = m_ItemBox.GetItems(items_t1.data(), 100);
 	int updatecount = 0;
 	int uposcount = 0;
 	for (int i = 0; i < count; i++)
@@ -154,40 +153,40 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
 			items_t2[updatecount].item = items_t1[i];
 			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = items_t1[i].dwParam[2];
+			items_t2[updatecount].pos = static_cast<WORD>(items_t1[i].dwParam[2]);
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = (items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = static_cast<BYTE>(items_t1[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
 				items_t2[updatecount].item = items_t1[i];
 				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = items_t1[i].dwParam[2];
+				items_t2[updatecount].pos = static_cast<WORD>(items_t1[i].dwParam[2]);
 				updatecount++;
 			}
 			else
 			{
 				itemspos_t1[uposcount].ItemId = items_t1[i].dwMakeIndex;
-				itemspos_t1[uposcount].wPos = items_t1[i].dwParam[2];
+				itemspos_t1[uposcount].wPos = static_cast<WORD>(items_t1[i].dwParam[2]);
 				uposcount++;
 			}
 		}
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BAG, 0, (LPVOID)items_t2, sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BAG, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 背包的其他物品的位置要更新
 	if (uposcount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), 0, DM_UPDATEITEMPOSEX, uposcount, IDF_BAG, 0, (LPVOID)itemspos_t1, sizeof(BAGITEMPOS) * uposcount);
+		length = EncodeMsg((char*)packet.getfreebuf(), 0, DM_UPDATEITEMPOSEX, uposcount, IDF_BAG, 0, (LPVOID)itemspos_t1.data(), sizeof(BAGITEMPOS) * uposcount);
 		packet.addsize(length);
 	}
 	// 仓库物品数据
-	count = m_ItemBank.GetItems(items_t1, 100);
+	count = m_ItemBank.GetItems(items_t1.data(), 100);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
@@ -213,11 +212,11 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BANK, 0, (LPVOID)items_t2, sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BANK, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 宠物背包数据
-	count = m_ItemPetBag.GetItems(items_t1, 100);
+	count = m_ItemPetBag.GetItems(items_t1.data(), 100);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
@@ -243,7 +242,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_PETBANK, 0, (LPVOID)items_t2, sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_PETBANK, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 装备数据
@@ -277,7 +276,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_EQUIPMENT, 0, (LPVOID)items_t2, sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_EQUIPMENT, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 存储升级临时武器的物品
@@ -288,7 +287,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		items_t2[updatecount].btFlag = 0;
 		items_t2[updatecount].pos = 0;
 		updatecount++;
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_UPGRADE, 0, (LPVOID)items_t2, sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_UPGRADE, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 }

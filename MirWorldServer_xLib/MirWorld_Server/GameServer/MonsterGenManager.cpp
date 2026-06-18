@@ -8,14 +8,14 @@
 #include ".\monsterex.h"
 extern CServerForm g_Form;
 
-CMonsterGenManager::CMonsterGenManager(void)
+CMonsterGenManager::CMonsterGenManager(VOID)
 {
-	memset(m_MonsterGens, 0, sizeof(m_MonsterGens));
+	m_MonsterGens.fill(nullptr);
 	m_iMonsterGenCount = 0;
 	m_iRefreshMonGenIndex = 0;
 }
 
-CMonsterGenManager::~CMonsterGenManager(void)
+CMonsterGenManager::~CMonsterGenManager(VOID)
 {
 }
 
@@ -36,12 +36,12 @@ VOID CMonsterGenManager::OnFoundFile(const char* pszFilename, UINT nParam)
 
 MONSTERGEN* CMonsterGenManager::AddMonsterGen(const char* pszGenDesc)
 {
-	if (m_iMonsterGenCount >= MONSTERGEN_MAX_COUNT)return NULL;
+	if (m_iMonsterGenCount >= MONSTERGEN_MAX_COUNT)return nullptr;
 	char g_szTempString[128];
 	o_strncpy(g_szTempString, pszGenDesc, 127);
 	char* Params[8];
 	//#名字/地图ID/X/Y/范围/数量/刷新间隔(分)/脚本节点
-	int nParam = SearchParam(g_szTempString, Params, 8, ',');
+	int nParam = SearchParam(g_szTempString, Params, 8, ",");
 	int MongenFactor = CGameWorld::GetInstance()->GetVar(EVI_MONGENFACTOR);
 	MongenFactor = MIN(MongenFactor, 100);
 	int fFactor = ROUND(MongenFactor / 100);
@@ -50,7 +50,7 @@ MONSTERGEN* CMonsterGenManager::AddMonsterGen(const char* pszGenDesc)
 		if (CMonsterManagerEx::GetInstance()->GetClassByName(Params[0]) == nullptr)
 		{
 			PRINT(ERROR_RED, "刷怪信息中出现未设置的怪物 %s \n", Params[0]);
-			return NULL;
+			return nullptr;
 		}
 		int mapid = StringToInteger(Params[1]);
 		int x = StringToInteger(Params[2]);
@@ -60,7 +60,7 @@ MONSTERGEN* CMonsterGenManager::AddMonsterGen(const char* pszGenDesc)
 		if (pMap == nullptr || x < 0 || y < 0 || x >= pMap->GetWidth() || y >= pMap->GetHeight())
 		{
 			PRINT(ERROR_RED, "刷怪点map(%d)(%d,%d)地图不存在, 或者该点在地图之外!\n", mapid, x, y);
-			return NULL;
+			return nullptr;
 		}
 
 		MONSTERGEN* p = m_xMonsterGenPool.newObject();
@@ -89,7 +89,7 @@ MONSTERGEN* CMonsterGenManager::AddMonsterGen(const char* pszGenDesc)
 			return p;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 VOID CMonsterGenManager::UpdateGen()
@@ -115,8 +115,8 @@ VOID CMonsterGenManager::UpdateGen()
 	if (!p->tmrRefresh.IsTimeOut(p->dwRefreshDelay)) return;
 	if (p->dwRefreshDelay == 0) // 如果刷新时间是0, 就删除刷怪配置
 	{
-		m_MonsterGens[iCurRefIndex] = nullptr;
 		m_xMonsterGenPool.deleteObject(p);
+		m_MonsterGens[iCurRefIndex] = nullptr;
 		return;
 	}
 	if (p->range <= 1000)
@@ -124,6 +124,7 @@ VOID CMonsterGenManager::UpdateGen()
 		static CRandomRangeSpawnStrategy strategy;
 		if (!UpdateGenEx(p, &strategy, iRefCount))
 		{
+			m_xMonsterGenPool.deleteObject(p);
 			m_MonsterGens[iCurRefIndex] = nullptr;
 			return;  // 失败时不保存时间, 等待下次重试
 		}
@@ -133,6 +134,7 @@ VOID CMonsterGenManager::UpdateGen()
 		static CSpecialFormationSpawnStrategy strategy;
 		if (!UpdateGenEx(p, &strategy, iRefCount))
 		{
+			m_xMonsterGenPool.deleteObject(p);
 			m_MonsterGens[iCurRefIndex] = nullptr;
 			return;  // 失败时不保存时间, 等待下次重试
 		}
@@ -152,7 +154,6 @@ VOID CMonsterGenManager::InitAllGen()
 		// OpenMP 需要简单的终止条件, 先计算批次的结束索引
 		int batchEnd = batch + BATCH_SIZE;
 		if (batchEnd > m_iMonsterGenCount) batchEnd = m_iMonsterGenCount;
-		#pragma omp parallel for reduction(+:iBatchGenCount,iBatchProcessed) schedule(dynamic, 8)
 		for (int i = batch; i < batchEnd; i++)
 		{
 			MONSTERGEN* pGen = m_MonsterGens[i];
@@ -206,14 +207,15 @@ BOOL CMonsterGenManager::UpdateGenEx(MONSTERGEN* p, IMonsterSpawnStrategy* pStra
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(p->mapid);
 	if (pMap == nullptr)
 	{
-		PRINT(ERROR_RED, "在地图 %d 的 (%d,%d) 刷 %s 怪, 由于地图不存在而被禁用!\n",
+		p->errortime = -10; // 负值：额外等待10个刷新周期后自动恢复
+		PRINT(ERROR_RED, "在地图 %d 的 (%d,%d) 刷 %s 怪, 连续10次失败, 暂停刷新!\n",
 			p->mapid, p->x, p->y, p->szName);
-		return FALSE;
+		return TRUE;
 	}
 
 	if (bSetGenPtr)
 	{
-		DWORD dwCurTime = timeGetTime();
+		DWORD dwCurTime = CFrameTime::GetFrameTime();
 		if (dwCurTime - p->dwLastRefreshTime < p->dwRefreshDelay && p->dwLastRefreshTime != 0)
 			return TRUE;
 		p->dwLastRefreshTime = dwCurTime;
@@ -282,12 +284,12 @@ bool CRandomRangeSpawnStrategy::SpawnMonster(CMonsterGenManager* pMgr, MONSTERGE
 		CMonsterEx* pMonster = pMonsterMgr->CreateMonster(p->szName, p->mapid, tx, ty, p);
 		if (pMonster)
 		{
+			iSuccess++;
 			if (!pGameWorld->AddMapObject(pMonster))
 				pMonsterMgr->DeleteMonsterImm(pMonster);
 			else
 			{
 				pMonster->SetGotoTarget(bGotoTarget, wTargetX, wTargetY);
-				iSuccess++;
 				if (initGenCount) (*initGenCount)++;
 				if(bSetGenPtr) p->xMonsterList.addObject(pMonster); // 把刷的怪对象针放到列表
 			}
@@ -314,12 +316,12 @@ bool CSpecialFormationSpawnStrategy::SpawnMonster(CMonsterGenManager* pMgr, MONS
 		CMonsterEx* pMonster = pMonsterMgr->CreateMonster(p->szName, p->mapid, tx, ty, p);
 		if (pMonster)
 		{
+			iSuccess++;
 			if (!pGameWorld->AddMapObject(pMonster))
 				pMonsterMgr->DeleteMonsterImm(pMonster);
 			else
 			{
 				pMonster->SetGotoTarget(bGotoTarget, wTargetX, wTargetY);
-				iSuccess++;
 				if (initGenCount) (*initGenCount)++;
 				if (bSetGenPtr) p->xMonsterList.addObject(pMonster); // 把刷的怪对象针放到列表
 			}

@@ -22,16 +22,16 @@ typedef struct tagLevelRank
 
 typedef struct tagPetRank
 {
-    tagPetRank()
-    {
+	tagPetRank()
+	{
 		FILLSELF(0);
-    }
-    WORD wIndex;        // 名次
-    char szName[14];    // 名称
+	}
+	WORD wIndex;        // 名次
+	char szName[14];    // 名称
 	WORD wLevel;        // 等级(0-7)
 	WORD btPerCent;     // 当前经验百分数, 客户端处理时值会除以10显示
-    char szFengHao[14]; // 称号
-    char szMaster[14];  // 主体名字
+	char szFengHao[14]; // 称号
+	char szMaster[14];  // 主体名字
 	BYTE btMasterJob;   // 主人职业
 } PetRank; // 宠物榜
 
@@ -55,17 +55,17 @@ typedef struct tagShadowRank
 
 typedef struct tagMasterRank
 {
-    tagMasterRank()
-    {
+	tagMasterRank()
+	{
 		FILLSELF(0);
-    }
-    WORD wIndex;                 // 名次
-    char szName[14];             // 名字
-    WORD wTudiCount;             // 出师徒弟数
-    BYTE btLevel;                // 等级
-    BYTE btJob;                  // 职业(0,1,2)
-    BYTE btSex;                  // 性别(0,1)
-    char szGuild[30];            // 行会
+	}
+	WORD wIndex;                 // 名次
+	char szName[14];             // 名字
+	WORD wTudiCount;             // 出师徒弟数
+	BYTE btLevel;                // 等级
+	BYTE btJob;                  // 职业(0,1,2)
+	BYTE btSex;                  // 性别(0,1)
+	char szGuild[30];            // 行会
 	WORD wRepute;                // 声望
 	BYTE btNowTudiCount;         // 当前徒弟数
 } MasterRank; // 师傅榜
@@ -77,8 +77,8 @@ class CScriptNpc;
 class CTopManager : public xSingletonClass<CTopManager>
 {
 public:
-	CTopManager(void);
-	virtual ~CTopManager(void);
+	CTopManager(VOID);
+	virtual ~CTopManager(VOID);
 	// 进入前100排行榜
 	VOID EnterTop100(CHumanPlayer* pPlayer);
 	// 加入天下第一
@@ -91,8 +91,6 @@ public:
 	VOID Load(const char* pszFile);
 	// 保存排行榜数据
 	VOID Save(const char* pszFile)const;
-	// 设置天下第一NPC
-	VOID SetTopNpc(CScriptNpc* pNpc, BYTE btPro, BYTE btSex);
 	// 更新排行榜信息
 	BOOL UpdateTopInfo(CHumanPlayer* pPlayer);
 	// 获取天下第一NPC显示
@@ -135,9 +133,9 @@ public:
 	// 获取玩家排行序号
 	int GetTopIndex(const char* szName)const;
 protected:
-	TopCharInfo m_Top100[100]; // 排行榜100玩家
+	std::array<TopCharInfo, 100> m_Top100{}; // 排行榜100玩家
 	int	m_iTop100Count; // 排行榜数量
-	TopCharInfo m_ProfessionTop[6]; // 天下第一玩家
-	CScriptNpc* m_ProTopNpc[6]; // 天下第一NPC
-	char m_szListFile[1024]; // 排行榜文件名
+	std::array<TopCharInfo, 6> m_ProfessionTop{}; // 天下第一玩家
+	std::array<CScriptNpc*, 6> m_ProTopNpc{}; // 天下第一NPC
+	std::array<char, 1024> m_szListFile{}; // 排行榜文件名
 };

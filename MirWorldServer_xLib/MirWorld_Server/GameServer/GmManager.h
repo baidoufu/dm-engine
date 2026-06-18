@@ -1,8 +1,9 @@
 #pragma once
+#include <array>
 struct gm_node
 {
-	char szAccount[32];
-	int	level;
+	std::array<char, 32> szAccount{};
+	int	level = 0;
 };
 
 class CSe_Page;
@@ -24,18 +25,23 @@ typedef struct tagGameCommand
 class CGmManager : public xSingletonClass<CGmManager>
 {
 public:
-	CGmManager(void);
-	virtual ~CGmManager(void);
+	CGmManager(VOID);
+	virtual ~CGmManager(VOID);
 	BOOL Load(const char* pszFile);
 	VOID Save(const char* pszFile);
 	int	GetGmLevel(const char* pszAccount);
 	BOOL LoadCommandDef(const char* pszFile);
 	BOOL ExecGameCmd(const char* pszCommand, CHumanPlayer* pPlayer);
-	/*VOID OnGmCommand( */
 	BOOL MapCommand(int iLevel, const char* pszCommand, const char* pszBuildInCommand);
 private:
 	VOID ClearCmdList();
+	// ·ÖÅä×Ö·û´®»º´æ
+	StringCacheNode* AllocStringCache();
+	// ÊÍ·Å×Ö·û´®»º´æ
+	VOID FreeStringCache(StringCacheNode* pStringCahce);
+private:
 	xStringList<512> m_xCmdList;
 	xObjectPool<gm_node> m_xGmNodePool;
+	xObjectPool<StringCacheNode> m_xStringCachePool;
 	CNameHash m_GmHash;
 };

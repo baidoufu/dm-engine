@@ -1,17 +1,18 @@
 #include "StdAfx.h"
 #include ".\taskmanager.h"
 
-CTaskManager::CTaskManager(void)
+CTaskManager::CTaskManager(VOID)
 {
-	memset(m_pTaskMap, 0, sizeof(m_pTaskMap));
 }
 
-CTaskManager::~CTaskManager(void)
+CTaskManager::~CTaskManager(VOID)
 {
 }
 
 VOID CTaskManager::Load(const char* pszPath)
 {
+	m_pTaskMap.fill(nullptr);
+	m_xTaskList.Clear();
 	StartFind(pszPath, "*.txt", TRUE, 0);
 }
 
@@ -25,7 +26,7 @@ VOID CTaskManager::OnFoundFile(const char* pszFilename, UINT nParam)
 	if (define.nId > 65536)return;
 	define.nStepCount = (UINT)sf.GetInteger("setup", "stepcount", 0);
 	if (define.nStepCount == 0)return;
-	define.pSteps = new TASK_STEP[define.nStepCount];
+	define.pSteps = std::make_unique<TASK_STEP[]>(define.nStepCount);
 	if (define.pSteps == nullptr)return;
 	define.pszTitle = copystring(sf.GetString("setup", "title", "未命名任务"));
 
@@ -60,7 +61,14 @@ VOID CTaskManager::OnFoundFile(const char* pszFilename, UINT nParam)
 	{
 		PRINT(SUCCESS_GREEN, "任务 %s 被更新!\n", szItemName);
 	}
-	*pDef = define;
+	//释放 pDef 中的旧字符串
+	freestring(pDef->pszTitle);
+	for (UINT i = 0; i < pDef->nStepCount; i++)
+	{
+		freestring(pDef->pSteps[i].pszStepaim);
+		freestring(pDef->pSteps[i].pszDesc);
+	}
+	*pDef = std::move(define);
 }
 
 TASK_DEFINE* CTaskManager::GetTaskDefine(UINT nId)
@@ -74,7 +82,7 @@ TASK_STEP* CTaskManager::GetTaskStep(UINT nId, UINT step)
 	TASK_DEFINE* p = GetTaskDefine(nId);
 	if (p == nullptr)return nullptr;
 	if (step == 0 || step > (int)p->nStepCount)return nullptr;
-	return (p->pSteps + (step - 1));
+	return (p->pSteps.get() + (step - 1));
 }
 
 int CTaskManager::GetTaskType(const WORD wTaskId)

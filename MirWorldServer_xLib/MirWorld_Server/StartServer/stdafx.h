@@ -5,6 +5,10 @@
 #else
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+// 解决 C++17 std::byte 与 Windows SDK byte 的冲突
+#define _HAS_STD_BYTE 0
+
 // Windows 头文件:
 #include <windows.h>
 // C 运行时头文件
@@ -43,7 +47,7 @@ struct MimallocInitializer {
 static std::string CalculateFileHash(const char* filePath)
 {
     std::string hashResult;
-    HANDLE hFile = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+    HANDLE hFile = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     if (hFile == INVALID_HANDLE_VALUE)
         return hashResult;
 
@@ -54,13 +58,13 @@ static std::string CalculateFileHash(const char* filePath)
     BYTE hash[16];
     DWORD hashLen = 16;
 
-    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+    if (!CryptAcquireContext(&hProv, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
         goto cleanup;
 
     if (!CryptCreateHash(hProv, CALG_MD5, 0, 0, &hHash))
         goto cleanup;
 
-    while (ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, NULL) && bytesRead > 0)
+    while (ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, nullptr) && bytesRead > 0)
     {
         if (!CryptHashData(hHash, buffer, bytesRead, 0))
             goto cleanup;
@@ -80,7 +84,7 @@ cleanup:
     if (hHash) CryptDestroyHash(hHash);
     if (hProv) CryptReleaseContext(hProv, 0);
     CloseHandle(hFile);
-    return hashResult;
+    return std::move(hashResult);
 }
 
 // 预定义的可执行文件哈希值（你需要用实际值替换这些）

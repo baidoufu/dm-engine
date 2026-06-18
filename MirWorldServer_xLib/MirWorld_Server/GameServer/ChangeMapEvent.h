@@ -5,11 +5,11 @@
 class CChangeMapEvent : public CEventObject
 {
 public:
-	CChangeMapEvent(void);
-	virtual ~CChangeMapEvent(void);
+	CChangeMapEvent(VOID);
+	virtual ~CChangeMapEvent(VOID);
 	CChangeMapEvent(const CChangeMapEvent&) = delete;           // 禁止拷贝构造
 	CChangeMapEvent& operator=(const CChangeMapEvent&) = delete; // 禁止拷贝赋值
-    // 对象进入事件区域
+	// 对象进入事件区域
 	virtual VOID OnEnter(CMapObject* pObject);
 	// 对象离开事件区域
 	virtual VOID OnLeave(CMapObject* pObject);

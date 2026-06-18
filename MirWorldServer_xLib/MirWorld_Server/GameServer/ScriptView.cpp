@@ -5,26 +5,28 @@
 
 CScriptView::CScriptView(CScriptShell* pShell)
 {
-	m_xScriptPacket.create(m_szBuffer, 65536);
+	m_szBuffer = std::make_unique<char[]>(65536);
+	m_xScriptPacket.create(m_szBuffer.get(), 65536);
 	m_szBuffer[0] = 0;
 	ChangeShell(pShell);
 	m_dwParam = 0;
 	m_nPageSize = 0;
 }
 
-CScriptView::~CScriptView(void)
+CScriptView::~CScriptView(VOID)
 {
 	m_xScriptPacket.destroy();
 }
 
-static thread_local char g_szTempBuffer[65536];
+static std::array<char, 65536> g_szTempBuffer{};
 BOOL CScriptView::AppendWordsEx(const char* pszWords, ...)
 {
 	va_list	vl;
 	va_start(vl, pszWords);
-	vsprintf(g_szTempBuffer, pszWords, vl);
+	vsnprintf(g_szTempBuffer.data(), g_szTempBuffer.size(), pszWords, vl);
 	va_end(vl);
-	return AppendWords(g_szTempBuffer);
+	g_szTempBuffer[g_szTempBuffer.size() - 1] = 0;
+	return AppendWords(g_szTempBuffer.data());
 }
 
 CScriptPageView::CScriptPageView(CScriptShell* pShell) : CScriptView(pShell)
@@ -45,7 +47,7 @@ BOOL CScriptPageView::AppendWords(const char* pszWords)
 
 VOID CScriptPageView::SendPageToTarget(CScriptTarget* pTarget, DWORD dwParam)
 {
-	this->m_dwParam = dwParam;
+	m_dwParam = dwParam;
 	if (m_nPageSize > 0)
 	{
 		if (pTarget)pTarget->SendPage(this->m_pShell, this);

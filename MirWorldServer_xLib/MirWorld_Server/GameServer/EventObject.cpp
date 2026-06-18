@@ -2,12 +2,12 @@
 #include ".\eventobject.h"
 #include "logicmap.h"
 
-CEventObject::CEventObject(void)
+CEventObject::CEventObject(VOID)
 {
 	m_bDisabled = FALSE;
 }
 
-CEventObject::~CEventObject(void)
+CEventObject::~CEventObject(VOID)
 {
 }
 
@@ -19,7 +19,7 @@ VOID CEventObject::Clean()
 
 VOID CEventObject::SetEnterFlag(CLogicMap* pMap)
 {
-	CMapCellInfo* pInfo = pMap->GetMapCellInfo(m_wX, m_wY);
+	CMapCellInfo* pInfo = pMap->GetMapCellInfoExclusive(m_wX, m_wY);
 	if (pInfo == nullptr)return;
 	//	设置事件标记
 	pInfo->wEventFlag = pInfo->wEventFlag | EVENTFLAG_ENTEREVENT;
@@ -27,7 +27,7 @@ VOID CEventObject::SetEnterFlag(CLogicMap* pMap)
 
 VOID CEventObject::SetLeaveFlag(CLogicMap* pMap)
 {
-	CMapCellInfo* pInfo = pMap->GetMapCellInfo(m_wX, m_wY);
+	CMapCellInfo* pInfo = pMap->GetMapCellInfoExclusive(m_wX, m_wY);
 	if (pInfo == nullptr)return;
 	//	设置事件标记
 	pInfo->wEventFlag = pInfo->wEventFlag | EVENTFLAG_LEAVEEVENT;
@@ -35,7 +35,7 @@ VOID CEventObject::SetLeaveFlag(CLogicMap* pMap)
 
 VOID CEventObject::OnLeaveMap(CLogicMap* pMap)
 {
-	CMapCellInfo* pInfo = pMap->GetMapCellInfo(m_wX, m_wY);
+	CMapCellInfo* pInfo = pMap->GetMapCellInfoExclusive(m_wX, m_wY);
 	if (pInfo)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();

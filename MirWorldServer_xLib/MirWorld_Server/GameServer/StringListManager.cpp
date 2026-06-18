@@ -1,11 +1,11 @@
 #include "StdAfx.h"
 #include ".\stringlistmanager.h"
 
-CStringListManager::CStringListManager(void) : m_StringListList(TRUE)
+CStringListManager::CStringListManager(VOID) : m_StringListList(TRUE)
 {
 }
 
-CStringListManager::~CStringListManager(void)
+CStringListManager::~CStringListManager(VOID)
 {
 }
 
@@ -28,17 +28,17 @@ VOID CStringListManager::ClearAll()
 
 BOOL CStringListManager::InStringList(const char* pszStringList, const char* pszString)
 {
-	char szStringList[64];
-	char szString[64];
-	o_strncpy(szStringList, pszStringList, 63);
-	q_strupper(szStringList);
+	std::array<char, 64> szStringList{};
+	std::array<char, 64> szString{};
+	o_strncpy(szStringList.data(), pszStringList, 63);
+	q_strupper(szStringList.data());
 
-	o_strncpy(szString, pszString, 63);
-	q_strupper(szString);
+	o_strncpy(szString.data(), pszString, 63);
+	q_strupper(szString.data());
 
-	xStringFileList* pList = (xStringFileList*)this->m_StringListList.ObjectOf(szStringList);
+	xStringFileList* pList = (xStringFileList*)this->m_StringListList.ObjectOf(szStringList.data());
 	if (pList == nullptr)return FALSE;
-	return (pList->IndexOf(szString) != -1);
+	return (pList->IndexOf(szString.data()) != -1);
 }
 
 VOID CStringListManager::OnFoundFile(const char* pszFilename, UINT nParam)
@@ -46,16 +46,16 @@ VOID CStringListManager::OnFoundFile(const char* pszFilename, UINT nParam)
 	LoadStringList(pszFilename, TRUE);
 }
 
-void CStringListManager::LoadStringList(const char* pszFilename, BOOL bFindFile)
+VOID CStringListManager::LoadStringList(const char* pszFilename, BOOL bFindFile)
 {
 	if (bFindFile == FALSE && !FileExist(pszFilename))return;
-	char szStringListName[64];
+	std::array<char, 64> szStringListName{};
 	BOOL bAdd = FALSE;
-	_splitpath(pszFilename, nullptr, nullptr, szStringListName, nullptr);
+	_splitpath(pszFilename, nullptr, nullptr, szStringListName.data(), nullptr);
 
-	q_strupper(szStringListName);
+	q_strupper(szStringListName.data());
 
-	xStringFileList* p = (xStringFileList*)this->m_StringListList.ObjectOf(szStringListName);
+	xStringFileList* p = (xStringFileList*)this->m_StringListList.ObjectOf(szStringListName.data());
 	if (p == nullptr)
 	{
 		p = m_StringListPool.newObject();
@@ -65,23 +65,22 @@ void CStringListManager::LoadStringList(const char* pszFilename, BOOL bFindFile)
 	p->LoadFromFile(pszFilename);
 	if (bAdd)
 	{
-		m_StringListList.Add(szStringListName, (LPVOID)p);
+		m_StringListList.Add(szStringListName.data(), (LPVOID)p);
 	}
 }
 
 BOOL CStringListManager::AddToStringList(const char* pszStringList, const char* pszString)
 {
-	char szStringList[128];
-	char szString[128];
-	//char szDirectory[64] = { 0 };
+	std::array<char, 128> szStringList{};
+	std::array<char, 128> szString{};
 	BOOL bAdd = FALSE;
-	o_strncpy(szStringList, pszStringList, 120);
-	q_strupper(szStringList);
+	o_strncpy(szStringList.data(), pszStringList, 120);
+	q_strupper(szStringList.data());
 
-	o_strncpy(szString, pszString, 120);
-	q_strupper(szString);
+	o_strncpy(szString.data(), pszString, 120);
+	q_strupper(szString.data());
 
-	xStringsExtracter<2> path(szStringList, "\\");
+	xStringsExtracter<2> path(szStringList.data(), "\\");
 
 	char* pszStringListName = path[path.getCount() - 1];
 
@@ -94,25 +93,25 @@ BOOL CStringListManager::AddToStringList(const char* pszStringList, const char* 
 		//	´´½¨Ä¿Â¼
 		if (path.getCount() > 1)
 		{
-			char szPath[256];
-			_snprintf(szPath, 256, ".\\Data\\StringList\\%s", path[0]);
-			if (!PathIsFolder(szPath))
+			std::array<char, 256> szPath{};
+			_snprintf(szPath.data(), 256, ".\\Data\\StringList\\%s", path[0]);
+			if (!PathIsFolder(szPath.data()))
 			{
-				if (!CreateDirectory(szPath, nullptr))return FALSE;
+				if (!CreateDirectory(szPath.data(), nullptr))return FALSE;
 			}
 
-			char	szFileName[256];
-			_makepath(szFileName, nullptr, szPath, pszStringListName, ".txt");
-			pList->SetFileName(szFileName);
+			std::array<char, 256> szFileName{};
+			_makepath(szFileName.data(), nullptr, szPath.data(), pszStringListName, ".txt");
+			pList->SetFileName(szFileName.data());
 		}
 
 		pList->SetIgnCase(TRUE);
 		bAdd = TRUE;
 	}
-	if (pList->IndexOf(szString) == -1)
+	if (pList->IndexOf(szString.data()) == -1)
 	{
-		pList->Add(szString);
-		SaveStringList(szStringList, pList);
+		pList->Add(szString.data());
+		SaveStringList(szStringList.data(), pList);
 	}
 	if (bAdd)
 	{
@@ -123,20 +122,20 @@ BOOL CStringListManager::AddToStringList(const char* pszStringList, const char* 
 
 BOOL CStringListManager::DelFromStringList(const char* pszStringList, const char* pszString)
 {
-	char szStringList[64];
-	char szString[64];
+	std::array<char, 64> szStringList{};
+	std::array<char, 64> szString{};
 
-	o_strncpy(szStringList, pszStringList, 63);
-	q_strupper(szStringList);
+	o_strncpy(szStringList.data(), pszStringList, 63);
+	q_strupper(szStringList.data());
 
-	o_strncpy(szString, pszString, 63);
-	q_strupper(szString);
+	o_strncpy(szString.data(), pszString, 63);
+	q_strupper(szString.data());
 
-	xStringFileList* pList = (xStringFileList*)this->m_StringListList.ObjectOf(szStringList);
+	xStringFileList* pList = (xStringFileList*)this->m_StringListList.ObjectOf(szStringList.data());
 	if (pList == nullptr)return FALSE;
-	if (pList->Delete(szString))
+	if (pList->Delete(szString.data()))
 	{
-		SaveStringList(szStringList, pList);
+		SaveStringList(szStringList.data(), pList);
 		return TRUE;
 	}
 	return FALSE;
@@ -151,9 +150,9 @@ VOID CStringListManager::SaveStringList(const char* pszName, xStringFileList* pL
 {
 	if (pList->GetFileName() == nullptr)
 	{
-		char szFile[1024];
-		sprintf_s(szFile, sizeof(szFile), ".\\Data\\StringList\\%s.txt", pszName);
-		pList->SaveToFile(szFile);
+		std::array<char, 1024> szFile{};
+		sprintf_s(szFile.data(), szFile.size(), ".\\Data\\StringList\\%s.txt", pszName);
+		pList->SaveToFile(szFile.data());
 	}
 	else
 		pList->SaveToFile(pList->GetFileName());

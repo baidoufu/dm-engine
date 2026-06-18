@@ -1,4 +1,6 @@
 #pragma once
+#include <array>
+#include <memory>
 
 struct FengHaoProp
 {
@@ -13,39 +15,39 @@ typedef struct tagFengHaoGrowItem
 	{
 		FILLSELF(0);
 	}
-    BYTE btId;
-	char szName[16];
-    BYTE btType;
-    BYTE btLastDay;
-    BYTE nAttrCnt;
-    FengHaoProp attrs[4];
+	BYTE btId;
+	std::array<char, 16> szName{};
+	BYTE btType;
+	BYTE btLastDay;
+	BYTE nAttrCnt;
+	std::array<FengHaoProp, 4> attrs{};
 	BYTE btColorId;
 }FengHaoGrowItem;
 
 struct TempItem
 {
 	BYTE id;
-	char name[16];
+	std::array<char, 16> name{};
 	BYTE type;
 	BYTE lastDay;
 	BYTE attrCnt;
-	char szAttrs[4][64];
+	std::array<std::array<char, 64>, 4> szAttrs{};
 	BYTE colorId;
 };
 
 class CFengHaoGrowManager : public xSingletonClass<CFengHaoGrowManager>
 {
 public:
-	CFengHaoGrowManager(void);
-	virtual ~CFengHaoGrowManager(void);
+	CFengHaoGrowManager(VOID);
+	virtual ~CFengHaoGrowManager(VOID);
 	// 加载时长封号数据
-	VOID LoadData(const char* pszData, BOOL bCSV = FALSE);
+	VOID LoadData(const char* pszData);
 	// 获取时长封号对象
 	FengHaoGrowItem* GetItem(BYTE index);
 	// 获取时长封号总数量
 	BYTE GetCount() const { return m_iFengHaoGrowCount; }
 private:
-    FengHaoGrowItem* m_pFengHaoGrows;
+	std::unique_ptr<FengHaoGrowItem[]> m_pFengHaoGrows;
 	BYTE m_iFengHaoGrowCount;
 };
 

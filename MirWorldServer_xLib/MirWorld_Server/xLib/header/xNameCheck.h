@@ -1,7 +1,8 @@
 #pragma once
+#include <array>
 inline BOOL xCheckCharname(const char* pszName)
 {
-	char* p = (char*)pszName;
+	const char* p = pszName;
 	while (*p)
 	{
 		if (*p < 0)
@@ -35,9 +36,9 @@ inline BOOL xCheckAccount(const char* pszName)
 
 inline BOOL xCheckBirthday(const char* pszBirthday)
 {
-	char szText[40];
-	o_strncpy(szText, pszBirthday, 10);
-	xStringsExpander<20> birthday(szText, '/');
+	std::array<char, 40> szText = {};
+	o_strncpy(szText.data(), pszBirthday, 10);
+	xStringsExpander<20> birthday(szText.data(), '/');
 	if (birthday.getCount() != 3)return FALSE;
 	int t = atoi(birthday[0]);
 	if (t < 1900 || t > 9999)return FALSE;
@@ -52,7 +53,7 @@ inline BOOL xCheckEmail(const char* pszEmail)
 {
 	const char* p = strchr(pszEmail, '@');
 	if (p == nullptr)return FALSE;
-	p = (char*)pszEmail;
+	p = pszEmail;
 	while (*p)
 	{
 		if (*p == '-' || *p == '.' || *p == '@' || *p == '_' || (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9'))
@@ -67,7 +68,7 @@ inline BOOL xCheckEmail(const char* pszEmail)
 
 inline BOOL	xCheckTelephone(const char* pszNumber)
 {
-	char* p = (char*)pszNumber;
+	const char* p = pszNumber;
 	while (*p)
 	{
 		if ((*p >= '0' && *p <= '9') || *p == '-')
@@ -82,7 +83,7 @@ inline BOOL	xCheckTelephone(const char* pszNumber)
 
 inline BOOL xCheckMobilePhone(const char* pszMobile)
 {
-	char* p = (char*)pszMobile;
+	const char* p = pszMobile;
 	while (*p)
 	{
 		if ((*p >= '0' && *p <= '9'))
@@ -97,7 +98,7 @@ inline BOOL xCheckMobilePhone(const char* pszMobile)
 
 inline BOOL xCheckIdCard(const char* pszIdCard)
 {
-	char* p = (char*)pszIdCard;
+	const char* p = pszIdCard;
 	while (*p)
 	{
 		if ((*p >= '0' && *p <= '9') || *p == 'x' || *p == 'X')
@@ -112,7 +113,7 @@ inline BOOL xCheckIdCard(const char* pszIdCard)
 
 inline BOOL xCheckPassword(const char* pszPassword)
 {
-	char* p = (char*)pszPassword;
+	const char* p = pszPassword;
 	int length = 0;
 	while (*p)
 	{
@@ -130,7 +131,7 @@ inline BOOL xCheckPassword(const char* pszPassword)
 
 inline BOOL xCheckNormalString(const char* pszPassword)
 {
-	char* p = (char*)pszPassword;
+	const char* p = pszPassword;
 	while (*p)
 	{
 		if (*p == '\'' ||
@@ -144,7 +145,7 @@ inline BOOL xCheckNormalString(const char* pszPassword)
 }
 inline char* xGetValidName(char* pszName, int length)
 {
-	char* p = (char*)pszName;
+	char* p = pszName;
 	int i = 0;
 	BOOL bInHz = FALSE;
 	while (*p)

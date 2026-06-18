@@ -1,16 +1,20 @@
 #pragma once
-class xIocpWorkThread;
 
+constexpr DWORD IOCP_KEY_LISTEN_SOCKET = 0xFFFFFFFF;
+constexpr DWORD IOCP_KEY_CLIENT_SOCKET = 0;
+constexpr ULONG_PTR IOCP_KEY_SHUTDOWN = 0xDEADBEEF;
+
+class xIocpWorkThread;
 class xIocpManager :public xError
 {
 public:
-	xIocpManager(void);
-	virtual ~xIocpManager(void);
-	BOOL	Start();
-	VOID	Stop();
-	BOOL	Bind(SOCKET socket, DWORD dwBindId);
+	xIocpManager(VOID);
+	virtual ~xIocpManager(VOID);
+	BOOL Start();
+	VOID Stop();
+	BOOL Bind(SOCKET socket, DWORD dwBindId);
 protected:
-	HANDLE	m_hIocp;
-	xIocpWorkThread* m_pIocpWorkThread;
-	int	m_iIocpWorkThreadCount;
+	HANDLE m_hIocp;
+	std::unique_ptr<xIocpWorkThread[]> m_pIocpWorkThread;
+	DWORD m_iIocpWorkThreadCount;
 };

@@ -7,8 +7,8 @@
 class CTimeSystem : public xSingletonClass<CTimeSystem>
 {
 public:
-	CTimeSystem(void);
-	virtual ~CTimeSystem(void);
+	CTimeSystem(VOID);
+	virtual ~CTimeSystem(VOID);
 	// 更新时间系统状态
 	VOID Update();
 	/**

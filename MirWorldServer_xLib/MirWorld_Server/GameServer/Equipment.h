@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 class CHumanPlayer;
 // 穿戴装备
 class CEquipment
@@ -7,7 +8,7 @@ public:
 	// 构造函数, 需要传入玩家对象指针
 	CEquipment(CHumanPlayer* pPlayer);
 	// 析构函数
-	virtual ~CEquipment(void);
+	virtual ~CEquipment(VOID);
 	// 清空所有装备数据
 	VOID Clean();
 public:
@@ -44,7 +45,7 @@ public:
 	// 获取错误信息
 	const char* GetErrorMsg()const { return m_strErrorMsg.c_str(); }
 	// 设置错误消息
-	void SetErrorMsg(const char* pErrorMsg){ m_strErrorMsg = pErrorMsg ? pErrorMsg : ""; }
+	VOID SetErrorMsg(const char* pErrorMsg){ m_strErrorMsg = pErrorMsg ? pErrorMsg : ""; }
 	// 获取指定属性值
 	int	GetProp(PROP_INDEX index) { if (index < 0 || index >= PI_PROP_COUNT)return 0; return m_PropMap[index]; }
 	// 重置属性缓存
@@ -63,9 +64,9 @@ private:
 	// 从缓存中移除物品属性
 	VOID RemovePropCache(ITEM& item);
 	// 属性缓存数组
-	int	m_PropMap[PI_PROP_COUNT];
+	std::array<int, PI_PROP_COUNT>	m_PropMap;
 	// 装备数组(_U_MAX个位置)
-	ITEM m_Equipments[_U_MAX];
+	std::array<ITEM, _U_MAX> m_Equipments;
 	// 空装备对象(用于返回)
 	ITEM m_EmptyEquipment;
 	// 错误信息字符串

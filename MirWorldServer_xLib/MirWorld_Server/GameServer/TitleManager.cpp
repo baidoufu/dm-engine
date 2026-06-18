@@ -3,20 +3,13 @@
 #include ".\fmttextfile.h"
 #include ".\humanplayer.h"
 
-CTitleManager::CTitleManager(void)
+CTitleManager::CTitleManager(VOID)
 {
-	m_pTitles = nullptr;
 	m_iTitleCount = 0;
 }
 
-CTitleManager::~CTitleManager(void)
+CTitleManager::~CTitleManager(VOID)
 {
-	if (m_pTitles)
-	{
-		delete[] m_pTitles;
-		m_pTitles = nullptr;
-	}
-    m_iTitleCount = 0;
 }
 
 static int	sort_title(const TITLE* p1, const TITLE* p2)
@@ -31,116 +24,116 @@ static int	sort_title(const TITLE* p1, const TITLE* p2)
 	return -1;
 }
 
-VOID CTitleManager::LoadData(const char* pszData, BOOL bCSV)
+VOID CTitleManager::LoadData(const char* pszData)
 {
-	CFmtTextFile ftf("d2s64s64s64", pszData, bCSV);
+	CFmtTextFile ftf("d2s64s64s64", pszData, TRUE);
 	if (ftf.GetCount() == 0)return;
-	m_pTitles = new TITLE[ftf.GetCount()];
+	m_pTitles = std::make_unique<TITLE[]>(ftf.GetCount());
 	for (int i = 0; i < ftf.GetCount(); i++)
 	{
 		if (ftf.GetStruct(i, &m_pTitles[m_iTitleCount]))
 			m_iTitleCount++;
 	}
-	qsort((void*)m_pTitles, m_iTitleCount, sizeof(TITLE), (int(*)(const void*, const void*)) sort_title);
+	qsort((VOID*)m_pTitles.get(), m_iTitleCount, sizeof(TITLE), (int(*)(const VOID*, const VOID*)) sort_title);
 }
 
 BOOL CTitleManager::GetTitle(CHumanPlayer* player, char* pszTitle)
 {
-    if (m_pTitles == nullptr || m_iTitleCount == 0 || player == nullptr) return FALSE;
-    const DWORD dwLevel = player->GetPropValue(PI_LEVEL);
-    const DWORD dwExp = player->GetPropValue(PI_EXP);
-    const BYTE proIndex = player->GetPro() % 3;
+	if (!m_pTitles || m_iTitleCount == 0 || player == nullptr) return FALSE;
+	const DWORD dwLevel = player->GetPropValue(PI_LEVEL);
+	const DWORD dwExp = player->GetPropValue(PI_EXP);
+	const BYTE proIndex = player->GetPro() % 3;
 
-    int left = 0;
-    int right = m_iTitleCount - 1;
-    int matchIndex = -1;
-    while (left <= right)
-    {
-        int mid = left + (right - left) / 2;
-        const TITLE* pTitle = &m_pTitles[mid];
+	int left = 0;
+	int right = m_iTitleCount - 1;
+	int matchIndex = -1;
+	while (left <= right)
+	{
+		int mid = left + (right - left) / 2;
+		const TITLE* pTitle = &m_pTitles[mid];
 
-        if (dwLevel > pTitle->dwLevel)
-        {
-            left = mid + 1;
-            matchIndex = mid;
-        }
-        else if (dwLevel < pTitle->dwLevel)
-        {
-            right = mid - 1;
-        }
-        else
-        {
-            if (dwExp > pTitle->dwExp)
-            {
-                left = mid + 1;
-                matchIndex = mid;
-            }
-            else
-            {
-                if (mid <= 0) return FALSE;
-                const TITLE* pTargetTitle = &m_pTitles[mid - 1];
-                strcpy(pszTitle, pTargetTitle->strTitle[proIndex]);
-                return TRUE;
-            }
-        }
-    }
-    if (matchIndex >= 0)
-    {
-        const TITLE* pTargetTitle = &m_pTitles[matchIndex];
-        strcpy(pszTitle, pTargetTitle->strTitle[proIndex]);
-        return TRUE;
-    }
-    return FALSE;
+		if (dwLevel > pTitle->dwLevel)
+		{
+			left = mid + 1;
+			matchIndex = mid;
+		}
+		else if (dwLevel < pTitle->dwLevel)
+		{
+			right = mid - 1;
+		}
+		else
+		{
+			if (dwExp > pTitle->dwExp)
+			{
+				left = mid + 1;
+				matchIndex = mid;
+			}
+			else
+			{
+				if (mid <= 0) return FALSE;
+				const TITLE* pTargetTitle = &m_pTitles[mid - 1];
+				strcpy(pszTitle, pTargetTitle->strTitle[proIndex].data());
+				return TRUE;
+			}
+		}
+	}
+	if (matchIndex >= 0)
+	{
+		const TITLE* pTargetTitle = &m_pTitles[matchIndex];
+		strcpy(pszTitle, pTargetTitle->strTitle[proIndex].data());
+		return TRUE;
+	}
+	return FALSE;
 }
 
 BOOL CTitleManager::GetTitle(CHumanPlayer* player, char* pszTitle, int& index)
 {
-    if (m_pTitles == nullptr || m_iTitleCount == 0 || player == nullptr) return FALSE;
-    const DWORD dwLevel = player->GetPropValue(PI_LEVEL);
-    const DWORD dwExp = player->GetPropValue(PI_EXP);
-    const BYTE proIndex = player->GetPro() % 3;
+	if (!m_pTitles || m_iTitleCount == 0 || player == nullptr) return FALSE;
+	const DWORD dwLevel = player->GetPropValue(PI_LEVEL);
+	const DWORD dwExp = player->GetPropValue(PI_EXP);
+	const BYTE proIndex = player->GetPro() % 3;
 
-    int left = 0;
-    int right = m_iTitleCount - 1;
-    int matchIndex = -1;
-    while (left <= right)
-    {
-        int mid = left + (right - left) / 2;
-        const TITLE* pTitle = &m_pTitles[mid];
+	int left = 0;
+	int right = m_iTitleCount - 1;
+	int matchIndex = -1;
+	while (left <= right)
+	{
+		int mid = left + (right - left) / 2;
+		const TITLE* pTitle = &m_pTitles[mid];
 
-        if (dwLevel > pTitle->dwLevel)
-        {
-            left = mid + 1;
-            matchIndex = mid;
-        }
-        else if (dwLevel < pTitle->dwLevel)
-        {
-            right = mid - 1;
-        }
-        else
-        {
-            if (dwExp > pTitle->dwExp)
-            {
-                left = mid + 1;
-                matchIndex = mid;
-            }
-            else
-            {
-                if (mid <= 0) return FALSE;
+		if (dwLevel > pTitle->dwLevel)
+		{
+			left = mid + 1;
+			matchIndex = mid;
+		}
+		else if (dwLevel < pTitle->dwLevel)
+		{
+			right = mid - 1;
+		}
+		else
+		{
+			if (dwExp > pTitle->dwExp)
+			{
+				left = mid + 1;
+				matchIndex = mid;
+			}
+			else
+			{
+				if (mid <= 0) return FALSE;
 
-                const TITLE* pTargetTitle = &m_pTitles[mid - 1];
-                strcpy(pszTitle, pTargetTitle->strTitle[proIndex]);
-                index = mid - 1;
-                return TRUE;
-            }
-        }
-    }
-    if (matchIndex >= 0)
-    {
-        const TITLE* pTargetTitle = &m_pTitles[matchIndex];
-        strcpy(pszTitle, pTargetTitle->strTitle[proIndex]);
-        index = matchIndex;
-        return TRUE;
-    }
-    return FALSE;
+				const TITLE* pTargetTitle = &m_pTitles[mid - 1];
+				strcpy(pszTitle, pTargetTitle->strTitle[proIndex].data());
+				index = mid - 1;
+				return TRUE;
+			}
+		}
+	}
+	if (matchIndex >= 0)
+	{
+		const TITLE* pTargetTitle = &m_pTitles[matchIndex];
+		strcpy(pszTitle, pTargetTitle->strTitle[proIndex].data());
+		index = matchIndex;
+		return TRUE;
+	}
+	return FALSE;
 }

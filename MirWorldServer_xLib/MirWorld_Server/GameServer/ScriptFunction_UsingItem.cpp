@@ -3,6 +3,7 @@
 #include ".\cmdproc.h"
 #include "time.h"
 #include ".\scriptview.h"
+#include <array>
 #include ".\scripttarget.h"
 #include ".\scriptshell.h"
 #include ".\Humanplayer.h"
@@ -147,40 +148,40 @@ DEFINE_SCRIPT_FUNCTION(US_UPGRADE)
 	BOOL te = CItemManager::GetInstance()->UpgradePetItem(*pUsItem, Params[1].pszParam);
 	pPlayer->SendUpdateItem(*pUsItem);
 	WORD id = pUsItem->baseitem.wDc;
-	char name[20];
+	std::array<char, 20> name{};
 	switch (id)
 	{
 	case 0:
-		strcpy(name, "丛林豹0");
+		strcpy(name.data(), "丛林豹0");
 		break;
 	case 1:
-		strcpy(name, "丛林豹1");
+		strcpy(name.data(), "丛林豹1");
 		break;
 	case 2:
-		strcpy(name, "丛林豹2");
+		strcpy(name.data(), "丛林豹2");
 		break;
 	case 3:
-		strcpy(name, "丛林豹3");
+		strcpy(name.data(), "丛林豹3");
 		break;
 	case 4:
-		strcpy(name, "丛林豹4");
+		strcpy(name.data(), "丛林豹4");
 		break;
 	case 5:
-		strcpy(name, "丛林豹5");
+		strcpy(name.data(), "丛林豹5");
 		break;
 	case 6:
-		strcpy(name, "丛林豹6");
+		strcpy(name.data(), "丛林豹6");
 		break;
 	case 7:
-		strcpy(name, "丛林豹7");
+		strcpy(name.data(), "丛林豹7");
 		break;
 	default:
 		break;
 	}
-	pPlayer->SetPetName(name);
+	pPlayer->SetPetName(name.data());
 	if (te)
 	{
-		pPlayer->SetPetMonster(name);
+		pPlayer->SetPetMonster(name.data());
 	}
 	CItemManager::GetInstance()->AddItemModifyFlag(*pUsItem, ITEMMODIFY_DURACHANGED);//更新时间
 	return 1;
@@ -258,7 +259,9 @@ DEFINE_SCRIPT_FUNCTION(US_CHECKITEMNAME)
 	if (nParam < 1)return 0;
 	ITEM* pItem = nullptr;
 	if ((pItem = pPlayer->GetUsingItem()) == nullptr)return 0;
-	char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*pItem)->szFullName;
+	ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(*pItem);
+	if (pItemClass == nullptr) return 0;
+	char* szFullName = pItemClass->szFullName;
 	if (strcmp(szFullName, Params[0].pszParam) == 0)return 1;
 	return 0;
 }
@@ -285,7 +288,9 @@ DEFINE_SCRIPT_FUNCTION(US_CHECKPACKITEMNAME)
 	if (nParam < 1)return 0;
 	ITEM* pItem = nullptr;
 	if ((pItem = pPlayer->GetPackItem()) == nullptr)return 0;
-	char* szFullName = CItemManager::GetInstance()->GetItemClassPtr(*pItem)->szFullName;
+	ITEMCLASS* pItemClass = CItemManager::GetInstance()->GetItemClassPtr(*pItem);
+	if (pItemClass == nullptr) return 0;
+	char* szFullName = pItemClass->szFullName;
 	if (strcmp(szFullName, Params[0].pszParam) == 0)return 1;
 	return 0;
 }
@@ -300,10 +305,10 @@ DEFINE_SCRIPT_FUNCTION(US_RELEASEPET)
 	if (nParam == 0)return 0;
 	ITEM* pItem = nullptr;
 	if ((pItem = pPlayer->GetUsingItem()) == nullptr)return 0;
-	char szPetName[64];
+	std::array<char, 64> szPetName{};
 	WORD wLevel = pItem->baseitem.wDc;
-	_snprintf(szPetName, 60, "%s%u", Params[0].pszParam, wLevel);
-	return pPlayer->SummonPet(szPetName);
+	_snprintf(szPetName.data(), 60, "%s%u", Params[0].pszParam, wLevel);
+	return pPlayer->SummonPet(szPetName.data());
 	//if( nParam == 0 )return 0;
 	//pPlayer->SetPrivateShopSign( Params[0].nParam );
 }
@@ -492,7 +497,7 @@ DEFINE_SCRIPT_FUNCTION(CHANGEMAGICCOLOR)
 		pMagic->dwColor = 0;
 	else
 		pMagic->dwColor = dwColor;
-	pPlayer->SendMsg(dwColor, 0xb4a4, pMagic->pClass->id, 0, 0);
+	pPlayer->SendMsg(dwColor, 0xb4a4, static_cast<WORD>(pMagic->pClass->id), 0, 0);
 }
 END_SCRIPT_FUNCTION
 

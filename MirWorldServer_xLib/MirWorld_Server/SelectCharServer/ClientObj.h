@@ -5,7 +5,7 @@ typedef struct tagLOGINENTER
 	{
 		FILLSELF(0);
 	}
-	CHAR szAccount[12];
+	std::array<char, 12> szAccount;
 	UINT nLid;
 	UINT nSid;
 	DWORD dwEnterTime;
@@ -14,7 +14,7 @@ typedef struct tagLOGINENTER
 
 typedef struct tagCHARLISTNODE
 {
-	char szName[32];
+	std::array<char, 32> szName;
 	BYTE btLevel;
 	BYTE btHair;
 	BYTE btSex;
@@ -25,8 +25,8 @@ class CClientObj :
 	public CClientObject
 {
 public:
-	CClientObj(void);
-	virtual ~CClientObj(void);
+	CClientObj(VOID);
+	virtual ~CClientObj(VOID);
 	VOID Clean();
 	VOID Update();
 	VOID OnCodedMsg(xClientObject* pObject, PMIRMSG	pMsg, int datasize);
@@ -46,7 +46,8 @@ protected:
 	UINT m_nFailCount;
 	CServerTimer m_TimeOut;
 	BOOL m_bSelected;
-	CHAR m_szCharName[32];
-	BOOL m_bWaitForVerify;
+	UINT m_nActiveCount{ 0 };
+	std::array<CHAR, 32> m_szCharName{};
+	BOOL m_bWaitForVerify{ FALSE };
 	CServerTimer m_WaitForVerifyTimer;
 };

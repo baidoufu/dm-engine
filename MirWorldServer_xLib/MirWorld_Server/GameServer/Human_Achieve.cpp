@@ -48,7 +48,7 @@ BOOL CHumanPlayer::ChangeAchieveGroupExp(BYTE btGroupId, BYTE btType, DWORD btRe
 			m_Achievement.dwExp += pAchieveItem->nPoint; // 增加成就点
 			m_Achievement.btStatus[pIndex] = 1; // 标记为可领取
 			m_Achievement.dwCompleteTime[pIndex] = dwNow; // 设置完成时间戳
-			setSParam(0, pAchieveItem->szName); // 成就名
+			setSParam(0, pAchieveItem->szName.data()); // 成就名
 			setVParam(1, nIndex); // 成就ID
 			CSystemScript::GetInstance()->Execute(GetScriptTarget(), "成就系统.完成奖励");
 		}
@@ -88,7 +88,7 @@ BOOL CHumanPlayer::ChangeAchieveExp(WORD wId, BYTE btType, DWORD btRecentCount)
 		m_Achievement.btStatus[pIndex] = 1; // 标记为可领取
 		DWORD dwNow = (DWORD)time(nullptr);
 		m_Achievement.dwCompleteTime[pIndex] = dwNow; // 设置完成时间戳
-		setSParam(0, pAchieveItem->szName); // 成就名
+		setSParam(0, pAchieveItem->szName.data()); // 成就名
 		setVParam(1, wId); // 成就ID
 		CSystemScript::GetInstance()->Execute(GetScriptTarget(), "成就系统.完成奖励");
 	}
@@ -119,25 +119,24 @@ BOOL CHumanPlayer::SendGotAchieve(WORD wId)
 	const int pIndex = CTimeAchieve::GetInstance()->FindIndexById(wId);
 	if (pAchieveItem == nullptr || pIndex == -1) return FALSE;
 
-	char g_szTempBuffer[64];
-	xPacket packet(g_szTempBuffer, 64);
+	xPacketPool::ScopedPacket packet;
 	int nValue = 1;
-	packet.push(&nValue, 1);
-	packet.push(4);
+	packet->push(&nValue, 1);
+	packet->push(4);
 	nValue = 1;
-	packet.push(&nValue, 4);
+	packet->push(&nValue, 4);
 	nValue = pAchieveItem->nId;
-	packet.push(&nValue, 4);
+	packet->push(&nValue, 4);
 	nValue = 1;
-	packet.push(&nValue, 4);
-	packet.push(4);
+	packet->push(&nValue, 4);
+	packet->push(4);
 	nValue = 1;
-	packet.push(&nValue, 4);
-	packet.push(4);
-	packet.push(4);
-	packet.push(4);
-	packet.push(5);
-	SendMsg(GetId(), 0x959, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push(&nValue, 4);
+	packet->push(4);
+	packet->push(4);
+	packet->push(4);
+	packet->push(5);
+	SendMsg(GetId(), 0x959, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	return TRUE;
 }
 
@@ -205,13 +204,13 @@ VOID CHumanPlayer::CheckAchieveLevelUp()
 	}
 }
 
-VOID CHumanPlayer::PacketAchieve(xPacket& packet, BYTE btType, int nAchieveCount)
+VOID CHumanPlayer::PacketAchieve(xPacket& packet, BYTE btType, DWORD nAchieveCount)
 {
 	switch (btType)
 	{
 	case 0:// i=0时,状态值(0未完成,1已完成/可领取,2已领取)
 	{
-		for (int i = 0; i < nAchieveCount; i++)
+		for (DWORD i = 0; i < nAchieveCount; i++)
 		{
 			DWORD dwStatus = (DWORD)m_Achievement.btStatus[i];
 			packet.push(&dwStatus, 4);
@@ -220,13 +219,13 @@ VOID CHumanPlayer::PacketAchieve(xPacket& packet, BYTE btType, int nAchieveCount
 	break;
 	case 1:// i=1时,近期获得成就
 	{
-		for (int i = 0; i < nAchieveCount; i++)
+		for (DWORD i = 0; i < nAchieveCount; i++)
 			packet.push(&m_Achievement.btRecentCount[i], 4);
 	}
 	break;
 	case 2:// i=2时,完成时间戳
 	{
-		for (int i = 0; i < nAchieveCount; i++)
+		for (DWORD i = 0; i < nAchieveCount; i++)
 			packet.push(&m_Achievement.dwCompleteTime[i], 4);
 	}
 	break;

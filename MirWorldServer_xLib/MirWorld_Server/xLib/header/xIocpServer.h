@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 #include "xsupport.h"
 #include "xlistenobject.h"
 #include "xiocpmanager.h"
@@ -46,16 +46,14 @@ private:
 	BOOL m_bPreDeleted;
 	CServerTimer m_deleteTimer;
 };
-struct accept_connection
-{
-	UINT nListenId;
-	SOCKET sAccept;
-};
 
-class xIocpServer :
-	public xError,
-	public xEventSender
+class xIocpServer : public xError, public xEventSender
 {
+	// ½ûÖ¹¸´ÖÆºÍÒÆ¶¯
+	xIocpServer(const xIocpServer&) = delete;
+	xIocpServer& operator=(const xIocpServer&) = delete;
+	xIocpServer(xIocpServer&&) = delete;
+	xIocpServer& operator=(xIocpServer&&) = delete;
 public:
 	enum eventid
 	{
@@ -64,8 +62,8 @@ public:
 		ISE_ONDISCONNECTION,
 	};
 
-	xIocpServer(void);
-	virtual ~xIocpServer(void);
+	xIocpServer(VOID);
+	virtual ~xIocpServer(VOID);
 
 	BOOL postListen(const char* cp, UINT nPort, int nPostAccept = 64, UINT id = 0);
 	BOOL postConnection(const char* cp, UINT nPort, xSocket& socket);
@@ -74,53 +72,31 @@ public:
 	VOID update();
 
 	xPacket* newPacket();
-	void releasePacket(xPacket* pPacket);
+	VOID releasePacket(xPacket* pPacket);
 
 	xIocpUnit* newIocpUnit();
-	void releaseIocpUnit(xIocpUnit* pIocpUnit);
+	VOID releaseIocpUnit(xIocpUnit* pIocpUnit);
 
-	void onConnection(xSocket* pSocket, UINT id);
-	void onDisconnect(xSocket* pSocket);
+	BOOL onConnection(xSocket* pSocket, UINT id); // ·µ»ØTRUE=½ÓÊÜÁ¬½Ó, FALSE=¾Ü¾øÁ¬½Ó(Ğè¹Ø±Õsocket)
+	VOID onDisconnect(xSocket* pSocket);
 
-	void addRecvBytes(DWORD dwBytes)
+	VOID addRecvBytes(DWORD dwBytes)
 	{
-		InterlockedExchangeAdd(
-			(LPLONG)&m_dwRecvBytes,
-			dwBytes
-		);
-		if (m_dwRecvBytes >= 1024)
-		{
-			InterlockedExchangeAdd(
-				(LPLONG)&m_dwRecvBytes,
-				-1024
-			);
-			InterlockedIncrement((LPLONG)&m_dwRecvKBytes);
-		}
+		m_dwRecvBytes.fetch_add(dwBytes, std::memory_order_relaxed);
 	}
-	DWORD getRecvKBytes()const { return m_dwRecvKBytes; }
-	void addSendBytes(DWORD dwBytes)
+	DWORD getRecvKBytes() const { return m_dwRecvBytes.load(std::memory_order_relaxed) / 1024; }
+	VOID addSendBytes(DWORD dwBytes)
 	{
-		InterlockedExchangeAdd(
-			(LPLONG)&m_dwSendBytes,
-			dwBytes
-		);
-		if (m_dwSendBytes >= 1024)
-		{
-			InterlockedExchangeAdd(
-				(LPLONG)&m_dwSendBytes,
-				-1024
-			);
-			InterlockedIncrement((LPLONG)&m_dwSendKBytes);
-		}
+		m_dwSendBytes.fetch_add(dwBytes, std::memory_order_relaxed);
 	}
-	DWORD getSendKBytes() { return m_dwSendKBytes; }
-	void getPacketCount(int& free, int& used, int& all)
+	DWORD getSendKBytes() const { return m_dwSendBytes.load(std::memory_order_relaxed) / 1024; }
+	VOID getPacketCount(int& free, int& used, int& all)
 	{
 		free = m_xPacketPool.getFreeCount();
 		used = m_xPacketPool.getUsedCount();
 		all = m_xPacketPool.getCount();
 	}
-	void getUnitCount(int& free, int& used, int& all)
+	VOID getUnitCount(int& free, int& used, int& all)
 	{
 		free = m_xIocpUnitPool.getFreeCount();
 		used = m_xIocpUnitPool.getUsedCount();
@@ -130,19 +106,29 @@ public:
 	{
 		return m_xAcceptConnectionQueue.getcount() > 0 || m_xDisconnectQueue.getcount() > 0;
 	}
+	BOOL isWSAReady() const { return m_bWSAInitialized; }
+	// »îÔ¾Á¬½Ó¶ÓÁĞ£ºIOCP ¹¤×÷Ïß³ÌÊÕ°üÊ±ÍÆÈë£¬Ö÷Ïß³ÌÏû·Ñ
+	VOID PushActiveClientQueue(xClientObject* pClient)
+	{
+		m_xActiveClientQueue.push(pClient);
+	}
+	xMpscQueue<xClientObject, 1024>& GetActiveClientQueue() { return m_xActiveClientQueue; }
 protected:
 private:
-	volatile DWORD m_dwRecvKBytes;
-	volatile DWORD m_dwRecvBytes;
-	volatile DWORD m_dwSendKBytes;
-	volatile DWORD m_dwSendBytes;
-	BOOL m_bWSAInitialized; // WSAåˆå§‹åŒ–çŠ¶æ€
-	xPtrQueue<xSocket> m_xDisconnectQueue;
-	xPtrQueue<xTempClient> m_xAcceptConnectionQueue;
-	CDQueue<accept_connection, 2000> m_xAcceptQueue;
+	std::atomic<DWORD> m_dwRecvBytes;
+	std::atomic<DWORD> m_dwSendBytes;
+	std::atomic<BOOL> m_bWSAInitialized; // WSA³õÊ¼»¯×´Ì¬
+	xMpscQueue<xSocket, 1024> m_xDisconnectQueue;
+	xMpscQueue<xTempClient, 1024> m_xAcceptConnectionQueue; // ĞÂ½¨Á¬½Ó
+	std::vector<xTempClient*> m_vPreDeleteWait;  // Ô¤É¾³ıµÈ´ıÁĞ±í
 	xObjectPool<xListenObject> m_xListenObjectPool;
 	xObjectPool<xPacket> m_xPacketPool;
 	xObjectPool<xIocpUnit> m_xIocpUnitPool;
 	xObjectPool<xTempClient> m_xTempClientPool;
 	xIocpManager m_xIocpManager;
+	xMpscQueue<xClientObject, 1024> m_xActiveClientQueue; // »îÔ¾Á¬½Ó¶ÓÁĞ
+	// Á¬½ÓÏŞÁ÷Æ÷
+	std::atomic<DWORD> m_dwConnectionsPerSecond{ 0 };
+	DWORD m_dwMaxConnectionsPerSecond = 100;  // Ã¿Ãë×î´óĞÂÁ¬½ÓÊı
+	CServerTimer m_ConnectionRateTimer;
 };

@@ -7,8 +7,8 @@ class CMonsterManagerEx :
 	public xSingletonClass<CMonsterManagerEx>
 {
 public:
-	CMonsterManagerEx(void);
-	virtual ~CMonsterManagerEx(void);
+	CMonsterManagerEx(VOID);
+	virtual ~CMonsterManagerEx(VOID);
 	VOID ClearMonsterData();
 	BOOL LoadMonsters(const char* pszPath);
 	VOID LoadMonsterScript(const char* pszFileName);
@@ -40,6 +40,6 @@ private:
 	xObjectPool<CMonsterEx>	m_xMonsterPool;
 	xIndexPtrList<CMonsterEx> m_xMonsterList;
 
-	xPtrQueue<CMonsterEx> m_xDeleteQueue;
+	xMpscQueue<CMonsterEx, 65536> m_xDeleteQueue;
 	UINT m_nCurFreeIndex;
 };

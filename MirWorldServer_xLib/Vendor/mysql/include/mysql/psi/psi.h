@@ -1,13 +1,20 @@
-/* Copyright (c) 2008, 2015, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2008, 2023, Oracle and/or its affiliates.
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+  it under the terms of the GNU General Public License, version 2.0,
+  as published by the Free Software Foundation.
+
+  This program is also distributed with certain software (including
+  but not limited to OpenSSL) that is licensed under separate terms,
+  as designated in a particular file or component or in included license
+  documentation.  The authors of MySQL hereby grant you an additional
+  permission to link the program and your derivative works with the
+  separately licensed software that they have included with MySQL.
 
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU General Public License, version 2.0, for more details.
 
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software Foundation,
@@ -1671,6 +1678,15 @@ typedef void (*set_thread_info_v1_t)(const char* info, uint info_len);
 */
 typedef void (*set_thread_v1_t)(struct PSI_thread *thread);
 
+/**
+  Assign the remote (peer) port to the instrumented thread.
+
+  @param thread    pointer to the thread instrumentation
+  @param port      the remote port
+*/
+typedef void (*set_thread_peer_port_v1_t)(PSI_thread *thread,
+                                          unsigned int port);
+
 /** Delete the current thread instrumentation. */
 typedef void (*delete_current_thread_v1_t)(void);
 
@@ -1963,6 +1979,17 @@ typedef void (*start_file_close_wait_v1_t)
 */
 typedef void (*end_file_close_wait_v1_t)
   (struct PSI_file_locker *locker, int rc);
+
+/**
+  Rename a file instrumentation close operation.
+  @param locker the file locker.
+  @param old_name name of the file to be renamed.
+  @param new_name name of the file after rename.
+  @param rc the rename operation return code (0 for success).
+*/
+typedef void (*end_file_rename_wait_v1_t)
+  (struct PSI_file_locker *locker, const char *old_name,
+   const char *new_name, int rc);
 
 /**
   Start a new stage, and implicitly end the previous stage.
@@ -2344,6 +2371,15 @@ typedef void (*execute_prepared_stmt_v1_t)
   (PSI_statement_locker *locker, PSI_prepared_stmt* prepared_stmt);
 
 /**
+  Set the statement text for a prepared statment event.
+  @param prepared_stmt prepared statement.
+  @param text the prepared statement text
+  @param text_len the prepared statement text length
+*/
+typedef void (*set_prepared_stmt_text_v1_t)(PSI_prepared_stmt *prepared_stmt,
+                                            const char *text,
+                                            uint text_len);
+/**
   Get a digest locker for the current statement.
   @param locker a statement locker for the running thread
 */
@@ -2572,6 +2608,8 @@ struct PSI_v1
   start_file_close_wait_v1_t start_file_close_wait;
   /** @sa end_file_close_wait_v1_t. */
   end_file_close_wait_v1_t end_file_close_wait;
+  /** @sa rename_file_close_wait_v1_t. */
+  end_file_rename_wait_v1_t end_file_rename_wait;
   /** @sa start_stage_v1_t. */
   start_stage_v1_t start_stage;
   /** @sa get_current_stage_progress_v1_t. */
@@ -2658,6 +2696,8 @@ struct PSI_v1
   reprepare_prepared_stmt_v1_t reprepare_prepared_stmt;
   /** @sa execute_prepared_stmt_v1_t. */
   execute_prepared_stmt_v1_t execute_prepared_stmt;
+  /** @sa set_prepared_stmt_text_v1_t. */
+  set_prepared_stmt_text_v1_t set_prepared_stmt_text;
   /** @sa digest_start_v1_t. */
   digest_start_v1_t digest_start;
   /** @sa digest_end_v1_t. */
@@ -2693,6 +2733,8 @@ struct PSI_v1
 
   start_metadata_wait_v1_t start_metadata_wait;
   end_metadata_wait_v1_t end_metadata_wait;
+
+  set_thread_peer_port_v1_t set_thread_peer_port;
 };
 
 /** @} (end of group Group_PSI_v1) */

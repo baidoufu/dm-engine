@@ -8,8 +8,8 @@ class CMapObject;
 class CEventManager : public xSingletonClass<CEventManager>
 {
 public:
-	CEventManager(void);
-	virtual ~CEventManager(void);
+	CEventManager(VOID);
+	virtual ~CEventManager(VOID);
 	// 创建新的可见事件
 	// pMap: 事件所在地图
 	// x,y: 事件位置
@@ -39,7 +39,7 @@ public:
 	VOID UpdateEvents();
 private:
 	xObjectPool<CVisibleEvent> m_VisibleEventPool; // 可见事件对象池
-	xPtrQueue<CVisibleEvent> m_DeleteObjectQueue; // 待删除对象队列
+	xMpscQueue<CVisibleEvent, 16384> m_DeleteObjectQueue; // 待删除对象队列
 	xListHost<CEventProcessor> m_xProcessorList; // 事件处理器列表
 	xListHost<CMapObject> m_xVisibleEventList; // 可见事件列表
 	xListHost<CMapObject>::xListNode* m_pCurUpdateEvent; // 当前更新的事件节点

@@ -8,12 +8,12 @@
 xObjectPool<CScriptEvent> CScriptEvent::m_xScriptEventPool;
 xListHost<CScriptEvent> CScriptEvent::m_xList;
 
-CScriptEvent::CScriptEvent(void) : m_xNode(this), m_dwFlag(0)
+CScriptEvent::CScriptEvent(VOID) : m_xNode(this), m_dwFlag(0)
 {
 	m_szScriptPage[0] = '\0';
 }
 
-CScriptEvent::~CScriptEvent(void)
+CScriptEvent::~CScriptEvent(VOID)
 {
 	//	Release();
 }
@@ -26,8 +26,7 @@ CScriptEvent* CScriptEvent::Create(UINT nMapId, UINT x, UINT y, DWORD dwFlag, co
 	if (dwFlag == 0)return nullptr;
 	if (pszPage[0] == 0)return nullptr;
 	CScriptEvent* pEvent = m_xScriptEventPool.newObject();
-	//pEvent->m_szScriptPage[0] = 0;
-	o_strncpy(pEvent->m_szScriptPage, pszPage, 250);
+	o_strncpy(pEvent->m_szScriptPage.data(), pszPage, 250);
 	pEvent->m_dwFlag = dwFlag;
 	pEvent->SetMapId(nMapId);
 	pEvent->setXY(x, y);
@@ -57,7 +56,7 @@ VOID CScriptEvent::OnEnter(CMapObject* pObject)
 	if (pObject->GetType() == OBJ_PLAYER && (m_dwFlag & SEF_ENTER) != 0)
 	{
 		CHumanPlayer* pPlayer = (CHumanPlayer*)pObject;
-		CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), this->m_szScriptPage, FALSE);
+		CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), this->m_szScriptPage.data(), FALSE);
 	}
 }
 
@@ -66,7 +65,7 @@ VOID CScriptEvent::OnLeave(CMapObject* pObject)
 	if (pObject->GetType() == OBJ_PLAYER && (m_dwFlag & SEF_LEAVE) != 0)
 	{
 		CHumanPlayer* pPlayer = (CHumanPlayer*)pObject;
-		CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), this->m_szScriptPage, FALSE);
+		CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), this->m_szScriptPage.data(), FALSE);
 	}
 }
 

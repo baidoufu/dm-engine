@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 typedef struct tagScriptTimerDef
 {
 	DWORD dwStartTime;
@@ -8,11 +9,11 @@ class CScriptTimerManager :
 	public xSingletonClass<CScriptTimerManager>
 {
 public:
-	CScriptTimerManager(void);
-	virtual ~CScriptTimerManager(void);
+	CScriptTimerManager(VOID);
+	virtual ~CScriptTimerManager(VOID);
 	BOOL StartTimer(UINT nIndex);
 	BOOL StopTimer(UINT nIndex);
 	DWORD GetTimerTime(UINT nIndex);
 protected:
-	ScriptTimerDef m_xTimer[256];
+	std::array<ScriptTimerDef, 256> m_xTimer;
 };

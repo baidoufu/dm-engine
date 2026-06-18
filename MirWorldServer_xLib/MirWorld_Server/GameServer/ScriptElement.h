@@ -1,5 +1,7 @@
 #pragma once
 #include "ScriptFile.h"
+#include <memory>
+#include <vector>
 static constexpr size_t MAX_CALL_PARAMS = 16;// @carryto&159&123  这种写法, 最多支持多少个参数., 使用 $_param0 获取指定参数
 
 enum e_parse_state
@@ -27,9 +29,8 @@ public:
 		m_pNext = nullptr;
 		m_pPrev = nullptr;
 		m_nLineNumber = 0;
-		m_pViewString = nullptr;
 	}
-	virtual ~CScriptElement() { Destroy(); }
+	virtual ~CScriptElement() { }
 	virtual BOOL Parse(CScriptFile& file) { m_nLineNumber = file.GetCurrentLineNumber(); return TRUE; }
 	//	执行接口
 	//	需要一个SHELL和一个TARGET, 还需要一个PAGEVIEW
@@ -62,7 +63,7 @@ public:
 	VOID setPrev(CScriptElement* pPrev) { m_pPrev = pPrev; }
 	CScriptElement* getNext() { return m_pNext; }
 	CScriptElement* getPrev() { return m_pPrev; }
-	const char* GetViewString() { return m_pViewString; }
+	const char* GetViewString() { return m_pViewString.get(); }
 	static xPacket* NewParamStack()
 	{
 		xPacket* packet = m_xParamStackPool.newObject();
@@ -90,7 +91,7 @@ protected:
 	CScriptElement* m_pNext;
 	CScriptElement* m_pPrev;
 	UINT m_nLineNumber;
-	char* m_pViewString;
+	pooled_string_ptr m_pViewString;
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ public:
 	char* getfreebuf() { if (m_pPacket)return (char*)m_pPacket->getfreebuf(); return nullptr; }
 	int	getsize() { if (m_pPacket)return m_pPacket->getsize(); return 0; }
 	int getfreesize() { if (m_pPacket)return m_pPacket->getfreesize(); return 0; }
-	void clear() { if (m_pPacket)m_pPacket->clear(); }
+	VOID clear() { if (m_pPacket)m_pPacket->clear(); }
 protected:
 	xPacket* m_pPacket;
 };
@@ -128,13 +129,13 @@ class CSe_Goods : public CScriptElement
 {
 public:
 	CSe_Goods() { m_pGoodsList = nullptr; }
-	virtual ~CSe_Goods() { Destroy(); }
+	virtual ~CSe_Goods() { }
 	BOOL Parse(CScriptFile& file);
 	VOID Destroy();
 	bool hasFourchar(const char* szName);//判断是否有4个负数, 来表示数组包含两个中文
 	Goods* getList() { return m_pGoodsList; }
 protected:
-	VOID AddGoods(Goods* pGoods);
+	VOID AddGoods(std::unique_ptr<Goods> pGoods);
 	Goods* m_pGoodsList;
 };
 
@@ -151,8 +152,8 @@ enum Page_Access_Right
 class CSe_Page : public CScriptElement
 {
 public:
-	CSe_Page(void);
-	virtual ~CSe_Page(void) { Destroy(); }
+	CSe_Page(VOID);
+	virtual ~CSe_Page(VOID) { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	Page_Access_Right getAccessRight() { return m_AccessRight; }
@@ -164,7 +165,7 @@ protected:
 	VOID AddScriptElement(CScriptElement* pElement);
 	Page_Access_Right m_AccessRight;
 	char m_szName[64];
-	CScriptElement* m_pElements;
+	std::unique_ptr<CScriptElement> m_pElements;
 	CScriptObject* m_pObject;
 };
 
@@ -179,11 +180,10 @@ public:
 	{
 		m_nCommand = 0;
 		m_nParamCount = 0;
-		m_pParams = nullptr;
 		m_dwResult = 0;
 		m_fnProc = nullptr;
 	}
-	virtual ~CSe_NormalAct() { Destroy(); }
+	virtual ~CSe_NormalAct() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	//VOID setResult( DWORD dwResult ){ m_dwResult = dwResult;}
@@ -196,7 +196,7 @@ protected:
 	DWORD m_dwResult;
 	UINT m_nCommand;
 	DWORD m_nParamCount;
-	ScriptParamEx* m_pParams;
+	std::unique_ptr<ScriptParamEx[]> m_pParams;
 	fnCommandProc m_fnProc;
 };
 
@@ -207,16 +207,13 @@ protected:
 class CSe_NormalSay : public CScriptElement
 {
 public:
-	CSe_NormalSay()
-	{
-		m_pSayWords = nullptr;
-	}
-	virtual ~CSe_NormalSay() { Destroy(); }
+	CSe_NormalSay() = default;
+	virtual ~CSe_NormalSay() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	VOID Destroy();
 protected:
-	char* m_pSayWords;
+	pooled_string_ptr m_pSayWords;
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -232,25 +229,17 @@ enum if_parse_state
 class CSe_IfStatement : public CScriptElement
 {
 public:
-	CSe_IfStatement()
-	{
-		m_pCondition = nullptr;
-		m_pTrueElements = nullptr;
-		m_pFalseElements = nullptr;
-		m_pElseIfStatement = nullptr;
-		m_bNot = FALSE;
-		m_bOne = FALSE;
-	}
-	virtual ~CSe_IfStatement() { Destroy(); }
+	CSe_IfStatement() : m_bNot(FALSE), m_bOne(FALSE) {}
+	virtual ~CSe_IfStatement() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	VOID Destroy();
 protected:
 	BOOL CheckConditionList(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
-	CSe_NormalAct* m_pCondition;
-	CScriptElement* m_pTrueElements;
-	CScriptElement* m_pFalseElements;
-	CSe_IfStatement* m_pElseIfStatement;
+	std::unique_ptr<CSe_NormalAct> m_pCondition;
+	std::unique_ptr<CScriptElement> m_pTrueElements;
+	std::unique_ptr<CScriptElement> m_pFalseElements;
+	std::unique_ptr<CSe_IfStatement> m_pElseIfStatement;
 	BOOL m_bNot;
 	BOOL m_bOne;
 };
@@ -262,19 +251,15 @@ protected:
 class CSe_CaseBlock : public CScriptElement
 {
 public:
-	CSe_CaseBlock()
-	{
-		m_nCode = 0;
-		m_pElements = nullptr;
-	}
-	virtual ~CSe_CaseBlock() { Destroy(); }
+	CSe_CaseBlock() : m_nCode(0) {}
+	virtual ~CSe_CaseBlock() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	UINT getCode()const { return m_nCode; }
 	VOID Destroy();
 protected:
 	UINT m_nCode;
-	CScriptElement* m_pElements;
+	std::unique_ptr<CScriptElement> m_pElements;
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -292,22 +277,15 @@ enum switch_parse_state
 class CSe_SwitchStatement : public CScriptElement
 {
 public:
-	CSe_SwitchStatement()
-	{
-		m_nCaseBlocks = 0;
-		m_pBranchSource = nullptr;
-		m_pCaseBlocks = nullptr;
-		m_pDefaultBlock = nullptr;
-	}
-	virtual ~CSe_SwitchStatement() { Destroy(); }
+	CSe_SwitchStatement() = default;
+	virtual ~CSe_SwitchStatement() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	VOID Destroy();
 protected:
-	UINT m_nCaseBlocks;
-	CSe_NormalAct* m_pBranchSource;
-	CSe_CaseBlock** m_pCaseBlocks;
-	CSe_CaseBlock* m_pDefaultBlock;
+	std::vector<std::unique_ptr<CSe_CaseBlock>> m_pCaseBlocks;
+	std::unique_ptr<CSe_NormalAct> m_pBranchSource;
+	std::unique_ptr<CSe_CaseBlock> m_pDefaultBlock;
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -317,18 +295,14 @@ protected:
 class CSe_JsonStatement : public CScriptElement
 {
 public:
-	CSe_JsonStatement()
-	{
-		m_nType = 0;
-		m_pWords = nullptr;
-	}
-	virtual ~CSe_JsonStatement() { Destroy(); }
+	CSe_JsonStatement() : m_nType(0) {}
+	virtual ~CSe_JsonStatement() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	VOID Destroy();
 protected:
 	UINT m_nType;
-	char* m_pWords;
+	pooled_string_ptr m_pWords;
 };
 
 
@@ -339,16 +313,12 @@ protected:
 class CSe_FlashStatement : public CScriptElement
 {
 public:
-	CSe_FlashStatement()
-	{
-		m_nType = 0;
-		m_pWords = nullptr;
-	}
-	virtual ~CSe_FlashStatement() { Destroy(); }
+	CSe_FlashStatement() : m_nType(0) {}
+	virtual ~CSe_FlashStatement() { }
 	BOOL Parse(CScriptFile& file);
 	BOOL Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScriptView* pView);
 	VOID Destroy();
 protected:
 	UINT m_nType;
-	char* m_pWords;
+	pooled_string_ptr m_pWords;
 };

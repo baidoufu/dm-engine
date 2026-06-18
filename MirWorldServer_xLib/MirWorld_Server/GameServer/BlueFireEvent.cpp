@@ -7,7 +7,7 @@
 #include "eventmanager.h"
 
 xObjectPool<CBlueFireEvent>	CBlueFireEvent::m_xEventPool;
-CBlueFireEvent::CBlueFireEvent(void)
+CBlueFireEvent::CBlueFireEvent(VOID)
 {
 	m_nDamage = 0;
 	m_pOwner = nullptr;
@@ -15,7 +15,7 @@ CBlueFireEvent::CBlueFireEvent(void)
 	memset(m_pEvents, 0, sizeof(m_pEvents));
 }
 
-CBlueFireEvent::~CBlueFireEvent(void)
+CBlueFireEvent::~CBlueFireEvent(VOID)
 {
 }
 
@@ -32,7 +32,9 @@ VOID CBlueFireEvent::OnUpdate(CVisibleEvent* pEvent)
 			return;
 		}
 	}
-	CMapCellInfo* pInfo = pEvent->GetMap()->GetMapCellInfo(pEvent->getX(), pEvent->getY());
+	CLogicMap* pEventMap = pEvent->GetMap();
+	if (pEventMap == nullptr) { Destroy(); return; }
+	CMapCellInfo* pInfo = pEventMap->GetMapCellInfoShared(pEvent->getX(), pEvent->getY());
 	if (pInfo)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -87,13 +89,14 @@ CBlueFireEvent* CBlueFireEvent::Create(CAliveObject* pOwner, int x, int y, int n
 	{ -2,  2 }, { -1,  2 }, { 0,  2 }, { 1,  2 }, { 2,  2 }   // 第五行
 	};
 	int successcount = 0;
+	auto* pEventManager = CEventManager::GetInstance();
 	for (int i = 0; i < BLUEFIRE_EVENT_NUM; i++)
 	{
 		int targetX = x + ptFire[i].x;
 		int targetY = y + ptFire[i].y;
 		// 检查边界
 		if (targetX < 0 || targetX >= pMap->GetWidth() || targetY < 0 || targetY >= pMap->GetHeight()) continue;
-		pEvent->m_pEvents[i] = CEventManager::GetInstance()->NewVisibleEvent(pOwner->GetMap(), targetX, targetY, VE_BLUEFIRE, dwTick, dwLastTime, pEvent);
+		pEvent->m_pEvents[i] = pEventManager->NewVisibleEvent(pOwner->GetMap(), targetX, targetY, VE_BLUEFIRE, dwTick, dwLastTime, pEvent);
 		if (pEvent->m_pEvents[i] != nullptr)
 			successcount++;
 	}
@@ -103,7 +106,7 @@ CBlueFireEvent* CBlueFireEvent::Create(CAliveObject* pOwner, int x, int y, int n
 		pEvent = nullptr;
 	}
 	else
-		CEventManager::GetInstance()->AddEventProcessor(pEvent);
+		pEventManager->AddEventProcessor(pEvent);
 	return pEvent;
 }
 

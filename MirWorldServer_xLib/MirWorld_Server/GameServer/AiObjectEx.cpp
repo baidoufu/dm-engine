@@ -7,7 +7,7 @@
 
 #define	_SIGN(n) (n>0?1:(n<0?-1:0))
 
-CAiObjectEx::CAiObjectEx(void)
+CAiObjectEx::CAiObjectEx(VOID)
 {
 	m_bLastActionWasAttack = FALSE;//边走边打,移动跟攻击开关
 	m_wHomeX = 0; // 出生X坐标
@@ -16,7 +16,7 @@ CAiObjectEx::CAiObjectEx(void)
 	m_wGoGomeTime = 0;
 }
 
-CAiObjectEx::~CAiObjectEx(void)
+CAiObjectEx::~CAiObjectEx(VOID)
 {
 }
 
@@ -51,8 +51,8 @@ VOID CAiObjectEx::Ai_KeepLine(BYTE nAttackDistance, DWORD dwFlag)
 		UINT Mx = 0, My = 0;
 		if (dwFlag & LINEATTACK_XSTYLE)
 		{
-			int p = min(abs(dx), abs(dy));
-			if (p == 0)p = max(abs(dx), abs(dy));
+			int p = MIN(abs(dx), abs(dy));
+			if (p == 0)p = MAX(abs(dx), abs(dy));
 			nx = p * (dx == 0 ? (Getrand(2) == 0 ? 1 : -1) : _SIGN(dx));
 			ny = p * (dy == 0 ? (Getrand(2) == 0 ? 1 : -1) : _SIGN(dy));
 			Nx = (int)pTarget->getX() + nx;
@@ -128,20 +128,6 @@ VOID CAiObjectEx::Ai_Static(BYTE nAttackDistance, BOOL bAutoHide)
 	}
 	else
 	{
-		CHumanPlayer* pOwner = (CHumanPlayer*)GetOwner();
-		if (pOwner != nullptr) //如果没目标的情况下,获取主人的目标,这里应该给魔法师的宠物用
-		{
-			CLogicMap* pMap = pOwner->GetMap();
-			if (pMap != nullptr)
-			{
-				int x = pOwner->getX(), y = pOwner->getY();
-				if (GetMap() == pOwner->GetMap() && DISTANCE(getX(), getY(), x, y) >= VIEW_RANGE)
-				{
-					pOwner->PetsFlyto(pMap, x, y, FALSE);
-					return;
-				}
-			}
-		}
 		if (bAutoHide)
 		{
 			if (!IsSystemFlagSeted(SF_HIDED))
@@ -201,9 +187,10 @@ VOID CAiObjectEx::Ai_BackHome(BYTE nAttackDistance, BYTE btViewDistance, MONSTER
 	if (pGen == nullptr) return;
 	CAliveObject* pTarget = GetTarget();
 	xIndexPtrListHelper<CMonsterEx> helper(pGen->xMonsterList);
-	std::vector<CMonsterEx*> monsterList; // 获取阵型中所有怪物
+	thread_local std::vector<CMonsterEx*> monsterList; // 使用thread_local复用，避免高频AI路径堆分配
 	monsterList.clear();
-	monsterList.reserve(pGen->curcount); // 预分配内存
+	if ((int)monsterList.capacity() < pGen->curcount)
+		monsterList.reserve(pGen->curcount); // 预分配内存
 	for (CMonsterEx* pMonster = helper.first(); pMonster; pMonster = helper.next())
 	{
 		monsterList.push_back(pMonster);
@@ -252,14 +239,18 @@ VOID CAiObjectEx::Ai_BackHome(BYTE nAttackDistance, BYTE btViewDistance, MONSTER
 	}
 	else // 有目标, 进行警戒逻辑
 	{
-		std::vector<std::pair<CMonsterEx*, BYTE>> monsterDistances;
+		thread_local std::vector<std::pair<CMonsterEx*, BYTE>> monsterDistances; // 使用thread_local复用，避免高频AI路径堆分配
+		monsterDistances.clear();
+		monsterDistances.reserve(monsterList.size());
 		for (CMonsterEx* pMonster : monsterList) // 计算所有怪物到目标的距离
 		{
 			BYTE dist = DISTANCE(pMonster->getX(), pMonster->getY(), pTarget->getX(), pTarget->getY());
 			monsterDistances.push_back({ pMonster, dist });
 		}
-		// 按距离排序
-		std::sort(monsterDistances.begin(), monsterDistances.end(),
+		// 按距离部分排序（只需前12个最小的，避免全排序的O(n log n)开销）
+		const size_t kMaxAttackCount = 12;
+		size_t sortCount = MIN(monsterDistances.size(), kMaxAttackCount); // 已通过partial_sort保证前sortCount个是最近的
+		std::partial_sort(monsterDistances.begin(), monsterDistances.begin() + sortCount, monsterDistances.end(),
 			[](const auto& a, const auto& b) {
 				return a.second < b.second;
 			});
@@ -269,8 +260,7 @@ VOID CAiObjectEx::Ai_BackHome(BYTE nAttackDistance, BYTE btViewDistance, MONSTER
 		{
 			if (monsterDistances[0].first == this) // 协同攻击：让最近的怪物发起攻击
 			{
-				size_t attackCount = MIN(monsterDistances.size(), (size_t)12);
-				for (size_t i = 0; i < attackCount; i++)
+				for (size_t i = 0; i < sortCount; i++)
 				{
 					monsterDistances[i].first->AttackTarget();
 				}
@@ -306,12 +296,14 @@ VOID CAiObjectEx::Ai_StupidMove()
 		if (IsGotoOwner()) return;
 		CLogicMap* pMap = pOwner->GetMap();
 		int x = pOwner->getX(), y = pOwner->getY();
-		if (GetMap() == pOwner->GetMap() && DISTANCE(getX(), getY(), x, y) >= VIEW_RANGE)
-			pOwner->PetsFlyto(pMap, x, y, FALSE);
+		if (DISTANCE(getX(), getY(), x, y) >= VIEW_RANGE)
+		{
+			FlyTo(pMap, x, y, FALSE);
+		}
 		else
 		{
 			GETNEXTPOS(x, y, (pOwner->GetDirection() + 4) % 8);
-			if (!m_pMap->IsBlocked(x, y))
+			if (m_pMap && !m_pMap->IsBlocked(x, y))
 				GotoPosition(x, y);
 			else if (DISTANCE(getX(), getY(), x, y) > 1)
 				GotoPosition(x, y);
@@ -342,6 +334,7 @@ VOID CAiObjectEx::GoAwayPosition(int nX, int nY)
 
 VOID CAiObjectEx::GotoPosition(int nX, int nY)
 {
+	if (m_ActionType == AT_WALK || m_ActionType == AT_RUN) return;
 	int nDir = DR_DOWN;
 	int nCurrX = m_wX;
 	int nCurrY = m_wY;
@@ -349,6 +342,10 @@ VOID CAiObjectEx::GotoPosition(int nX, int nY)
 	bool bOnLineOrDiagonal = false;
 	if (nX == nCurrX || nY == nCurrY || (nX - nY) == (nCurrX - nCurrY) || (nX + nY) == (nCurrX + nCurrY))
 		bOnLineOrDiagonal = true;
+	//是否需要跑 - 使用怪物的实际位置计算距离, 避免对齐修正导致距离低估
+	UINT nDist = DISTANCE(nCurrX, nCurrY, nX, nY);
+	if (nDist == 0) return;
+	BOOL bCheckRun = (nDist >= 3);
 	// 如果目标位置不在水平线、垂直线或对角线上, 则选择优先移动方向.
 	if (!bOnLineOrDiagonal)
 	{
@@ -358,10 +355,7 @@ VOID CAiObjectEx::GotoPosition(int nX, int nY)
 			nCurrY = (nY > nCurrY) ? nCurrY + 1 : nCurrY - 1;
 	}
 	nDir = GetDir8(nX, nY, nCurrX, nCurrY);
-	//是否需要跑
-	UINT nDist = DISTANCE(nCurrX, nCurrY, nX, nY);
-	BOOL bCheckRun = (nDist > 2);
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		if (!AiWalk(nDir, bCheckRun))
 		{

@@ -15,8 +15,8 @@ class CScriptShell :
 	public xVariableProvider
 {
 public:
-	CScriptShell(void);
-	virtual ~CScriptShell(void);
+	CScriptShell(VOID);
+	virtual ~CScriptShell(VOID);
 	BOOL Execute(CScriptTarget* pTarget, const char* pszPage = nullptr, BOOL bUserQuery = TRUE, DWORD dwParam = 0);
 	BOOL Execute(CScriptTarget* pTarget, CSe_Page* pPage, BOOL bUserQuery = TRUE, DWORD dwParam = 0);
 
@@ -24,7 +24,6 @@ public:
 
 	virtual const char* GetTitleName() { return "NPC"; }
 	virtual UINT GetTitleId() { return 0xffffffff; }
-	virtual BOOL OnPageShow(CScriptTarget* pTarget, CScriptView* pView, const char* pszPage) { return TRUE; }
 
 	Execute_Result getExecuteResult()const { return m_ExecuteResult; }
 	CallParamEx& getExecuteResultValue() { return m_dwResultValue; }

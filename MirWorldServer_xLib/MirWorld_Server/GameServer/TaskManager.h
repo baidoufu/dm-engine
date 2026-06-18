@@ -21,7 +21,7 @@ typedef struct task_define
 	char* pszTitle;
 	UINT nId;
 	UINT nStepCount;
-	TASK_STEP* pSteps;
+	std::unique_ptr<TASK_STEP[]> pSteps;
 }TASK_DEFINE;
 
 class CTaskManager :
@@ -29,15 +29,15 @@ class CTaskManager :
 	public CFindFile
 {
 public:
-	CTaskManager(void);
-	virtual ~CTaskManager(void);
+	CTaskManager(VOID);
+	virtual ~CTaskManager(VOID);
 	VOID Load(const char* pszPath);
 	TASK_DEFINE* GetTaskDefine(UINT nId);
 	TASK_STEP* GetTaskStep(UINT nId, UINT step);
 	//获取任务类型, 0主线任务, 1为支线任务, 2日常任务
 	int GetTaskType(const WORD wTaskId);
 protected:
-	TASK_DEFINE* m_pTaskMap[0xffff];
+	std::array<TASK_DEFINE*, 0xffff> m_pTaskMap{};
 	VOID OnFoundFile(const char* pszFilename, UINT nParam = 0);
 	xStringList<256> m_xTaskList;
 	xObjectPool<TASK_DEFINE> m_xTaskPool;

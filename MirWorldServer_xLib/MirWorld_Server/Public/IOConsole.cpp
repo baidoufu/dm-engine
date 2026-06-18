@@ -2,24 +2,25 @@
 #include ".\ioconsole.h"
 #include "stdio.h"
 
-CIOConsole::CIOConsole(void)
+CIOConsole::CIOConsole(VOID)
 {
 	m_pInputListener = nullptr;
 }
 
-CIOConsole::~CIOConsole(void)
+CIOConsole::~CIOConsole(VOID)
 {
 }
 
-void CIOConsole::OutPut(DWORD dwColor, const char* pszString, ...)
+VOID CIOConsole::OutPut(DWORD dwColor, const char* pszString, ...)
 {
 	if (this == nullptr)return;
-	char szBuff[2048];
+	std::array<char, 2048> szBuff{};
 	va_list	vl;
 	va_start(vl, pszString);
-	vsprintf(szBuff, pszString, vl);
+	vsnprintf(szBuff.data(), szBuff.size(), pszString, vl);
 	va_end(vl);
-	OutPutStatic(GetColor(dwColor), szBuff);
+	szBuff[szBuff.size() - 1] = 0;
+	OutPutStatic(GetColor(dwColor), szBuff.data());
 }
 
 DWORD CIOConsole::GetColor(DWORD index)

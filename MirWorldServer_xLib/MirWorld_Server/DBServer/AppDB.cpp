@@ -1,39 +1,317 @@
 #include "StdAfx.h"
 #include ".\appdb.h"
 #include "mysqldatabase.h"
+#include "DBConnectionPool.h"
 #include "server.h"
 #include <string>
+#include "dbserver.h"
+#include <wincrypt.h>
 
 static thread_local char g_szTempBuffer[65536];
-CAppDB::CAppDB(void)
+
+// ============================================================================
+// PasswordHash 实现
+// ============================================================================
+namespace PasswordHash {
+
+static std::string MD5Hash(const std::string& input)
 {
-	m_pDatabase = nullptr;
-	m_pDBConnection = nullptr;
+	HCRYPTPROV hProv = 0;
+	HCRYPTHASH hHash = 0;
+	BYTE rgbHash[16];
+	DWORD cbHash = 16;
+	std::string result;
+
+	if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+		return result;
+	if (!CryptCreateHash(hProv, CALG_MD5, 0, 0, &hHash))
+	{
+		CryptReleaseContext(hProv, 0);
+		return result;
+	}
+	if (!CryptHashData(hHash, (BYTE*)input.c_str(), (DWORD)input.size(), 0))
+	{
+		CryptDestroyHash(hHash);
+		CryptReleaseContext(hProv, 0);
+		return result;
+	}
+	if (!CryptGetHashParam(hHash, HP_HASHVAL, rgbHash, &cbHash, 0))
+	{
+		CryptDestroyHash(hHash);
+		CryptReleaseContext(hProv, 0);
+		return result;
+	}
+
+	char hex[33];
+	for (DWORD i = 0; i < cbHash; i++)
+		sprintf(hex + i * 2, "%02x", rgbHash[i]);
+	hex[32] = '\0';
+	result = hex;
+
+	CryptDestroyHash(hHash);
+	CryptReleaseContext(hProv, 0);
+	return result;
 }
 
-CAppDB::~CAppDB(void)
+static std::string GenerateSalt()
 {
-	if (m_pDBConnection != nullptr)
-		m_pDatabase->DelConnection(m_pDBConnection);
-	if (m_pDatabase != nullptr)
+	HCRYPTPROV hProv = 0;
+	BYTE randomBytes[4];
+	std::string salt;
+
+	if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 	{
-		m_pDatabase->UnInit();
-		delete m_pDatabase;
+		// 回退：使用时间作为种子
+		srand(GetTickCount());
+		sprintf(reinterpret_cast<char*>(randomBytes), "%04x", rand() & 0xFFFF);
 	}
+	else
+	{
+		CryptGenRandom(hProv, 4, randomBytes);
+		CryptReleaseContext(hProv, 0);
+	}
+
+	char hex[9];
+	for (int i = 0; i < 4; i++)
+		sprintf(hex + i * 2, "%02x", randomBytes[i]);
+	hex[8] = '\0';
+	salt = hex;
+	return salt;
+}
+
+std::string HashPassword(const char* pszPassword)
+{
+	if (pszPassword == nullptr || pszPassword[0] == '\0') return "";
+	std::string salt = GenerateSalt();
+	std::string combined = salt + pszPassword;
+	std::string hash = MD5Hash(combined);
+	return salt + "$" + hash;
+}
+
+bool VerifyPassword(const char* pszPassword, const char* pszStoredHash)
+{
+	if (pszPassword == nullptr || pszStoredHash == nullptr) return false;
+	// 检查是否为哈希格式 "salt$hash"
+	const char* delim = strchr(pszStoredHash, '$');
+	if (delim == nullptr)
+	{
+		// 兼容旧版明文密码：直接比较
+		return (strcmp(pszStoredHash, pszPassword) == 0);
+	}
+	std::string salt(pszStoredHash, delim - pszStoredHash);
+	std::string storedHashOnly(delim + 1);
+	std::string combined = salt + pszPassword;
+	std::string computedHash = MD5Hash(combined);
+	return (computedHash == storedHashOnly);
+}
+
+} // namespace PasswordHash
+
+// ============================================================================
+// CDeferredWriteBuffer 实现
+// ============================================================================
+void CDeferredWriteBuffer::Enqueue(std::string sql)
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	m_pendingSQL.push_back(std::move(sql));
+}
+
+SERVER_ERROR CDeferredWriteBuffer::Flush(CVirtualDBConnection* pConnection)
+{
+	std::vector<std::string> localSQL;
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		localSQL.swap(m_pendingSQL);
+	}
+	if (localSQL.empty()) return SE_OK;
+	if (pConnection == nullptr) return SE_DB_NOTINITED;
+	// 最多重试3次，应对临时网络抖动
+	constexpr int maxRetries = 3;
+	for (int attempt = 0; attempt < maxRetries; attempt++)
+	{
+		CVirtualDataUnit* pDataUnit = pConnection->GetDataUnit();
+		if (pDataUnit == nullptr)
+		{
+			// GetDataUnit 内部会尝试重连，如果仍失败则放弃
+			if (attempt < maxRetries - 1) continue;
+			return SE_ALLOCMEMORYFAIL;
+		}
+		// 开启事务
+		SERVER_ERROR ret = pDataUnit->Operation("START TRANSACTION");
+		if (ret != SE_OK)
+		{
+			pConnection->DelDataUnit(pDataUnit);
+			if (attempt < maxRetries - 1) continue;
+			return ret;
+		}
+		int nExecuted = 0;
+		bool bFailed = false;
+		for (const auto& sql : localSQL)
+		{
+			ret = pDataUnit->Operation(sql.c_str());
+			if (ret != SE_OK && ret != SE_DB_NOMOREDATA)
+			{
+				pDataUnit->Operation("ROLLBACK");
+				pConnection->DelDataUnit(pDataUnit);
+				PRINT(ERROR_RED, "批量写入失败(第%d条，第%d次尝试)，已回滚。SQL: %.100s\n", nExecuted, attempt + 1, sql.c_str());
+				bFailed = true;
+				break;
+			}
+			nExecuted++;
+		}
+		if (bFailed)
+		{
+			if (attempt < maxRetries - 1) continue;
+			// 所有重试均失败，记录丢失的SQL以便后续恢复
+			PRINT(ERROR_RED, "延迟写入彻底失败！共%d条SQL丢失，请检查数据库连接！\n", (int)localSQL.size());
+			for (const auto& lostSql : localSQL)
+			{
+				LG2("[DATA_LOSS] %s\n", lostSql.c_str());
+			}
+			return ret;
+		}
+
+		ret = pDataUnit->Operation("COMMIT");
+		pConnection->DelDataUnit(pDataUnit);
+		if (ret == SE_OK) return SE_OK;
+		// COMMIT 失败，重试
+		if (attempt < maxRetries - 1) continue;
+		return ret;
+	}
+	return SE_FAIL;
+}
+
+int CDeferredWriteBuffer::GetPendingCount() const
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	return (int)m_pendingSQL.size();
+}
+
+BOOL CDeferredWriteBuffer::IsEmpty() const
+{
+	std::lock_guard<std::mutex> lock(m_mutex);
+	return m_pendingSQL.empty();
+}
+
+// ============================================================================
+// CAppDB 实现
+// ============================================================================
+CAppDB::CAppDB(VOID) : m_pDBConnection(nullptr), m_pPool(nullptr), m_bUsingPool(false), m_bDeferredWrite(false)
+{
+}
+
+CAppDB::~CAppDB(VOID)
+{
+	// 析构前先刷盘
+	if (m_bDeferredWrite && !m_writeBuffer.IsEmpty())
+		FlushDeferredWrites();
+	if (m_pDBConnection != nullptr)
+	{
+		if (m_bUsingPool && m_pPool) // 连接池模式：归还连接
+			m_pPool->Release(static_cast<CMySQLDBConnection*>(m_pDBConnection));
+		else if (m_pDatabase)
+			m_pDatabase->DelConnection(m_pDBConnection);
+		m_pDBConnection = nullptr;
+	}
+	m_pDatabase.reset();
+	m_pPool = nullptr;
+	m_bUsingPool = false;
+}
+
+std::string CAppDB::Escape(const char* pszInput)
+{
+	if (pszInput == nullptr) return "";
+	if (m_pDBConnection == nullptr) return pszInput;
+	return m_pDBConnection->EscapeString(pszInput);
 }
 
 SERVER_ERROR CAppDB::OpenDataBase(const char* pszServer, const char* pszPort, const char* pszDBName, const char* pszId, const char* pszPassword)
 {
 	SERVER_ERROR ret = SE_OK;
-	m_pDatabase = new CMySQLDatabase;
-	if (m_pDatabase == nullptr) return SE_ALLOCMEMORYFAIL;
+	// 先断开旧连接，防止悬垂指针
+	if (m_pDBConnection != nullptr)
+	{
+		if (m_bUsingPool && m_pPool)
+			m_pPool->Release(static_cast<CMySQLDBConnection*>(m_pDBConnection));
+		else if (m_pDatabase)
+			m_pDatabase->DelConnection(m_pDBConnection);
+		m_pDBConnection = nullptr;
+	}
+	m_pDatabase.reset();
+	m_bUsingPool = false;
+	m_pPool = nullptr;
+
+	m_pDatabase = std::make_unique<CMySQLDatabase>();
+	if (!m_pDatabase) return SE_ALLOCMEMORYFAIL;
 	ret = m_pDatabase->Init();
 	if (ret != SE_OK) return ret;
 	m_pDBConnection = m_pDatabase->GetConnection();
 	if (m_pDBConnection == nullptr) return SE_ALLOCMEMORYFAIL;
 	ret = m_pDBConnection->Connect(pszServer, pszPort, pszDBName, pszId, pszPassword);
-	if (ret != SE_OK) return ret;
+	if (ret != SE_OK)
+	{
+		m_pDatabase->DelConnection(m_pDBConnection);
+		m_pDBConnection = nullptr;
+		return ret;
+	}
 	return SE_OK;
+}
+
+SERVER_ERROR CAppDB::OpenDataBase(CMySQLConnectionPool& pool)
+{
+	// 先断开旧连接
+	if (m_pDBConnection != nullptr)
+	{
+		if (m_bUsingPool && m_pPool)
+			m_pPool->Release(static_cast<CMySQLDBConnection*>(m_pDBConnection));
+		else if (m_pDatabase)
+			m_pDatabase->DelConnection(m_pDBConnection);
+		m_pDBConnection = nullptr;
+	}
+	m_pDatabase.reset();
+	// 从连接池获取
+	m_pPool = &pool;
+	m_bUsingPool = true;
+	CMySQLDBConnection* pConn = pool.Acquire();
+	if (pConn == nullptr)
+		return SE_ALLOCMEMORYFAIL;
+	m_pDBConnection = pConn;
+	return SE_OK;
+}
+
+void CAppDB::EnableDeferredWrite(bool bEnable)
+{
+	m_bDeferredWrite = bEnable;
+}
+
+SERVER_ERROR CAppDB::FlushDeferredWrites()
+{
+	return m_writeBuffer.Flush(m_pDBConnection);
+}
+
+int CAppDB::GetDeferredWriteCount() const
+{
+	return m_writeBuffer.GetPendingCount();
+}
+
+void CAppDB::Reset()
+{
+	// 刷盘延迟写入
+	if (m_bDeferredWrite && !m_writeBuffer.IsEmpty())
+		FlushDeferredWrites();
+	// 归还连接
+	if (m_pDBConnection != nullptr)
+	{
+		if (m_bUsingPool && m_pPool)
+			m_pPool->Release(static_cast<CMySQLDBConnection*>(m_pDBConnection));
+		else if (m_pDatabase)
+			m_pDatabase->DelConnection(m_pDBConnection);
+		m_pDBConnection = nullptr;
+	}
+	m_pDatabase.reset();
+	m_pPool = nullptr;
+	m_bUsingPool = false;
+	m_bDeferredWrite = false;
 }
 
 SERVER_ERROR CAppDB::CreateAccount(const char* pszAccount, const char* pszPassword, const char* pszName, const char* pszBirthday,
@@ -42,6 +320,8 @@ SERVER_ERROR CAppDB::CreateAccount(const char* pszAccount, const char* pszPasswo
 {
 	CVirtualDataUnit* pDataUnit = nullptr;
 	SERVER_ERROR ret = SE_OK;
+
+	if (m_pDBConnection == nullptr) return SE_DB_NOTINITED;
 
 	if (!xCheckAccount(pszAccount))
 		return SE_REG_INVALIDACCOUNT;
@@ -69,44 +349,62 @@ SERVER_ERROR CAppDB::CreateAccount(const char* pszAccount, const char* pszPasswo
 	if (pszEmail[0] != 0 && !xCheckEmail(pszEmail)) return SE_REG_INVALIDEMAIL;
 	if ((ret = CheckAccountExist(pszAccount)) == SE_LOGIN_ACCOUNTNOTEXIST)
 	{
+		// 转义所有字符串参数防止 SQL 注入
+		std::string sAccount = Escape(pszAccount);
+		// 密码使用加盐哈希存储，不再存储明文
+		std::string sPasswordHash = PasswordHash::HashPassword(pszPassword);
+		std::string sEscapedPasswordHash = Escape(sPasswordHash.c_str());
+		std::string sName = Escape(pszName);
+		std::string sBirthday = Escape(pszBirthday);
+		std::string sQ1 = Escape(pszQ1);
+		std::string sA1 = Escape(pszA1);
+		std::string sQ2 = Escape(pszQ2);
+		std::string sA2 = Escape(pszA2);
+		std::string sPhoneNumber = Escape(pszPhoneNumber);
+		std::string sMobilePhoneNumber = Escape(pszMobilePhoneNumber);
+		std::string sIdCard = Escape(pszIdCard);
+		std::string sEmail = Escape(pszEmail);
+
 		pDataUnit = m_pDBConnection->GetDataUnit();
 		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 		ret = pDataUnit->Operation("Insert into TBL_ACCOUNT(ACCOUNT,PASSWORD,NAME,BIRTHDAY,Q1,A1,Q2,A2,PHONENUMBER,MOBILEPHONENUMBER,IDCARD,EMAIL,CREATEDATE)"
 			"VALUES('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',CURRENT_TIMESTAMP)",
-			pszAccount, pszPassword, pszName, pszBirthday,
-			pszQ1, pszA1, pszQ2, pszA2, pszPhoneNumber, pszMobilePhoneNumber, pszIdCard, pszEmail);
-		m_pDBConnection->DelDataUnit(pDataUnit);   //注册账号
+			sAccount.c_str(), sEscapedPasswordHash.c_str(), sName.c_str(), sBirthday.c_str(),
+			sQ1.c_str(), sA1.c_str(), sQ2.c_str(), sA2.c_str(),
+			sPhoneNumber.c_str(), sMobilePhoneNumber.c_str(), sIdCard.c_str(), sEmail.c_str());
+		m_pDBConnection->DelDataUnit(pDataUnit);
 	}
 	return ret;
 }
 
 SERVER_ERROR CAppDB::CheckAccount(const char* pszAccount, const char* pszPassword)
 {
-	CHAR szPassword[65] = ""; // 增加缓冲区大小
-	int bufferSize = 64;        // 缓冲区大小
-	int dataSize = 0;          // 接收实际数据大小
+	CHAR szPassword[256] = ""; // 增大缓冲区以容纳哈希值（8+1+32=41字符）及可能的额外数据
+	int bufferSize = sizeof(szPassword) - 1; // 缓冲区大小，预留结尾\0
+	int dataSize = 0;         // 接收实际数据大小
 
 	if (!xCheckAccount(pszAccount)) return SE_LOGIN_ACCOUNTNOTEXIST;
 	if (!xCheckPassword(pszPassword)) return SE_LOGIN_PASSWORDERROR;
 
-	//    ?  
 	if (strlen(pszAccount) > 50) return SE_LOGIN_ACCOUNTNOTEXIST;
+
+	if (m_pDBConnection == nullptr) return SE_DB_NOTINITED;
 
 	SERVER_ERROR ret = CheckAccountExist(pszAccount);
 	if (ret != SE_LOGIN_ACCOUNTEXIST)return ret;
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 
-	ret = pDataUnit->Operation("select PASSWORD from TBL_ACCOUNT where ACCOUNT = N'%s'", pszAccount);
+	ret = pDataUnit->Operation("select PASSWORD from TBL_ACCOUNT where ACCOUNT = '%s'", Escape(pszAccount).c_str());
 	if (ret == SE_OK)
 	{
-		dataSize = bufferSize; // 设置缓冲区大小
+		dataSize = bufferSize;
 		ret = pDataUnit->GetData(1, SQL_C_CHAR, szPassword, dataSize);
 		if (ret == SE_OK)
 		{
-			// 确保字符串正确终止
 			szPassword[bufferSize - 1] = '\0';
-			if (strcmp(szPassword, pszPassword) == 0)
+			// 使用哈希验证（兼容旧版明文密码）
+			if (PasswordHash::VerifyPassword(pszPassword, szPassword))
 				ret = SE_OK;
 			else
 				ret = SE_LOGIN_PASSWORDERROR;
@@ -123,12 +421,18 @@ SERVER_ERROR CAppDB::CheckAccount(const char* pszAccount, const char* pszPasswor
 SERVER_ERROR CAppDB::ChangePassword(const char* pszAccount, const char* pszOldPass, const char* pszNewPass)
 {
 	if (!xCheckPassword(pszNewPass)) return SE_LOGIN_PASSWORDERROR;
+	if (m_pDBConnection == nullptr) return SE_DB_NOTINITED;
 	SERVER_ERROR ret = CheckAccount(pszAccount, pszOldPass);
 	if (ret == SE_OK)
 	{
+		// 新密码使用加盐哈希存储
+		std::string sNewPassHash = PasswordHash::HashPassword(pszNewPass);
+		std::string sEscapedNewPassHash = Escape(sNewPassHash.c_str());
+		std::string sAccount = Escape(pszAccount);
+
 		CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-		ret = pDataUnit->Operation("update TBL_ACCOUNT set password = '%s' where account = '%s'", pszNewPass, pszAccount);
+		ret = pDataUnit->Operation("update TBL_ACCOUNT set password = '%s' where account = '%s'", sEscapedNewPassHash.c_str(), sAccount.c_str());
 		m_pDBConnection->DelDataUnit(pDataUnit);
 	}
 	return ret;
@@ -137,29 +441,26 @@ SERVER_ERROR CAppDB::ChangePassword(const char* pszAccount, const char* pszOldPa
 SERVER_ERROR CAppDB::CheckAccountExist(const char* pszAccount)
 {
 	if (!xCheckAccount(pszAccount)) return SE_LOGIN_ACCOUNTNOTEXIST;
+	if (m_pDBConnection == nullptr) return SE_DB_NOTINITED;
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select account from TBL_ACCOUNT where account = '%s'", pszAccount);
+	SERVER_ERROR ret = pDataUnit->Operation("select account from TBL_ACCOUNT where account = '%s'", Escape(pszAccount).c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	if (ret == SE_DB_NOMOREDATA) return SE_LOGIN_ACCOUNTNOTEXIST;
 	if (ret == SE_OK) return SE_LOGIN_ACCOUNTEXIST;
 	return ret;
 }
 
-SERVER_ERROR CAppDB::UpdateAccountState(DWORD dwServerId, const char* pszAccount, UINT state)
-{
-	return SERVER_ERROR();
-}
-
 SERVER_ERROR CAppDB::GetCharList(const char* pszAccount, const char* pszServerName, tQueryCharList_Result* pResult)
 {
+	if (m_pDBConnection == nullptr) return SE_DB_NOTINITED;
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select NAME,CLASS,SEX,VLEVEL,HAIR,ODATE from TBL_CHARACTER_INFO where ACCOUNT = '%s' and SERVER = '%s' AND DELFLAG = 0", pszAccount, pszServerName);
+	SERVER_ERROR ret = pDataUnit->Operation("select NAME,CLASS,SEX,VLEVEL,HAIR,ODATE from TBL_CHARACTER_INFO where ACCOUNT = '%s' and SERVER = '%s' AND DELFLAG = 0", Escape(pszAccount).c_str(), Escape(pszServerName).c_str());
 	int count = 0;
 	if (ret == SE_OK)
 	{
-		SELECT_CHAR_LIST* clist = pResult->charlist;
+		SELECT_CHAR_LIST* clist = pResult->charlist.data();
 		CHAR szDate[200] = "";
 		CSystemTime	stTime[2];
 		do
@@ -222,31 +523,37 @@ SERVER_ERROR CAppDB::GetCharList(const char* pszAccount, const char* pszServerNa
 
 SERVER_ERROR CAppDB::CreateCharacter(CREATECHARDESC* pDesc)
 {
+	if (m_pDBConnection == nullptr) return SE_DB_NOTINITED;
 	SERVER_ERROR ret = CheckCharacterExist(pDesc->szAccount, pDesc->szServer, pDesc->szName);
 	if (!xCheckAccount(pDesc->szAccount))
 	{
-		CServer::GetInstance()->GetIoConsole()->OutPut(ERROR_RED, "检测szAccount返回错误\n");
+		PRINT(ERROR_RED, "检测szAccount返回错误\n");
 		return SE_CREATECHARACTER_INVALID_CHARNAME;
 	}
 	if (!xCheckCharname(pDesc->szName)) {
-		CServer::GetInstance()->GetIoConsole()->OutPut(ERROR_RED, "检测szName返回错误\n");
+		PRINT(ERROR_RED, "检测szName返回错误\n");
 		return SE_CREATECHARACTER_INVALID_CHARNAME;
 	}
 	if (ret == SE_SELCHAR_CHAREXIST)
 	{
-		CServer::GetInstance()->GetIoConsole()->OutPut(ERROR_RED, "SE_SELCHAR_CHAREXIST返回错误\n");
+		PRINT(ERROR_RED, "SE_SELCHAR_CHAREXIST返回错误\n");
 		return ret;
 	}
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr)
 	{
-		CServer::GetInstance()->GetIoConsole()->OutPut(ERROR_RED, "pDataUnit == nullptr返回错误\n");
+		PRINT(ERROR_RED, "pDataUnit == NULL返回错误\n");
 		return SE_ALLOCMEMORYFAIL;
 	}
 
+	// 转义字符串参数
+	std::string sAccount = Escape(pDesc->szAccount);
+	std::string sServer = Escape(pDesc->szServer);
+	std::string sName = Escape(pDesc->szName);
+
 	ret = pDataUnit->Operation("insert into TBL_CHARACTER_INFO(ACCOUNT,SERVER,NAME,CLASS,SEX,VLEVEL,HAIR,CREATEDATE) "
 		"VALUES('%s', '%s', '%s', %u, %u, %u, %u, CURRENT_TIMESTAMP)",
-		pDesc->szAccount, pDesc->szServer, pDesc->szName, pDesc->btClass, pDesc->btSex, pDesc->btLevel, pDesc->btHair);
+		sAccount.c_str(), sServer.c_str(), sName.c_str(), pDesc->btClass, pDesc->btSex, pDesc->btLevel, pDesc->btHair);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
@@ -257,7 +564,7 @@ SERVER_ERROR CAppDB::CheckCharacterExist(const char* pszAccount, const char* psz
 	if (!xCheckCharname(pszName))return SE_SELCHAR_NOTEXIST;
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select ID from TBL_CHARACTER_INFO where server = '%s' and name = '%s'", pszServerName, pszName);
+	SERVER_ERROR ret = pDataUnit->Operation("select ID from TBL_CHARACTER_INFO where server = '%s' and name = '%s'", Escape(pszServerName).c_str(), Escape(pszName).c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	if (ret == SE_OK) return SE_SELCHAR_CHAREXIST;
 	return SE_SELCHAR_NOTEXIST;
@@ -268,9 +575,14 @@ SERVER_ERROR CAppDB::DelCharacter(const char* pszAccount, const char* pszServerN
 	SERVER_ERROR ret = CheckCharacterExist(pszAccount, pszServerName, pszName);
 	if (ret == SE_SELCHAR_CHAREXIST)
 	{
+		// 转义参数
+		std::string sAccount = Escape(pszAccount);
+		std::string sServer = Escape(pszServerName);
+		std::string sName = Escape(pszName);
+
 		CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-		ret = pDataUnit->Operation("update TBL_CHARACTER_INFO set DELFLAG = 1, deldate = CURRENT_TIMESTAMP where account = '%s' and server = '%s' and name = '%s'", pszAccount, pszServerName, pszName);
+		ret = pDataUnit->Operation("update TBL_CHARACTER_INFO set DELFLAG = 1, deldate = CURRENT_TIMESTAMP where account = '%s' and server = '%s' and name = '%s'", sAccount.c_str(), sServer.c_str(), sName.c_str());
 		m_pDBConnection->DelDataUnit(pDataUnit);
 	}
 	return ret;
@@ -285,13 +597,13 @@ SERVER_ERROR CAppDB::GetDelCharList(const char* pszAccount, const char* pszServe
 	}
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select NAME,CLASS,SEX,VLEVEL,HAIR,ODATE from TBL_CHARACTER_INFO where ACCOUNT = '%s' and SERVER = '%s' AND DELFLAG = 1", pszAccount, pszServerName);
+	SERVER_ERROR ret = pDataUnit->Operation("select NAME,CLASS,SEX,VLEVEL,HAIR,ODATE from TBL_CHARACTER_INFO where ACCOUNT = '%s' and SERVER = '%s' AND DELFLAG = 1", Escape(pszAccount).c_str(), Escape(pszServerName).c_str());
 	int count = 0;
 	if (ret == SE_OK)
 	{
 		SELECT_CHAR_LIST* clist = nullptr;
 		CHAR szDate[200] = { 0 };
-		CSystemTime	stTime[1];
+		CSystemTime	stTime[MAX_DELCHARLISTCOUNT];
 		do
 		{
 			clist = &pResult->charlist[count];
@@ -329,9 +641,14 @@ SERVER_ERROR CAppDB::RestoreCharacter(const char* pszAccount, const char* pszSer
 	SERVER_ERROR ret = CheckCharacterExist(pszAccount, pszServerName, pszName);
 	if (ret == SE_SELCHAR_CHAREXIST)
 	{
+		// 转义参数
+		std::string sAccount = Escape(pszAccount);
+		std::string sServer = Escape(pszServerName);
+		std::string sName = Escape(pszName);
+
 		CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-		ret = pDataUnit->Operation("update TBL_CHARACTER_INFO set DELFLAG = 0 where account = '%s' and server = '%s' and name = '%s'", pszAccount, pszServerName, pszName);
+		ret = pDataUnit->Operation("update TBL_CHARACTER_INFO set DELFLAG = 0 where account = '%s' and server = '%s' and name = '%s'", sAccount.c_str(), sServer.c_str(), sName.c_str());
 		m_pDBConnection->DelDataUnit(pDataUnit);
 	}
 	return ret;
@@ -345,10 +662,10 @@ SERVER_ERROR CAppDB::GetMapPosition(const char* pszAccount, const char* pszServe
 		CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 		int size = 32;
-		ret = pDataUnit->Operation("select MAPNAME,POSX,POSY from TBL_CHARACTER_INFO where account = '%s' and server = '%s' and name = '%s'", pszAccount, pszServerName, pszName);
+		ret = pDataUnit->Operation("select MAPNAME,POSX,POSY from TBL_CHARACTER_INFO where account = '%s' and server = '%s' and name = '%s'", Escape(pszAccount).c_str(), Escape(pszServerName).c_str(), Escape(pszName).c_str());
 		if (ret == SE_OK)
 		{
-			pDataUnit->GetData(1, SQL_C_CHAR, (LPVOID)pResult->szName, size);
+			pDataUnit->GetData(1, SQL_C_CHAR, pResult->szName.data(), size);
 			size = 0;
 			pDataUnit->GetData(2, SQL_SMALLINT, (LPVOID)&pResult->x, size);
 			size = 0;
@@ -376,7 +693,7 @@ SERVER_ERROR CAppDB::GetCharDBInfo(const char* pszAccount, const char* pszServer
 			"PERSONCODE, PERSONSIGN, TEMPRANK,"
 			"FLAG1, FLAG2, FLAG3, FLAG4, GUILDNAME, FORGEPOINT,"
 			"PROP1, PROP2, PROP3, PROP4, PROP5, PROP6, PROP7, PROP8"
-			" from TBL_CHARACTER_INFO where account = '%s' and server = '%s' and name = '%s'", pszAccount, pszServerName, pszName);
+			" from TBL_CHARACTER_INFO where account = '%s' and server = '%s' and name = '%s'", Escape(pszAccount).c_str(), Escape(pszServerName).c_str(), Escape(pszName).c_str());
 		if (ret == SE_OK)
 		{
 			strncpy(pInfo->szName, pszName, 18);
@@ -449,9 +766,16 @@ SERVER_ERROR CAppDB::GetCharDBInfo(const char* pszAccount, const char* pszServer
 SERVER_ERROR CAppDB::PutCharDBInfo(CHARDBINFO* pInfo)
 {
 	SERVER_ERROR ret = SE_FAIL;
-	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
-	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	ret = pDataUnit->Operation("update TBL_CHARACTER_INFO "
+
+	// 转义字符串参数
+	std::string sStartPoint = Escape(pInfo->szStartPoint);
+	std::string sPersonSign = Escape(pInfo->szPersonSign);
+	std::string sTempRank = Escape(pInfo->szTempRank);
+	std::string sGuildName = Escape(pInfo->szGuildName);
+
+	char szSQL[4096];
+	sprintf_s(szSQL, sizeof(szSQL),
+		"update TBL_CHARACTER_INFO "
 		"set VLEVEL = %d, MAPNAME = '%s', POSX = %d, POSY = %d, DIR = %u, ATTACKMODE = %u, HAIR = %u,"
 		"CUREXP = %d, HP = %d, MP = %d, MAXHP = %d, MAXMP = %d, MINDC = %u, MAXDC = %u,"
 		"MINMC = %u, MAXMC = %u, MINSC = %u, MAXSC = %u, MINAC = %u, MAXAC = %u,"
@@ -461,30 +785,22 @@ SERVER_ERROR CAppDB::PutCharDBInfo(CHARDBINFO* pInfo)
 		"FLAG1 = %d, FLAG2 = %d, FLAG3 = %d, FLAG4 = %d, GUILDNAME = '%s',FORGEPOINT = %d,"
 		"PROP1 = %d, PROP2 = %d, PROP3 = %d, PROP4 = %d, PROP5 = %d, PROP6 = %d, PROP7 = %d, PROP8 = %d"
 		" where ID = %u",
-		pInfo->wLevel, pInfo->szStartPoint, pInfo->x, pInfo->y, pInfo->dir, pInfo->btAttackMode, pInfo->btHair,
+		pInfo->wLevel, sStartPoint.c_str(), pInfo->x, pInfo->y, pInfo->dir, pInfo->btAttackMode, pInfo->btHair,
 		pInfo->dwCurExp, pInfo->hp, pInfo->mp, pInfo->maxhp, pInfo->maxmp, pInfo->mindc, pInfo->maxdc,
 		pInfo->minmc, pInfo->maxmc, pInfo->minsc, pInfo->maxsc, pInfo->minac, pInfo->maxac,
 		pInfo->minmac, pInfo->maxmac, pInfo->weight, pInfo->handweight, pInfo->bodyweight,
 		pInfo->nGameTime, pInfo->dwGold, pInfo->mapid, pInfo->dwYuanbao, pInfo->bBigGold, pInfo->bBigBag,
-		pInfo->wPersonCode, pInfo->szPersonSign, pInfo->szTempRank,
-		pInfo->dwFlag[0], pInfo->dwFlag[1], pInfo->dwFlag[2], pInfo->dwFlag[3], pInfo->szGuildName, pInfo->dwForgePoint,
+		pInfo->wPersonCode, sPersonSign.c_str(), sTempRank.c_str(),
+		pInfo->dwFlag[0], pInfo->dwFlag[1], pInfo->dwFlag[2], pInfo->dwFlag[3], sGuildName.c_str(), pInfo->dwForgePoint,
 		pInfo->dwProp[0], pInfo->dwProp[1], pInfo->dwProp[2], pInfo->dwProp[3], pInfo->dwProp[4], pInfo->dwProp[5], pInfo->dwProp[6], pInfo->dwProp[7],
 		pInfo->dwDBId
 	);
-	m_pDBConnection->DelDataUnit(pDataUnit);
-	return ret;
-}
 
-SERVER_ERROR CAppDB::GetFreeItemId(DWORD& dwItemIndex)
-{
+	// PutCharDBInfo是角色核心数据保存，始终立即执行，不走延迟写入
+	// 延迟写入可能导致崩溃时数据丢失
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select ID from TBL_CHARACTER_ITEM where DELFLAG = 1 LIMIT 1");
-	if (ret == SE_OK)
-	{
-		int size = 0;
-		ret = pDataUnit->GetData(1, SQL_INTEGER, &dwItemIndex, size);
-	}
+	ret = pDataUnit->Operation(szSQL);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
@@ -516,12 +832,22 @@ SERVER_ERROR CAppDB::FindItemId(DWORD dwOwner, BYTE btFlag, WORD wPos, DWORD dwF
 
 SERVER_ERROR CAppDB::UpgradeItem(DWORD dwMakeIndex, DWORD dwUpgrade)
 {
+	char szSQL[512];
+	sprintf_s(szSQL, sizeof(szSQL), "update TBL_CHARACTER_ITEM "
+		"set NEEDIDENTIFY = %d, FLAG = %u, FINDKEY = %u "
+		"where ID = %u", 1, IDF_UPGRADE, dwUpgrade, dwMakeIndex);
+
+	// 延迟写入
+	if (m_bDeferredWrite)
+	{
+		m_writeBuffer.Enqueue(szSQL);
+		return SE_OK;
+	}
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr)
 		return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_ITEM "
-		"set NEEDIDENTIFY = %d, FLAG = %u, FINDKEY = %u "
-		"where ID = %u", 1, IDF_UPGRADE, dwUpgrade, dwMakeIndex);
+	SERVER_ERROR ret = pDataUnit->Operation(szSQL);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
@@ -532,7 +858,7 @@ SERVER_ERROR CAppDB::CreateItem(DWORD dwOwner, BYTE	btFlag, WORD wPos, ITEM* pIt
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 	char szName[32];
 	char szFullName[32];
-	DWORD FindKey = static_cast<DWORD>(Getrand(0x7fffffff)) | timeGetTime();
+	DWORD FindKey = static_cast<DWORD>(Getrand(0x7fffffff)) | CFrameTime::GetFrameTime();
 	o_strncpy(szName, pItem->baseitem.szName, 14);
 	o_strncpy(szFullName, pItem->szFullName, 16);
 	// 将 btItemExt 转换为 HEX 字符串
@@ -541,6 +867,10 @@ SERVER_ERROR CAppDB::CreateItem(DWORD dwOwner, BYTE	btFlag, WORD wPos, ITEM* pIt
 	{
 		sprintf_s(&szExtHex[i * 2], 3, "%02X", (unsigned char)pItem->btItemExt[i]);
 	}
+	// 转义物品名称
+	std::string sName = Escape(szName);
+	std::string sFullName = Escape(szFullName);
+
 	SERVER_ERROR ret = pDataUnit->Operation("insert into TBL_CHARACTER_ITEM( "
 		"OWNERID,NAME,FULLNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
 		"MINMAC,MAXMAC,DURA,CURDURA,MAXDURA,NEEDTYPE,NEEDLEVEL,SPECIALPOWER,NEEDIDENTIFY,"
@@ -549,7 +879,7 @@ SERVER_ERROR CAppDB::CreateItem(DWORD dwOwner, BYTE	btFlag, WORD wPos, ITEM* pIt
 		"%u,'%s','%s',%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,UNHEX('%s'),CURRENT_TIMESTAMP)",
-		dwOwner, szName, szFullName, pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
+		dwOwner, sName.c_str(), sFullName.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
 		pItem->baseitem.btMinSouAtk, pItem->baseitem.btMaxSouAtk, pItem->baseitem.btMinDef, pItem->baseitem.btMaxDef,
 		pItem->baseitem.btMinMagDef, pItem->baseitem.btMaxMagDef, pItem->baseitem.wMaxDura, pItem->wCurDura, pItem->wMaxDura, pItem->baseitem.needtype,
 		pItem->baseitem.needvalue, pItem->baseitem.btSpecialpower, pItem->baseitem.bNeedIdentify, pItem->baseitem.btWeight,
@@ -576,6 +906,10 @@ SERVER_ERROR CAppDB::CreateItemEx(DWORD dwOwner, BYTE btFlag, WORD wPos, ITEM* p
 	{
 		sprintf_s(&szExtHex[i * 2], 3, "%02X", (unsigned char)pItem->btItemExt[i]);
 	}
+	// 转义物品名称
+	std::string sName2 = Escape(szName);
+	std::string sFullName2 = Escape(szFullName);
+
 	SERVER_ERROR ret = pDataUnit->Operation("insert into TBL_CHARACTER_ITEM("
 		"OWNERID,NAME,FULLNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
 		"MINMAC,MAXMAC,DURA,CURDURA,MAXDURA,NEEDTYPE,NEEDLEVEL,SPECIALPOWER,NEEDIDENTIFY,"
@@ -584,7 +918,7 @@ SERVER_ERROR CAppDB::CreateItemEx(DWORD dwOwner, BYTE btFlag, WORD wPos, ITEM* p
 		"%u,'%s','%s',%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,UNHEX('%s'),CURRENT_TIMESTAMP)",
-		dwOwner, szName, szFullName, pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
+		dwOwner, sName2.c_str(), sFullName2.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
 		pItem->baseitem.btMinSouAtk, pItem->baseitem.btMaxSouAtk, pItem->baseitem.btMinDef, pItem->baseitem.btMaxDef,
 		pItem->baseitem.btMinMagDef, pItem->baseitem.btMaxMagDef, pItem->baseitem.wMaxDura, pItem->wCurDura, pItem->wMaxDura, pItem->baseitem.needtype,
 		pItem->baseitem.needvalue, pItem->baseitem.btSpecialpower, pItem->baseitem.bNeedIdentify, pItem->baseitem.btWeight,
@@ -609,39 +943,73 @@ SERVER_ERROR CAppDB::UpdateItem(DWORD	dwOwner, BYTE	btFlag, WORD wPos, ITEM* pIt
 	{
 		sprintf_s(&szExtHex[i * 2], 3, "%02X", (unsigned char)pItem->btItemExt[i]);
 	}
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_ITEM "
+
+	// 转义物品名称
+	std::string sName = Escape(szName);
+	std::string sFullName = Escape(szFullName);
+
+	char szSQL[4096];
+	sprintf_s(szSQL, sizeof(szSQL), "update TBL_CHARACTER_ITEM "
 		"set OWNERID = %u, NAME = '%s', FULLNAME = '%s', MINDC = %u, MAXDC = %u, MINMC = %u, MAXMC = %u, MINSC = %u, MAXSC = %u, MINAC = %u, MAXAC = %u, "
 		"MINMAC = %u, MAXMAC = %u, DURA = %u, CURDURA = %u, MAXDURA = %u, NEEDTYPE = %u, NEEDLEVEL = %u, SPECIALPOWER = %u, NEEDIDENTIFY = %u, "
 		"WEIGHT = %u, STDMODE = %d, SHAPE = %u, PRICE = %u, UNKNOWN_1 = %u, UNKNOWN_2 = %u, FLAG = %u, POS = %u, FINDKEY = %u, IMAGEINDEX = %u, EXT = UNHEX('%s'), DELFLAG = 0 "
 		"where ID = %u",
-		dwOwner, szName, szFullName, pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
+		dwOwner, sName.c_str(), sFullName.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
 		pItem->baseitem.btMinSouAtk, pItem->baseitem.btMaxSouAtk, pItem->baseitem.btMinDef, pItem->baseitem.btMaxDef,
 		pItem->baseitem.btMinMagDef, pItem->baseitem.btMaxMagDef, pItem->baseitem.wMaxDura, pItem->wCurDura, pItem->wMaxDura, pItem->baseitem.needtype,
 		pItem->baseitem.needvalue, pItem->baseitem.btSpecialpower, pItem->baseitem.bNeedIdentify, pItem->baseitem.btWeight,
 		pItem->baseitem.btStdMode, pItem->baseitem.btShape, pItem->baseitem.nPrice, pItem->baseitem.btPriceType, pItem->baseitem.wFeature,
 		btFlag, wPos, pItem->dwParam[0], pItem->baseitem.wImageIndex, szExtHex, pItem->dwMakeIndex
 	);
+
+	// 延迟写入
+	if (m_bDeferredWrite)
+	{
+		m_writeBuffer.Enqueue(szSQL);
+		m_pDBConnection->DelDataUnit(pDataUnit);
+		return SE_OK;
+	}
+
+	SERVER_ERROR ret = pDataUnit->Operation(szSQL);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::DeleteItem(DWORD dwItemIndex)
 {
+	char szSQL[256];
+	sprintf_s(szSQL, sizeof(szSQL), "DELETE FROM TBL_CHARACTER_ITEM where ID = %u", dwItemIndex);
+
+	// 延迟写入
+	if (m_bDeferredWrite)
+	{
+		m_writeBuffer.Enqueue(szSQL);
+		return SE_OK;
+	}
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("DELETE FROM TBL_CHARACTER_ITEM "
-		"where ID = %u", dwItemIndex);
+	SERVER_ERROR ret = pDataUnit->Operation(szSQL);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::UpdateItemPos(DWORD dwItemIndex, BYTE btFlag, WORD wPos)
 {
+	char szSQL[256];
+	sprintf_s(szSQL, sizeof(szSQL), "update TBL_CHARACTER_ITEM "
+		"set FLAG = %u, POS = %u where ID = %u", btFlag, wPos, dwItemIndex);
+
+	// 延迟写入
+	if (m_bDeferredWrite)
+	{
+		m_writeBuffer.Enqueue(szSQL);
+		return SE_OK;
+	}
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_ITEM "
-		"set FLAG = %u, POS = %u "
-		"where ID = %u", btFlag, wPos, dwItemIndex);
+	SERVER_ERROR ret = pDataUnit->Operation(szSQL);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
@@ -657,17 +1025,29 @@ SERVER_ERROR CAppDB::UpdateItemPosEx(BYTE btFlag, WORD wCount, BAGITEMPOS* pItem
 
 SERVER_ERROR CAppDB::UpdateItemOwner(DWORD dwItemIndex, DWORD dwOwner, BYTE btFlag, WORD wPos)
 {
+	char szSQL[256];
+	sprintf_s(szSQL, sizeof(szSQL), "update TBL_CHARACTER_ITEM "
+		"set OWNERID = %u,FLAG = %u, POS = %u where ID = %u", dwOwner, btFlag, wPos, dwItemIndex);
+
+	// 延迟写入
+	if (m_bDeferredWrite)
+	{
+		m_writeBuffer.Enqueue(szSQL);
+		return SE_OK;
+	}
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_ITEM "
-		"set OWNERID = %u,FLAG = %u, POS = %u "
-		"where ID = %u", dwOwner, btFlag, wPos, dwItemIndex);
+	SERVER_ERROR ret = pDataUnit->Operation(szSQL);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::QueryItems(DWORD dwOwner, BYTE	btFlag, DBITEM* pItemBuffer, int& count)
 {
+	// 防止恶意传入超大count导致内存越界
+	if (count > 100) count = 100;
+	if (count <= 0) { count = 0; return SE_OK; }
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	int getcount = 0;
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
@@ -717,7 +1097,8 @@ SERVER_ERROR CAppDB::QueryItems(DWORD dwOwner, BYTE	btFlag, DBITEM* pItemBuffer,
 			pDataUnit->GetValue(p->item.baseitem.wImageIndex);
 			pDataUnit->GetValue(szExtHex, 721);
 			// 将 HEX 字符串转换回二进制数据
-			for (int i = 0; i < 360 && szExtHex[i * 2] != '\0'; i++)
+			int extLen = 360; // btItemExt数组大小
+			for (int i = 0; i < extLen && szExtHex[i * 2] != '\0' && szExtHex[i * 2 + 1] != '\0'; i++)
 			{
 				char high = szExtHex[i * 2];
 				char low = szExtHex[i * 2 + 1];
@@ -822,15 +1203,14 @@ SERVER_ERROR CAppDB::QueryMagic(DWORD dwOwner, MAGICDB* pMagicArray, int& count)
 	if (ret == SE_DB_NOMOREDATA)
 		ret = SE_OK, count = 0;
 	else
-		qsort(pMagicArray, count, sizeof(MAGICDB), (int(*)(const void*, const void*))qsort_cmpmagic);
+		qsort(pMagicArray, count, sizeof(MAGICDB), (int(*)(const VOID*, const VOID*))qsort_cmpmagic);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::UpdateCommunity(DWORD dwOwner, const char* pszCommunity)
 {
-	char* szText = g_szTempBuffer;
-	o_strncpy(szText, pszCommunity, 65535);
-	xStringsExpander<200> community((char*)szText, '/');
+	std::string szText(pszCommunity);
+	xStringsExpander<200> community(&szText[0], '/');
 
 	char* name;
 	char* wife;
@@ -854,6 +1234,11 @@ SERVER_ERROR CAppDB::UpdateCommunity(DWORD dwOwner, const char* pszCommunity)
 	SERVER_ERROR ret = SE_OK;
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+
+	// 转义所有字符串参数
+	std::string sName = Escape(name);
+
+	// 更新/插入主表 TBL_CHARACTER_COMMUNITY
 	ret = pDataUnit->Operation("select * from TBL_CHARACTER_COMMUNITY where OWNERID = %u LIMIT 1", dwOwner);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 
@@ -862,250 +1247,263 @@ SERVER_ERROR CAppDB::UpdateCommunity(DWORD dwOwner, const char* pszCommunity)
 
 	if (ret == SE_OK)
 	{
-		ret = pDataUnit->Operation("update TBL_CHARACTER_COMMUNITY "
-			"set name = '%s',marriage = '%s',master = '%s',"
-			"student1 = '%s',student2 = '%s',student3 = '%s',"
-			"friend1 = '%s',friend2 = '%s',friend3 = '%s',friend4 = '%s',friend5 = '%s',friend6 = '%s',friend7 = '%s',friend8 = '%s',friend9 = '%s',friend10 = '%s',"
-			"friend11 = '%s',friend12 = '%s',friend13 = '%s',friend14 = '%s',friend15 = '%s',friend16 = '%s',friend17 = '%s',friend18 = '%s',friend19 = '%s',friend20 = '%s',"
-			"friend21 = '%s',friend22 = '%s',friend23 = '%s',friend24 = '%s',friend25 = '%s',friend26 = '%s',friend27 = '%s',friend28 = '%s',friend29 = '%s',friend30 = '%s',"
-			"friend31 = '%s',friend32 = '%s'"
-			" WHERE OWNERID = %d",
-			name, wife, master,
-			students[0], students[1], students[2],
-			friends[0], friends[1], friends[2], friends[3], friends[4], friends[5], friends[6], friends[7], friends[8], friends[9],
-			friends[10], friends[11], friends[12], friends[13], friends[14], friends[15], friends[16], friends[17], friends[18], friends[19],
-			friends[20], friends[21], friends[22], friends[23], friends[24], friends[25], friends[26], friends[27], friends[28], friends[29],
-			friends[30], friends[31],
-			dwOwner);
+		ret = pDataUnit->Operation("update TBL_CHARACTER_COMMUNITY set name = '%s' WHERE OWNERID = %d",
+			sName.c_str(), dwOwner);
 	}
 	else
 	{
-		ret = pDataUnit->Operation("insert into TBL_CHARACTER_COMMUNITY("
-			"OWNERID,name,marriage,master,"
-			"student1,student2,student3,"
-			"friend1,friend2,friend3,friend4,friend5,friend6,friend7,friend8,friend9,friend10,"
-			"friend11,friend12,friend13,friend14,friend15,friend16,friend17,friend18,friend19,friend20,"
-			"friend21,friend22,friend23,friend24,friend25,friend26,friend27,friend28,friend29,friend30,"
-			"friend31,friend32"
-			") VALUES(%d,'%s','%s','%s',"
-			"'%s','%s','%s',"
-			"'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',"
-			"'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',"
-			"'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',"
-			"'%s','%s'"
-			")",
-			dwOwner, name, wife, master,
-			students[0], students[1], students[2],
-			friends[0], friends[1], friends[2], friends[3], friends[4], friends[5], friends[6], friends[7], friends[8], friends[9],
-			friends[10], friends[11], friends[12], friends[13], friends[14], friends[15], friends[16], friends[17], friends[18], friends[19],
-			friends[20], friends[21], friends[22], friends[23], friends[24], friends[25], friends[26], friends[27], friends[28], friends[29],
-			friends[30], friends[31]);
+		ret = pDataUnit->Operation("insert into TBL_CHARACTER_COMMUNITY(OWNERID,name) VALUES(%d,'%s')",
+			dwOwner, sName.c_str());
 	}
 	m_pDBConnection->DelDataUnit(pDataUnit);
-	return ret;
+	if (ret != SE_OK) return ret;
+
+	// 先清除旧的好友关系，再批量插入
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_FRIEND where character_id = %d", dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	if (ret != SE_OK && ret != SE_DB_NOMOREDATA) return ret;
+
+	for (int i = 0; i < 32; i++)
+	{
+		if (friends[i] == nullptr || friends[i][0] == 0) continue;
+		std::string sFriend = Escape(friends[i]);
+		pDataUnit = m_pDBConnection->GetDataUnit();
+		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+		ret = pDataUnit->Operation("insert into TBL_CHARACTER_FRIEND(character_id,friend_name,friend_order) VALUES(%d,'%s',%d)",
+			dwOwner, sFriend.c_str(), i);
+		m_pDBConnection->DelDataUnit(pDataUnit);
+		if (ret != SE_OK) return ret;
+	}
+
+	// 先清除旧的师徒关系，再批量插入
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_STUDENT where character_id = %d", dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	if (ret != SE_OK && ret != SE_DB_NOMOREDATA) return ret;
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (students[i] == nullptr || students[i][0] == 0) continue;
+		std::string sStudent = Escape(students[i]);
+		pDataUnit = m_pDBConnection->GetDataUnit();
+		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+		ret = pDataUnit->Operation("insert into TBL_CHARACTER_STUDENT(character_id,student_name,student_order) VALUES(%d,'%s',%d)",
+			dwOwner, sStudent.c_str(), i);
+		m_pDBConnection->DelDataUnit(pDataUnit);
+		if (ret != SE_OK) return ret;
+	}
+
+	// 先清除旧的婚姻关系，再插入
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_MARRIAGE where character_id = %d", dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	if (ret != SE_OK && ret != SE_DB_NOMOREDATA) return ret;
+
+	if (wife != nullptr && wife[0] != 0)
+	{
+		std::string sWife = Escape(wife);
+		pDataUnit = m_pDBConnection->GetDataUnit();
+		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+		ret = pDataUnit->Operation("insert into TBL_CHARACTER_MARRIAGE(character_id,spouse_name) VALUES(%d,'%s')",
+			dwOwner, sWife.c_str());
+		m_pDBConnection->DelDataUnit(pDataUnit);
+		if (ret != SE_OK) return ret;
+	}
+
+	// 处理师傅（一人一个师傅）
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_MASTER where character_id = %d", dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	if (ret != SE_OK && ret != SE_DB_NOMOREDATA) return ret;
+
+	if (master != nullptr && master[0] != 0)
+	{
+		std::string sMaster = Escape(master);
+		pDataUnit = m_pDBConnection->GetDataUnit();
+		if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+		ret = pDataUnit->Operation("insert into TBL_CHARACTER_MASTER(character_id,master_name) VALUES(%d,'%s')",
+			dwOwner, sMaster.c_str());
+		m_pDBConnection->DelDataUnit(pDataUnit);
+		if (ret != SE_OK) return ret;
+	}
+
+	return SE_OK;
 }
 
 typedef char SHORTNAME[64];
 SERVER_ERROR CAppDB::QueryCommunity(DWORD dwOwner, char* pszCommunity, int& iBufferSize)
 {
+	xPacketPool::ScopedPacket packet(pszCommunity, iBufferSize);
+
+	// 查主表确认角色存在
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select * "
-		"FROM TBL_CHARACTER_COMMUNITY "
-		"where OWNERID = %d", dwOwner);
-	SHORTNAME friends[32] = { 0 };
-	SHORTNAME wife;
-	SHORTNAME master;
-	SHORTNAME students[3] = { 0 };
-	SHORTNAME name;
-	xPacket packet(pszCommunity, iBufferSize);
-	if (ret == SE_OK)
-	{
-		pDataUnit->GetValue(dwOwner);
-		pDataUnit->GetValue(name, 64);
-		//	wife
-		pDataUnit->GetValue(wife, 64);
-		packet.push((LPVOID)wife, static_cast<int>(strlen(wife)));
-		packet.push((LPVOID)"/", 1);
-		//	wife
-		pDataUnit->GetValue(master, 64);
-		packet.push((LPVOID)master, static_cast<int>(strlen(master)));
-		packet.push((LPVOID)"/", 1);
-		//	student~
-		pDataUnit->GetValue(students[0], 64);
-		pDataUnit->GetValue(students[1], 64);
-		pDataUnit->GetValue(students[2], 64);
-		for (int i = 0; i < 3; i++)
-		{
-			packet.push((LPVOID)students[i], static_cast<int>(strlen(students[i])));
-			packet.push((LPVOID)"/", 1);
-		}
-		//	friends
-		pDataUnit->GetValue(friends[0], 64);
-		pDataUnit->GetValue(friends[1], 64);
-		pDataUnit->GetValue(friends[2], 64);
-		pDataUnit->GetValue(friends[3], 64);
-		pDataUnit->GetValue(friends[4], 64);
-		pDataUnit->GetValue(friends[5], 64);
-		pDataUnit->GetValue(friends[6], 64);
-		pDataUnit->GetValue(friends[7], 64);
-		pDataUnit->GetValue(friends[8], 64);
-		pDataUnit->GetValue(friends[9], 64);
-		pDataUnit->GetValue(friends[10], 64);
-		pDataUnit->GetValue(friends[11], 64);
-		pDataUnit->GetValue(friends[12], 64);
-		pDataUnit->GetValue(friends[13], 64);
-		pDataUnit->GetValue(friends[14], 64);
-		pDataUnit->GetValue(friends[15], 64);
-		pDataUnit->GetValue(friends[16], 64);
-		pDataUnit->GetValue(friends[17], 64);
-		pDataUnit->GetValue(friends[18], 64);
-		pDataUnit->GetValue(friends[19], 64);
-		pDataUnit->GetValue(friends[20], 64);
-		pDataUnit->GetValue(friends[21], 64);
-		pDataUnit->GetValue(friends[22], 64);
-		pDataUnit->GetValue(friends[23], 64);
-		pDataUnit->GetValue(friends[24], 64);
-		pDataUnit->GetValue(friends[25], 64);
-		pDataUnit->GetValue(friends[26], 64);
-		pDataUnit->GetValue(friends[27], 64);
-		pDataUnit->GetValue(friends[28], 64);
-		pDataUnit->GetValue(friends[29], 64);
-		pDataUnit->GetValue(friends[30], 64);
-		pDataUnit->GetValue(friends[31], 64);
-		for (int i = 0; i < 32; i++)
-		{
-			packet.push((LPVOID)friends[i], static_cast<int>(strlen(friends[i])));
-			packet.push((LPVOID)"/", 1);
-		}
-		packet.push((LPVOID)"\0", 1);
-	}
+	SERVER_ERROR ret = pDataUnit->Operation("select OWNERID FROM TBL_CHARACTER_COMMUNITY where OWNERID = %d", dwOwner);
 	m_pDBConnection->DelDataUnit(pDataUnit);
-	if (ret == SE_DB_NOMOREDATA)
+	if (ret != SE_OK)
 	{
 		strcpy(pszCommunity, "//////////////////////////////////////");
 		iBufferSize = static_cast<int>(strlen(pszCommunity));
 		return SE_OK;
 	}
-	iBufferSize = static_cast<int>(packet.getsize());
-	return ret;
+
+	// 查婚姻关系
+	SHORTNAME wife = { 0 };
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("select spouse_name from TBL_CHARACTER_MARRIAGE where character_id = %d", dwOwner);
+	if (ret == SE_OK) { pDataUnit->GetValue(wife, 64); }
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	packet->push((LPVOID)wife, static_cast<int>(strlen(wife)));
+	packet->push((LPVOID)"/", 1);
+
+	// 查师傅
+	SHORTNAME master = { 0 };
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("select master_name from TBL_CHARACTER_MASTER where character_id = %d", dwOwner);
+	if (ret == SE_OK) { pDataUnit->GetValue(master, 64); }
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	packet->push((LPVOID)master, static_cast<int>(strlen(master)));
+	packet->push((LPVOID)"/", 1);
+
+	// 查徒弟（按排序取前3个）
+	SHORTNAME students[3] = { 0 };
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("select student_name from TBL_CHARACTER_STUDENT where character_id = %d order by student_order limit 3", dwOwner);
+	if (ret == SE_OK)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			pDataUnit->GetValue(students[i], 64);
+			if (pDataUnit->MoveNext() != SE_OK) break;
+		}
+	}
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	for (int i = 0; i < 3; i++)
+	{
+		packet->push((LPVOID)students[i], static_cast<int>(strlen(students[i])));
+		packet->push((LPVOID)"/", 1);
+	}
+
+	// 查好友（按排序取前32个）
+	SHORTNAME friends[32] = { 0 };
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("select friend_name from TBL_CHARACTER_FRIEND where character_id = %d order by friend_order limit 32", dwOwner);
+	if (ret == SE_OK)
+	{
+		for (int i = 0; i < 32; i++)
+		{
+			pDataUnit->GetValue(friends[i], 64);
+			if (pDataUnit->MoveNext() != SE_OK) break;
+		}
+	}
+	m_pDBConnection->DelDataUnit(pDataUnit);
+	for (int i = 0; i < 32; i++)
+	{
+		packet->push((LPVOID)friends[i], static_cast<int>(strlen(friends[i])));
+		packet->push((LPVOID)"/", 1);
+	}
+
+	packet->push((LPVOID)"\0", 1);
+	iBufferSize = static_cast<int>(packet->getsize());
+	return SE_OK;
 }
 
 SERVER_ERROR CAppDB::DeleteMarriage(const char* pszName, const char* pszMarriage)
 {
+	// 转义参数
+	std::string sName = Escape(pszName);
+	std::string sMarriage = Escape(pszMarriage);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_COMMUNITY set marriage = '' where Name = '%s' and marriage = '%s'", pszName, pszMarriage);
+	SERVER_ERROR ret = pDataUnit->Operation("select OWNERID from TBL_CHARACTER_COMMUNITY where Name = '%s'", sName.c_str());
+	if (ret != SE_OK) { m_pDBConnection->DelDataUnit(pDataUnit); return ret; }
+	DWORD dwOwner = 0;
+	pDataUnit->GetValue(dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_MARRIAGE where character_id = %d and spouse_name = '%s'", dwOwner, sMarriage.c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::DeleteTeacher(const char* pszName, const char* pszTeacher)
 {
+	// 转义参数
+	std::string sName = Escape(pszName);
+	std::string sTeacher = Escape(pszTeacher);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_COMMUNITY set master = '' where Name = '%s' and master = '%s'", pszName, pszTeacher);
+	SERVER_ERROR ret = pDataUnit->Operation("select OWNERID from TBL_CHARACTER_COMMUNITY where Name = '%s'", sName.c_str());
+	if (ret != SE_OK) { m_pDBConnection->DelDataUnit(pDataUnit); return ret; }
+	DWORD dwOwner = 0;
+	pDataUnit->GetValue(dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_MASTER where character_id = %d and master_name = '%s'", dwOwner, sTeacher.c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::DeleteStudent(const char* pszTeacher, const char* pszStudent)
 {
+	// 转义参数
+	std::string sTeacher = Escape(pszTeacher);
+	std::string sStudent = Escape(pszStudent);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SHORTNAME studentname;
-	DWORD dwOwner;
-	SERVER_ERROR ret = pDataUnit->Operation("select "
-		"ownerid,"
-		"student1,student2,student3 "
-		"from TBL_CHARACTER_COMMUNITY where Name = '%s'", pszTeacher);
-	if (ret == SE_OK)
-	{
-		pDataUnit->GetValue(dwOwner);
-		for (int i = 0; i < 3; i++)
-		{
-			pDataUnit->GetValue(studentname, 64);
-			if (strcmp(pszStudent, studentname) == 0)
-			{
-				m_pDBConnection->DelDataUnit(pDataUnit);
-				pDataUnit = m_pDBConnection->GetDataUnit();
-				if (pDataUnit)
-					ret = pDataUnit->Operation("update TBL_CHARACTER_COMMUNITY set student%d = '' where ownerid = %d", i + 1, dwOwner);
-				else
-					return SE_ALLOCMEMORYFAIL;
-				break;
-			}
-		}
-	}
+	SERVER_ERROR ret = pDataUnit->Operation("select OWNERID from TBL_CHARACTER_COMMUNITY where Name = '%s'", sTeacher.c_str());
+	if (ret != SE_OK) { m_pDBConnection->DelDataUnit(pDataUnit); return ret; }
+	DWORD dwOwner = 0;
+	pDataUnit->GetValue(dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_STUDENT where character_id = %d and student_name = '%s'", dwOwner, sStudent.c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::BreakFriend(const char* friend1, const char* friend2)
 {
+	// 转义参数
+	std::string sFriend1 = Escape(friend1);
+	std::string sFriend2 = Escape(friend2);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SHORTNAME friendname;
-	DWORD dwOwner;
-	SERVER_ERROR ret = pDataUnit->Operation("select "
-		"ownerid,"
-		"friend1,"
-		"friend2,"
-		"friend3,"
-		"friend4,"
-		"friend5,"
-		"friend6,"
-		"friend7,"
-		"friend8,"
-		"friend9,"
-		"friend10,"
-		"friend11,"
-		"friend12,"
-		"friend13,"
-		"friend14,"
-		"friend15,"
-		"friend16,"
-		"friend17,"
-		"friend18,"
-		"friend19,"
-		"friend20,"
-		"friend21,"
-		"friend22,"
-		"friend23,"
-		"friend24,"
-		"friend25,"
-		"friend26,"
-		"friend27,"
-		"friend28,"
-		"friend29,"
-		"friend30,"
-		"friend31,"
-		"friend32  "
-		"from TBL_CHARACTER_COMMUNITY where Name = '%s'", friend1);
-	if (ret == SE_OK)
-	{
-		pDataUnit->GetValue(dwOwner);
-		for (int i = 0; i < 32; i++)
-		{
-			pDataUnit->GetValue(friendname, 64);
-			if (strcmp(friend2, friendname) == 0)
-			{
-				m_pDBConnection->DelDataUnit(pDataUnit);
-				pDataUnit = m_pDBConnection->GetDataUnit();
-				if (pDataUnit)
-					ret = pDataUnit->Operation("update TBL_CHARACTER_COMMUNITY set friend%d = '' where ownerid = %d", i + 1, dwOwner);
-				else
-					return SE_ALLOCMEMORYFAIL;
-				break;
-			}
-		}
-	}
+	SERVER_ERROR ret = pDataUnit->Operation("select OWNERID from TBL_CHARACTER_COMMUNITY where Name = '%s'", sFriend1.c_str());
+	if (ret != SE_OK) { m_pDBConnection->DelDataUnit(pDataUnit); return ret; }
+	DWORD dwOwner = 0;
+	pDataUnit->GetValue(dwOwner);
+	m_pDBConnection->DelDataUnit(pDataUnit);
+
+	pDataUnit = m_pDBConnection->GetDataUnit();
+	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
+	ret = pDataUnit->Operation("delete from TBL_CHARACTER_FRIEND where character_id = %d and friend_name = '%s'", dwOwner, sFriend2.c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 VOID CAppDB::DoInit()
 {
+	if (m_pDBConnection == nullptr) return;
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return;
 	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_ITEM "
@@ -1113,23 +1511,30 @@ VOID CAppDB::DoInit()
 		"where FLAG = %u", IDF_GROUND);
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	if (ret == SE_OK)
-		CServer::GetInstance()->GetIoConsole()->OutPut(SUCCESS_GREEN, "垃圾物品清理完毕!\n");
+		PRINT(SUCCESS_GREEN, "垃圾物品清理完毕!\n");
 }
 
 SERVER_ERROR CAppDB::RestoreGuild(const char* name, const char* guildname)
 {
+	// 转义参数
+	std::string sName = Escape(name);
+	std::string sGuildName = Escape(guildname);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("update tbl_character_info set guildname = '%s' where name = '%s'", guildname, name);
+	SERVER_ERROR ret = pDataUnit->Operation("update tbl_character_info set guildname = '%s' where name = '%s'", sGuildName.c_str(), sName.c_str());
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
 SERVER_ERROR CAppDB::AddCredit(const char* pszName, UINT nCount)
 {
+	// 转义参数
+	std::string sName = Escape(pszName);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select flag1 from tbl_character_info where name = '%s'", pszName);
+	SERVER_ERROR ret = pDataUnit->Operation("select flag1 from tbl_character_info where name = '%s'", sName.c_str());
 	if (ret == SE_OK)
 	{
 		DWORD dwCredit;
@@ -1149,55 +1554,27 @@ SERVER_ERROR CAppDB::AddCredit(const char* pszName, UINT nCount)
 
 SERVER_ERROR CAppDB::UpdateCharacterGuildName(const char* pszName, const char* pszGuildName)
 {
+	// 转义参数
+	std::string sName = Escape(pszName);
+	std::string sGuildName = Escape(pszGuildName);
+
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-	SERVER_ERROR ret = pDataUnit->Operation("select GUILDNAME from tbl_character_info where name = '%s'", pszName);
+	SERVER_ERROR ret = pDataUnit->Operation("select GUILDNAME from tbl_character_info where name = '%s'", sName.c_str());
 	if (ret == SE_OK)
 	{
 		m_pDBConnection->DelDataUnit(pDataUnit);
 		pDataUnit = m_pDBConnection->GetDataUnit();
-		ret = pDataUnit->Operation("update tbl_character_info set GUILDNAME = '%s'", pszGuildName);
+		ret = pDataUnit->Operation("update tbl_character_info set GUILDNAME = '%s'", sGuildName.c_str());
 	}
 	m_pDBConnection->DelDataUnit(pDataUnit);
 	return ret;
 }
 
-static DWORD GetSqlRecordSize(EXECSQLRECORD* pRecord)
-{
-	DWORD dwSize = 0;
-	for (UINT i = 0; i < pRecord->dwColCount; i++)
-	{
-		switch (pRecord->coldef[i].type)
-		{
-		case CT_STRING:			//	字符串
-			dwSize += pRecord->coldef[i].length;
-			break;
-		case CT_TINYINT:		//	8位整数
-			dwSize += sizeof(BYTE);
-			break;
-		case CT_SMALLINT:		//	16位整数
-			dwSize += sizeof(WORD);
-			break;
-		case CT_INTEGER:		//	32位整数
-			dwSize += sizeof(DWORD);
-			break;
-		case CT_BIGINT:			//	64位整数
-			dwSize += sizeof(__int64);
-			break;
-		case CT_DATETIME:		//	时间
-			dwSize += sizeof(SYSTEMTIME);
-			break;
-		case CT_CODEDARRAY:		//	编码存的数据		
-			dwSize += pRecord->coldef[i].length;
-			break;
-		}
-	}
-	return dwSize;
-}
-
 SERVER_ERROR CAppDB::ExecSqlCommand(DWORD dwTransId, const char* pszCommand, EXECSQLRECORD* pRecordDef, xPacket& packet)
 {
-	char* szBuffer = g_szTempBuffer;
+	std::vector<char> szBufferVec(65536);
+	char* szBuffer = szBufferVec.data();
 	packet.clear();
 	packet.push(&dwTransId, sizeof(dwTransId));
 	packet.push(sizeof(DWORD) * 2);
@@ -1302,7 +1679,7 @@ SERVER_ERROR CAppDB::ExecSqlCommand(DWORD dwTransId, const char* pszCommand, EXE
 					}
 					else
 					{
-						memset((void*)packet.getfreebuf(), 0, pRecordDef->coldef[i].length);
+						memset((VOID*)packet.getfreebuf(), 0, pRecordDef->coldef[i].length);
 					}
 					packet.addsize(pRecordDef->coldef[i].length);
 				}
@@ -1332,11 +1709,11 @@ SERVER_ERROR CAppDB::DeleteMagic(DWORD dwOwner, WORD wId)
 	return ret;
 }
 
-static constexpr int TASK_BINARY_SIZE = sizeof(TASKNODE) * MAX_TASK;
-static void SerializeTasksBinary(TASKINFO* pInfo, BYTE* pBuffer, int bufferSize)
+static constexpr UINT TASK_BINARY_SIZE = sizeof(TASKNODE) * MAX_TASK;
+static VOID SerializeTasksBinary(TASKINFO* pInfo, BYTE* pBuffer, UINT bufferSize)
 {
 	memset(pBuffer, 0, bufferSize);
-	int offset = 0;
+	UINT offset = 0;
 	for (int i = 0; i < MAX_TASK; i++)
 	{
 		memcpy(pBuffer + offset, &pInfo->tasks[i].wTaskId, sizeof(WORD));
@@ -1356,9 +1733,9 @@ static void SerializeTasksBinary(TASKINFO* pInfo, BYTE* pBuffer, int bufferSize)
 	}
 }
 
-static void DeserializeTasksBinary(const BYTE* pData, int dataSize, TASKINFO* pInfo)
+static VOID DeserializeTasksBinary(const BYTE* pData, UINT dataSize, TASKINFO* pInfo)
 {
-	int offset = 0;
+	UINT offset = 0;
 	for (int i = 0; i < MAX_TASK; i++)
 	{
 		memcpy(&pInfo->tasks[i].wTaskId, pData + offset, sizeof(WORD));
@@ -1415,7 +1792,10 @@ SERVER_ERROR CAppDB::InstertTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 	CMySQLDBConnection* pMySQLConn = (CMySQLDBConnection*)m_pDBConnection;
 	MYSQL* pMySQL = pMySQLConn->GetConnectionHandle();
 	if (pMySQL == nullptr)
+	{
+		m_pDBConnection->DelDataUnit(pDataUnit);
 		return SE_FAIL;
+	}
 	SerializeTasksBinary(pInfo, g_szTasksBinary, sizeof(g_szTasksBinary));
 	std::string hexString;
 	hexString.resize(TASK_BINARY_SIZE * 2);
@@ -1444,7 +1824,10 @@ SERVER_ERROR CAppDB::UpdateTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 	CMySQLDBConnection* pMySQLConn = (CMySQLDBConnection*)m_pDBConnection;
 	MYSQL* pMySQL = pMySQLConn->GetConnectionHandle();
 	if (pMySQL == nullptr)
+	{
+		m_pDBConnection->DelDataUnit(pDataUnit);
 		return SE_FAIL;
+	}
 	SerializeTasksBinary(pInfo, g_szTasksBinary, sizeof(g_szTasksBinary));
 	std::string hexString;
 	hexString.resize(TASK_BINARY_SIZE * 2);
@@ -1467,7 +1850,7 @@ SERVER_ERROR CAppDB::UpdateTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 	return ret;
 }
 
-static void SerializeFengHaoGrowsBinary(FenghaoInfo* pInfo, BYTE* pBuffer, int bufferSize)
+static VOID SerializeFengHaoGrowsBinary(FenghaoInfo* pInfo, BYTE* pBuffer, int bufferSize)
 {
 	memset(pBuffer, 0, bufferSize);
 	int offset = 0;
@@ -1480,7 +1863,7 @@ static void SerializeFengHaoGrowsBinary(FenghaoInfo* pInfo, BYTE* pBuffer, int b
 	}
 }
 
-static void DeserializeFengHaoGrowsBinary(const BYTE* pData, int dataSize, FenghaoInfo* pInfo)
+static VOID DeserializeFengHaoGrowsBinary(const BYTE* pData, int dataSize, FenghaoInfo* pInfo)
 {
 	int offset = 0;
 	for (int i = 0; i < MAX_FENGHAO; i++)

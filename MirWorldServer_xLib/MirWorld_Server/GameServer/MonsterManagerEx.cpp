@@ -6,59 +6,40 @@
 #include "monitemsmgr.h"
 #include "gameworld.h"
 
-CMonsterManagerEx::CMonsterManagerEx(void)
+CMonsterManagerEx::CMonsterManagerEx(VOID)
 {
-	m_xMonsterList.create(100000);
-	m_xDeleteQueue.create(50000);
+	m_xMonsterList.create(102400);
 	m_pActiveMonster = nullptr;
 	m_nCurFreeIndex = 0;
 }
 
-CMonsterManagerEx::~CMonsterManagerEx(void)
+CMonsterManagerEx::~CMonsterManagerEx(VOID)
 {
 	m_xMonsterList.destroy();
-	m_xDeleteQueue.destroy();
 }
 
 VOID CMonsterManagerEx::ClearMonsterData()
 {
-	xListHost<MonsterClass>::xListNode* pNode = m_xMonsterClassPool.GetUsedHeadNode();
-	while (pNode != nullptr)
-	{
-		MonsterClass* pClass = pNode->getObject();
+	m_xMonsterClassPool.forEach([](MonsterClass* pClass) {
 		if (pClass != nullptr)
 		{
-			if (pClass->pszBornScript != nullptr)
+			char** scripts[] = {
+				&pClass->pszBornScript,
+				&pClass->pszGotTargetScript,
+				&pClass->pszKillTargetScript,
+				&pClass->pszHurtScript,
+				&pClass->pszDeathScript
+			};
+			for (char** ppScript : scripts)
 			{
-				delete[] pClass->pszBornScript;
-				pClass->pszBornScript = nullptr;
-			}
-			if (pClass->pszGotTargetScript != nullptr)
-			{
-				delete[] pClass->pszGotTargetScript;
-				pClass->pszGotTargetScript = nullptr;
-			}
-			if (pClass->pszKillTargetScript != nullptr)
-			{
-				delete[] pClass->pszKillTargetScript;
-				pClass->pszKillTargetScript = nullptr;
-			}
-			if (pClass->pszHurtScript != nullptr)
-			{
-				delete[] pClass->pszHurtScript;
-				pClass->pszHurtScript = nullptr;
-			}
-			if (pClass->pszDeathScript != nullptr)
-			{
-				delete[] pClass->pszDeathScript;
-				pClass->pszDeathScript = nullptr;
+				delete[] * ppScript;
+				*ppScript = nullptr;
 			}
 		}
-		pNode = pNode->getNext();
-	}
+		return true; // 继续遍历
+	});
 
-	m_MonsterClassHash.~CNameHash();
-	new (&m_MonsterClassHash) CNameHash();
+	m_MonsterClassHash.Clear();
 }
 
 CMonsterEx* CMonsterManagerEx::CreateMonster(MonsterClass* pClass, int mapid, int x, int y, MONSTERGEN* pGen)
@@ -115,8 +96,11 @@ VOID CMonsterManagerEx::UpdateDeleteMonster()
 {
 	const UINT MAX_PROCESS_PER_TICK = 100;
 	UINT processed = 0;
-	std::vector<CMonsterEx*> pendingObjects;
-	pendingObjects.reserve(MAX_PROCESS_PER_TICK);
+	// 使用thread_local复用，避免每帧堆分配
+	thread_local std::vector<CMonsterEx*> pendingObjects;
+	pendingObjects.clear();
+	if ((int)pendingObjects.capacity() < MAX_PROCESS_PER_TICK)
+		pendingObjects.reserve(MAX_PROCESS_PER_TICK);
 	while (processed < MAX_PROCESS_PER_TICK)
 	{
 		CMonsterEx* pMonster = m_xDeleteQueue.pop();
@@ -141,14 +125,16 @@ CMonsterEx* CMonsterManagerEx::newObject()//创建一个怪物OBJECT, 并设置ID
 {
 	CMonsterEx* pMonster = m_xMonsterPool.newObject();
 	if (pMonster == nullptr)
+	{
+		PRINT(ERROR_RED, "怪物对象池耗尽! 当前活跃怪物数：%d\n", m_xMonsterList.getCount());
 		return nullptr;
-
+	}
 	UINT id = m_xMonsterList.addObject(pMonster);
-
 	if (id == 0)
 	{
+		PRINT(ERROR_RED, "怪物列表已满! 当前数量：%d/102400\n", m_xMonsterList.getCount());
 		m_xMonsterPool.deleteObject(pMonster);
-		pMonster = nullptr;
+		return nullptr;
 	}
 	else
 	{
@@ -187,6 +173,13 @@ VOID CMonsterManagerEx::OnFoundFile(const char* pszFilename, UINT nParam1)
 					MonsterClass* pClassOld = (MonsterClass*)m_MonsterClassHash.HGet(pClass->base.szClassName);
 					if (pClassOld != nullptr)
 					{
+						// 释放旧对象的脚本指针，避免memcpy覆盖后泄漏
+						delete[] pClassOld->pszBornScript; pClassOld->pszBornScript = nullptr;
+						delete[] pClassOld->pszGotTargetScript; pClassOld->pszGotTargetScript = nullptr;
+						delete[] pClassOld->pszKillTargetScript; pClassOld->pszKillTargetScript = nullptr;
+						delete[] pClassOld->pszHurtScript; pClassOld->pszHurtScript = nullptr;
+						delete[] pClassOld->pszDeathScript; pClassOld->pszDeathScript = nullptr;
+
 						if (memcmp(pClass, pClassOld, sizeof(MonsterClass)) != 0)
 						{
 							memcpy(pClassOld, pClass, sizeof(MonsterClass));
@@ -363,6 +356,7 @@ VOID CMonsterManagerEx::OnFoundFile(const char* pszFilename, UINT nParam1)
 			MonsterClass* pClassOld = (MonsterClass*)m_MonsterClassHash.HGet(pClass->base.szClassName);
 			if (pClassOld != nullptr)
 			{
+				// 保留旧对象的脚本指针到新对象
 				pClass->pszBornScript = pClassOld->pszBornScript;
 				pClass->pszGotTargetScript = pClassOld->pszGotTargetScript;
 				pClass->pszKillTargetScript = pClassOld->pszKillTargetScript;
@@ -374,6 +368,13 @@ VOID CMonsterManagerEx::OnFoundFile(const char* pszFilename, UINT nParam1)
 					memcpy(pClassOld, pClass, sizeof(MonsterClass));
 					PRINT(CYAN, "怪物 %s 被更新\n", pClass->base.szClassName);
 				}
+				// 清空新对象的脚本指针，避免后续deleteObject时双重释放
+				// 脚本指针的所有权已转移给pClassOld
+				pClass->pszBornScript = nullptr;
+				pClass->pszGotTargetScript = nullptr;
+				pClass->pszKillTargetScript = nullptr;
+				pClass->pszHurtScript = nullptr;
+				pClass->pszDeathScript = nullptr;
 			}
 			else if (m_MonsterClassHash.HAdd(pClass->base.szClassName, pClass))
 				pClass = nullptr;
@@ -403,7 +404,7 @@ VOID CMonsterManagerEx::LoadMonsterScript(const char* pszFileName)
 		xStringsExtracter<10> pages(line[1], ",", " \t");
 		if (pClass->pszBornScript)
 		{
-			delete[]pClass->pszBornScript;
+			freestring(pClass->pszBornScript);
 			pClass->pszBornScript = nullptr;
 		}
 		if (pages.getCount() > 0 && pages[0][0] != 0)
@@ -414,7 +415,7 @@ VOID CMonsterManagerEx::LoadMonsterScript(const char* pszFileName)
 
 		if (pClass->pszGotTargetScript)
 		{
-			delete[]pClass->pszGotTargetScript;
+			freestring(pClass->pszGotTargetScript);
 			pClass->pszGotTargetScript = nullptr;
 		}
 		if (pages.getCount() > 1 && pages[1][0] != 0)
@@ -425,7 +426,7 @@ VOID CMonsterManagerEx::LoadMonsterScript(const char* pszFileName)
 
 		if (pClass->pszKillTargetScript)
 		{
-			delete[]pClass->pszKillTargetScript;
+			freestring(pClass->pszKillTargetScript);
 			pClass->pszKillTargetScript = nullptr;
 		}
 		if (pages.getCount() > 2 && pages[2][0] != 0)
@@ -436,7 +437,7 @@ VOID CMonsterManagerEx::LoadMonsterScript(const char* pszFileName)
 
 		if (pClass->pszHurtScript)
 		{
-			delete[]pClass->pszHurtScript;
+			freestring(pClass->pszHurtScript);
 			pClass->pszHurtScript = nullptr;
 		}
 		if (pages.getCount() > 3 && pages[3][0] != 0)
@@ -447,7 +448,7 @@ VOID CMonsterManagerEx::LoadMonsterScript(const char* pszFileName)
 
 		if (pClass->pszDeathScript)
 		{
-			delete[]pClass->pszDeathScript;
+			freestring(pClass->pszDeathScript);
 			pClass->pszDeathScript = nullptr;
 		}
 		if (pages.getCount() > 4 && pages[4][0] != 0)
@@ -474,6 +475,6 @@ VOID CMonsterManagerEx::UpdateFreeObjects()
 			pMonster->Update();
 		}
 		m_nCurFreeIndex++;
-		if (i >= nCount - 1)return;
+		if (static_cast<int>(i) >= nCount - 1)return;
 	}
 }

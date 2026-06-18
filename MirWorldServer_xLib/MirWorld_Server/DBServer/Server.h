@@ -1,36 +1,43 @@
 #pragma once
 #include "clientobj.h"
+#include "DBQueryThreadPool.h"
+#include "DBConnectionPool.h"
 
 constexpr UINT MAX_CLIENTOBJECT = 64;
 
-class CServer : public CBaseServer, public xIndexObjectPool<CClientObj>
+class CServer : public CBaseServer, public xIndexObjectPool<CClientObj>, public xSingletonClass<CServer>
 {
 public:
-	CServer(void);
-	virtual ~CServer(void);
+	CServer(VOID);
+	virtual ~CServer(VOID);
 public:
-	void OnInput(const char* pString) { CBaseServer::OnInput(pString); }
+	VOID OnInput(const char* pString);
 	CClientObject* GetClientObject(UINT id) { return getObject(id); }
 	CClientObject* NewClientObject();
 	VOID DeleteClientObject(CClientObject* pObject);
 	BOOL InitServer(CSettingFile&);
 	VOID CleanServer();
 	VOID Update();
-	static CServer* GetInstance()
-	{
-		if (m_pInstance == nullptr)
-			m_pInstance = new CServer;
-		return m_pInstance;
-	}
 	VOID OnParseMsg(WORD wMsg);
-protected:
+	// 获取异步查询线程池
+	CDBQueryThreadPool& GetQueryPool() { return m_queryPool; }
+	// 获取连接池
+	CMySQLConnectionPool& GetConnectionPool() { return m_connectionPool; }
+	// 获取AppDB引用
+	CAppDB& GetAppDB() { return m_appDB; }
+private:
 	CServerTimer m_xxShowTimer;
-	DWORD m_dwMsgTimes[DM_END];
+	std::array<DWORD, DM_END> m_dwMsgTimes;
 	CAppDB m_appDB;
-	static CServer* m_pInstance;
-	char m_szServer[64];// = (char*)s.GetString( m_pServerName, "server", "localhost" );
-	char m_szPort[64];// = (char*)s.GetString( m_pServerName, "port", "3306" );
-	char m_szDatabase[64];// = (char*)s.GetString( m_pServerName, "database", "mirworlddb" );
-	char m_szAccount[64];// = (char*)s.GetString( m_pServerName, "account", "root" );
-	char m_szPassword[64];// = (char*)s.GetString( m_pServerName, "password", "root" );
+	std::array<char, 64> m_szServer;
+	std::array<char, 64> m_szPort;
+	std::array<char, 64> m_szDatabase;
+	std::array<char, 64> m_szAccount;
+	std::array<char, 64> m_szPassword;
+	// 异步查询线程池
+	CDBQueryThreadPool m_queryPool;
+	// 数据库连接池
+	CMySQLConnectionPool m_connectionPool;
+	// 定时刷盘计时器
+	DWORD m_dwFlushTimer;
 };

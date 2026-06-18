@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 class CScriptView;
 class CSe_Page;
 class CScriptShell;
@@ -7,8 +8,8 @@ class CScriptObject;
 class CScriptTarget : public xVariableProvider
 {
 public:
-	CScriptTarget(void);
-	virtual ~CScriptTarget(void);
+	CScriptTarget(VOID);
+	virtual ~CScriptTarget(VOID);
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------
 	//		描述：	发送页面, 发送关闭页面
 	//		注释：
@@ -40,7 +41,7 @@ public:
 	virtual VOID ClrVariable(const char* pszVariable);
 	virtual BOOL AddVariable(const char* pszVariable, const char* pszValue);
 protected:
-	char m_szToPage[64];
+	std::array<char, 64> m_szToPage{};
 	CScriptShell* m_pInputShell;
 	UINT m_nInputLength;
 	CScriptObject* m_pCurScriptObject;

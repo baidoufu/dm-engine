@@ -4,11 +4,11 @@
 #include "humanplayermgr.h"
 #include "groupobject.h"
 
-CGroupObjectMgr::CGroupObjectMgr(void)
+CGroupObjectMgr::CGroupObjectMgr(VOID)
 {
 }
 
-CGroupObjectMgr::~CGroupObjectMgr(void)
+CGroupObjectMgr::~CGroupObjectMgr(VOID)
 {
 }
 

@@ -1,4 +1,6 @@
 #pragma once
+#include <array>
+#include <memory>
 #include "findfile.h"
 
 class CVariableFile
@@ -14,21 +16,21 @@ public:
 	VOID SetVariableValue(const char* pszName, const char* pszValue);
 	VOID DelVariable(const char* pszName);
 
-	void SetName(const char* pszName)
+	VOID SetName(const char* pszName)
 	{
 		if (pszName)
 		{
-			strncpy_s(m_szName, sizeof(m_szName), pszName, _TRUNCATE);
-			m_szName[sizeof(m_szName) - 1] = '\0';
+			strncpy_s(m_szName.data(), m_szName.size(), pszName, _TRUNCATE);
+			m_szName[m_szName.size() - 1] = '\0';
 		}
 	}
-	const char* GetName()const { return m_szName; }
-	const char* GetFileName() { return m_pFilename; }
+	const char* GetName()const { return m_szName.data(); }
+	const char* GetFileName() { return m_pFilename.get(); }
 
 protected:
 	BOOL m_bModified;
-	char* m_pFilename;
-	char m_szName[64];
+	pooled_string_ptr m_pFilename;
+	std::array<char, 64> m_szName;
 	xVarList<32> m_xVarList;
 };
 
@@ -51,7 +53,7 @@ public:
 protected:
 	VOID OnFoundFile(const char* pszFilename, UINT nParam = 0);
 	xStringList<256> m_xVarList;
-	StringCacheNode m_xStringCache[256];
+	std::array<StringCacheNode, 256> m_xStringCache;
 	UINT m_nCachePtr;
 	xStringList<32> m_xVarGroupList;
 	xObjectPool<CVariableFile> m_xVarGroupPool;

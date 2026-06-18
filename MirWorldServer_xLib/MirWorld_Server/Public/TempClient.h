@@ -4,8 +4,8 @@ class CTempClient :
 	public CClientObject
 {
 public:
-	CTempClient(void);
-	virtual ~CTempClient(void);
+	CTempClient(VOID);
+	virtual ~CTempClient(VOID);
 	BOOL IsTimeOut(DWORD dwTimeOut) { return m_LiveTimer.IsTimeOut(dwTimeOut); }
 	VOID SaveTime() { m_LiveTimer.Savetime(); }
 private:

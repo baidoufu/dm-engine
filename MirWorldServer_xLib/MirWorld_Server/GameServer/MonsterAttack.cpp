@@ -9,6 +9,7 @@
 
 VOID CMonsterAttack::BlackRobeHelper(CMonsterEx* pFriend)
 {
+	if (pMon == nullptr || pFriend == nullptr) return;
 	if (pFriend->CustomIsOutTime(5000)) // 黑袍加血辅助
 	{
 		if (!pFriend->IsProcess(EP_MAGHEALING) && !pFriend->IsDeath() && !pFriend->IsFullHp())
@@ -32,6 +33,7 @@ VOID CMonsterAttack::BlackRobeHelper(CMonsterEx* pFriend)
 
 VOID CMonsterAttack::MoYan(int nDamage, damage_type damagetype)
 {
+	if (pMon == nullptr) return;
 	std::vector<CAliveObject*> validTargets;//存储所有符合条件的目标
 	const int targetDir = pMon->GetDirection();
 	const int myX = pMon->getX();
@@ -43,12 +45,15 @@ VOID CMonsterAttack::MoYan(int nDamage, damage_type damagetype)
 	const int nEndX = myX + attackDist;
 	const int nEndY = myY + attackDist;
 
+	CLogicMap* pMap = pMon->GetMap();
+	if (pMap == nullptr) return;
+
 	bool bFoundEnough = false;
 	for (int x = nStartX; x <= nEndX && !bFoundEnough; x++)
 	{
 		for (int y = nStartY; y <= nEndY && !bFoundEnough; y++)
 		{
-			CAliveObject* pObj = pMon->GetMap()->FindTarget(pMon, x, y);
+			CAliveObject* pObj = pMap->FindTarget(pMon, x, y);
 			if (pObj)
 			{
 				const e_object_type objType = pObj->GetType();
@@ -79,9 +84,8 @@ VOID CMonsterAttack::MoYan(int nDamage, damage_type damagetype)
 		}
 	}
 	//发起攻击
-	for (size_t i = 0; i < validTargets.size(); i++)
+	for (auto* pAttackTarget : validTargets)
 	{
-		CAliveObject* pAttackTarget = validTargets[i];
 		WORD wTargetX, wTargetY;
 		pAttackTarget->GetPosition(wTargetX, wTargetY);
 		pAttackTarget->TakeDamage(pMon->GetId(), nDamage, damagetype, 0,
@@ -157,6 +161,7 @@ VOID CMonsterAttack::BloodKing(int nDamage)
 
 VOID CMonsterAttack::KuangChaoFeiCi(int myX, int myY, int nDir, int nDamage)
 {
+	if (pMon == nullptr) return;
 	CLogicMap* pMap = pMon->GetMap();
 	if (pMap)
 	{
@@ -187,12 +192,15 @@ VOID CMonsterAttack::ZhaoHuanMoYan(int myX, int myY, int nDamage)
 
 VOID CMonsterAttack::HengSaoQianJun(CAliveObject* pTarget, int myX, int myY, int nDir, int nDamage)
 {
+	if (pMon == nullptr) return;
+	CLogicMap* pMap = pMon->GetMap();
+	if (pMap == nullptr) return;
 	const int attackRange = 2; // 横扫范围
 	// 预计算方向偏移量
-	BYTE dirX = G_DIROFS[nDir % 8].x;
-	BYTE dirY = G_DIROFS[nDir % 8].y;
-	BYTE sideDirX = G_DIROFS[(nDir + 2) % 8].x;
-	BYTE sideDirY = G_DIROFS[(nDir + 2) % 8].y;
+	BYTE dirX = static_cast<BYTE>(G_DIROFS[nDir % 8].x);
+	BYTE dirY = static_cast<BYTE>(G_DIROFS[nDir % 8].y);
+	BYTE sideDirX = static_cast<BYTE>(G_DIROFS[(nDir + 2) % 8].x);
+	BYTE sideDirY = static_cast<BYTE>(G_DIROFS[(nDir + 2) % 8].y);
 	for (int depth = 1; depth <= attackRange; depth++)
 	{
 		// 计算当前深度的中心点位置（沿方向前进depth步）
@@ -214,16 +222,16 @@ VOID CMonsterAttack::HengSaoQianJun(CAliveObject* pTarget, int myX, int myY, int
 				sideX = centerX - sideDirX * (-offset);
 				sideY = centerY - sideDirY * (-offset);
 			}
-			CAliveObject* pAliveObj = pMon->GetMap()->FindTarget(pMon, sideX, sideY);
+			CAliveObject* pAliveObj = pMap->FindTarget(pMon, sideX, sideY);
 			if (pAliveObj)
 			{
 				const e_object_type objType = pAliveObj->GetType();
 				if (objType == OBJ_PLAYER ||
 					(objType == OBJ_PET && ((CMonsterEx*)pAliveObj)->GetDesc()->petset.Type == APT_CALL))
 				{
-					nDamage = nDamage / depth;
+					int depthDamage = nDamage / depth;
 					// 发送横扫伤害消息
-					pAliveObj->AddProcess(EP_BEATTACKED, nDamage, pMon->GetId(), DT_PHYSICS, 0, depth * 120);
+					pAliveObj->AddProcess(EP_BEATTACKED, depthDamage, pMon->GetId(), DT_PHYSICS, 0, depth * 120);
 				}
 			}
 		}
@@ -239,6 +247,7 @@ VOID CMonsterAttack::HengSaoQianJun(CAliveObject* pTarget, int myX, int myY, int
 
 VOID CMonsterAttack::TuiDiMoZhou(CAliveObject* pTarget)
 {
+	if (pMon == nullptr || pTarget == nullptr) return;
 	const int myX = pMon->getX();
 	const int myY = pMon->getY();
 	CLogicMap* pMap = pMon->GetMap();
@@ -273,12 +282,15 @@ VOID CMonsterAttack::TuiDiMoZhou(CAliveObject* pTarget)
 
 VOID CMonsterAttack::NuZhenShanHe(CAliveObject* pTarget, int myX, int myY, int nDir, int nDamage)
 {
+	if (pMon == nullptr) return;
+	CLogicMap* pMap = pMon->GetMap();
+	if (pMap == nullptr) return;
 	const int range = VIEW_RANGE / 2;
 	for (int x = myX - range; x <= myX + range; x++)
 	{
 		for (int y = myY - range; y <= myY + range; y++)
 		{
-			CAliveObject* pObj = pMon->GetMap()->FindTarget(pMon, x, y);
+			CAliveObject* pObj = pMap->FindTarget(pMon, x, y);
 			if (pObj)
 			{
 				const e_object_type objType = pObj->GetType();
@@ -304,6 +316,7 @@ VOID CMonsterAttack::NuZhenShanHe(CAliveObject* pTarget, int myX, int myY, int n
 
 VOID CMonsterAttack::YiXingHuanWei(int nDir)
 {
+	if (pMon == nullptr) return;
 	const int myX = pMon->getX();
 	const int myY = pMon->getY();
 	CLogicMap* pMap = pMon->GetMap();

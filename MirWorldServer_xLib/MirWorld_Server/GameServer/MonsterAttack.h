@@ -11,7 +11,7 @@ class CLogicMap;
 class CMonsterAttack
 {
 public:
-	CMonsterAttack(CMonsterEx* p) { pMon = p; }
+	CMonsterAttack(CMonsterEx* p) { assert(p != nullptr); pMon = p; }
 	~CMonsterAttack() {}
 	// ºÚÅÛ¸¨Öú
 	VOID BlackRobeHelper(CMonsterEx* pFriend);

@@ -1,8 +1,9 @@
 #include "StdAfx.h"
 #include ".\humanplayermgr.h"
 #include ".\gameworld.h"
+#include "BotManager.h"
 
-CHumanPlayerMgr::CHumanPlayerMgr(void)
+CHumanPlayerMgr::CHumanPlayerMgr(VOID)
 {
 	m_HumanPlayers.Create(1024);
 	VMP_PROTECT_BEGIN("CHumanPlayerMgr-boTest");
@@ -10,7 +11,7 @@ CHumanPlayerMgr::CHumanPlayerMgr(void)
 	VMP_PROTECT_END();
 }
 
-CHumanPlayerMgr::~CHumanPlayerMgr(void)
+CHumanPlayerMgr::~CHumanPlayerMgr(VOID)
 {
 }
 
@@ -21,14 +22,50 @@ CHumanPlayer* CHumanPlayerMgr::FindbyName(const char* pszName)
 
 CHumanPlayer* CHumanPlayerMgr::FindbyId(UINT id)
 {
+	UINT rawId = id;
 	if (((id & 0xff000000) >> 24) == OBJ_PLAYER)
-		id &= 0xffffff;
-	return m_HumanPlayers.Get(id);
+		rawId = id & 0xffffff;
+	CHumanPlayer* pPlayer = m_HumanPlayers.Get(rawId);
+	if (pPlayer != nullptr)
+		return pPlayer;
+	CBotManager* pBotMgr = CBotManager::GetInstance();
+	if (pBotMgr != nullptr)
+	{
+		CBotPlayer* pBot = pBotMgr->FindBotById(id);
+		if (pBot != nullptr)
+			return pBot;
+	}
+	return nullptr;
 }
 
 BOOL CHumanPlayerMgr::AddPlayerNameList(CHumanPlayer* pPlayer, const char* pszName)
 {
 	return m_PlayerNameHash.HAdd(pszName, (LPVOID)pPlayer);
+}
+
+VOID CHumanPlayerMgr::RemovePlayerNameList(const char* pszName)
+{
+	m_PlayerNameHash.HDel(pszName);
+}
+
+BOOL CHumanPlayerMgr::RegisterBotPlayer(CHumanPlayer* pPlayer, const char* pszName)
+{
+	if (pszName == nullptr || pszName[0] == '\0')
+		return FALSE;
+	// 检查是否已存在同名玩家
+	if (m_PlayerNameHash.HGet(pszName) != nullptr)
+	{
+		LG2("机器人注册: 名字 [%s] 已存在\n", pszName);
+		return FALSE;
+	}
+	return m_PlayerNameHash.HAdd(pszName, (LPVOID)pPlayer);
+}
+
+VOID CHumanPlayerMgr::UnregisterBotPlayer(const char* pszName)
+{
+	if (pszName == nullptr || pszName[0] == '\0')
+		return;
+	m_PlayerNameHash.HDel(pszName);
 }
 
 CHumanPlayer* CHumanPlayerMgr::NewPlayer()

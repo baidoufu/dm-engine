@@ -1,13 +1,13 @@
 #include "StdAfx.h"
 #include "xsimplesocket.h"
 
-xSimpleSocket::xSimpleSocket(void)
+xSimpleSocket::xSimpleSocket(VOID)
 {
 	m_Socket = INVALID_SOCKET;
 	m_Status = SS_EMPTY;
 }
 
-xSimpleSocket::~xSimpleSocket(void)
+xSimpleSocket::~xSimpleSocket(VOID)
 {
 	Close();
 }
@@ -123,20 +123,29 @@ BOOL xSimpleSocket::Select(PBOOL pbRead, PBOOL pbWrite, PBOOL pbExcept, DWORD dw
 
 BOOL xSimpleSocket::Connect(const char* pszAddress, UINT nPort)
 {
-	struct sockaddr_in ServAddr;
-	LPHOSTENT pHost = gethostbyname(pszAddress);
-	if (pHost == nullptr)
+	struct addrinfo hints = {};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	struct addrinfo* result = nullptr;
+	if (getaddrinfo(pszAddress, nullptr, &hints, &result) != 0 || result == nullptr)
 	{
-		OnError("Connect() ÖĞ gethostbyname() Ê§°Ü!");
+		OnError("Connect() ÖĞ getaddrinfo() Ê§°Ü!");
 		return FALSE;
 	}
 
 	if (!Socket())
+	{
+		freeaddrinfo(result);
 		return FALSE;
+	}
 
+	struct sockaddr_in ServAddr = {};
 	ServAddr.sin_family = AF_INET;
-	ServAddr.sin_addr.s_addr = *(ULONG*)pHost->h_addr_list[0];
+	ServAddr.sin_addr.s_addr = reinterpret_cast<struct sockaddr_in*>(result->ai_addr)->sin_addr.s_addr;
 	ServAddr.sin_port = htons(nPort);
+	freeaddrinfo(result);
 
 	int erri = connect(m_Socket, (struct sockaddr*)&ServAddr, sizeof(ServAddr));
 	if (erri == SOCKET_ERROR)
@@ -151,22 +160,34 @@ BOOL xSimpleSocket::Connect(const char* pszAddress, UINT nPort)
 
 BOOL xSimpleSocket::ConnectNoBlocking(const char* pszAddress, UINT nPort)
 {
-	struct sockaddr_in ServAddr;
-	LPHOSTENT pHost = gethostbyname(pszAddress);
-	if (pHost == nullptr)
+	struct addrinfo hints = {};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	struct addrinfo* result = nullptr;
+	if (getaddrinfo(pszAddress, nullptr, &hints, &result) != 0 || result == nullptr)
 	{
-		OnError("ConnectNoBlocking() ÖĞ gethostbyname() Ê§°Ü!");
+		OnError("ConnectNoBlocking() ÖĞ getaddrinfo() Ê§°Ü!");
 		return FALSE;
 	}
 
 	if (!Socket())
+	{
+		freeaddrinfo(result);
 		return FALSE;
+	}
 	if (!SetNoBlocking())
+	{
+		freeaddrinfo(result);
 		return FALSE;
+	}
 
+	struct sockaddr_in ServAddr = {};
 	ServAddr.sin_family = AF_INET;
-	ServAddr.sin_addr.s_addr = *(ULONG*)pHost->h_addr_list[0];
+	ServAddr.sin_addr.s_addr = reinterpret_cast<struct sockaddr_in*>(result->ai_addr)->sin_addr.s_addr;
 	ServAddr.sin_port = htons(nPort);
+	freeaddrinfo(result);
 
 	int erri = connect(m_Socket, (struct sockaddr*)&ServAddr, sizeof(ServAddr));
 	if (erri == SOCKET_ERROR)
@@ -231,7 +252,7 @@ BOOL xSimpleSocket::Listen(const char* pszAddress, UINT nPort)
 	struct sockaddr_in serveraddr;
 	if (!this->Socket())return FALSE;
 
-	memset((void*)&serveraddr, 0, sizeof(struct sockaddr_in));
+	memset((VOID*)&serveraddr, 0, sizeof(struct sockaddr_in));
 
 	serveraddr.sin_family = PF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);

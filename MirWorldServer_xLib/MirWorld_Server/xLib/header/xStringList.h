@@ -1,5 +1,7 @@
 #pragma once
 #include "xinc.h"
+#include <memory>
+#include <array>
 
 // SIMD指令集支持
 #ifdef _MSC_VER
@@ -14,47 +16,33 @@ class xStringList
 	{
 		string_def()
 		{
-			memset(this, 0, sizeof(*this));
+			dwKey = 0;
+			lpObject = nullptr;
 		}
 		DWORD dwKey;
-		char* pszString;
+		pooled_string_ptr pszString;
 		LPVOID lpObject;
 	}STRING_DEF;
 public:
 	xStringList(BOOL ignCase = FALSE)
 	{
-		m_pStringArray = nullptr;
 		m_nStringCount = 0;
 		m_nCurArraySize = 0;
 		m_bIgnCase = ignCase;
-		m_pFileName = nullptr;
 	}
 
-	~xStringList()
-	{
-		if (m_pStringArray != nullptr)
-		{
-			delete[]m_pStringArray;
-			m_pStringArray = 0;
-		}
-		if (m_pFileName)
-			delete[]m_pFileName;
-	}
+	~xStringList() = default;
 
 	BOOL IsIgnCase() { return m_bIgnCase; }
 	VOID SetIgnCase(BOOL bFlag) { m_bIgnCase = bFlag; }
 
-	void Clear()
+	VOID Clear()
 	{
-		for (UINT n = 0; n < m_nStringCount; n++)
+		for (UINT n = 0; n < m_nStringCount; ++n)
 		{
 			m_pStringArray[n].lpObject = nullptr;
 			m_pStringArray[n].dwKey = 0;
-			if (this->m_pStringArray[n].pszString)
-			{
-				delete[]this->m_pStringArray[n].pszString;
-			}
-			m_pStringArray[n].pszString = nullptr;
+			m_pStringArray[n].pszString.reset();
 		}
 		m_nStringCount = 0;
 	}
@@ -62,12 +50,13 @@ public:
 	int	IndexOf(const char* pszString1)
 	{
 		if (*pszString1 == 0)return -1;
-		char	pszString[260];
-		o_strncpy(pszString, pszString1, 256);
+		std::array<char, 260> pszString{};
+		o_strncpy(pszString.data(), pszString1, 256);
 		if (this->m_bIgnCase)
-			q_strupper(pszString);
+			q_strupper(pszString.data());
 
-		DWORD dwKey = MakeKey(pszString);
+		const char* searchStr = pszString.data();
+		DWORD dwKey = MakeKey(searchStr);
 		DWORD s = 0, m = 0, e = m_nStringCount;
 		
 		// 二分查找：减少不必要的比较操作
@@ -79,21 +68,21 @@ public:
 			if (dwKey == curKey)
 			{
 				// 找到相同哈希, 进行优化的字符串比较
-				const char* targetStr = m_pStringArray[m].pszString;
+				const char* targetStr = m_pStringArray[m].pszString.get();
 				
 				// 优化的字符串比较, 使用SIMD指令加速
 				int cmpResult;
 				#ifdef _MSC_VER
-				if (strlen(targetStr) >= 16 && strlen(pszString) >= 16)
+				if (strlen(targetStr) >= 16 && strlen(searchStr) >= 16)
 				{
 					// 对于长字符串使用SIMD优化比较
 					size_t len1 = strlen(targetStr);
-					size_t len2 = strlen(pszString);
+					size_t len2 = strlen(searchStr);
 					size_t minLen = (len1 < len2) ? len1 : len2;
 					
 					// 预取内存到缓存
 					_mm_prefetch(targetStr, _MM_HINT_T0);
-					_mm_prefetch(pszString, _MM_HINT_T0);
+					_mm_prefetch(searchStr, _MM_HINT_T0);
 					
 					if (len1 == len2)
 					{
@@ -102,13 +91,13 @@ public:
 						for (; i + 15 < minLen; i += 16)
 						{
 							__m128i data1 = _mm_loadu_si128((const __m128i*)(targetStr + i));
-							__m128i data2 = _mm_loadu_si128((const __m128i*)(pszString + i));
+							__m128i data2 = _mm_loadu_si128((const __m128i*)(searchStr + i));
 							__m128i cmp = _mm_cmpeq_epi8(data1, data2);
 							int mask = _mm_movemask_epi8(cmp);
 							if (mask != 0xFFFF)
 							{
 								// 发现不匹配字符, 使用传统比较找到确切位置
-								cmpResult = strcmp(targetStr, pszString);
+								cmpResult = strcmp(targetStr, searchStr);
 								break;
 							}
 						}
@@ -120,20 +109,20 @@ public:
 						}
 						else
 						{
-							cmpResult = strcmp(targetStr + i, pszString + i);
+							cmpResult = strcmp(targetStr + i, searchStr + i);
 						}
 					}
 					else
 					{
 						// 长度不同, 直接使用传统比较
-						cmpResult = strcmp(targetStr, pszString);
+						cmpResult = strcmp(targetStr, searchStr);
 					}
 				}
 				else
 				#endif
 				{
 					// 短字符串使用传统比较
-					cmpResult = strcmp(targetStr, pszString);
+					cmpResult = strcmp(targetStr, searchStr);
 				}
 				
 				if (cmpResult == 0)
@@ -144,48 +133,48 @@ public:
 				int maxSearch = (m > (int)(m_nStringCount - m)) ? m : (int)(m_nStringCount - m);
 				maxSearch = (maxSearch > 32) ? 32 : maxSearch;  // 限制最大搜索范围
 				
-				for (int i = 1; i <= maxSearch; i++)
+				for (int i = 1; i <= maxSearch; ++i)
 				{
 					if (left >= 0 && m_pStringArray[left].dwKey == dwKey)
 					{
-						const char* leftStr = m_pStringArray[left].pszString;
+						const char* leftStr = m_pStringArray[left].pszString.get();
 						
 						// 使用相同的优化比较逻辑
 						int leftCmp;
 						#ifdef _MSC_VER
-						if (strlen(leftStr) >= 16 && strlen(pszString) >= 16)
+						if (strlen(leftStr) >= 16 && strlen(searchStr) >= 16)
 						{
 							size_t len1 = strlen(leftStr);
-							size_t len2 = strlen(pszString);
+							size_t len2 = strlen(searchStr);
 							
 							if (len1 == len2)
 							{
 								_mm_prefetch(leftStr, _MM_HINT_T0);
-								size_t i = 0;
-								for (; i + 15 < len1; i += 16)
+								size_t j = 0;
+								for (; j + 15 < len1; j += 16)
 								{
-									__m128i data1 = _mm_loadu_si128((const __m128i*)(leftStr + i));
-									__m128i data2 = _mm_loadu_si128((const __m128i*)(pszString + i));
+									__m128i data1 = _mm_loadu_si128((const __m128i*)(leftStr + j));
+									__m128i data2 = _mm_loadu_si128((const __m128i*)(searchStr + j));
 									__m128i cmp = _mm_cmpeq_epi8(data1, data2);
 									int mask = _mm_movemask_epi8(cmp);
 									if (mask != 0xFFFF)
 									{
-										leftCmp = strcmp(leftStr, pszString);
+										leftCmp = strcmp(leftStr, searchStr);
 										break;
 									}
 								}
-								if (i >= len1) leftCmp = 0;
-								else leftCmp = strcmp(leftStr + i, pszString + i);
+								if (j >= len1) leftCmp = 0;
+								else leftCmp = strcmp(leftStr + j, searchStr + j);
 							}
 							else
 							{
-								leftCmp = strcmp(leftStr, pszString);
+								leftCmp = strcmp(leftStr, searchStr);
 							}
 						}
 						else
 						#endif
 						{
-							leftCmp = strcmp(leftStr, pszString);
+							leftCmp = strcmp(leftStr, searchStr);
 						}
 						
 						if (leftCmp == 0)
@@ -194,44 +183,44 @@ public:
 					}
 					else if (right < (int)m_nStringCount && m_pStringArray[right].dwKey == dwKey)
 					{
-						const char* rightStr = m_pStringArray[right].pszString;
+						const char* rightStr = m_pStringArray[right].pszString.get();
 						
 						// 使用相同的优化比较逻辑
 						int rightCmp;
 						#ifdef _MSC_VER
-						if (strlen(rightStr) >= 16 && strlen(pszString) >= 16)
+						if (strlen(rightStr) >= 16 && strlen(searchStr) >= 16)
 						{
 							size_t len1 = strlen(rightStr);
-							size_t len2 = strlen(pszString);
+							size_t len2 = strlen(searchStr);
 							
 							if (len1 == len2)
 							{
 								_mm_prefetch(rightStr, _MM_HINT_T0);
-								size_t i = 0;
-								for (; i + 15 < len1; i += 16)
+								size_t j = 0;
+								for (; j + 15 < len1; j += 16)
 								{
-									__m128i data1 = _mm_loadu_si128((const __m128i*)(rightStr + i));
-									__m128i data2 = _mm_loadu_si128((const __m128i*)(pszString + i));
+									__m128i data1 = _mm_loadu_si128((const __m128i*)(rightStr + j));
+									__m128i data2 = _mm_loadu_si128((const __m128i*)(searchStr + j));
 									__m128i cmp = _mm_cmpeq_epi8(data1, data2);
 									int mask = _mm_movemask_epi8(cmp);
 									if (mask != 0xFFFF)
 									{
-										rightCmp = strcmp(rightStr, pszString);
+										rightCmp = strcmp(rightStr, searchStr);
 										break;
 									}
 								}
-								if (i >= len1) rightCmp = 0;
-								else rightCmp = strcmp(rightStr + i, pszString + i);
+								if (j >= len1) rightCmp = 0;
+								else rightCmp = strcmp(rightStr + j, searchStr + j);
 							}
 							else
 							{
-								rightCmp = strcmp(rightStr, pszString);
+								rightCmp = strcmp(rightStr, searchStr);
 							}
 						}
 						else
 						#endif
 						{
-							rightCmp = strcmp(rightStr, pszString);
+							rightCmp = strcmp(rightStr, searchStr);
 						}
 						
 						if (rightCmp == 0)
@@ -259,19 +248,18 @@ public:
 	int	Add(const char* pszString1, LPVOID lpObject = nullptr)
 	{
 		if (*pszString1 == 0)return -1;
-		char	pszString[260];
-		o_strncpy(pszString, pszString1, 256);
+		std::array<char, 260> pszString{};
+		o_strncpy(pszString.data(), pszString1, 256);
 		if (this->m_bIgnCase)
-			q_strupper(pszString);
+			q_strupper(pszString.data());
 
-		DWORD dwKey = MakeKey(pszString);
+		DWORD dwKey = MakeKey(pszString.data());
 		UINT	nLeft = this->m_nCurArraySize - this->m_nStringCount;
 
 		if (nLeft < 1)
 		{
 			if (!IncArraySize(nCacheSize) /*&& nLeft == 0 */)
 			{
-				//delete []pszString;
 				return -1;
 			}
 		}
@@ -279,18 +267,23 @@ public:
 		int index = FindFitIndex(dwKey);
 		if (index == -1)
 		{
-			//delete []pszString;
 			return -1;
 		}
 
 		if (index < (int)m_nStringCount)
 		{
-			memmove(m_pStringArray + index + 1, m_pStringArray + index, sizeof(STRING_DEF) * (m_nStringCount - index));
+			// 使用 move 向后移动元素, 避免 memmove 破坏 unique_ptr 语义
+			for (UINT i = m_nStringCount; i > (UINT)index; i--)
+			{
+				m_pStringArray[i].dwKey = m_pStringArray[i - 1].dwKey;
+				m_pStringArray[i].pszString = std::move(m_pStringArray[i - 1].pszString);
+				m_pStringArray[i].lpObject = m_pStringArray[i - 1].lpObject;
+			}
 		}
 
 		m_pStringArray[index].dwKey = dwKey;
 		m_pStringArray[index].lpObject = lpObject;
-		m_pStringArray[index].pszString = copystring(pszString);
+		m_pStringArray[index].pszString.reset(copystring(pszString.data()));
 		m_nStringCount++;
 		return index;
 	}
@@ -313,9 +306,15 @@ public:
 		if (index < 0 || index >= (int)m_nStringCount)
 			return FALSE;
 		m_nStringCount--;
-		delete[]m_pStringArray[index].pszString;
+		m_pStringArray[index].pszString.reset();
 		if (m_nStringCount == index)return TRUE;
-		memmove(m_pStringArray + index, m_pStringArray + index + 1, sizeof(STRING_DEF) * (m_nStringCount - index));
+		// 使用 move 向前移动元素, 避免 memmove 破坏 unique_ptr 语义
+		for (UINT i = (UINT)index; i < m_nStringCount; ++i)
+		{
+			m_pStringArray[i].dwKey = m_pStringArray[i + 1].dwKey;
+			m_pStringArray[i].pszString = std::move(m_pStringArray[i + 1].pszString);
+			m_pStringArray[i].lpObject = m_pStringArray[i + 1].lpObject;
+		}
 		return TRUE;
 	}
 
@@ -323,23 +322,21 @@ public:
 	{
 		if (index < 0 || index >= (int)m_nStringCount)
 			return nullptr;
-		return m_pStringArray + index;
+		return m_pStringArray.get() + index;
 	}
 
 	UINT GetCount() { return m_nStringCount; }
 
 	BOOL LoadFromFile(const char* pszFilename)
 	{
-		char* filename = copystring(pszFilename);
-		if (m_pFileName)delete[]m_pFileName;
-		m_pFileName = filename;
+		m_pFileName.reset(copystring(pszFilename));
 
-		CStringFile sf(m_pFileName);
+		CStringFile sf(m_pFileName.get());
 		BOOL	bFlag = FALSE;
-		char* p = nullptr;
-		for (int i = 0; i < sf.GetLineCount(); i++)
+		const int nLineCount = sf.GetLineCount();
+		for (int i = 0; i < nLineCount; ++i)
 		{
-			p = TrimEx(sf[i]);
+			char* p = TrimEx(sf[i]);
 			if (p[0] == 0)continue;
 			if (m_bIgnCase)
 			{
@@ -355,15 +352,13 @@ public:
 
 	BOOL SaveToFile(const char* pszFilename)
 	{
-		char* filename = copystring(pszFilename);
-		if (m_pFileName)delete[]m_pFileName;
-		m_pFileName = filename;
+		m_pFileName.reset(copystring(pszFilename));
 
-		FILE* fp = fopen(m_pFileName, "w");
+		FILE* fp = fopen(m_pFileName.get(), "w");
 		if (fp == nullptr)return FALSE;
-		for (UINT i = 0; i < m_nStringCount; i++)
+		for (UINT i = 0; i < m_nStringCount; ++i)
 		{
-			fputs(m_pStringArray[i].pszString, fp);
+			fputs(m_pStringArray[i].pszString.get(), fp);
 			fputs("\n", fp);
 		}
 		fclose(fp);
@@ -371,12 +366,11 @@ public:
 	}
 	const char* GetFileName()
 	{
-		return m_pFileName;
+		return m_pFileName.get();
 	}
-	void SetFileName(const char* pszFilename)
+	VOID SetFileName(const char* pszFilename)
 	{
-		if (m_pFileName)delete[]m_pFileName;
-		m_pFileName = copystring(pszFilename);
+		m_pFileName.reset(copystring(pszFilename));
 	}
 protected:
 	DWORD MakeKey(const char* pszString)
@@ -441,26 +435,27 @@ protected:
 				newSize = m_nCurArraySize + nSize;
 		}
 		
-		STRING_DEF* pArray = new STRING_DEF[newSize];
+		std::unique_ptr<STRING_DEF[]> pArray(new (std::nothrow) STRING_DEF[newSize]);
 		if (pArray == nullptr)return FALSE;
 		
-		if (m_nStringCount > 0)
+		// 使用 move 转移 unique_ptr 所有权, 避免 memcpy 破坏智能指针语义
+		for (UINT i = 0; i < m_nStringCount; ++i)
 		{
-			// 使用 memcpy_s 进行更安全的内存复制
-			memcpy(pArray, m_pStringArray, sizeof(STRING_DEF) * m_nStringCount);
+			pArray[i].dwKey = m_pStringArray[i].dwKey;
+			pArray[i].pszString = std::move(m_pStringArray[i].pszString);
+			pArray[i].lpObject = m_pStringArray[i].lpObject;
 		}
 		
-		delete[]m_pStringArray;
-		m_pStringArray = pArray;
+		m_pStringArray = std::move(pArray);
 		m_nCurArraySize = newSize;
 		return TRUE;
 	}
 
-	STRING_DEF* m_pStringArray;
+	std::unique_ptr<STRING_DEF[]> m_pStringArray;
 	UINT m_nStringCount;
 	UINT m_nCurArraySize;
 	BOOL m_bIgnCase;
-	char* m_pFileName;
+	pooled_string_ptr m_pFileName;
 };
 
 template <UINT nMax>
@@ -472,9 +467,8 @@ public:
 	{
 		tagVariable()
 		{
-			pszValue = nullptr;
 		}
-		char* pszValue;
+		pooled_string_ptr pszValue;
 	}Variable;
 
 	xVarList() : m_xList(TRUE)
@@ -485,57 +479,46 @@ public:
 	{
 		UINT nCount = m_xList.GetCount();
 
-		for (UINT i = 0; i < nCount; i++)
+		for (UINT i = 0; i < nCount; ++i)
 		{
-			Variable* pVar = (Variable*)m_xList[i]->lpObject;
-			if (pVar)
-			{
-				if (pVar->pszValue)
-					delete[]pVar->pszValue;
-				delete pVar;
-			}
+			Variable* pVar = static_cast<Variable*>(m_xList[i]->lpObject);
+			delete pVar;
 		}
 		m_xList.Clear();
 	}
 
 	VOID DelVar(const char* pszName)
 	{
-		Variable* pVar = (Variable*)m_xList.ObjectOf(pszName);
+		Variable* pVar = static_cast<Variable*>(m_xList.ObjectOf(pszName));
 		if (pVar == nullptr)
 			return;
 		m_xList.Delete(pszName);
-		if (pVar->pszValue)
-			delete[]pVar->pszValue;
 		delete pVar;
 	}
 
 	VOID AddVar(const char* pszName, char* pszValue)
 	{
 		if (pszValue == nullptr)pszValue = "";
-		Variable* pVar = (Variable*)m_xList.ObjectOf(pszName);
+		Variable* pVar = static_cast<Variable*>(m_xList.ObjectOf(pszName));
 		if (pVar == nullptr)
 		{
 			pVar = new Variable;
-			m_xList.Add(pszName, (LPVOID)pVar);
+			m_xList.Add(pszName, static_cast<LPVOID>(pVar));
 		}
 		else
 		{
-			if (pVar->pszValue)
-			{
-				delete[]pVar->pszValue;
-				pVar->pszValue = nullptr;
-			}
+			pVar->pszValue.reset();
 		}
 		if (pszValue)
-			pVar->pszValue = copystring(pszValue);
+			pVar->pszValue.reset(copystring(pszValue));
 	}
 
 	char* GetVarValue(const char* pszName)
 	{
-		Variable* pVar = (Variable*)m_xList.ObjectOf(pszName);
+		Variable* pVar = static_cast<Variable*>(m_xList.ObjectOf(pszName));
 		if (pVar == nullptr)return nullptr;
 		if (pVar->pszValue == nullptr)return "";
-		return pVar->pszValue;
+		return pVar->pszValue.get();
 	}
 
 	xStringList<nMax>* GetList() { return &m_xList; }
@@ -544,7 +527,7 @@ public:
 	{
 		CStringFile sf(pszFile);
 		char* pLine = "";
-		for (UINT i = 0; i < (UINT)sf.GetLineCount(); i++)
+		for (UINT i = 0; i < (UINT)sf.GetLineCount(); ++i)
 		{
 			pLine = TrimEx(sf[i]);
 			if (*pLine == 0 || *pLine == '#')continue;
@@ -561,13 +544,13 @@ public:
 		fp = fopen(pszFile, "w");
 		if (fp == nullptr)return;
 
-		for (UINT n = 0; n < m_xList.GetCount(); n++)
+		for (UINT n = 0; n < m_xList.GetCount(); ++n)
 		{
-			Variable* var = (Variable*)m_xList[n]->lpObject;
-			char* pVal = var->pszValue;
+			Variable* var = static_cast<Variable*>(m_xList[n]->lpObject);
+			const char* pVal = var->pszValue.get();
 			if (pVal == nullptr)
 				pVal = "";
-			fprintf(fp, "%s = \"%s\"\n", m_xList[n]->pszString, pVal);
+			fprintf(fp, "%s = \"%s\"\n", m_xList[n]->pszString.get(), pVal);
 		}
 		fclose(fp);
 	}

@@ -9,16 +9,15 @@
 #include "magicmanager.h"
 #include "monstermanagerex.h"
 #include <vector>
-CServer* CServer::m_pInstance = nullptr;
+#include <memory>
 
-CServer::CServer(void)
+CServer::CServer(VOID)
 {
 	m_pGameWorld = nullptr;
-	m_pInstance = this;
 	m_bWillClose = FALSE;
 }
 
-CServer::~CServer(void)
+CServer::~CServer(VOID)
 {
 }
 
@@ -34,7 +33,7 @@ VOID CServer::DeleteClientObject(CClientObject* pObject)
 
 BOOL CServer::InitServer(CSettingFile& s)
 {
-	int maxconnection = s.GetInteger(m_pServerName, "MaxConnection", 100);
+	int maxconnection = s.GetInteger(m_strServerName.c_str(), "MaxConnection", 100);
 	create(maxconnection);
 	m_EnterObjects.Create(maxconnection);
 	PRINT(SUCCESS_GREEN, "最大连接数 %d!\n", maxconnection);
@@ -44,42 +43,80 @@ BOOL CServer::InitServer(CSettingFile& s)
 
 VOID CServer::CleanServer()
 {
-	if (m_pGameWorld)
-	{
-		delete m_pGameWorld;
-		m_pGameWorld = nullptr;
-	}
-	if (m_pInstance)
-	{
-		delete m_pInstance;
-		m_pInstance = nullptr;
-	}
 }
 
 VOID CServer::Update()
 {
-	CClientObj* pObject = m_ObjectPool.First();
-	while (pObject)
-	{
-		if (pObject->IsConnected())
-		{
-			int processCount = 0; // 每帧只处理5个包
-			while (processCount < 5 && pObject->GetPacketQueueCount() > 0)
-			{
-				pObject->Update();
-				processCount++;
-			}
-		}
-		pObject = m_ObjectPool.Next();
-	}
-	// 更新游戏世界
 	const DWORD dwUpdateKey = GetUpdateKey();
+	// ===== 消费客户端数据包（在主线程上下文执行业务逻辑） =====
+	// 数据包由IOCP工作线程自动填充到 m_xPacketQueue
+	// 主线程只负责从队列中取出并执行业务逻辑
+	ProcessClientPackets();
+	// ===== 更新游戏世界（纯游戏逻辑） =====
 	m_pGameWorld->SetUpdateKey(dwUpdateKey);
 	m_pGameWorld->Update();
-	if ((dwUpdateKey & 1) == 0)// 偶数帧：处理客户端消息
-		UpdateSCServer(); // 处理服务中心消息
-	else // 奇数帧：处理服务器通信
-		UpdateDBServer(); // 处理数据中心消息
+	// ===== 帧末：刷新所有连接的批量发送缓冲区 =====
+	// WSASend 本身是线程安全的，主线程可以安全调用
+	FlushAllBatchBuffers();
+	// ===== SC/DB重连和状态维护（保留在主线程） =====
+	if ((dwUpdateKey & 1) == 0)
+		UpdateSCServer(); // 偶数帧：处理服务中心消息
+	else
+		UpdateDBServer(); // 奇数帧：处理数据中心消息
+	// ===== 定期清理过期的进入游戏条目 =====
+	static DWORD s_cleanupCounter = 0;
+	if (++s_cleanupCounter >= 200)
+	{
+		s_cleanupCounter = 0;
+		CleanupExpiredEnterInfos();
+	}
+}
+
+VOID CServer::ProcessClientPackets()
+{
+	// 只处理活跃队列中有待处理包的连接
+	// IOCP 工作线程收包时已通过 CAS 推入活跃队列，主线程仅消费
+	auto& activeQueue = m_xIocpServer.GetActiveClientQueue();
+	CClientObj* pObject = nullptr;
+	while (pObject = (CClientObj*)activeQueue.pop())
+	{
+		// 重置活跃标记（允许后续收包再次推入）
+		pObject->m_bInActiveList.store(FALSE, std::memory_order_release); // 重置标记
+		if (!pObject->IsConnected()) continue;
+		int processCount = 0;
+		while (processCount < 10 && pObject->GetPacketQueueCount() > 0)
+		{
+			pObject->Update(); // 取一个包 → OnDataPacket → 解析 → 业务处理
+			processCount++;
+		}
+		// 如果还有剩余包，重新推入活跃队列
+		if (pObject->GetPacketQueueCount() > 0)
+		{
+			BOOL expected = FALSE;
+			if (pObject->m_bInActiveList.compare_exchange_strong(expected, TRUE))
+				m_xIocpServer.PushActiveClientQueue(pObject);
+		}
+	}
+}
+
+VOID CServer::FlushAllBatchBuffers()
+{
+	// 遍历所有连接，刷新批量发送缓冲区 + 心跳检测
+	// GameServer 的 ProcessClientPackets 只对活跃连接调 Update()
+	// 空闲连接需要在这里补上心跳检测
+	CClientObj* pFlushObj = m_ObjectPool.First();
+	while (pFlushObj)
+	{
+		if (pFlushObj->IsConnected())
+		{
+			if (pFlushObj->IsBatchMode())
+				pFlushObj->FlushMsgQueue();
+			// 空闲连接的心跳检测（活跃连接已在 ProcessClientPackets 中通过 Update() 检测）
+			if (pFlushObj->GetPacketQueueCount() == 0)
+				pFlushObj->UpdateStarPing();
+		}
+		pFlushObj = m_ObjectPool.Next();
+	}
 }
 
 VOID CServer::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszData, int datasize)
@@ -93,7 +130,7 @@ VOID CServer::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszData, 
 		if (m_EnterObjects.GetFreeCount() == 0)
 			pEnterInfo->result = SE_SERVERFULL; // 游戏服务器人数已满
 		else
-			pEnterInfo->result = AddEnterAccount(pEnterInfo->nLoginId, pEnterInfo->nSelCharId, pEnterInfo->szAccount, pEnterInfo->szName, wIndex);
+			pEnterInfo->result = AddEnterAccount(pEnterInfo->nLoginId, pEnterInfo->nSelCharId, pEnterInfo->szAccount.data(), pEnterInfo->szName.data(), wIndex);
 		m_SCClientObj.SendMsgAcrossServer(id, MAS_ENTERGAMESERVER, MST_SINGLE, wIndex, pszData, datasize);
 	}
 	break;
@@ -134,9 +171,10 @@ SERVER_ERROR CServer::AddEnterAccount(UINT nLoginId, UINT nSelCharId, const char
 	pEnterInfo->nClientId = id;
 	pEnterInfo->nLoginId = nLoginId;
 	pEnterInfo->nSelCharId = nSelCharId;
-	pEnterInfo->dwEnterTime = timeGetTime();
-	strncpy(pEnterInfo->szAccount, pszAccount, 10);
-	o_strncpy(pEnterInfo->szName, pszName, 20);
+	pEnterInfo->dwEnterTime = CFrameTime::GetFrameTime();
+	pEnterInfo->nListId = id;
+	strncpy(pEnterInfo->szAccount.data(), pszAccount, 10);
+	o_strncpy(pEnterInfo->szName.data(), pszName, 20);
 	pEnterInfo->szAccount[10] = 0;
 	pEnterInfo->dwSelectCharServerId = wIndex;
 	return SE_OK;
@@ -155,38 +193,59 @@ BOOL CServer::GetEnterInfo(UINT nLoginId, UINT nSelCharId, const char* pszAccoun
 	return TRUE;
 }
 
-void CServer::OnInput(const char* pString)
+VOID CServer::CleanupExpiredEnterInfos()
 {
-	char szLine[256];
-	o_strncpy(szLine, pString, 250);
-	xStringsExtracter<16> cmd(szLine, " \t,", " \t");
+	DWORD dwNow = CFrameTime::GetFrameTime();
+	std::vector<UINT> expiredIds;
+	m_EnterObjects.ForEach([&](ENTERGAMESERVER* pInfo) {
+		if (pInfo != nullptr && (dwNow - pInfo->dwEnterTime) > ENTER_GAME_TIMEOUT)
+		{
+			expiredIds.push_back(pInfo->nListId);
+		}
+	});
+	for (UINT id : expiredIds)
+	{
+		ENTERGAMESERVER* pInfo = m_EnterObjects.Get(id);
+		if (pInfo != nullptr)
+		{
+			m_Inthash.HDel(pInfo->nLoginId);
+			m_EnterObjects.Del(id);
+		}
+	}
+}
+
+VOID CServer::OnInput(const char* pString)
+{
+	std::array<char, 256> szLine{};
+	o_strncpy(szLine.data(), pString, 250);
+	xStringsExtracter<16> cmd(szLine.data(), " \t,", " \t");
 	if (static_cast<int>(cmd.getCount()) > 0)
 	{
 		if (_stricmp(cmd[0], "reloadserverconfig") == 0)
 		{
 			CGameWorld::GetInstance()->LoadServerConfig();
-			this->GetIoConsole()->OutPut(SUCCESS_GREEN, "服务器配置文件已重新加载!\n");
+			PRINT(SUCCESS_GREEN, "服务器配置文件已重新加载!\n");
 		}
 		else if (_stricmp(cmd[0], "reloaditem") == 0)
 		{
 			CItemManager::GetInstance()->ClearItemData();
 			CItemManager::GetInstance()->Load(".\\Data\\Config\\BaseItem.csv");
-			this->GetIoConsole()->OutPut(SUCCESS_GREEN, "物品配置文件BaseItem.csv已重新加载!\n");
+			PRINT(SUCCESS_GREEN, "物品配置文件BaseItem.csv已重新加载!\n");
 		}
 		else if (_stricmp(cmd[0], "reloadmonster") == 0)
 		{
 			CMonsterManagerEx::GetInstance()->ClearMonsterData();
 			CMonsterManagerEx::GetInstance()->LoadMonsters(".\\Data\\Monsters");
-			this->GetIoConsole()->OutPut(SUCCESS_GREEN, "怪物配置Monsters下的所有文件已重新加载!\n");
+			PRINT(SUCCESS_GREEN, "怪物配置Monsters下的所有文件已重新加载!\n");
 		}
 		else if (_stricmp(cmd[0], "reloadskill") == 0) {
 			CMagicManager::GetInstance()->ClearMagicData();
 			CMagicManager::GetInstance()->LoadMaigc(".\\Data\\Config\\BaseMagic.csv");
-			CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv", TRUE);
+			CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv");
 			CMagicManager::GetInstance()->LoadMaigcskill(".\\Data\\Config\\MagicSkill.xml");
 			// 重新加载技能数据后, 需要更新所有在线玩家的技能指针
 			CMagicManager::GetInstance()->ReloadAllPlayerSkills();
-			this->GetIoConsole()->OutPut(SUCCESS_GREEN, "技能配置文件BaseMagic.csv、MagicExt.csv、MagicSkill.xml已重新加载!\n");
+			PRINT(SUCCESS_GREEN, "技能配置文件BaseMagic.csv、MagicExt.csv、MagicSkill.xml已重新加载!\n");
 		}
 	}
 	CBaseServer::OnInput(pString);
@@ -235,9 +294,9 @@ VOID CServer::OnTerminated(BOOL bExcepted)
 
 	// 创建临时DB连接（同步方式）
 	CSimpleDBConnection dbConn;
-	if (!dbConn.Connect(pAddr->addr, pAddr->nPort))
+	if (!dbConn.Connect(pAddr->addr.data(), pAddr->nPort))
 	{
-		PRINT(ERROR_RED, "无法连接到数据库服务 %s:%u, 数据备份失败.\n", pAddr->addr, pAddr->nPort);
+		PRINT(ERROR_RED, "无法连接到数据库服务 %s:%u, 数据备份失败.\n", pAddr->addr.data(), pAddr->nPort);
 		return;
 	}
 
@@ -245,31 +304,47 @@ VOID CServer::OnTerminated(BOOL bExcepted)
 
 	CHumanPlayer* pPlayer = pList->First();
 	int nSavedCount = 0;
-	alignas(64) static char szBackupBuffer[1024 * 64];
 
+	// 先批量发送所有玩家数据，再统一等待确认，避免逐个等待导致超时
+	std::vector<CHumanPlayer*> players;
 	while (pPlayer)
 	{
-		// 保存角色变量
-		pPlayer->SaveVars();
-
-		// 构建保存数据包
-		memset(szBackupBuffer, 0, sizeof(szBackupBuffer));
-		xPacket msgpacket(szBackupBuffer, 1024 * 64);
-		pPlayer->GetDBInfoPacket(msgpacket);
-
-		// 同步发送到DBServer
-		int size = msgpacket.getsize();
-		if (size > 0)
-		{
-			dbConn.Send((LPVOID)msgpacket.getbuf(), size);
-			// 等待发送完成（简单处理：短暂延时）
-			Sleep(10);
-		}
-
-		PRINT(STRING_GREEN, "%s 角色信息已经保存到数据库\n", pPlayer->GetName());
-		nSavedCount++;
+		players.push_back(pPlayer);
 		pPlayer = pList->Next();
 	}
 
+	// 批量发送阶段
+	for (auto* p : players)
+	{
+		p->SaveVars();
+		xPacketPool::ScopedPacket msgpacket(1024 * 64);
+		p->GetDBInfoPacket(*msgpacket);
+		int size = msgpacket->getsize();
+		if (size > 0)
+		{
+			dbConn.Send((LPVOID)msgpacket->getbuf(), size);
+		}
+		nSavedCount++;
+	}
+
+	// 统一等待阶段：循环Update处理所有响应，最多等待10秒
+	PRINT(STRING_GREEN, "等待数据库确认所有保存操作...\n");
+	DWORD dwWaitStart = timeGetTime(); // 使用系统时间而非帧时间（主线程已停止更新帧时间）
+	while (timeGetTime() - dwWaitStart < 10000)
+	{
+		dbConn.Update();
+		Sleep(1);
+	}
+	for (auto* p : players)
+	{
+		PRINT(STRING_GREEN, "%s 角色信息已经保存到数据库\n", p->GetName());
+	}
+	// 最终刷新：确保所有发送缓冲区数据已发出
+	DWORD dwFinalStart = timeGetTime();
+	while (timeGetTime() - dwFinalStart < 2000)
+	{
+		dbConn.Update();
+		Sleep(1);
+	}
 	PRINT(SUCCESS_GREEN, "数据已备份完毕, 共保存 %d 个角色.\n", nSavedCount);
 }

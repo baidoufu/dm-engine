@@ -46,7 +46,7 @@ DEFINE_SCRIPT_VAR(TOP_0_0_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(TOP_0_0_GUILDNAME) {
@@ -96,7 +96,7 @@ DEFINE_SCRIPT_VAR(TOP_0_1_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(TOP_0_1_GUILDNAME) {
@@ -146,7 +146,7 @@ DEFINE_SCRIPT_VAR(TOP_1_0_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(TOP_1_0_GUILDNAME) {
@@ -196,7 +196,7 @@ DEFINE_SCRIPT_VAR(TOP_1_1_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(TOP_1_1_GUILDNAME) {
@@ -246,7 +246,7 @@ DEFINE_SCRIPT_VAR(TOP_2_0_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(TOP_2_0_GUILDNAME) {
@@ -296,7 +296,7 @@ DEFINE_SCRIPT_VAR(TOP_2_1_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(TOP_2_1_GUILDNAME) {
@@ -346,5 +346,5 @@ DEFINE_SCRIPT_VAR(SABUKMASTER_RANKDATE) {
 	char* pStringCache = CScriptVariableManager::GetInstance()->GetStringCache();
 	if (pStringCache == nullptr)return FALSE;
 	result.SetValue(pStringCache);
-	sprintf(pStringCache, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
+	snprintf(pStringCache, 16, "%04u-%02u-%02u", pInfo->stRanking.wYear, pInfo->stRanking.wMonth, pInfo->stRanking.wDay);
 }END_SCRIPT_VAR

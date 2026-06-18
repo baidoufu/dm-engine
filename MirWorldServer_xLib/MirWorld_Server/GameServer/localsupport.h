@@ -1,15 +1,18 @@
 #pragma	once
 
+#include <array>
+#include <charconv>
+#include <string_view>
+#include <vector>
+
 #define	INDEXEDTABLE_SEGMENT_CACHE	2048
 template<int MAXCOUNT>
 class xIdAllocorEx
 {
 public:
-	xIdAllocorEx()
+	xIdAllocorEx() : m_nIdPtr(0), m_nCacheCount(0)
 	{
-		memset(m_IdCache, 0, sizeof(m_IdCache));
-		m_nIdPtr = 0;
-		m_nCacheCount = 0;
+		m_IdCache.fill(0);
 	}
 	UINT allocid()
 	{
@@ -28,28 +31,26 @@ public:
 	{
 		return TRUE;
 	}
-	//	UINT getcount(){ return m_iCount;}
 private:
-	UINT m_IdCache[MAXCOUNT];
+	std::array<UINT, MAXCOUNT> m_IdCache;
 	UINT m_nCacheCount;
 	UINT m_nIdPtr;
 };
+
 template<int MAXCOUNT>
 class xIdAllocor
 {
 public:
-	xIdAllocor()
+	xIdAllocor() : m_iFree(0), m_iCount(0)
 	{
 		for (UINT i = 0; i < MAXCOUNT; i++)
 		{
 			m_NextFree[i] = i + 1;
 		}
-		m_iFree = 0;
-		m_iCount = 0;
 	}
 	UINT allocid()
 	{
-		if (m_iFree >= MAXCOUNT)return 0;
+		if (m_iFree >= MAXCOUNT) return 0;
 		UINT id = m_iFree + 1;
 		m_iFree = m_NextFree[m_iFree];
 		m_NextFree[id - 1] = 0xffffffff;
@@ -58,9 +59,9 @@ public:
 	}
 	VOID freeid(UINT id)
 	{
-		if (id == 0 || id > MAXCOUNT)return;
+		if (id == 0 || id > MAXCOUNT) return;
 		id--;
-		if (m_NextFree[id] != 0xffffffff)return;
+		if (m_NextFree[id] != 0xffffffff) return;
 		m_NextFree[id] = m_iFree;
 		m_iFree = id;
 		m_iCount--;
@@ -72,32 +73,29 @@ public:
 	UINT getcount() { return m_iCount; }
 	BOOL isfull() { return (m_iCount >= MAXCOUNT); }
 private:
-	UINT m_NextFree[MAXCOUNT + 1];
+	std::array<UINT, MAXCOUNT + 1> m_NextFree;
 	UINT m_iFree;
 	UINT m_iCount;
 };
+
 template<class T>
 class xIndexedTable
 {
 	struct table_array
 	{
-		UINT nStartId;
-		xIdAllocor<INDEXEDTABLE_SEGMENT_CACHE>	idallocor;
-		T* array[INDEXEDTABLE_SEGMENT_CACHE];
-		table_array* pNext;
+		UINT nStartId{ 0 };
+		xIdAllocor<INDEXEDTABLE_SEGMENT_CACHE> idallocor;
+		std::array<T*, INDEXEDTABLE_SEGMENT_CACHE> array{};
+		std::unique_ptr<table_array> pNext;
 	};
 public:
-	xIndexedTable()
-	{
-		m_pArray = nullptr;
-		m_iCount = 0;
-	}
+	xIndexedTable() : m_iCount(0) {}
 	UINT add(T* pt)
 	{
 		table_array* pFreeArray = getfreearray();
-		if (pFreeArray == nullptr)return 0;
+		if (pFreeArray == nullptr) return 0;
 		UINT id = pFreeArray->idallocor.allocid();
-		if (id == 0)return 0;
+		if (id == 0) return 0;
 		pFreeArray->array[id - 1] = pt;
 		m_iCount++;
 		return pFreeArray->nStartId + id;
@@ -105,17 +103,17 @@ public:
 	T* get(UINT id)
 	{
 		table_array* p = getarray(id);
-		if (p == nullptr)return nullptr;
+		if (p == nullptr) return nullptr;
 		id -= p->nStartId;
-		if (!p->idallocor.isused(id))return nullptr;
+		if (!p->idallocor.isused(id)) return nullptr;
 		return p->array[id - 1];
 	}
 	VOID del(UINT id)
 	{
 		table_array* p = getarray(id);
-		if (p == nullptr)return;
+		if (p == nullptr) return;
 		id -= p->nStartId;
-		if (!p->idallocor.isused(id))return;
+		if (!p->idallocor.isused(id)) return;
 		p->array[id - 1] = nullptr;
 		p->idallocor.freeid(id);
 		m_iCount--;
@@ -123,80 +121,41 @@ public:
 private:
 	table_array* getarray(UINT id)
 	{
-		table_array* p = m_pArray;
+		table_array* p = m_pArray.get();
 		while (p)
 		{
 			if (id > p->nStartId)
 			{
 				return p;
 			}
-			p = p->pNext;
+			p = p->pNext.get();
 		}
 		return nullptr;
 	}
 	table_array* getfreearray()
 	{
-		table_array* p = m_pArray;
+		table_array* p = m_pArray.get();
 		while (p)
 		{
 			if (!p->idallocor.isfull())
 			{
-				//pfree = p;
 				return p;
 			}
-			p = p->pNext;
+			p = p->pNext.get();
 		}
-		p = new table_array;
-		if (p == nullptr)return p;
+		auto newArray = std::make_unique<table_array>();
 		if (m_pArray != nullptr)
-			p->nStartId = m_pArray->nStartId + INDEXEDTABLE_SEGMENT_CACHE;
+			newArray->nStartId = m_pArray->nStartId + INDEXEDTABLE_SEGMENT_CACHE;
 		else
-			p->nStartId = 0;
-		p->pNext = m_pArray;
-		m_pArray = p;
-		return p;
+			newArray->nStartId = 0;
+		newArray->pNext = std::move(m_pArray);
+		m_pArray = std::move(newArray);
+		return m_pArray.get();
 	}
-	table_array* m_pArray;
+	std::unique_ptr<table_array> m_pArray;
 	int	m_iCount;
 };
 
-template <int maxcount>
-class xSortedIntegerArray
-{
-public:
-	BOOL add(UINT integer)
-	{
-	}
-	BOOL has(UINT integer)
-	{
-	}
-	VOID remove(UINT integer)
-	{
-	}
-private:
-	UINT m_iArray[maxcount];
-	int	m_iCount;
-};
-
-static char* gettoken(char* pString)
-{
-	char* p = pString;
-	while (*p && (*p == ' ' || *p == '	'))p++;
-	if (*p == 0)
-		return nullptr;
-	BOOL	bString = FALSE;
-	while (*p && ((*p != ' ' && *p != '	') || bString))
-	{
-		if (*p == '\"')
-		{
-			bString = !bString;
-		}
-		p++;
-	}
-	if (*p != 0)
-		*p++ = 0;
-	return p;
-}
 
 inline int getintegerinside(char* buffer, int begin, int end)
 {
@@ -254,24 +213,24 @@ inline char* gettoedge(char* buffer, int begin, int end)
 			if (level == 0)
 				return (p + 1);
 		}
+		p++;
 	}
 	return nullptr;
 }
 
 inline int StringToStruct(const char* pszString, LPVOID lpStruct)
 {
-	char* Params[200];
-	char* subParams[100];
+	std::array<char*, 200> Params{};
+	std::array<char*, 100> subParams{};
 	int nSubParam = 0;
-	char	szBuffer[2048];
-	char* pBinbuffer = (char*)lpStruct;
+	std::array<char, 2048> szBuffer{};
+	char* pBinbuffer = static_cast<char*>(lpStruct);
 	int binPtr = 0;
-	o_strncpy(szBuffer, pszString, 2047);
-	int nParam = SearchParam(szBuffer, Params, 200, '|');
-	//	d[2]:{ 0x91, 0x88}|s[16]:abcdefg|s[100]:gamesoft|s[60]
+	o_strncpy(szBuffer.data(), pszString, 2047);
+	int nParam = SearchParam(szBuffer.data(), Params.data(), 200, "|");
+
 	bool bArray = false;
 	int	arraysize = 0;
-	//	d * 2 : { 0x91, 0x88 }
 
 	for (int i = 0; i < nParam; i++)
 	{
@@ -282,12 +241,11 @@ inline int StringToStruct(const char* pszString, LPVOID lpStruct)
 
 		if (*Params[i] == '[')
 		{
-			//	处理数组
 			bArray = true;
 			arraysize = getintegerinside(Params[i], '[', ']');
-			if (arraysize == 0)return 0;
+			if (arraysize == 0) return 0;
 			Params[i] = gettoedge(Params[i], '[', ']');
-			if (Params[i] == nullptr)return 0;
+			if (Params[i] == nullptr) return 0;
 		}
 		if (*Params[i] == ':')
 		{
@@ -295,14 +253,14 @@ inline int StringToStruct(const char* pszString, LPVOID lpStruct)
 		}
 		else
 			return 0;
-		//	对于字符串, 不离参数.
+
 		if (c == 's')
 		{
 			strcpy(pBinbuffer + binPtr, Params[i]);
 			if (bArray)
 				binPtr += arraysize;
 			else
-				binPtr += (int)strlen(Params[i]);
+				binPtr += static_cast<int>(strlen(Params[i]));
 			continue;
 		}
 
@@ -310,13 +268,13 @@ inline int StringToStruct(const char* pszString, LPVOID lpStruct)
 
 		switch (c)
 		{
-		case	'w':
+		case 'w':
 			blocksize = 2;
 			break;
-		case	'd':
+		case 'd':
 			blocksize = 4;
 			break;
-		case	'b':
+		case 'b':
 			blocksize = 1;
 			break;
 		default:
@@ -326,14 +284,13 @@ inline int StringToStruct(const char* pszString, LPVOID lpStruct)
 
 		if (bArray)
 		{
-			//	开始分开数组参数
 			Params[i] = getstringinside(Params[i], '{', '}');
 			if (Params[i] == nullptr)
 				return 0;
-			nSubParam = SearchParam(Params[i], subParams, 100, ',');
+			nSubParam = SearchParam(Params[i], subParams.data(), 100, ",");
 			if (nSubParam != arraysize)
 			{
-				if (nSubParam == 0)return 0;
+				if (nSubParam == 0) return 0;
 				arraysize = nSubParam;
 			}
 			for (int block = 0; block < arraysize; block++)
@@ -353,243 +310,220 @@ inline int StringToStruct(const char* pszString, LPVOID lpStruct)
 	return binPtr;
 }
 
-static int	GetMsgFromString(const char* pszString, char* pMsgBuffer)
+static int GetMsgFromString(std::string_view sv, char* pMsgBuffer)
 {
+	if (sv.empty()) return 0;
+
 	MIRMSG header{};
 	char* pMsg = pMsgBuffer;
-	char* Params[200];
-	char szBuffer[2048];
-	char szBinBuffer[1024] = { 0 };
-	int	binPtr = 0;
-	o_strncpy(szBuffer, pszString, 2047);
+	std::array<char, 1024> szBinBuffer{};
+	int binPtr = 0;
 
-	int nParam = SearchParam(szBuffer, Params, 200, '|');
-	if (nParam < 5)return 0;
+	// 使用 string_view 按 '|' 分割，不修改原始字符串
+	std::array<std::string_view, 200> tokens{};
+	int nParam = 0;
+	size_t pos = 0;
+	while (pos <= sv.size() && nParam < 200)
+	{
+		auto next = sv.find('|', pos);
+		auto token = (next == std::string_view::npos) ? sv.substr(pos) : sv.substr(pos, next - pos);
+		// 去除首尾空白
+		while (!token.empty() && (token.front() == ' ' || token.front() == '\t'))
+			token.remove_prefix(1);
+		while (!token.empty() && (token.back() == ' ' || token.back() == '\t'))
+			token.remove_suffix(1);
+		tokens[nParam++] = token;
+		if (next == std::string_view::npos) break;
+		pos = next + 1;
+	}
+	if (nParam < 5) return 0;
 
-	header.dwFlag = (DWORD)StringToInteger(Params[0]);
-	header.wCmd = (WORD)StringToInteger(Params[1]);
-	header.wParam[0] = (WORD)StringToInteger(Params[2]);
-	header.wParam[1] = (WORD)StringToInteger(Params[3]);
-	header.wParam[2] = (WORD)StringToInteger(Params[4]);
+	auto svToInt = [](std::string_view sv) -> int {
+		int result = 0;
+		std::from_chars(sv.data(), sv.data() + sv.size(), result);
+		return result;
+	};
+
+	header.dwFlag = static_cast<DWORD>(svToInt(tokens[0]));
+	header.wCmd = static_cast<WORD>(svToInt(tokens[1]));
+	header.wParam[0] = static_cast<WORD>(svToInt(tokens[2]));
+	header.wParam[1] = static_cast<WORD>(svToInt(tokens[3]));
+	header.wParam[2] = static_cast<WORD>(svToInt(tokens[4]));
 	*pMsg++ = '#';
-	pMsg += _CodeGameCode((BYTE*)&header, MSGHEADERSIZE, (BYTE*)pMsg);
-	char	c;
+	pMsg += _CodeGameCode(reinterpret_cast<BYTE*>(&header), MSGHEADERSIZE, reinterpret_cast<BYTE*>(pMsg));
+
 	for (int i = 5; i < nParam; i++)
 	{
-		if (*(Params[i] + 1) == ':')
+		auto token = tokens[i];
+		if (token.size() >= 2 && token[1] == ':')
 		{
-			c = *Params[i];
-			Params[i] += 2;
-			switch (c)
+			char typeChar = token[0];
+			auto value = token.substr(2);
+			switch (typeChar)
 			{
-			case	'w':
-			case	'W':
-				*(WORD*)(szBinBuffer + binPtr) = (WORD)StringToInteger(Params[i]);
+			case 'w': case 'W':
+				*reinterpret_cast<WORD*>(szBinBuffer.data() + binPtr) = static_cast<WORD>(svToInt(value));
 				binPtr += 2;
 				break;
-			case	'D':
-			case	'd':
-				*(DWORD*)(szBinBuffer + binPtr) = (DWORD)StringToInteger(Params[i]);
+			case 'D': case 'd':
+				*reinterpret_cast<DWORD*>(szBinBuffer.data() + binPtr) = static_cast<DWORD>(svToInt(value));
 				binPtr += 4;
 				break;
-			case	'B':
-			case	'b':
-				*(BYTE*)(szBinBuffer + binPtr) = (BYTE)StringToInteger(Params[i]);
+			case 'B': case 'b':
+				*reinterpret_cast<BYTE*>(szBinBuffer.data() + binPtr) = static_cast<BYTE>(svToInt(value));
 				binPtr += 1;
 				break;
-			case	's':
-			case	'S':
-				strcpy(szBinBuffer + binPtr, Params[i]);
-				binPtr += (int)strlen(Params[i]);
+			case 's': case 'S':
+				memcpy(szBinBuffer.data() + binPtr, value.data(), value.size());
+				binPtr += static_cast<int>(value.size());
 				break;
 			default:
 				break;
 			}
 			continue;
 		}
-		strcpy(szBinBuffer + binPtr, Params[i]);
-		binPtr += (int)strlen(Params[i]);
+		// 无类型前缀，直接作为字符串
+		memcpy(szBinBuffer.data() + binPtr, token.data(), token.size());
+		binPtr += static_cast<int>(token.size());
 	}
 	if (binPtr > 0)
 	{
-		*(szBinBuffer + binPtr) = 0;
-		pMsg += _CodeGameCode((BYTE*)szBinBuffer, binPtr, (BYTE*)pMsg);
+		*(szBinBuffer.data() + binPtr) = 0;
+		pMsg += _CodeGameCode(reinterpret_cast<BYTE*>(szBinBuffer.data()), binPtr, reinterpret_cast<BYTE*>(pMsg));
 	}
 	*pMsg++ = '!';
-	return (int)(pMsg - pMsgBuffer);
+	return static_cast<int>(pMsg - pMsgBuffer);
 }
 
-static UINT g_nnUnitIndex = 0;
 template <class PT, UINT nIncreaseMeter>
 class xDynamicPtrArray
 {
 public:
-	//typedef T PT;
-	xDynamicPtrArray(void)
+	xDynamicPtrArray() = default;
+	~xDynamicPtrArray() = default;
+
+	BOOL add(PT pt, UINT& nIndex)
 	{
-		memset(&m_empty, 0, sizeof(PT));
-		m_pArray = nullptr;
-		m_nCurrentArraySize = 0;
-		m_nCurrentItemCount = 0;
-	}
-	~xDynamicPtrArray(void)
-	{
-		if (m_pArray)
-			delete[]m_pArray;
-	}
-	BOOL add(PT pt, UINT& nIndex = g_nnUnitIndex)
-	{
-		UINT nLeft = m_nCurrentArraySize - m_nCurrentItemCount;
-		if (nLeft == 0)
-		{
-			if (!resizeArray(m_nCurrentArraySize + nIncreaseMeter))
-				return FALSE;
-		}
-		nIndex = m_nCurrentItemCount;
-		m_pArray[m - nCurrentItemCount++] = pt;
+		nIndex = static_cast<UINT>(m_Array.size());
+		m_Array.push_back(pt);
 		return TRUE;
 	}
+
+	BOOL add(PT pt)
+	{
+		m_Array.push_back(pt);
+		return TRUE;
+	}
+
 	BOOL insert(UINT nIndex, PT pt)
 	{
-		UINT nLeft = m_nCurrentArraySize - m_nCurrentItemCount;
-		if (nLeft == 0)
-		{
-			if (!resizeArray(m_nCurrentArraySize + nIncreaseMeter))
-				return FALSE;
-		}
-		if (nIndex >= m_nCurrentItemCount)
-			nIndex = m_nCurrentItemCount;
-		else
-		{
-			memmove(m_pArray + nIndex + 1, m_pArray + nIndex, sizeof(PT) * (m_nCurrentItemCount - nIndex));
-		}
-		m_nCurrentItemCount++;
-		m_pArray[nIndex] = pt;
+		if (nIndex >= m_Array.size())
+			nIndex = static_cast<UINT>(m_Array.size());
+		m_Array.insert(m_Array.begin() + nIndex, pt);
 		return TRUE;
 	}
+
 	VOID remove(UINT nIndex)
 	{
-		if (!verifyIndex(nIndex))return;
-		m_nCurrentItemCount--;
-		if (nIndex < m_nCurrentItemCount)
-		{
-			memmove(m_pArray + nIndex, m_pArray + nIndex + 1, sizeof(PT) * (m_nCurrentItemCount - nIndex));
-		}
+		if (nIndex >= m_Array.size()) return;
+		m_Array.erase(m_Array.begin() + nIndex);
 	}
+
 	PT& operator[](UINT nIndex)
 	{
-		if (!verifyIndex(nIndex))return m_empty;
-		return m_pArray[nIndex];
+		static PT empty{};
+		if (nIndex >= m_Array.size()) return empty;
+		return m_Array[nIndex];
 	}
-	UINT getCount() { return m_nCurrentItemCount; }
-protected:
-	BOOL verifyIndex(UINT nIndex)
-	{
-		if (nIndex >= m_nCurrentItemCount)
-			return FALSE;
-		return TRUE;
-	}
-	BOOL resizeArray(UINT nNewSize)
-	{
-		PT* array = new PT[nNewSize];
-		if (m_pArray)
-		{
-			memcpy(array, m_pArray, sizeof(PT) * m_nCurrentItemCount);
-			delete[]m_pArray;
-		}
-		m_pArray = array;
-		m_nCurrentArraySize = nNewSize;
-		return TRUE;
-	}
-	PT* m_pArray;
-	UINT m_nCurrentArraySize;
-	UINT m_nCurrentItemCount;
-	PT m_empty;
+
+	UINT getCount() const { return static_cast<UINT>(m_Array.size()); }
+
+private:
+	std::vector<PT> m_Array;
 };
 
 template <class T>
 class xKeyPtrList
 {
-	typedef struct tagKeyObj
+	struct KeyObj
 	{
-		tagKeyObj()
-		{
-			FILLSELF(0);
-		}
-		DWORD dwKey;
-		T* pObject;
-	}KeyObj;
+		KeyObj() = default;
+		DWORD dwKey{ 0 };
+		T* pObject{ nullptr };
+	};
 public:
-	xKeyPtrList()
-	{
-	}
-	~xKeyPtrList()
-	{
-	}
+	xKeyPtrList() = default;
+	~xKeyPtrList() = default;
+
 	BOOL addObject(DWORD dwKey, T* pObject)
 	{
 		UINT index = getFitableIndex(dwKey);
-		KeyObj obj;
+		KeyObj obj{};
 		obj.pObject = pObject;
 		obj.dwKey = dwKey;
 		return m_xObjectArray.insert(index, obj);
 	}
+
 	T* getObject(DWORD dwKey)
 	{
 		UINT index = getFitableIndex(dwKey);
-		if (m_xObjectArray[index].dwKey == dwKey)
+		if (index < m_xObjectArray.getCount() && m_xObjectArray[index].dwKey == dwKey)
 			return m_xObjectArray[index].pObject;
 		return nullptr;
 	}
+
 	DWORD getObjectKey(T* pObject)
 	{
-		if (getObjectIndex(pObject) == (UINT)-1)return 0;
-		return m_xObjectArray[i].dwKey;
+		UINT index = getObjectIndex(pObject);
+		if (index == static_cast<UINT>(-1)) return 0;
+		return m_xObjectArray[index].dwKey;
 	}
+
 	BOOL removeObject(DWORD dwKey)
 	{
 		UINT index = getFitableIndex(dwKey);
-		if (m_xObjectArray[i].dwKey != dwKey)return FALSE;
+		if (index >= m_xObjectArray.getCount() || m_xObjectArray[index].dwKey != dwKey) return FALSE;
 		m_xObjectArray.remove(index);
 		return TRUE;
 	}
+
 	BOOL removeObject(T* pObject)
 	{
 		UINT index = getObjectIndex(pObject);
-		if (index == (UINT)-1)return FALSE;
+		if (index == static_cast<UINT>(-1)) return FALSE;
 		m_xObjectArray.remove(index);
-		return TURE;
+		return TRUE;
 	}
+
 protected:
 	UINT getObjectIndex(T* pObject)
 	{
-		UINT i = 0;
-		for (i = 0; i < m_xObjectArray.getCount(); i++)
+		for (UINT i = 0; i < m_xObjectArray.getCount(); i++)
 		{
 			if (pObject == m_xObjectArray[i].pObject)
 				return i;
 		}
-		return -1;
+		return static_cast<UINT>(-1);
 	}
+
 	UINT getFitableIndex(DWORD dwKey)
 	{
-		UINT s = 0, e = m_xObjectArray.getCount(), m = 0;
-		if (e == 0)return 0;
-		while (s < (e + 1))
+		UINT s = 0, e = m_xObjectArray.getCount();
+		if (e == 0) return 0;
+		while (s < e)
 		{
-			m = (s + e) / 2;
+			UINT m = (s + e) / 2;
 			if (dwKey > m_xObjectArray[m].dwKey)
-				s = m;
+				s = m + 1;
 			else
 				e = m;
 		}
-		if (s == m)return e;
 		return s;
 	}
-	xDynamicPtrArray<KeyObj, 512 > m_xObjectArray;
+
+	xDynamicPtrArray<KeyObj, 512> m_xObjectArray;
 };
 
-// 获取tt的方向
 inline int GetFlyDirection(int sx, int sy, int ttx, int tty)
 {
 	int dx = ttx - sx;
@@ -608,20 +542,19 @@ inline int GetFlyDirection(int sx, int sy, int ttx, int tty)
 	else return (dy > 0) ? 5 : 7;
 }
 
-// 计算字符串数量
 inline int countStringChar(const char* pstring, int ichar)
 {
-	char* p = (char*)pstring;
+	char* p = const_cast<char*>(pstring);
 	int c = 0;
 	while (*p)
 	{
-		if (*p == ichar)c++;
+		if (*p == ichar) c++;
 		p++;
 	}
 	return c;
 }
 
-inline void replaceOutPair(char* pszString, int PairL, int PairR, int ReplaceTo)
+inline VOID replaceOutPair(char* pszString, int PairL, int PairR, int ReplaceTo)
 {
 	char* p = pszString;
 	int	PairLevel = 0;
@@ -660,21 +593,20 @@ inline void replaceOutPair(char* pszString, int PairL, int PairR, int ReplaceTo)
 
 inline static BOOL InRect(int x, int y, RECT& rc)
 {
-	if (x < rc.left || x > rc.right)return FALSE;
-	if (y < rc.top || y > rc.bottom)return FALSE;
+	if (x < rc.left || x > rc.right) return FALSE;
+	if (y < rc.top || y > rc.bottom) return FALSE;
 	return TRUE;
 }
 
-// 过滤物品显示名字的末尾数字
 inline int FilterItemShowName(char* sName)
 {
 	if (!sName) return 0;
 	int len = 0;
-	while (len < 256 && sName[len] != '\0') // 限制最大长度
+	while (len < 256 && sName[len] != '\0')
 		len++;
 	if (len == 0) return 0;
 	int pos = len - 1;
-	while (pos >= 0) // 从后往前找第一个非数字字符
+	while (pos >= 0)
 	{
 		if (sName[pos] < '0' || sName[pos] > '9')
 			break;
@@ -685,7 +617,6 @@ inline int FilterItemShowName(char* sName)
 		}
 		pos--;
 	}
-	// 设置结束符
 	if (pos >= 0)
 	{
 		sName[pos + 1] = '\0';
@@ -694,29 +625,22 @@ inline int FilterItemShowName(char* sName)
 	return 0;
 }
 
-// 字符转字节集
-inline void CharToBytes(const char* str, BYTE* outBytes, int& outCount)
+inline VOID CharToBytes(const char* str, BYTE* outBytes, int& outCount)
 {
 	if (str == nullptr || outBytes == nullptr)
 	{
 		outCount = 0;
 		return;
 	}
-	int len = (int)strlen(str);
-	outCount = min(len, 256); // 限制最大256字节
+	int len = static_cast<int>(strlen(str));
+	outCount = MIN(len, 256);
 	for (int i = 0; i < outCount; i++)
 	{
-		outBytes[i] = (BYTE)(str[i] & 0xff);
+		outBytes[i] = static_cast<BYTE>(str[i] & 0xff);
 	}
 }
 
-// 字符转字节集并打印的函数
-// 示例:
-// BYTE bytes[256];
-// int count;
-// CharToBytesAndPrint("ABC", bytes, count);
-// 输出: [65,66,67,]
-inline void CharToBytesAndPrint(const char* str, BYTE* outBytes, int& outCount)
+inline VOID CharToBytesAndPrint(const char* str, BYTE* outBytes, int& outCount)
 {
 	CharToBytes(str, outBytes, outCount);
 	LG1("[");
@@ -727,20 +651,15 @@ inline void CharToBytesAndPrint(const char* str, BYTE* outBytes, int& outCount)
 	LG1("]\n\n");
 }
 
-// 获取金币外形
 inline WORD GetGoldImageIndex(DWORD dwCount)
 {
-	//使用查找表+二分查找
-	static const DWORD thresholds[] = { 100, 300, 500, 1000, UINT_MAX };
-	static const WORD images[] = { 0xe1, 0xe2, 0xe3, 0xe4, 0xe5 };
-	int idx = 0;
-	while (idx < 4 && dwCount > thresholds[idx + 1])
-		idx++;
-	return images[idx];
+	static const std::array<DWORD, 5> thresholds{ 100, 300, 500, 1000, UINT_MAX };
+	static const std::array<WORD, 5> images{ 0xe1, 0xe2, 0xe3, 0xe4, 0xe5 };
+	auto it = std::lower_bound(thresholds.begin(), thresholds.end(), dwCount);
+	return images[std::distance(thresholds.begin(), it)];
 }
 
-// 检查字符是否为int数字
-inline bool IsIntegerNumber(const char* str) 
+inline bool IsIntegerNumber(const char* str)
 {
 	if (str == nullptr || *str == '\0') return false;
 	int i = 0;
@@ -749,16 +668,15 @@ inline bool IsIntegerNumber(const char* str)
 		i++;
 		if (str[i] == '\0') return false;
 	}
-	while (str[i] != '\0') 
+	while (str[i] != '\0')
 	{
-		unsigned char c = str[i];
+		unsigned char c = static_cast<unsigned char>(str[i]);
 		if (!isdigit(c)) return false;
 		i++;
 	}
 	return true;
 }
 
-// 比较两个时间戳, 是否已经到第二天
 inline int IsNextDay(time_t timestamp1, time_t timestamp2)
 {
 	if (timestamp1 == 0 || timestamp2 == 0)
@@ -768,47 +686,37 @@ inline int IsNextDay(time_t timestamp1, time_t timestamp2)
 	return static_cast<int>(abs(days2 - days1));
 }
 
-// 正方形坐标
 struct SquareArea
 {
-	int centerX, centerY = 0;      // 中心坐标
-	int sideLength = 0;            // 边长
-	std::vector<std::pair<int, int>> outerSquare;  // 外圈正方形坐标
-	std::vector<std::pair<int, int>> innerSquare;  // 内圈正方形坐标
+	int centerX = 0, centerY = 0;
+	int sideLength = 0;
+	std::vector<std::pair<int, int>> outerSquare;
+	std::vector<std::pair<int, int>> innerSquare;
 };
 
-//计算正方形坐标 - 外圈周长 + 内部小正方形
 inline SquareArea CalculateSquareArea(int centerX, int centerY)
 {
 	SquareArea area;
 	area.centerX = centerX;
 	area.centerY = centerY;
-	area.sideLength = 5;  // 5x5外圈
+	area.sideLength = 5;
 
-	// 外圈周长：5x5正方形的边界, 共16个点
-	area.outerSquare.resize(16);
-	int idx = 0;
-	// 上边（从左到右, 5个点）
+	area.outerSquare.reserve(16);
 	for (int x = centerX - 2; x <= centerX + 2; x++)
-		area.outerSquare[idx++] = { x, centerY - 2 };
-	// 右边（从上到下, 排除右上角, 4个点）
+		area.outerSquare.emplace_back(x, centerY - 2);
 	for (int y = centerY - 1; y <= centerY + 2; y++)
-		area.outerSquare[idx++] = { centerX + 2, y };
-	// 下边（从右到左, 排除右下角, 4个点）
+		area.outerSquare.emplace_back(centerX + 2, y);
 	for (int x = centerX + 1; x >= centerX - 2; x--)
-		area.outerSquare[idx++] = { x, centerY + 2 };
-	// 左边（从下到上, 排除左下角和左上角, 3个点）
+		area.outerSquare.emplace_back(x, centerY + 2);
 	for (int y = centerY + 1; y >= centerY - 1; y--)
-		area.outerSquare[idx++] = { centerX - 2, y };
+		area.outerSquare.emplace_back(centerX - 2, y);
 
-	// 内部小正方形：3x3, 共9个点
-	area.innerSquare.resize(9);
-	idx = 0;
+	area.innerSquare.reserve(9);
 	for (int y = centerY - 1; y <= centerY + 1; y++)
 	{
 		for (int x = centerX - 1; x <= centerX + 1; x++)
 		{
-			area.innerSquare[idx++] = { x, y };
+			area.innerSquare.emplace_back(x, y);
 		}
 	}
 

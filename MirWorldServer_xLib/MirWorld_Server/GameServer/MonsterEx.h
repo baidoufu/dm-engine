@@ -1,6 +1,7 @@
 #pragma once
 #include "aiobjectex.h"
 #include "itembox.h"
+#include <array>
 
 class CHumanPlayer;
 class CVisibleEvent;
@@ -8,8 +9,8 @@ class CVisibleEvent;
 class CMonsterEx : public CAiObjectEx
 {
 public:
-	CMonsterEx(void);
-	virtual ~CMonsterEx(void);
+	CMonsterEx(VOID);
+	virtual ~CMonsterEx(VOID);
 	// 初始化怪物
 	// pDesc: 怪物描述类指针
 	// mapid: 地图ID
@@ -31,9 +32,9 @@ public:
 	// 获取指定属性值
 	int GetPropValue(PROP_INDEX index);
 	// 减少属性值
-	void DecPropValue(PROP_INDEX index, int value);
+	VOID DecPropValue(PROP_INDEX index, int value);
 	// 增加属性值
-	void AddPropValue(PROP_INDEX index, int value);
+	VOID AddPropValue(PROP_INDEX index, int value);
 	// 处理对象进程
 	VOID DoProcess(OBJECTPROCESS* pProcess);
 	// 检查是否可以变身
@@ -45,25 +46,18 @@ public:
 	{
 		if (GetOwner() != nullptr)return OBJ_PET;
 		if (IsSystemFlagSeted(SF_FAKETARGET))return OBJ_PET;
-		return OBJ_MONSTER;
-	}
-	//获取怪物外观类型
-	e_object_ApprType GetApprType()
-	{
 		if (m_pDesc)
 		{
 			switch (m_pDesc->base.btImage)
 			{
 			case 0x73: // 大刀卫士
 			case 0x74: // 弓箭守卫
-				return APPR_GUARD;
+				return OBJ_GUARD;
 			case 0x79: // 树木
-				return APPR_TREE;
-			default:
-				return APPR_MONSTER;
+				return OBJ_TREE;
 			}
 		}
-		return APPR_MONSTER;
+		return OBJ_MONSTER;
 	}
 	// 检查是否可以被召唤
 	BOOL CanBeSlave() {
@@ -95,16 +89,16 @@ public:
 	// 获取自动恢复生命值的时间间隔(毫秒)
 	int GetAutoRecoverHptime() {
 		if (m_pDesc == nullptr) return 15 * 1000;
-		if (m_pDesc->prop.recoverhptime == 0)
-			m_pDesc->prop.recoverhptime = 15 * 1000;
-		return m_pDesc->prop.recoverhptime * 1000;
+		int hptime = m_pDesc->prop.recoverhptime;
+		if (hptime == 0) hptime = 15;
+		return hptime * 1000;
 	}
 	// 获取自动恢复魔法值的时间间隔(毫秒)
 	int GetAutoRecoverMptime() {
 		if (m_pDesc == nullptr)return 30 * 1000;
-		if (m_pDesc->prop.recovermptime == 0)
-			m_pDesc->prop.recovermptime = 30 * 1000;
-		return m_pDesc->prop.recovermptime * 1000;
+		int mptime = m_pDesc->prop.recovermptime;
+		if (mptime == 0) mptime = 30;
+		return mptime * 1000;
 	}
 	// 获取自动恢复的生命值数量
 	int GetAutoRecoverHp() 
@@ -112,7 +106,7 @@ public:
 		if (m_pDesc == nullptr)return 0; 
 		int hp = m_pDesc->prop.recoverhp;
 		if (IsStatusSet(SI_GREENPOISON))//绿毒状态
-			hp = -GetStatusParam(SI_GREENPOISON);
+			hp = -static_cast<int>(GetStatusParam(SI_GREENPOISON));
 		return hp; 
 	}
 	// 获取自动恢复的魔法值数量
@@ -121,7 +115,7 @@ public:
 		if (m_pDesc == nullptr)return 0; 
 		int mp = m_pDesc->prop.recovermp;  
 		if (IsStatusSet(SI_STRAWMAN)) // 诅咒术(男)红咒
-			mp = -GetStatusParam(SI_STRAWMAN);
+			mp = -static_cast<int>(GetStatusParam(SI_STRAWMAN));
 		return mp;
 	}
 	// 检查是否是合适的目标
@@ -147,6 +141,7 @@ public:
 	// 发送生命值魔法值变化消息
 	VOID SendHpMpChanged(int damage = 0, WORD wEffect = 57)
 	{
+		if (m_pDesc == nullptr) return;
 		if (GetType() == OBJ_MONSTER && damage < 0)
 			damage = 0; // 怪加血时, 不飘血
 		int wHp = GetPropValue(PI_CURHP); // 当前生命值
@@ -201,7 +196,7 @@ public:
 		PetgotoPOwner = TRUE;
 		m_pCurFocusItem = SearchFitableItem(x, y);
 	}
-	// 检查是否正在返回主人身边
+	// 检查是否已设置宠物拾取物品
 	BOOL IsGotoOwner() { return PetgotoPOwner; }
 	// 获取怪物生成器信息
 	MONSTERGEN* GetGen() { return m_pGen; }
@@ -288,7 +283,7 @@ protected:
 	CServerTimer m_bodytimer; // 身体计时器
 	CServerTimer m_IdleTimer; // 空闲计时器
 	CServerTimer m_betrayTimer; // 宠物叛变计时器
-	BOOL PetgotoPOwner = FALSE; // 宠物是否返回主人身边
+	BOOL PetgotoPOwner = FALSE; // 是否已设置宠物拾取
 	CAttackObject m_xAttackObj; // 攻击对象
 	MONSTERGEN* m_pGen; // 怪物生成器信息
 	MonsterClass* m_pDesc; // 怪物类描述
@@ -299,6 +294,6 @@ protected:
 private:
 	BOOL m_bNoAiDelayAttack = TRUE; //是否无延时攻击
 	BOOL m_bIsShow = FALSE; // 是否出现动画
-	char m_szOriginalName[20]; // 原始显示名字
+	std::array<char, 20> m_szOriginalName; // 原始显示名字
 	BYTE m_btRevivalCount; // 被复活的次数
 };

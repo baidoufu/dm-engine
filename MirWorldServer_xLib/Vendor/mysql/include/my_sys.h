@@ -1,13 +1,20 @@
-/* Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2023, Oracle and/or its affiliates.
 
    This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; version 2 of the License.
+   it under the terms of the GNU General Public License, version 2.0,
+   as published by the Free Software Foundation.
+
+   This program is also distributed with certain software (including
+   but not limited to OpenSSL) that is licensed under separate terms,
+   as designated in a particular file or component or in included license
+   documentation.  The authors of MySQL hereby grant you an additional
+   permission to link the program and your derivative works with the
+   separately licensed software that they have included with MySQL.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU General Public License, version 2.0, for more details.
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
@@ -34,6 +41,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <sys/stat.h>
 
 C_MODE_START
 
@@ -148,6 +156,8 @@ C_MODE_START
 #define GETDATE_HHMMSSTIME	4
 #define GETDATE_GMT		8
 #define GETDATE_FIXEDLENGTH	16
+#define GETDATE_T_DELIMITER 32
+#define GETDATE_SHORT_DATE_FULL_YEAR 64
 
 	/* defines when allocating data */
 extern void *my_multi_malloc(PSI_memory_key key, myf flags, ...);
@@ -163,7 +173,7 @@ extern PSI_memory_key key_memory_max_alloca;
 #define my_safe_afree(ptr, size, max_alloca_sz) if (size > max_alloca_sz) \
                                                my_free(ptr)
 
-#if !defined(DBUG_OFF) || defined(HAVE_VALGRIND)
+#if !defined(NDEBUG) || defined(HAVE_VALGRIND)
 /**
   Put bad content in memory to be sure it will segfault if dereferenced.
   With Valgrind, verify that memory is addressable, and mark it undefined.
@@ -171,9 +181,10 @@ extern PSI_memory_key key_memory_max_alloca;
   trashes value of B.
 */
 #define TRASH(A,B) do {                                                 \
+    void *p = (A);                                                      \
     const size_t l= (B);                                                \
     MEM_CHECK_ADDRESSABLE(A, l);                                        \
-    memset(A, 0x8F, l);                                                 \
+    memset(p, 0x8F, l);                                                 \
     MEM_UNDEFINED(A, l);                                                \
   } while (0)
 #else
@@ -469,6 +480,16 @@ typedef struct st_io_cache		/* Used when cacheing files */
 
 typedef int (*qsort2_cmp)(const void *, const void *, const void *);
 
+/*
+  Subset of struct stat fields filled by stat/lstat/fstat that uniquely
+  identify a file
+*/
+typedef struct st_file_id
+{
+  dev_t st_dev;
+  ino_t st_ino;
+} ST_FILE_ID;
+
 typedef void (*my_error_reporter)(enum loglevel level, const char *format, ...)
   MY_ATTRIBUTE((format(printf, 2, 3)));
 
@@ -502,7 +523,7 @@ extern PSI_file_key key_file_io_cache;
 #define my_b_tell(info) ((info)->pos_in_file + \
 			 (size_t) (*(info)->current_pos - (info)->request_pos))
 
-#define my_b_get_buffer_start(info) (info)->request_pos
+#define my_b_get_buffer_start(info) (info)->request_pos 
 #define my_b_get_bytes_in_buffer(info) (char*) (info)->read_end -   \
   (char*) my_b_get_buffer_start(info)
 #define my_b_get_pos_in_file(info) (info)->pos_in_file
@@ -540,8 +561,9 @@ extern File my_create(const char *FileName,int CreateFlags,
 extern int my_close(File Filedes,myf MyFlags);
 extern int my_mkdir(const char *dir, int Flags, myf MyFlags);
 extern int my_readlink(char *to, const char *filename, myf MyFlags);
-extern int my_is_symlink(const char *filename);
+extern int my_is_symlink(const char *filename, ST_FILE_ID *file_id);
 extern int my_realpath(char *to, const char *filename, myf MyFlags);
+extern int my_is_same_file(File file, const ST_FILE_ID *file_id);
 extern File my_create_with_symlink(const char *linkname, const char *filename,
 				   int createflags, int access_flags,
 				   myf MyFlags);
@@ -600,7 +622,7 @@ extern my_bool is_filename_allowed(const char *name, size_t length,
                    my_bool allow_current_dir);
 #else /* _WIN32 */
 # define is_filename_allowed(name, length, allow_cwd) (TRUE)
-#endif /* _WIN32 */
+#endif /* _WIN32 */ 
 
 #ifdef _WIN32
 extern int nt_share_delete(const char *name,myf MyFlags);
@@ -681,7 +703,6 @@ extern size_t cleanup_dirname(char * to,const char *from);
 extern size_t system_filename(char * to,const char *from);
 extern size_t unpack_filename(char * to,const char *from);
 extern char * intern_filename(char * to,const char *from);
-extern char * directory_file_name(char * dst, const char *src);
 extern int pack_filename(char * to, const char *name, size_t max_length);
 extern char * my_path(char * to,const char *progname,
 			 const char *own_pathname_part);
@@ -750,12 +771,10 @@ File create_temp_file(char *to, const char *dir, const char *pfx,
 		      int mode, myf MyFlags);
 
 // Use Prealloced_array or std::vector or something similar in C++
-#if defined(__cplusplus)
 
-#define init_dynamic_array please_use_an_appropriately_typed_container
-#define my_init_dynamic_array please_use_an_appropriately_typed_container
-
-#else
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 extern my_bool my_init_dynamic_array(DYNAMIC_ARRAY *array,
                                      PSI_memory_key key,
@@ -769,7 +788,9 @@ extern my_bool init_dynamic_array(DYNAMIC_ARRAY *array, uint element_size,
 #define dynamic_element(array,array_index,type) \
   ((type)((array)->buffer) +(array_index))
 
-#endif  /* __cplusplus */
+#ifdef __cplusplus
+}
+#endif
 
 /* Some functions are still in use in C++, because HASH uses DYNAMIC_ARRAY */
 extern my_bool insert_dynamic(DYNAMIC_ARRAY *array, const void *element);
@@ -814,6 +835,9 @@ static inline char *safe_strdup_root(MEM_ROOT *root, const char *str)
 }
 extern char *strmake_root(MEM_ROOT *root,const char *str,size_t len);
 extern void *memdup_root(MEM_ROOT *root,const void *str, size_t len);
+extern void set_memroot_max_capacity(MEM_ROOT *mem_root, size_t size);
+extern void set_memroot_error_reporting(MEM_ROOT *mem_root,
+                                       my_bool report_error);
 extern my_bool my_compress(uchar *, size_t *, size_t *);
 extern my_bool my_uncompress(uchar *, size_t , size_t *);
 extern uchar *my_compress_alloc(const uchar *packet, size_t *len,
@@ -851,6 +875,14 @@ extern my_bool my_gethwaddr(uchar *to);
 
 #ifndef MAP_NOSYNC
 #define MAP_NOSYNC      0
+#endif
+
+/*
+  Not defined in FreeBSD 11.
+  Was never implemented in FreeBSD, so we just set it to 0.
+*/
+#ifndef MAP_NORESERVE
+#define MAP_NORESERVE 0
 #endif
 
 #ifdef HAVE_MMAP64

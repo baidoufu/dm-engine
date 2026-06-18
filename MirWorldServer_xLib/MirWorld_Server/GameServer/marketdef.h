@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 class CMarket;
 class CSubMarket;
 typedef struct tagMarketItem
@@ -11,8 +12,8 @@ typedef struct tagMarketItem
 	UINT nId;
 	UINT nImage;
 	UINT nShowImage;
-	char szName[64];
-	char szItemName[64];
+	std::array<char, 64> szName{};
+	std::array<char, 64> szItemName{};
 	WORD wCount;
 	WORD wPrice;
 	BOOL bBind;

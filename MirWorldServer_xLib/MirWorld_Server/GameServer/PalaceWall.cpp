@@ -3,13 +3,14 @@
 #include "GameWorld.h"
 #include "monstermanagerex.h"
 #include "logicmap.h"
+#include <array>
 
-CPalaceWall::CPalaceWall(void)
+CPalaceWall::CPalaceWall(VOID)
 {
 	Clean();
 }
 
-CPalaceWall::~CPalaceWall(void)
+CPalaceWall::~CPalaceWall(VOID)
 {
 }
 
@@ -59,16 +60,16 @@ VOID CPalaceWall::Repair()//ÖØÐÂÐÞ¸´
 {
 	if (m_bDead)
 	{
-		char szMsg[1024];
+		std::array<char, 1024> szMsg{};
 		int length = 0;
-		if (this->GetOutViewmsg(szMsg, length))
+		if (this->GetOutViewmsg(szMsg.data(), length))
 		{
-			SendAroundMsg(szMsg, length);
+			SendAroundMsg(szMsg.data(), length);
 		}
 		m_bDead = FALSE;
 		SetDirection(ED_UP);
-		if (this->GetViewmsg(szMsg, length))
-			SendAroundMsg(szMsg, length);
+		if (this->GetViewmsg(szMsg.data(), length))
+			SendAroundMsg(szMsg.data(), length);
 	}
 	SetAroundBlock();
 	CMonsterEx::m_wCurHp = GetPropValue(PI_MAXHP);

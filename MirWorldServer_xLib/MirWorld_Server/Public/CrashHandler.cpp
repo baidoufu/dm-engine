@@ -1,294 +1,458 @@
 #include "StdAfx.h"
 #include "CrashHandler.h"
 #include <psapi.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <crtdbg.h>
 
 #pragma comment(lib, "dbghelp.lib")
 #pragma comment(lib, "psapi.lib")
 
-std::string CrashHandler::m_dumpPath = "..\\日志\\";
+std::string CrashHandler::m_dumpPath = "..\\异常\\";
 const char* (*CrashHandler::m_additionalInfoCallback)() = nullptr;
+CrashHandler::PreCrashSaveCallback CrashHandler::m_preCrashSaveCallback = nullptr;
 bool CrashHandler::m_initialized = false;
 
-// 获取异常代码的描述
-const char* CrashHandler::GetExceptionCodeString(DWORD code)
+// 线程安全的时间字符串构建
+static VOID BuildTimeStr(char* buf, size_t bufSize)
 {
-    switch (code)
-    {
-        case EXCEPTION_ACCESS_VIOLATION: return "访问违规 (EXCEPTION_ACCESS_VIOLATION)";
-        case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: return "数组越界 (EXCEPTION_ARRAY_BOUNDS_EXCEEDED)";
-        case EXCEPTION_BREAKPOINT: return "断点异常 (EXCEPTION_BREAKPOINT)";
-        case EXCEPTION_DATATYPE_MISALIGNMENT: return "数据类型未对齐 (EXCEPTION_DATATYPE_MISALIGNMENT)";
-        case EXCEPTION_FLT_DENORMAL_OPERAND: return "浮点数非正常操作数 (EXCEPTION_FLT_DENORMAL_OPERAND)";
-        case EXCEPTION_FLT_DIVIDE_BY_ZERO: return "浮点数除零 (EXCEPTION_FLT_DIVIDE_BY_ZERO)";
-        case EXCEPTION_FLT_INEXACT_RESULT: return "浮点数结果不精确 (EXCEPTION_FLT_INEXACT_RESULT)";
-        case EXCEPTION_FLT_INVALID_OPERATION: return "浮点数无效操作 (EXCEPTION_FLT_INVALID_OPERATION)";
-        case EXCEPTION_FLT_OVERFLOW: return "浮点数溢出 (EXCEPTION_FLT_OVERFLOW)";
-        case EXCEPTION_FLT_STACK_CHECK: return "浮点数栈检查失败 (EXCEPTION_FLT_STACK_CHECK)";
-        case EXCEPTION_FLT_UNDERFLOW: return "浮点数下溢 (EXCEPTION_FLT_UNDERFLOW)";
-        case EXCEPTION_ILLEGAL_INSTRUCTION: return "非法指令 (EXCEPTION_ILLEGAL_INSTRUCTION)";
-        case EXCEPTION_IN_PAGE_ERROR: return "页面错误 (EXCEPTION_IN_PAGE_ERROR)";
-        case EXCEPTION_INT_DIVIDE_BY_ZERO: return "整数除零 (EXCEPTION_INT_DIVIDE_BY_ZERO)";
-        case EXCEPTION_INT_OVERFLOW: return "整数溢出 (EXCEPTION_INT_OVERFLOW)";
-        case EXCEPTION_INVALID_DISPOSITION: return "无效的处置 (EXCEPTION_INVALID_DISPOSITION)";
-        case EXCEPTION_NONCONTINUABLE_EXCEPTION: return "不可继续的异常 (EXCEPTION_NONCONTINUABLE_EXCEPTION)";
-        case EXCEPTION_PRIV_INSTRUCTION: return "特权指令 (EXCEPTION_PRIV_INSTRUCTION)";
-        case EXCEPTION_SINGLE_STEP: return "单步执行 (EXCEPTION_SINGLE_STEP)";
-        case EXCEPTION_STACK_OVERFLOW: return "栈溢出 (EXCEPTION_STACK_OVERFLOW)";
-        default: return "未知异常";
-    }
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	_snprintf_s(buf, bufSize, _TRUNCATE, "%04d%02d%02d_%02d%02d%02d",
+				st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 }
 
-// 打印异常信息
-void CrashHandler::PrintExceptionInfo(EXCEPTION_POINTERS* pExceptionInfo, FILE* fp)
+// 使用 Win32 API 打开日志文件
+static HANDLE OpenLogFile(const char* path)
 {
-    fprintf(fp, "========== 异常信息 ==========\n");
-    fprintf(fp, "异常代码: 0x%08X\n", pExceptionInfo->ExceptionRecord->ExceptionCode);
-    fprintf(fp, "异常描述: %s\n", GetExceptionCodeString(pExceptionInfo->ExceptionRecord->ExceptionCode));
-    fprintf(fp, "异常地址: 0x%p\n", pExceptionInfo->ExceptionRecord->ExceptionAddress);
-    fprintf(fp, "异常标志: 0x%08X\n", pExceptionInfo->ExceptionRecord->ExceptionFlags);
-    fprintf(fp, "参数数量: %u\n", pExceptionInfo->ExceptionRecord->NumberParameters);
-    
-    // 打印异常参数
-    for (DWORD i = 0; i < pExceptionInfo->ExceptionRecord->NumberParameters && i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
-    {
-        fprintf(fp, "参数[%u]: 0x%p\n", i, (void*)pExceptionInfo->ExceptionRecord->ExceptionInformation[i]);
-    }
-    fprintf(fp, "\n");
-
-    // 访问违规的特殊处理
-    if (pExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
-    {
-        fprintf(fp, "访问违规详情:\n");
-        fprintf(fp, "  操作类型: %s\n", 
-                pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 0 ? "读取" :
-                pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 1 ? "写入" : "执行");
-        fprintf(fp, "  访问地址: 0x%p\n", (void*)pExceptionInfo->ExceptionRecord->ExceptionInformation[1]);
-        fprintf(fp, "\n");
-    }
+	return CreateFileA(path, GENERIC_WRITE, 0, nullptr,
+					   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 }
 
-// 打印调用栈
-void CrashHandler::PrintStackTrace(EXCEPTION_POINTERS* pExceptionInfo, FILE* fp)
+// 使用 Win32 API 写入日志（不依赖 CRT 的 FILE*）
+static VOID LogWrite(HANDLE hFile, const char* str)
 {
-    HANDLE hProcess = GetCurrentProcess();
-    HANDLE hThread = GetCurrentThread();
-    
-    // 初始化符号处理器
-    SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME | SYMOPT_LOAD_LINES);
-    SymInitialize(hProcess, NULL, TRUE);
-    
-    fprintf(fp, "========== 调用栈 ==========\n");
-    
-    CONTEXT context = *pExceptionInfo->ContextRecord;
-    
-    // 根据架构设置栈帧
-    STACKFRAME64 stackFrame = {0};
+	DWORD written;
+	WriteFile(hFile, str, (DWORD)strlen(str), &written, nullptr);
+}
+
+static VOID LogLine(HANDLE hFile, const char* str)
+{
+	LogWrite(hFile, str);
+	LogWrite(hFile, "\r\n");
+}
+
+static VOID LogFormat(HANDLE hFile, const char* fmt, ...)
+{
+	std::array<char, 4096> buf{};
+	va_list args;
+	va_start(args, fmt);
+	_vsnprintf_s(buf.data(), buf.size(), _TRUNCATE, fmt, args);
+	va_end(args);
+	LogWrite(hFile, buf.data());
+}
+
+static VOID LogLineFormat(HANDLE hFile, const char* fmt, ...)
+{
+	std::array<char, 4096> buf{};
+	va_list args;
+	va_start(args, fmt);
+	_vsnprintf_s(buf.data(), buf.size(), _TRUNCATE, fmt, args);
+	va_end(args);
+	LogWrite(hFile, buf.data());
+	LogWrite(hFile, "\r\n");
+}
+
+// 安全地生成 MiniDump 文件
+static BOOL SafeCreateDump(EXCEPTION_POINTERS* pExceptionInfo, const char* dumpPath)
+{
+	HANDLE hDumpFile = CreateFileA(dumpPath, GENERIC_WRITE, 0, nullptr, 
+								   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (hDumpFile == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+	dumpInfo.ExceptionPointers = pExceptionInfo;
+	dumpInfo.ThreadId = GetCurrentThreadId();
+	dumpInfo.ClientPointers = FALSE;
+	
+	MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(
+		MiniDumpWithFullMemory | 
+		MiniDumpWithHandleData | 
+		MiniDumpWithThreadInfo | 
+		MiniDumpWithProcessThreadData |
+		MiniDumpWithFullMemoryInfo |
+		MiniDumpWithUnloadedModules);
+	
+	BOOL result = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), 
+						 hDumpFile, dumpType, &dumpInfo, nullptr, nullptr);
+	CloseHandle(hDumpFile);
+	return result;
+}
+
+// 安全地打印异常信息
+static VOID SafePrintExceptionInfo(HANDLE hFile, EXCEPTION_POINTERS* pExceptionInfo)
+{
+	LogLine(hFile, "========== 异常信息 ==========");
+	
+	DWORD code = pExceptionInfo->ExceptionRecord->ExceptionCode;
+	LogLineFormat(hFile, "异常代码: 0x%08X", code);
+	
+	const char* desc;
+	switch (code)
+	{
+		case EXCEPTION_ACCESS_VIOLATION: desc = "访问违规"; break;
+		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED: desc = "数组越界"; break;
+		case EXCEPTION_BREAKPOINT: desc = "断点异常"; break;
+		case EXCEPTION_DATATYPE_MISALIGNMENT: desc = "数据类型未对齐"; break;
+		case EXCEPTION_FLT_DIVIDE_BY_ZERO: desc = "浮点数除零"; break;
+		case EXCEPTION_FLT_OVERFLOW: desc = "浮点数溢出"; break;
+		case EXCEPTION_ILLEGAL_INSTRUCTION: desc = "非法指令"; break;
+		case EXCEPTION_INT_DIVIDE_BY_ZERO: desc = "整数除零"; break;
+		case EXCEPTION_INT_OVERFLOW: desc = "整数溢出"; break;
+		case EXCEPTION_STACK_OVERFLOW: desc = "栈溢出"; break;
+		default: desc = "未知异常"; break;
+	}
+	LogLineFormat(hFile, "异常描述: %s", desc);
+	LogLineFormat(hFile, "异常地址: 0x%p", pExceptionInfo->ExceptionRecord->ExceptionAddress);
+	LogLineFormat(hFile, "异常标志: 0x%08X", pExceptionInfo->ExceptionRecord->ExceptionFlags);
+	LogLineFormat(hFile, "参数数量: %u", pExceptionInfo->ExceptionRecord->NumberParameters);
+	
+	for (DWORD i = 0; i < pExceptionInfo->ExceptionRecord->NumberParameters && i < 15; ++i)
+	{
+		LogLineFormat(hFile, "参数[%u]: 0x%p", i, 
+					 (VOID*)pExceptionInfo->ExceptionRecord->ExceptionInformation[i]);
+	}
+	
+	if (code == EXCEPTION_ACCESS_VIOLATION)
+	{
+		const char* opType = pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 0 ? "读取" :
+							 pExceptionInfo->ExceptionRecord->ExceptionInformation[0] == 1 ? "写入" : "执行";
+		LogLineFormat(hFile, "访问违规: %s 地址 0x%p", opType,
+					 (VOID*)pExceptionInfo->ExceptionRecord->ExceptionInformation[1]);
+	}
+	LogLine(hFile, "");
+}
+
+// 安全地打印调用栈
+static VOID SafePrintStackTrace(HANDLE hFile, EXCEPTION_POINTERS* pExceptionInfo)
+{
+	HANDLE hProcess = GetCurrentProcess();
+	HANDLE hThread = GetCurrentThread();
+	
+	SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME | SYMOPT_LOAD_LINES);
+	
+	// 构建符号搜索路径：exe目录 + 环境变量
+	std::array<char, MAX_PATH * 2> symbolPath{};
+	std::array<char, MAX_PATH> exePath{};
+	GetModuleFileNameA(nullptr, exePath.data(), MAX_PATH);
+	char* lastSlash = strrchr(exePath.data(), '\\');
+	if (lastSlash) *lastSlash = '\0';
+	_snprintf_s(symbolPath.data(), symbolPath.size(), _TRUNCATE, "%s;%s", exePath.data(), 
+				getenv("_NT_SYMBOL_PATH") ? getenv("_NT_SYMBOL_PATH") : "");
+	
+	if (!SymInitialize(hProcess, symbolPath.data(), TRUE))
+	{
+		LogLine(hFile, "SymInitialize 失败，无法解析符号");
+		return;
+	}
+	
+	LogLine(hFile, "========== 调用栈 ==========");
+	
+	CONTEXT context = *pExceptionInfo->ContextRecord;
+	
+	STACKFRAME64 stackFrame = {0};
 #ifdef _WIN64
-    stackFrame.AddrPC.Offset = context.Rip;
-    stackFrame.AddrPC.Mode = AddrModeFlat;
-    stackFrame.AddrFrame.Offset = context.Rbp;
-    stackFrame.AddrFrame.Mode = AddrModeFlat;
-    stackFrame.AddrStack.Offset = context.Rsp;
-    stackFrame.AddrStack.Mode = AddrModeFlat;
+	DWORD machineType = IMAGE_FILE_MACHINE_AMD64;
+	stackFrame.AddrPC.Offset = context.Rip;
+	stackFrame.AddrPC.Mode = AddrModeFlat;
+	stackFrame.AddrFrame.Offset = context.Rbp;
+	stackFrame.AddrFrame.Mode = AddrModeFlat;
+	stackFrame.AddrStack.Offset = context.Rsp;
+	stackFrame.AddrStack.Mode = AddrModeFlat;
 #else
-    stackFrame.AddrPC.Offset = context.Eip;
-    stackFrame.AddrPC.Mode = AddrModeFlat;
-    stackFrame.AddrFrame.Offset = context.Ebp;
-    stackFrame.AddrFrame.Mode = AddrModeFlat;
-    stackFrame.AddrStack.Offset = context.Esp;
-    stackFrame.AddrStack.Mode = AddrModeFlat;
+	DWORD machineType = IMAGE_FILE_MACHINE_I386;
+	stackFrame.AddrPC.Offset = context.Eip;
+	stackFrame.AddrPC.Mode = AddrModeFlat;
+	stackFrame.AddrFrame.Offset = context.Ebp;
+	stackFrame.AddrFrame.Mode = AddrModeFlat;
+	stackFrame.AddrStack.Offset = context.Esp;
+	stackFrame.AddrStack.Mode = AddrModeFlat;
 #endif
-    
-    // 获取模块信息
-    IMAGEHLP_MODULE64 moduleInfo = {0};
-    moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
-    
-    char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-    SYMBOL_INFO* pSymbol = (SYMBOL_INFO*)symbolBuffer;
-    pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-    pSymbol->MaxNameLen = MAX_SYM_NAME;
-    
-    IMAGEHLP_LINE64 lineInfo = {0};
-    lineInfo.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-    
-    DWORD displacement = 0;
-    
-    int frameCount = 0;
-    while (StackWalk64(IMAGE_FILE_MACHINE_AMD64, hProcess, hThread, &stackFrame, 
-                      &context, NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL) && 
-           frameCount < 100)
-    {
-        fprintf(fp, "[%2d] 0x%p", frameCount, (void*)stackFrame.AddrPC.Offset);
-        
-        // 获取符号信息
-        if (SymFromAddr(hProcess, stackFrame.AddrPC.Offset, NULL, pSymbol))
-        {
-            fprintf(fp, " %s", pSymbol->Name);
-        }
-        
-        // 获取行号信息
-        if (SymGetLineFromAddr64(hProcess, stackFrame.AddrPC.Offset, &displacement, &lineInfo))
-        {
-            fprintf(fp, " (%s:%d)", lineInfo.FileName, lineInfo.LineNumber);
-        }
-        
-        // 获取模块信息
-        if (SymGetModuleInfo64(hProcess, stackFrame.AddrPC.Offset, &moduleInfo))
-        {
-            fprintf(fp, " [%s]", moduleInfo.ModuleName);
-        }
-        
-        fprintf(fp, "\n");
-        frameCount++;
-    }
-    
-    if (frameCount == 0)
-    {
-        fprintf(fp, "无法获取调用栈信息\n");
-    }
-    
-    fprintf(fp, "\n");
-    
-    // 清理符号处理器
-    SymCleanup(hProcess);
+	
+	IMAGEHLP_MODULE64 moduleInfo = {0};
+	moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
+	
+	std::array<char, sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)> symbolBuffer{};
+	SYMBOL_INFO* pSymbol = (SYMBOL_INFO*)symbolBuffer.data();
+	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+	pSymbol->MaxNameLen = MAX_SYM_NAME;
+	
+	IMAGEHLP_LINE64 lineInfo = {0};
+	lineInfo.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+	DWORD displacement = 0;
+	
+	int frameCount = 0;
+	while (StackWalk64(machineType, hProcess, hThread, &stackFrame, 
+					  &context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64, nullptr) && 
+		   frameCount < 64)
+	{
+		LogFormat(hFile, "[%2d] 0x%p", frameCount, (VOID*)stackFrame.AddrPC.Offset);
+		
+		if (SymFromAddr(hProcess, stackFrame.AddrPC.Offset, nullptr, pSymbol))
+		{
+			LogFormat(hFile, " %s", pSymbol->Name);
+		}
+		
+		if (SymGetLineFromAddr64(hProcess, stackFrame.AddrPC.Offset, &displacement, &lineInfo))
+		{
+			LogFormat(hFile, " (%s:%d)", lineInfo.FileName, lineInfo.LineNumber);
+		}
+		
+		if (SymGetModuleInfo64(hProcess, stackFrame.AddrPC.Offset, &moduleInfo))
+		{
+			LogFormat(hFile, " [%s]", moduleInfo.ModuleName);
+		}
+		
+		LogLine(hFile, "");
+		++frameCount;
+	}
+	
+	if (frameCount == 0)
+		LogLine(hFile, "无法获取调用栈信息");
+	
+	LogLine(hFile, "");
+	SymCleanup(hProcess);
 }
 
-// 生成MiniDump
-void CrashHandler::CreateMiniDump(EXCEPTION_POINTERS* pExceptionInfo)
+// 确保目录存在（递归创建所有中间目录）
+static BOOL EnsureDirectoryExists(const char* path)
 {
-    time_t now = time(NULL);
-    struct tm* t = localtime(&now);
-    char timeStr[64];
-    strftime(timeStr, sizeof(timeStr), "%Y%m%d_%H%M%S", t);
-    
-    char dumpPath[MAX_PATH];
-    sprintf_s(dumpPath, "%scrash_%s.dmp", m_dumpPath.c_str(), timeStr);
-    
-    char logPath[MAX_PATH];
-    sprintf_s(logPath, "%scrash_%s.log", m_dumpPath.c_str(), timeStr);
-    
-    // 创建MiniDump文件
-    HANDLE hDumpFile = CreateFileA(dumpPath, GENERIC_WRITE, 0, NULL, 
-                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    
-    if (hDumpFile != INVALID_HANDLE_VALUE)
-    {
-        MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
-        dumpInfo.ExceptionPointers = pExceptionInfo;
-        dumpInfo.ThreadId = GetCurrentThreadId();
-        dumpInfo.ClientPointers = FALSE;
-        
-        MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(
-            MiniDumpWithFullMemory | 
-            MiniDumpWithHandleData | 
-            MiniDumpWithThreadInfo | 
-            MiniDumpWithProcessThreadData |
-            MiniDumpWithFullMemoryInfo |
-            MiniDumpWithUnloadedModules);
-        
-        if (MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), 
-                             hDumpFile, dumpType, &dumpInfo, NULL, NULL))
-        {
-            printf("崩溃转储已生成: %s\n", dumpPath);
-        }
-        else
-        {
-            printf("生成崩溃转储失败: %d\n", GetLastError());
-        }
-        
-        CloseHandle(hDumpFile);
-    }
-    
-    // 创建详细的崩溃日志文件
-    FILE* fp = fopen(logPath, "w");
-    if (fp)
-    {
-        fprintf(fp, "========================================\n");
-        fprintf(fp, "      程序崩溃报告\n");
-        fprintf(fp, "========================================\n\n");
-        
-        fprintf(fp, "崩溃时间: %04d-%02d-%02d %02d:%02d:%02d\n", 
-                t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-                t->tm_hour, t->tm_min, t->tm_sec);
-        fprintf(fp, "进程ID: %u\n", GetCurrentProcessId());
-        fprintf(fp, "线程ID: %u\n", GetCurrentThreadId());
-        fprintf(fp, "转储文件: %s\n", dumpPath);
-        fprintf(fp, "\n");
-        
-        // 打印异常信息
-        PrintExceptionInfo(pExceptionInfo, fp);
-        
-        // 打印调用栈
-        PrintStackTrace(pExceptionInfo, fp);
-        
-        // 打印额外的信息
-        if (m_additionalInfoCallback)
-        {
-            const char* additionalInfo = m_additionalInfoCallback();
-            if (additionalInfo)
-            {
-                fprintf(fp, "========== 额外信息 ==========\n");
-                fprintf(fp, "%s\n", additionalInfo);
-                fprintf(fp, "\n");
-            }
-        }
-        
-        // 打印内存信息
-        fprintf(fp, "========== 内存信息 ==========\n");
-        PROCESS_MEMORY_COUNTERS pmc;
-        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
-        {
-            fprintf(fp, "页面错误数: %lu\n", pmc.PageFaultCount);
-            fprintf(fp, "工作集大小: %Iu KB\n", pmc.WorkingSetSize / 1024);
-            fprintf(fp, "峰值工作集: %Iu KB\n", pmc.PeakWorkingSetSize / 1024);
-            fprintf(fp, "分页池大小: %Iu KB\n", pmc.QuotaPagedPoolUsage / 1024);
-            fprintf(fp, "非分页池: %Iu KB\n", pmc.QuotaNonPagedPoolUsage / 1024);
-            fprintf(fp, "页面文件使用: %Iu KB\n", pmc.PagefileUsage / 1024);
-            fprintf(fp, "峰值页面文件: %Iu KB\n", pmc.PeakPagefileUsage / 1024);
-        }
-        fprintf(fp, "\n");
-        
-        fclose(fp);
-        printf("崩溃日志已生成: %s\n", logPath);
-    }
+	// 复制一份用于修改
+	std::array<char, MAX_PATH> dirPath{};
+	strncpy_s(dirPath.data(), dirPath.size(), path, _TRUNCATE);
+	dirPath[MAX_PATH - 1] = '\0';  // 确保字符串零终止符
+	
+	// 找到最后一个反斜杠，截断为目录路径
+	char* lastSlash = strrchr(dirPath.data(), '\\');
+	if (lastSlash != nullptr)
+	{
+		*lastSlash = '\0';
+	}
+	else
+	{
+		// 没有路径分隔符，说明是当前目录，无需创建
+		return TRUE;
+	}
+	
+	// 如果目录已存在，直接返回成功
+	DWORD attr = GetFileAttributesA(dirPath.data());
+	if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY))
+		return TRUE;
+	
+	// 递归创建父目录
+	// 先找到上一层目录
+	char* prevSlash = strrchr(dirPath.data(), '\\');
+	if (prevSlash != nullptr && prevSlash != dirPath.data())
+	{
+		*prevSlash = '\0';
+		// 跳过盘符根目录（如 C:\）
+		if (prevSlash[-1] != ':')
+		{
+			if (!EnsureDirectoryExists(dirPath.data()))
+				return FALSE;
+		}
+		*prevSlash = '\\';
+	}
+	
+	// 创建当前目录
+	return CreateDirectoryA(dirPath.data(), nullptr) != 0 || 
+		   GetLastError() == ERROR_ALREADY_EXISTS;
+}
+
+// ========== 类公开方法 ==========
+
+// 生成MiniDump和崩溃日志
+VOID CrashHandler::CreateMiniDump(EXCEPTION_POINTERS* pExceptionInfo)
+{
+	std::array<char, 64> timeStr{};
+	BuildTimeStr(timeStr.data(), timeStr.size());
+	
+	std::array<char, MAX_PATH> logPath{};
+	_snprintf_s(logPath.data(), logPath.size(), _TRUNCATE, "%scrash_%s.log", m_dumpPath.c_str(), timeStr.data());
+
+	// 确保目录存在
+	EnsureDirectoryExists(logPath.data());
+
+	// 生成详细日志
+	__try
+	{
+		HANDLE hLogFile = OpenLogFile(logPath.data());
+		if (hLogFile != INVALID_HANDLE_VALUE)
+		{
+			SYSTEMTIME st;
+			GetLocalTime(&st);
+			LogLineFormat(hLogFile, "崩溃时间: %04d-%02d-%02d %02d:%02d:%02d",
+						  st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+			LogLine(hLogFile, "");
+			// 安全打印异常信息
+			SafePrintExceptionInfo(hLogFile, pExceptionInfo);
+			// 安全打印调用栈
+			__try
+			{
+				SafePrintStackTrace(hLogFile, pExceptionInfo);
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER)
+			{
+				LogLine(hLogFile, "调用栈解析过程中发生异常");
+			}
+			// 打印额外信息
+			if (m_additionalInfoCallback)
+			{
+				__try
+				{
+					const char* additionalInfo = m_additionalInfoCallback();
+					if (additionalInfo)
+					{
+						LogLine(hLogFile, "========== 额外信息 ==========");
+						LogLine(hLogFile, additionalInfo);
+						LogLine(hLogFile, "");
+					}
+				}
+				__except (EXCEPTION_EXECUTE_HANDLER)
+				{
+					LogLine(hLogFile, "[额外信息回调异常]");
+				}
+			}
+			// 打印内存信息
+			LogLine(hLogFile, "========== 内存信息 ==========");
+			PROCESS_MEMORY_COUNTERS pmc;
+			if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
+			{
+				LogLineFormat(hLogFile, "页面错误数: %lu", pmc.PageFaultCount);
+				LogLineFormat(hLogFile, "工作集大小: %Iu KB", pmc.WorkingSetSize / 1024);
+				LogLineFormat(hLogFile, "峰值工作集: %Iu KB", pmc.PeakWorkingSetSize / 1024);
+				LogLineFormat(hLogFile, "分页池大小: %Iu KB", pmc.QuotaPagedPoolUsage / 1024);
+				LogLineFormat(hLogFile, "非分页池: %Iu KB", pmc.QuotaNonPagedPoolUsage / 1024);
+				LogLineFormat(hLogFile, "页面文件使用: %Iu KB", pmc.PagefileUsage / 1024);
+				LogLineFormat(hLogFile, "峰值页面文件: %Iu KB", pmc.PeakPagefileUsage / 1024);
+			}
+			LogLine(hLogFile, "");
+			
+			CloseHandle(hLogFile);
+			printf("崩溃日志已生成: %s\n", logPath.data());
+		}
+		else
+		{
+			printf("无法创建崩溃日志文件: %s (错误: %d)\n", logPath.data(), GetLastError());
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		printf("生成崩溃日志时发生二次异常\n");
+	}
 }
 
 // 未处理异常的回调函数
 LONG WINAPI CrashHandler::UnhandledExceptionFilter(EXCEPTION_POINTERS* pExceptionInfo)
 {
-    printf("\n========== 程序崩溃 ==========\n");
-    printf("捕获到未处理的异常, 正在生成崩溃报告...\n");
-    
-    // 生成MiniDump和详细日志
-    CreateMiniDump(pExceptionInfo);
-    
-    printf("崩溃报告已生成, 程序即将退出.\n");
-    printf("=============================\n\n");
-    
-    return EXCEPTION_EXECUTE_HANDLER;
+	printf("\n========== 程序崩溃 ==========\n");
+	printf("捕获到未处理的异常, 正在生成崩溃报告...\n");
+	
+	// 先尝试保存数据（行会、沙城、玩家等）
+	if (m_preCrashSaveCallback)
+	{
+		printf("正在尝试保存数据...");
+		__try
+		{
+			m_preCrashSaveCallback();
+			printf("数据保存完成.");
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			printf("数据保存过程中发生二次异常, 已跳过.");
+		}
+	}
+
+	// 生成MiniDump和详细日志
+	CreateMiniDump(pExceptionInfo);
+	
+	printf("崩溃报告已生成, 程序即将退出.\n");
+	printf("=============================\n\n");
+
+	return EXCEPTION_EXECUTE_HANDLER;
 }
 
-// 初始化崩溃处理器
-void CrashHandler::Initialize()
+// 无效参数处理回调
+static VOID InvalidParameterHandler(const wchar_t* expression, const wchar_t* function, 
+									 const wchar_t* file, UINT line, uintptr_t reserved)
 {
-    if (m_initialized) return;
-    SetUnhandledExceptionFilter(UnhandledExceptionFilter);
-    m_initialized = true;
+	printf("[CRT] 无效参数: %S 函数: %S 文件: %S:%u\n", 
+		   expression ? expression : L"", 
+		   function ? function : L"", 
+		   file ? file : L"", line);
+	// 手动触发异常，走 UnhandledExceptionFilter
+	RaiseException(0xE0000001, EXCEPTION_NONCONTINUABLE, 0, nullptr);
 }
 
-// 设置崩溃转储文件保存路径
-void CrashHandler::SetDumpPath(const char* path)
+// 纯虚函数调用回调
+static VOID PureCallHandler()
 {
-    m_dumpPath = path;
-    // 确保路径以反斜杠结尾
-    if (!m_dumpPath.empty() && m_dumpPath.back() != '\\')
-    {
-        m_dumpPath += '\\';
-    }
+	printf("[CRT] 纯虚函数调用\n");
+	RaiseException(0xE0000002, EXCEPTION_NONCONTINUABLE, 0, nullptr);
 }
 
-// 设置额外的崩溃信息回调
-void CrashHandler::SetAdditionalInfoCallback(const char* (*callback)())
+// abort信号处理
+static VOID AbortHandler(int signal)
 {
-    m_additionalInfoCallback = callback;
+	printf("[CRT] abort() 被调用\n");
+	RaiseException(0xE0000003, EXCEPTION_NONCONTINUABLE, 0, nullptr);
+}
+
+VOID CrashHandler::Initialize()
+{
+	if (m_initialized) return;
+
+	// 1. 设置未处理异常过滤器（SEH异常）
+	SetUnhandledExceptionFilter(UnhandledExceptionFilter);
+
+	// 2. 处理CRT无效参数（如传NULL给需要非NULL的函数）
+	_set_invalid_parameter_handler(InvalidParameterHandler);
+
+	// 3. 处理纯虚函数调用
+	_set_purecall_handler(PureCallHandler);
+
+	// 4. 处理abort()信号
+	signal(SIGABRT, AbortHandler);
+
+	// 5. 禁用abort的错误报告弹窗
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
+	// 6. 禁用CRT断言弹窗（只输出到stderr）
+	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+
+	m_initialized = true;
+}
+
+VOID CrashHandler::SetDumpPath(const char* path)
+{
+	m_dumpPath = path;
+	// 确保路径以反斜杠结尾
+	if (!m_dumpPath.empty() && m_dumpPath.back() != '\\')
+	{
+		m_dumpPath += '\\';
+	}
+}
+
+VOID CrashHandler::SetAdditionalInfoCallback(const char* (*callback)())
+{
+	m_additionalInfoCallback = callback;
+}
+
+VOID CrashHandler::SetPreCrashSaveCallback(PreCrashSaveCallback callback)
+{
+	m_preCrashSaveCallback = callback;
 }

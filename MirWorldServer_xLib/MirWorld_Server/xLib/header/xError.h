@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 
 class xError
 {
@@ -13,22 +14,24 @@ public:
 		m_szErrorMsg[0] = 0;
 		m_dwErrorCode = 0;
 	}
-	void	setError(DWORD dwErrorCode, const char* pszError, ...)
+	VOID setError(DWORD dwErrorCode, const char* pszError, ...)
 	{
+		SWLock lock(m_errorLock);
 		m_dwErrorCode = dwErrorCode;
-		va_list	vl;
+		va_list vl;
 		va_start(vl, pszError);
-		vsprintf(m_szErrorMsg, pszError, vl);
+		vsnprintf(m_szErrorMsg.data(), m_szErrorMsg.size(), pszError, vl);
 		va_end(vl);
-		m_szErrorMsg[1023] = 0;
+		m_szErrorMsg[m_szErrorMsg.size() - 1] = 0;
 	}
-	void setError(xError& error)
+	VOID setError(xError& error)
 	{
 		setError(error.getErrorCode(), error.getErrorMsg());
 	}
-	DWORD	getErrorCode() { return m_dwErrorCode; }
-	const char* getErrorMsg() { return m_szErrorMsg; }
+	DWORD getErrorCode() const { return m_dwErrorCode; }
+	const char* getErrorMsg() { return m_szErrorMsg.data(); }
 private:
-	DWORD	m_dwErrorCode;
-	char			m_szErrorMsg[1024];
+	SRWLOCK m_errorLock = SRWLOCK_INIT;
+	DWORD m_dwErrorCode;
+	std::array<char, 1024> m_szErrorMsg;
 };

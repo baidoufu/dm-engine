@@ -13,7 +13,7 @@ public:
     bool StartAll();
     bool StartTest(const std::string& name);
     bool StopAll();
-    void PrintStatus();
+    VOID PrintStatus();
     bool StartServer(const std::string& name);
     bool StopServer(const std::string& name);
     bool SendCommand(const std::string& serverName, const std::string& command);

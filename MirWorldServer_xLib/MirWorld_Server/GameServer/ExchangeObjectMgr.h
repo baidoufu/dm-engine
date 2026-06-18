@@ -5,10 +5,10 @@ class CExchangeObj;
 class CExchangeObjectMgr : public xSingletonClass<CExchangeObjectMgr>
 {
 public:
-	CExchangeObjectMgr(void);
-	virtual ~CExchangeObjectMgr(void);
+	CExchangeObjectMgr(VOID);
+	virtual ~CExchangeObjectMgr(VOID);
 	//交易开始
-	BOOL BeginExchange(CHumanPlayer* p1, CHumanPlayer* p2);
+	CExchangeObj* BeginExchange(CHumanPlayer* p1, CHumanPlayer* p2);
 	//交易结束
 	VOID EndExchange(CExchangeObj* pObj);
 private:

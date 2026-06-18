@@ -5,12 +5,12 @@
 #include ".\eventprocessor.h"
 #include ".\aliveobject.h"
 
-CVisibleEvent::CVisibleEvent(void)
+CVisibleEvent::CVisibleEvent(VOID)
 {
 	Clean();
 }
 
-CVisibleEvent::~CVisibleEvent(void)
+CVisibleEvent::~CVisibleEvent(VOID)
 {
 }
 
@@ -24,18 +24,14 @@ VOID CVisibleEvent::Clean()
 
 BOOL CVisibleEvent::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
-	DWORD dwArray[2] = { m_dwParam1, m_dwParam2 };
-	int tempSize = 0;
-	SmartEncodeMessage(pszMsg, tempSize, (DWORD)this->GetId(), 804, m_dwView & 0xffff, m_wX, m_wY, (LPVOID)dwArray, sizeof(dwArray));
-	length = tempSize;
+	std::array<DWORD, 2> dwArray = { m_dwParam1, m_dwParam2 };
+	length = EncodeMsg(pszMsg, (DWORD)this->GetId(), 804, m_dwView & 0xffff, m_wX, m_wY, (LPVOID)dwArray.data(), sizeof(dwArray));
 	return TRUE;
 }
 
 BOOL CVisibleEvent::GetOutViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
-	int tempSize = 0;
-	SmartEncodeMessage(pszMsg, tempSize, (DWORD)this->GetId(), 805, 0, m_wX, m_wY, nullptr);
-	length = tempSize;
+	length = EncodeMsg(pszMsg, (DWORD)this->GetId(), 805, 0, m_wX, m_wY, nullptr);
 	return TRUE;
 }
 
@@ -61,7 +57,7 @@ BOOL CVisibleEvent::Create(CLogicMap* pMap, int x, int y, DWORD dwView, DWORD dw
 VOID CVisibleEvent::Close()
 {
 	if (m_bClosed)return;
-	m_pMap->RemoveObject(this);
+	if (m_pMap) m_pMap->RemoveObject(this);
 	CEventManager::GetInstance()->PreDelVisibleEvent(this);
 	m_bClosed = TRUE;
 }
@@ -105,7 +101,7 @@ VOID CVisibleEvent::OnEnterMap(CLogicMap* pMap)
 	{
 		for (int y = -12; y <= 12; y++)
 		{
-			CMapCellInfo* pInfo = pMap->GetMapCellInfo(mx + x, my + y);
+			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 			{
 				xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -131,7 +127,7 @@ VOID CVisibleEvent::OnLeaveMap(CLogicMap* pMap)
 	{
 		for (int y = -12; y <= 12; y++)
 		{
-			CMapCellInfo* pInfo = pMap->GetMapCellInfo(mx + x, my + y);
+			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 			{
 				xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();

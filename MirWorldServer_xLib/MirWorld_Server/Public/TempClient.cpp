@@ -1,9 +1,9 @@
 #include ".\tempclient.h"
 
-CTempClient::CTempClient(void)
+CTempClient::CTempClient(VOID)
 {
 }
 
-CTempClient::~CTempClient(void)
+CTempClient::~CTempClient(VOID)
 {
 }

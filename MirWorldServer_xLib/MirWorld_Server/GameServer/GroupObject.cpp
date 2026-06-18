@@ -6,13 +6,13 @@
 #include "GuildEx.h"
 #include "GuildManager.h"
 
-CGroupObject::CGroupObject(void)
+CGroupObject::CGroupObject(VOID)
 {
 	m_xMembersArray.Create(CGameWorld::GetInstance()->GetVar(EVI_MAXGROUPMEMBER));
 	m_xMembersArray.Clean();
 }
 
-CGroupObject::~CGroupObject(void)
+CGroupObject::~CGroupObject(VOID)
 {
 }
 
@@ -36,14 +36,16 @@ BOOL CGroupObject::Create(CHumanPlayer* pLeader, CHumanPlayer* pFirstMember)
 
 BOOL CGroupObject::AddMember(CHumanPlayer* pMember)
 {
-	if (m_xMembersArray.Add(pMember))
+	UINT idx = m_xMembersArray.Add(pMember);
+	if (idx != (UINT)-1)
 	{
 		pMember->SetGroupObject(this);
 		UpdateNameList();
 		SaySystemAttrib(CC_GROUPTIPS, "-%s 加入编组", pMember->GetName());
 		return TRUE;
 	}
-	m_xMembersArray[(UINT)0]->SaySystem("编组已满, 无法添加新成员!");
+	if (m_xMembersArray[(UINT)0] != nullptr)
+		m_xMembersArray[(UINT)0]->SaySystem("编组已满, 无法添加新成员!");
 	return FALSE;
 }
 
@@ -51,7 +53,7 @@ BOOL CGroupObject::IsMemberDBId(DWORD dwId)
 {
 	for (UINT i = 0; i < m_xMembersArray.GetCount(); i++)
 	{
-		if (m_xMembersArray[i]->GetDBId() == dwId)
+		if (m_xMembersArray[i] != nullptr && m_xMembersArray[i]->GetDBId() == dwId)
 			return TRUE;
 	}
 	return FALSE;
@@ -115,6 +117,7 @@ VOID CGroupObject::DestroyGroup()
 	SendMsg(nullptr, 0, SM_GROUPDESTROYED, 0, 0, 0);
 	for (UINT i = 0; i < m_xMembersArray.GetCount(); i++)
 	{
+		if (m_xMembersArray[i] == nullptr) continue;
 		m_xMembersArray[i]->SetGroupObject(nullptr);
 		m_xMembersArray[i]->SaySystemAttrib(CC_GROUPTIPS, "-小组被解散了");
 	}
@@ -126,42 +129,44 @@ VOID CGroupObject::SendMsg(CHumanPlayer* pSender, DWORD dwFlag, WORD wCmd, WORD 
 {
 	for (UINT i = 0; i < m_xMembersArray.GetCount(); i++)
 	{
-		if (pSender != m_xMembersArray[i])
+		if (m_xMembersArray[i] != nullptr && pSender != m_xMembersArray[i])
 			m_xMembersArray[i]->SendMsg(dwFlag, wCmd, wParam1, wParam2, wParam3, lpData, datasize);
 	}
 }
 
 VOID CGroupObject::UpdateNameList()
 {
-	char szNameList[1024] = "";
+	// 使用安全拼接，防止栈缓冲区溢出
+	std::string szNameList;
 	for (UINT i = 0; i < m_xMembersArray.GetCount(); i++)
 	{
-		strcat(szNameList, m_xMembersArray[i]->GetName());
-		strcat(szNameList, "/");
+		if (m_xMembersArray[i] == nullptr) continue;
+		if (i > 0) szNameList += '/';
+		szNameList += m_xMembersArray[i]->GetName();
 	}
-	SendMsg(nullptr, 0, SM_GROUPMEMBERLIST, 0, 0, 0, (LPVOID)szNameList);
+	SendMsg(nullptr, 0, SM_GROUPMEMBERLIST, 0, 0, 0, (LPVOID)szNameList.c_str(), static_cast<int>(szNameList.size()));
 }
 
 VOID CGroupObject::UpdateMemberPosition(CHumanPlayer* p)
 {
-	WORD wArray[20] = { 0 };
+	std::array<WORD, 20> wArray{};
 	int ptr = 0;
 	for (UINT i = 0; i < m_xMembersArray.GetCount(); i++)
 	{
-		if (m_xMembersArray[i] != p)
-		{
-			wArray[ptr++] = m_xMembersArray[i]->getX();
-			wArray[ptr++] = m_xMembersArray[i]->getY();
-		}
+		if (m_xMembersArray[i] == nullptr || m_xMembersArray[i] == p) continue;
+		if (ptr + 2 > (int)wArray.size()) break; // 防止数组越界
+		wArray[ptr++] = m_xMembersArray[i]->getX();
+		wArray[ptr++] = m_xMembersArray[i]->getY();
 	}
-	p->SendMsg(0, SM_UPDATEMEMBERINFO, 0, 0, 0, (LPVOID)wArray, ptr * sizeof(WORD));
+	p->SendMsg(0, SM_UPDATEMEMBERINFO, 0, 0, 0, (LPVOID)wArray.data(), ptr * sizeof(WORD));
 }
 
 VOID CGroupObject::AdjustGroupExp(CHumanPlayer* p, DWORD dwExp, DWORD dwId)
 {
 	int	sumlevel = 0;
 	int	sumaround = 0;
-	CHumanPlayer* pAoundList[20] = { 0 };
+	const int MAX_AROUND_MEMBERS = 20;
+	std::array<CHumanPlayer*, MAX_AROUND_MEMBERS> pAoundList{};
 	int px = p->getX();
 	int py = p->getY();
 	CLogicMap* pMap = p->GetMap();
@@ -169,12 +174,14 @@ VOID CGroupObject::AdjustGroupExp(CHumanPlayer* p, DWORD dwExp, DWORD dwId)
 	BOOL IsGuildMembers = TRUE;
 	for (UINT i = 0; i < m_xMembersArray.GetCount(); i++)
 	{
+		if (m_xMembersArray[i] == nullptr) continue;
 		if (m_xMembersArray[i]->GetMap() == pMap)
 		{
 			if (DISTANCE(px, py, m_xMembersArray[i]->getX(), m_xMembersArray[i]->getY()) <= 12 &&
 				!m_xMembersArray[i]->IsDeath())
 			{
-				pAoundList[sumaround++] = m_xMembersArray[i];
+				if (sumaround < MAX_AROUND_MEMBERS)
+					pAoundList[sumaround++] = m_xMembersArray[i];
 				sumlevel += m_xMembersArray[i]->GetPropValue(PI_LEVEL);
 			}
 			if (m_xMembersArray[i]->GetGuild() != pGuild)

@@ -14,6 +14,7 @@
 #include "monsterex.h"
 #include "FireRainEvent.h"
 #include "specialequipmentmanager.h"
+#include "humanplayer.h"
 
 DWORD g_dwActionDelay[AT_MAX] =
 {
@@ -21,7 +22,7 @@ DWORD g_dwActionDelay[AT_MAX] =
 };
 
 //线程安全的消息缓冲区65k大小
-static thread_local CHAR s_threadMessageBuffer[65536];
+static thread_local std::array<CHAR, 65536> s_threadMessageBuffer{};
 
 BOOL CRefObject::IsValid()
 {
@@ -37,21 +38,22 @@ VOID CRefObject::SetObject(CAliveObject* pObject)
 }
 
 xObjectPool<VISIBLE_OBJECT>	CAliveObject::m_xVisibleObjectPool;
-CAliveObject::CAliveObject(void)
+CAliveObject::CAliveObject(VOID)
 {
 	Clean();
 }
 
-CAliveObject::~CAliveObject(void)
+CAliveObject::~CAliveObject(VOID)
 {
 }
 
 VOID CAliveObject::Clean()
 {
 	OBJECTPROCESS* pProcess = nullptr;
+	auto* pGameWorld = CGameWorld::GetInstance();
 	while ((pProcess = m_xQProcess.pop()))
 	{
-		CGameWorld::GetInstance()->FreeProcess(pProcess);
+		pGameWorld->FreeProcess(pProcess);
 	}
 	m_dwProcessFlags = 0;
 	m_Status.Clean();
@@ -64,7 +66,6 @@ VOID CAliveObject::Clean()
 	m_wDeInvisibleLevel = 0;
 	m_ActionType = AT_STAND;
 	m_PreActionType = AT_STAND;
-	m_CurAttackType = DT_PHYSICS;
 	m_wActionX = 0;
 	m_wActionY = 0;
 	m_ActionDirection = ED_DN;
@@ -75,9 +76,9 @@ VOID CAliveObject::Clean()
 	m_nVisibleObjectFlag = 0;
 	AddVisibleObjectType(OBJ_PLAYER);
 	m_bDead = FALSE;
-	m_dwInstanceKey = (timeGetTime() ^ static_cast<DWORD>(reinterpret_cast<uintptr_t>(this)));
-	SetPetsActive(TRUE);
-	memset(m_AddProp, 0, sizeof(m_AddProp));
+	m_dwInstanceKey = (CFrameTime::GetFrameTime() ^ static_cast<DWORD>(reinterpret_cast<uintptr_t>(this)));
+	m_bPetsActive = TRUE;
+	m_AddProp.fill(0);
 	SetNoDead(FALSE);
 	SetNoDamage(FALSE);
 	SetSuperHit(FALSE);
@@ -92,7 +93,7 @@ VOID CAliveObject::Clean()
 	SetHitter(nullptr);
 	SetTarget(nullptr);
 	m_AttackObject.Clear();
-	m_szLongName[0] = 0;
+	m_szLongName.fill(0);
 	m_dwSkill6 = 0;
 	m_dwSkill45 = 0;
 	m_dwStatus26 = 0;
@@ -125,8 +126,7 @@ VOID CAliveObject::DropGold(DWORD dwCount, int x, int y, DWORD dwOwner)
 
 BOOL CAliveObject::Walk(int dir, DWORD dwDelay)
 {
-	if (!CanDoAction(AT_WALK))
-		return FALSE;
+	if (!CanDoAction(AT_WALK)) return FALSE;
 	int x = m_wX, y = m_wY;
 	int nSpeed = GetWalkSpeed();
 	for (int i = 0; i < nSpeed; i++)
@@ -136,7 +136,7 @@ BOOL CAliveObject::Walk(int dir, DWORD dwDelay)
 	}
 	DWORD dwTime = dwDelay == 0 ? g_dwActionDelay[AT_WALK] : dwDelay;
 	if (!SetAction(AT_WALK, (e_direction)dir, x, y, dwTime)) return FALSE;
-
+	CheckClearCloak();
 	DWORD dwView[2] = { GetFeather(), GetStatus() };
 	SendAroundMsg(GetId(), SM_WALK, x, y, dir, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
@@ -146,10 +146,9 @@ BOOL CAliveObject::WalkXY(int x, int y, int dir, DWORD dwDelay)
 {
 	if (!CanDoAction(AT_WALK))return FALSE;
 	if (!CheckIsNextPos(getX(), getY(), x, y, GetWalkSpeed()))return FALSE;
-	if (m_pMap->IsBlocked(x, y))return FALSE;
 	DWORD dwTime = dwDelay == 0 ? g_dwActionDelay[AT_WALK] : dwDelay;
 	if (!SetAction(AT_WALK, (e_direction)dir, x, y, dwTime))return FALSE;
-
+	CheckClearCloak();
 	DWORD dwView[2] = { GetFeather(), GetStatus() };
 	SendAroundMsg(GetId(), SM_WALK, x, y, dir, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
@@ -167,7 +166,7 @@ BOOL CAliveObject::Run(int dir, DWORD dwDelay)
 	}
 	DWORD dwTime = dwDelay == 0 ? g_dwActionDelay[AT_RUN] : dwDelay;
 	if (!SetAction(AT_RUN, (e_direction)dir, x, y, dwTime)) return FALSE;
-
+	CheckClearCloak();
 	DWORD dwView[2] = { GetFeather(), GetStatus() };
 	SendAroundMsg(GetId(), SM_RUN, x, y, dir, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
@@ -176,19 +175,12 @@ BOOL CAliveObject::Run(int dir, DWORD dwDelay)
 BOOL CAliveObject::RunXY(int x, int y, int dir, DWORD dwDelay)
 {
 	if (!CanDoAction(AT_RUN))return FALSE;
-	int nSpeed = GetRunSpeed();
-	if (!CheckIsNextPos(m_wX, m_wY, x, y, nSpeed))return FALSE;
-	int mx = m_wX, my = m_wY;
-	for (int i = 0; i < nSpeed; i++)
-	{
-		GETNEXTPOS(mx, my, dir);
-		if (m_pMap->IsBlocked(mx, my))return FALSE;
-	}
+	if (!CheckIsNextPos(m_wX, m_wY, x, y, GetRunSpeed()))return FALSE;
 	DWORD dwTime = dwDelay == 0 ? g_dwActionDelay[AT_RUN] : dwDelay;
 	if (!SetAction(AT_RUN, (e_direction)dir, x, y, dwTime))return FALSE;
-
+	CheckClearCloak();
 	DWORD dwView[2] = { GetFeather(), GetStatus() };
-	SendAroundMsg(GetId(), SM_RUN, mx, my, dir, (LPVOID)dwView, sizeof(dwView));
+	SendAroundMsg(GetId(), SM_RUN, x, y, dir, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
 }
 
@@ -216,7 +208,7 @@ BOOL CAliveObject::Turn(int dir)
 	return TRUE;
 }
 
-BOOL CAliveObject::Attack(int dir, DWORD dwDelay, e_humanattackmode mode)
+BOOL CAliveObject::Attack(int dir, DWORD dwDelay, e_humanattackmode mode, damage_type curAttackType)
 {
 	if (!CanDoAction(AT_ATTACK)) return FALSE;
 	DWORD dwView[] = { GetFeather(), GetStatus() };
@@ -240,8 +232,7 @@ BOOL CAliveObject::Attack(int dir, DWORD dwDelay, e_humanattackmode mode)
 	{
 		int damage = GetPropPower();
 		OnAttackTarget(pObj, damage);//虚函数调用字HUMANPLay的子类, 最终调用是否攻杀剑法等等
-		pObj->AddProcess(EP_BEATTACKED, damage, GetId(), 0, DT_PHYSICS, 200);
-		SetCurAttackType(DT_PHYSICS);
+		pObj->AddProcess(EP_BEATTACKED, damage, GetId(), 0, curAttackType, 200);
 	}
 	m_tmrAttack.Savetime();
 	return TRUE;
@@ -252,7 +243,7 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 	if (GetType() == OBJ_MONSTER)
 	{
 		CMonsterEx* pMon = (CMonsterEx*)this;
-		if (pMon->GetApprType() == APPR_TREE && pAttacker->GetCurAttackType() != DT_CUTTREE)
+		if (pMon->GetType() == OBJ_TREE && damagetype != DT_CUTTREE)
 			return FALSE;
 	}
 	if (IsNoDamage()) nDamage = 0; // 无敌模式
@@ -299,18 +290,15 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 	{
 		if (GetType() != OBJ_MONSTER && GetType() != OBJ_PET)
 		{
-			CMapCellInfo* pCell = nullptr;
 			if (pAttacker)
 			{
 				if (pAttacker->GetType() != OBJ_MONSTER)
 				{
-					pCell = m_pMap->GetMapCellInfo(pAttacker->getX(), pAttacker->getY());
-					if (pCell && (pCell->wFlag & MAPCELLFLAG_NOPK))
+					if (m_pMap->IsCellFlagSet(pAttacker->getX(), pAttacker->getY(), MAPCELLFLAG_NOPK))
 						return FALSE;
 				}
 			}
-			pCell = m_pMap->GetMapCellInfo(getX(), getY());
-			if (pCell && (pCell->wFlag & MAPCELLFLAG_NOPK))
+			if (m_pMap->IsCellFlagSet(getX(), getY(), MAPCELLFLAG_NOPK))
 				return FALSE;
 		}
 	}
@@ -377,8 +365,8 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 	DWORD dwEffectType = 0; // 破击, 破盾效果类型
 	if (wMsg == 0x2f) // 设计破击, 破盾的技能标识
 	{
-		DWORD w = dwFlag - DF_TARGETEFFECT;
-		dwEffectType = w;
+		DWORD w = dwFlag - DF_TARGETEFFECT; // 剥离高位标记，得到具体效果类型
+		dwEffectType = w; // TE_POJI = 6，破击 TE_PODUN = 7，破盾
 		WORD w1 = 0;
 		WORD wd = (WORD)w;
 		wid = static_cast<DWORD>(MAKELONG(w1, wd));
@@ -392,7 +380,7 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 		{
 			dwView[0] = GetFeather();
 			dwView[1] = GetStatus();
-			dwView[2] = timeGetTime();
+			dwView[2] = CFrameTime::GetFrameTime();
 			dwView[3] = pAttacker == nullptr ? 0 : pAttacker->GetId();
 			dwView[4] = wid;
 		}
@@ -402,7 +390,7 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 			dwView[1] = GetStatus();
 			dwView[2] = 0;
 			dwView[3] = pAttacker == nullptr ? 0 : pAttacker->GetId();
-			dwView[4] = timeGetTime();
+			dwView[4] = CFrameTime::GetFrameTime();
 		}
 		WORD heathHP = 100; // 血条长度按百分之显示
 		WORD WbiliHP = (dwMaxHp > 0) ? (dwHp * 100 / dwMaxHp) : 0; // 百分比取整
@@ -414,8 +402,8 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 	{
 		if (pAttacker)
 		{
-			SendAroundMsg(pAttacker->GetId(), 0x9cbf, pAttacker->getX(), pAttacker->getY(), dwEffectType - 5);
-			SendMsg(pAttacker->GetId(), 0x9cbf, pAttacker->getX(), pAttacker->getY(), dwEffectType - 5);
+			SendAroundMsg(pAttacker->GetId(), 0x9cbf, pAttacker->getX(), pAttacker->getY(), static_cast<WORD>(dwEffectType - 5));
+			SendMsg(pAttacker->GetId(), 0x9cbf, pAttacker->getX(), pAttacker->getY(), static_cast<WORD>(dwEffectType - 5));
 		}
 	}
 	if (nDamage > 0)
@@ -440,17 +428,17 @@ BOOL CAliveObject::Backward(int dir)
 
 VOID CAliveObject::Say(const char* pszMsg, ...)
 {
-	char szBuff[248];
-	sprintf(szBuff, "%s: ", GetName());
+	std::array<char, 248> szBuff{};
+	sprintf(szBuff.data(), "%s: ", GetName());
 	va_list	vl;
 	va_start(vl, pszMsg);
-	size_t nLen = strlen(szBuff);
-	(void)_vsnprintf(szBuff + nLen, 247 - nLen, pszMsg, vl);
+	size_t nLen = strlen(szBuff.data());
+	(VOID)_vsnprintf(szBuff.data() + nLen, 247 - nLen, pszMsg, vl);
 	va_end(vl);
 	szBuff[120] = '\0';
-	CHAR* pBuffer = s_threadMessageBuffer;
+	CHAR* pBuffer = s_threadMessageBuffer.data();
 	int size = 0;
-	SmartEncodeMessage(pBuffer, size, GetId(), SM_CHAT, 0xff00, 0, 0, (LPVOID)szBuff);
+	size = EncodeMsg(pBuffer, GetId(), SM_CHAT, 0xff00, 0, 0, (LPVOID)szBuff.data());
 	if (CanRecvMsg()) OnAroundMsg(this, pBuffer, size);
 	SendAroundMsg(pBuffer, size);
 }
@@ -458,63 +446,60 @@ VOID CAliveObject::Say(const char* pszMsg, ...)
 VOID CAliveObject::SaySystem(const char* pszMsg, ...)//系统消息
 {
 	if (!CanRecvMsg())return;
-	char szBuff[248];
+	std::array<char, 248> szBuff{};
 	va_list	vl;
 	va_start(vl, pszMsg);
-	_vsnprintf(szBuff, sizeof(szBuff) - 1, pszMsg, vl);
+	_vsnprintf(szBuff.data(), szBuff.size() - 1, pszMsg, vl);
 	va_end(vl);
 	szBuff[120] = '\0';
-	SendMsg(GetId(), SM_SYSCHAT, 0x38ff, 0, 0, szBuff);
+	SendMsg(GetId(), SM_SYSCHAT, 0x38ff, 0, 0, szBuff.data());
 }
 
 VOID CAliveObject::SaySystem10(const char* pszMsg, ...)//系统消息
 {
 	if (!CanRecvMsg())return;
-	char szBuff[248];
+	std::array<char, 248> szBuff{};
 	va_list	vl;
 	va_start(vl, pszMsg);
-	_vsnprintf(szBuff, sizeof(szBuff) - 1, pszMsg, vl);
+	_vsnprintf(szBuff.data(), szBuff.size() - 1, pszMsg, vl);
 	va_end(vl);
 	szBuff[120] = '\0';
-	SendMsg(GetId(), SM_SYSCHAT, 0, 0, 10, szBuff);
+	SendMsg(GetId(), SM_SYSCHAT, 0, 0, 10, szBuff.data());
 }
 
 VOID CAliveObject::SaySystemAttrib(DWORD dwAttrib, const char* pszMsg, ...)
 {
 	if (!CanRecvMsg()) return;
-	char szBuff[248];
+	std::array<char, 248> szBuff{};
 	va_list	vl;
 	va_start(vl, pszMsg);
-	_vsnprintf(szBuff, sizeof(szBuff) - 1, pszMsg, vl);
+	_vsnprintf(szBuff.data(), szBuff.size() - 1, pszMsg, vl);
 	va_end(vl);
 	szBuff[120] = '\0';
-	SendMsg(GetId(), SM_SYSCHAT, LOWORD(dwAttrib), HIWORD(dwAttrib), 0, szBuff);
+	SendMsg(GetId(), SM_SYSCHAT, LOWORD(dwAttrib), HIWORD(dwAttrib), 0, szBuff.data());
 }
 
 VOID CAliveObject::SendMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpdata, int datasize)
 {
 	if (!CanRecvMsg())return;
-	CHAR* pBuffer = s_threadMessageBuffer;
-	int size = 0;
-	SmartEncodeMessage(pBuffer, size, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
+	CHAR* pBuffer = s_threadMessageBuffer.data();
+	int size = EncodeMsg(pBuffer, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
 	OnAroundMsg(this, pBuffer, size);
 }
 
 VOID CAliveObject::SendMsgToObject(CAliveObject* pReceiver, DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpdata, int datasize)
 {
 	if (!pReceiver->CanRecvMsg())return;
-	CHAR* pBuffer = s_threadMessageBuffer;
-	int size = 0;
-	SmartEncodeMessage(pBuffer, size, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
+	CHAR* pBuffer = s_threadMessageBuffer.data();
+	int size = EncodeMsg(pBuffer, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
 	pReceiver->OnAroundMsg(this, pBuffer, size);
 }
 
 VOID CAliveObject::SendMapMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpdata, int datasize)
 {
 	if (m_pMap == nullptr)return;
-	CHAR* pBuffer = s_threadMessageBuffer;
-	int size = 0;
-	SmartEncodeMessage(pBuffer, size, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
+	CHAR* pBuffer = s_threadMessageBuffer.data();
+	int size = EncodeMsg(pBuffer, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
 	m_pMap->SendMsg(this, pBuffer, size);
 }
 
@@ -522,6 +507,10 @@ VOID CAliveObject::SendMapMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3
 BOOL CAliveObject::SetAction(actiontype action, e_direction dir, WORD x, WORD y, DWORD dwActionTime)
 {
 	if (this->m_pMap == nullptr) return FALSE;
+	// 防止在相同帧内对同一位置发起重复的移动动作
+	// 如果当前已在执行相同的动作且目标坐标相同，跳过重复设置
+	if (m_ActionType == action && m_wActionX == x && m_wActionY == y && !m_ActionTimer.IsTimeOut(m_dwActionCompleteTime))
+		return TRUE;
 	WORD wOldX = getX();
 	WORD wOldY = getY();
 	if (wOldX != x || wOldY != y)
@@ -543,6 +532,15 @@ BOOL CAliveObject::CompleteAction()
 {
 	if (m_pMap == nullptr)return FALSE;
 	if (m_ActionType == AT_STAND)return TRUE;
+	// 如果当前坐标与动作目标坐标不同（可能是异常），则强制同步到动作目标坐标
+	if (m_wX != m_wActionX || m_wY != m_wActionY)
+	{
+		if (m_ActionType == AT_WALK || m_ActionType == AT_RUN || m_ActionType == AT_BACK)
+		{
+			if (!m_pMap->IsBlocked(m_wActionX, m_wActionY))
+				m_pMap->MoveObject(this, m_wActionX, m_wActionY);
+		}
+	}
 	Stop(); //停止其他动作
 	m_ActionType = AT_STAND;
 	SetDirection(m_ActionDirection);
@@ -558,7 +556,7 @@ BOOL CAliveObject::CompleteAction()
 BOOL CAliveObject::GetOutViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
 	if (IsSystemFlagSeted(SF_HIDED)) return FALSE;
-	SmartEncodeMessage(pszMsg, length, GetId(), SM_DISAPPEAR, m_wX, m_wY, 0, nullptr);
+	length = EncodeMsg(pszMsg, GetId(), SM_DISAPPEAR, m_wX, m_wY, 0, nullptr);
 	return TRUE;
 }
 
@@ -588,8 +586,8 @@ BOOL CAliveObject::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 	// 在数据最后面插入15个空字节, 去过滤玩家、怪、宠物的一些独特封号
 	memcpy(szData + 12, szData + 12, static_cast<size_t>(len) + 15);
 	int totalLen = len + 15;
-	SmartEncodeMessage(pszMsg, length, GetId(), wCmd, m_wX, m_wY, (GetSex() << 8) | m_Direction, (LPVOID)szData, 12 + totalLen);
-	if (pViewer && pViewer->GetType() == OBJ_PLAYER)
+	length = EncodeMsg(pszMsg, GetId(), wCmd, m_wX, m_wY, (GetSex() << 8) | m_Direction, (LPVOID)szData, 12 + totalLen);
+	if (GetType() == OBJ_PLAYER && pViewer && pViewer->GetType() == OBJ_PLAYER)
 		((CAliveObject*)pViewer)->SendFeatureChanged();
 	return TRUE;
 }
@@ -603,7 +601,7 @@ VOID CAliveObject::SendChangeName()
 	{
 		if (m_pMap == nullptr)return;
 		xListHost<VISIBLE_OBJECT>::xListNode* pNode = nullptr;
-		if (m_xVisibleObjectList.getCount())
+		if (m_xVisibleObjectList.getCount() > 0)
 		{
 			pNode = m_xVisibleObjectList.getHead();
 			while (pNode)
@@ -626,6 +624,21 @@ BOOL CAliveObject::CanDoAction(actiontype action)
 	if (m_pMap == nullptr) return FALSE;
 	if (IsStatusSet(SI_PALSY)) return FALSE;
 	if (IsSystemFlagSeted(SF_FROZEN)) return FALSE;
+	if (action == AT_WALK || action == AT_RUN)
+	{
+		if (m_ActionType != AT_STAND)
+		{
+			if (m_ActionType != AT_WALK && m_ActionType != AT_RUN)
+				return FALSE;
+			// 防止加速外挂: 连续移动动作之间必须经过最小时间间隔
+			// 允许客户端在当前动作完成前提前发送下一个移动请求(容忍网络延迟)
+			// 但至少需要经过动作延迟的80%时间,防止恶意客户端高频刷移动包
+			DWORD dwMinInterval = m_dwActionCompleteTime * 8 / 10;
+			if (dwMinInterval < 100) dwMinInterval = 100;
+			if (!m_ActionTimer.IsTimeOut(dwMinInterval))
+				return FALSE;
+		}
+	}
 	if (GetType() == OBJ_PLAYER && action == AT_ATTACK) // 玩家的判断
 		return m_tmrAttack.IsTimeOut(g_dwActionDelay[AT_ATTACK] - 80 * GetPropValue(PI_ATTACKSPEED));
 	return TRUE;
@@ -720,7 +733,7 @@ VOID CAliveObject::Update()
 					}
 				}
 			}
-			if (m_AddHpTimer.IsTimeOut(CGameWorld::GetInstance()->GetVar(EVI_HPRECOVERTIME))) // 吃药增加HP
+			if (m_AddHpTimer.IsTimeOut(500)) // 吃药增加HP
 			{
 				if (m_dwAddHp > 0)
 				{
@@ -736,7 +749,7 @@ VOID CAliveObject::Update()
 				}
 				m_AddHpTimer.Savetime();
 			}
-			if (m_AddMpTimer.IsTimeOut(CGameWorld::GetInstance()->GetVar(EVI_MPRECOVERTIME))) // 吃药增加MP
+			if (m_AddMpTimer.IsTimeOut(500)) // 吃药增加MP
 			{
 				if (m_dwAddMp > 0)
 				{
@@ -766,11 +779,14 @@ VOID CAliveObject::Update()
 	}
 	// 队列对象线程处理
 	OBJECTPROCESS* p = nullptr;
-	DWORD dwCurTime = timeGetTime();
+	DWORD dwCurTime = CFrameTime::GetFrameTime();
 	int count = m_xQProcess.getcount();
-	// 预分配空间, 避免动态扩容
-	std::vector<OBJECTPROCESS*> tempVec;
-	tempVec.reserve(count);
+	// 使用thread_local复用，避免每帧堆分配
+	thread_local std::vector<OBJECTPROCESS*> tempVec;
+	tempVec.clear();
+	if ((int)tempVec.capacity() < count)
+		tempVec.reserve(count);
+	auto* pGameWorld = CGameWorld::GetInstance();
 	for (int i = 0; i < count; i++)
 	{
 		p = m_xQProcess.pop();
@@ -787,7 +803,7 @@ VOID CAliveObject::Update()
 				if (p->repeattimes <= 0)
 				{
 					m_dwProcessFlags &= ~(1ULL << p->ident); // 清除标识
-					CGameWorld::GetInstance()->FreeProcess(p);
+					pGameWorld->FreeProcess(p);
 					continue;
 				}
 			}
@@ -834,6 +850,7 @@ VOID CAliveObject::CleanVisibleList()
 			m_xVisibleObjectList.removeNode(pNode);
 			DeleteVisibleObject(pVisibleObj);
 		}
+		m_mapVisibleObject.clear();
 	}
 	if (m_xVisibleItemsList.getCount() > 0)
 	{
@@ -844,6 +861,7 @@ VOID CAliveObject::CleanVisibleList()
 			m_xVisibleItemsList.removeNode(pNode);
 			DeleteVisibleObject(pVisibleObj);
 		}
+		m_mapVisibleItems.clear();
 	}
 	//	断开别人对自己的单向连接
 	if (m_pMap == nullptr) return;
@@ -904,9 +922,8 @@ VOID CAliveObject::OnEnterMap(CLogicMap* pMap)
 VOID CAliveObject::ResetPos(WORD x, WORD y)
 {
 	DWORD dwdata[3] = { GetFeather(), GetStatus(), 0 };
-	CHAR* pBuffer = s_threadMessageBuffer;
-	int size = 0;
-	SmartEncodeMessage(pBuffer, size, GetId(), SM_BACK, x, y, (WORD)GetDirection(), (LPVOID)dwdata, sizeof(DWORD) * 2 + sizeof(WORD));
+	CHAR* pBuffer = s_threadMessageBuffer.data();
+	int size = EncodeMsg(pBuffer, GetId(), SM_BACK, x, y, (WORD)GetDirection(), (LPVOID)dwdata, sizeof(DWORD) * 2 + sizeof(WORD));
 	if (CanRecvMsg())
 		OnAroundMsg(this, pBuffer, size);
 	SetAction(AT_BACK, m_Direction, x, y, 1);
@@ -929,36 +946,27 @@ VOID CAliveObject::ItemToClient(ITEM& item)
 
 VOID CAliveObject::UpdateVisibleObject(CMapObject* pObject)
 {
-	xListHost<VISIBLE_OBJECT>::xListNode* pNode = nullptr;
-	VISIBLE_OBJECT_LIST* pList = nullptr;
-	if (pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC)
-		pList = &m_xVisibleObjectList;
-	else
-		pList = &m_xVisibleItemsList;
-	if (pList->getCount())
-	{
-		pNode = pList->getHead();
-		while (pNode)
-		{
-			if (pNode->getObject()->pObject == pObject)
-				return;
-			pNode = pNode->getNext();
-		}
-	}
+	BOOL bIsAlive = (pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC);
+	auto& map = bIsAlive ? m_mapVisibleObject : m_mapVisibleItems;
+
+	if (map.count(pObject)) return;
+
 	AddVisibleObject(pObject);
-	//	如果对方是个ALIVEOBJECT, 并且对方的可以看到自己, 就把自己加入到对方的表中
-	if (pList == &m_xVisibleObjectList && (((CAliveObject*)pObject)->GetVisibleObjectFlag() & (1 << GetType())) != 0)
-		((CAliveObject*)pObject)->UpdateVisibleObject(this);
+	//	如果对方是个ALIVEOBJECT, 并且对方可以看到自己, 就把自己加入到对方的表中
+	if (bIsAlive && (((CAliveObject*)pObject)->GetVisibleObjectFlag() & (1 << GetType())) != 0)
+	{
+		// O(1) 检查自己是否已在对方视野中，避免多余的调用
+		auto& targetMap = ((CAliveObject*)pObject)->m_mapVisibleObject;
+		if (!targetMap.count(this))
+			((CAliveObject*)pObject)->UpdateVisibleObject(this);
+	}
 }
 
 VOID CAliveObject::AddVisibleObject(CMapObject* pObject)
 {
-	xListHost<VISIBLE_OBJECT>::xListNode* pNode = nullptr;
-	VISIBLE_OBJECT_LIST* pList = nullptr;
-	if (pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC)
-		pList = &m_xVisibleObjectList;
-	else
-		pList = &m_xVisibleItemsList;
+	BOOL bIsAlive = (pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC);
+	VISIBLE_OBJECT_LIST* pList = bIsAlive ? &m_xVisibleObjectList : &m_xVisibleItemsList;
+	auto& map = bIsAlive ? m_mapVisibleObject : m_mapVisibleItems;
 	VISIBLE_OBJECT* p = NewVisibleObject();
 	if (p == nullptr)return;
 	pObject->AddRef();
@@ -968,47 +976,43 @@ VOID CAliveObject::AddVisibleObject(CMapObject* pObject)
 		DeleteVisibleObject(p);
 		return;
 	}
+	// O(1) 维护哈希表映射
+	map[pObject] = p;
 	char szMsgBuffer[1024];
 	int length = 1024;
 	if (CanRecvMsg() && pObject->GetViewmsg(szMsgBuffer, length, this))
 		OnAroundMsg(pObject, szMsgBuffer, length);
-	if (pObject->GetClassType() != CLS_ALIVEOBJECT && pObject->GetClassType() != CLS_NPC)
+	if (!bIsAlive)
 		return;
 	e_object_type pType = GetType();
-	e_object_ApprType pApprType = GetApprType();
 	e_object_type pPType = pObject->GetType();
-	e_object_ApprType pPApprType = pObject->GetApprType();
-	BOOL IsSpecial = FALSE;
-	if (pType == OBJ_MONSTER) // 判断自己是否是特殊刷怪
-		IsSpecial = ((CMonsterEx*)this)->IsSpecialGen();
-	if ((pType == OBJ_PLAYER || pType == OBJ_PET || pApprType == APPR_GUARD || IsSpecial) && (pPType == OBJ_PET || pPType == OBJ_MONSTER || pPApprType == APPR_GUARD))
+	if (pPType == OBJ_PET || pPType == OBJ_GUARD // 宠物、守卫永远加入更新列表
+		|| (pPType == OBJ_MONSTER && ((CMonsterEx*)pObject)->IsSpecialGen()) // 特殊怪永远加入更新列表
+		|| (pType == OBJ_PLAYER && pPType == OBJ_MONSTER)) // 怪，只有玩家看到时，才加入更新列表
+	{
 		CGameWorld::GetInstance()->AddUpdateMonster((CMonsterEx*)pObject);
+	}
 }
 
 VOID CAliveObject::RemoveVisibleObject(CMapObject* pObject)
 {
 	if (pObject == nullptr) return;
-	VISIBLE_OBJECT_LIST* pList = nullptr;
-	if (pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC)
-		pList = &m_xVisibleObjectList;
-	else
-		pList = &m_xVisibleItemsList;
-	if (pList->getCount() == 0) return;
+	BOOL bIsAlive = (pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC);
+	VISIBLE_OBJECT_LIST* pList = bIsAlive ? &m_xVisibleObjectList : &m_xVisibleItemsList;
+	auto& map = bIsAlive ? m_mapVisibleObject : m_mapVisibleItems;
+
+	auto it = map.find(pObject);
+	if (it == map.end()) return;
+
+	VISIBLE_OBJECT* pVisibleObj = it->second;
+	map.erase(it);
+	pList->removeNode(&pVisibleObj->Node);
+
 	char s_szMsgBuffer[1024];
 	int length = 1024;
-	xListHost<VISIBLE_OBJECT>::xListNode* pNode = pList->getHead();
-	while (pNode)
-	{
-		if (pNode->getObject()->pObject == pObject)
-		{
-			pList->removeNode(pNode);
-			if (CanRecvMsg() && pObject->GetOutViewmsg(s_szMsgBuffer, length, this))
-				OnAroundMsg(pObject, s_szMsgBuffer, length);
-			DeleteVisibleObject(pNode->getObject());
-			return;
-		}
-		pNode = pNode->getNext();
-	}
+	if (CanRecvMsg() && pObject->GetOutViewmsg(s_szMsgBuffer, length, this))
+		OnAroundMsg(pObject, s_szMsgBuffer, length);
+	DeleteVisibleObject(pVisibleObj);
 }
 
 //	进入地图的时候重新搜索下周围的环境
@@ -1055,7 +1059,6 @@ VOID CAliveObject::RefreshViewList()
 	int length = 1024;
 	BOOL bRecvMsg = CanRecvMsg();
 	DWORD dwVisibleFlag = m_nVisibleObjectFlag;
-	e_object_type myType = GetType();
 
 	// 清理自己看不到的东西
 	xListHost<VISIBLE_OBJECT>::xListNode* pNode = nullptr;
@@ -1072,9 +1075,11 @@ VOID CAliveObject::RefreshViewList()
 			if ((dwVisibleFlag & (1 << pObject->GetType())) == 0)
 			{
 				m_xVisibleObjectList.removeNode(pNode);
+				m_mapVisibleObject.erase(pObject);
 				if (bRecvMsg && pObject->GetOutViewmsg(s_szMsgBuffer, length, this))
 					OnAroundMsg(pObject, s_szMsgBuffer, length);
 				((CAliveObject*)pObject)->RemoveVisibleObject(this);
+				DeleteVisibleObject(pNode->getObject());
 			}
 			pNode = pNext;
 		}
@@ -1090,8 +1095,10 @@ VOID CAliveObject::RefreshViewList()
 			if ((dwVisibleFlag & (1 << pObject->GetType())) == 0)
 			{
 				m_xVisibleItemsList.removeNode(pNode);
+				m_mapVisibleItems.erase(pObject);
 				if (bRecvMsg && pObject->GetOutViewmsg(s_szMsgBuffer, length, this))
 					OnAroundMsg(pObject, s_szMsgBuffer, length);
+				DeleteVisibleObject(pNode->getObject());
 			}
 			pNode = pNext;
 		}
@@ -1124,15 +1131,8 @@ VOID CAliveObject::RefreshViewList()
 					pObject = pCellNode->getObject();
 					if (pObject && pObject != this)
 					{
-						// 如果自己可以看到这个东西, 就更新下
 						if ((dwVisibleFlag & (1 << pObject->GetType())) != 0)
 							UpdateVisibleObject(pObject);
-						// 如果这个东西可以看到自己, 就更新下
-						if ((pObject->GetClassType() == CLS_ALIVEOBJECT || pObject->GetClassType() == CLS_NPC) &&
-							(((CAliveObject*)pObject)->GetVisibleObjectFlag() & (1 << myType)) != 0)
-						{
-							((CAliveObject*)pObject)->UpdateVisibleObject(this);
-						}
 					}
 					pCellNode = pCellNode->getNext();
 				}
@@ -1142,14 +1142,15 @@ VOID CAliveObject::RefreshViewList()
 	}
 }
 
-inline static void ClipRects(RECT* rcs, int count, int mw, int mh)
+inline static VOID ClipRects(RECT* rcs, int count, int mw, int mh)
 {
 	for (int i = 0; i < count; i++)
 	{
-		rcs[i].left = max(0, rcs[i].left);
-		rcs[i].right = min(mw, rcs[i].right);
-		rcs[i].top = max(0, rcs[i].top);
-		rcs[i].bottom = min(mh, rcs[i].bottom);
+		auto& rc = rcs[i];
+		rc.left = MAX(0, rc.left);
+		rc.right = MIN(mw, rc.right);
+		rc.top = MAX(0, rc.top);
+		rc.bottom = MIN(mh, rc.bottom);
 	}
 }
 
@@ -1206,10 +1207,10 @@ VOID CAliveObject::UpdateViewRange(UINT ox, UINT oy)
 	if (m_pMap == nullptr) return;
 	int nx = getX(), ny = getY();
 	if (nx == ox && ny == oy) return;
-	int mw = m_pMap->GetWidth() - 1, mh = m_pMap->GetHeight() - 1;
+	int mw = static_cast<int>(m_pMap->GetWidth()) - 1, mh = static_cast<int>(m_pMap->GetHeight()) - 1;
 	int nRange = VIEW_RANGE + 2;
-	RECT rc1 = { ox - nRange, oy - nRange, ox + nRange, oy + nRange };
-	RECT rc2 = { nx - nRange, ny - nRange, nx + nRange, ny + nRange };
+	RECT rc1 = { static_cast<LONG>(ox - nRange), static_cast<LONG>(oy - nRange), static_cast<LONG>(ox + nRange), static_cast<LONG>(oy + nRange) };
+	RECT rc2 = { static_cast<LONG>(nx - nRange), static_cast<LONG>(ny - nRange), static_cast<LONG>(nx + nRange), static_cast<LONG>(ny + nRange) };
 	RECT rcs[4];
 
 	int rccount = GetOutRect(rc1, rc2, rcs);
@@ -1274,15 +1275,11 @@ VOID CAliveObject::UpdateViewObjectList(xListHost<CMapObject>* pList)
 		{
 			if ((m_nVisibleObjectFlag & (1 << pObject->GetType())))
 				UpdateVisibleObject(pObject);
-			if ((pObject->GetClassType() == CLS_ALIVEOBJECT ||
-				pObject->GetClassType() == CLS_NPC) && (((CAliveObject*)pObject)->GetVisibleObjectFlag() & (1 << GetType())) != 0)
-				((CAliveObject*)pObject)->UpdateVisibleObject(this);
 		}
 		pNode = pNode->getNext();
 	}
 }
 
-//更新离开列表
 VOID CAliveObject::UpdateOutViewObjectList(xListHost<CMapObject>* pList)
 {
 	xListHost<CMapObject>::xListNode* pNode = pList->getHead();
@@ -1301,64 +1298,23 @@ VOID CAliveObject::UpdateOutViewObjectList(xListHost<CMapObject>* pList)
 	}
 }
 
-VOID CAliveObject::UpdateMonster(UINT ox, UINT oy)
-{
-	if (m_pMap == nullptr) return;
-	int nx = getX(), ny = getY();
-	if (nx == ox && ny == oy) return;
-	// 只对玩家和宠物更新怪物
-	if (GetType() != OBJ_PLAYER && GetType() != OBJ_PET)
-		return;
-	int mw = m_pMap->GetWidth();
-	int mh = m_pMap->GetHeight();
-	// 限制边界范围, 避免不必要的计算
-	int startX = MAX(MAX(ox, nx) - 2, 0);
-	int endX = MIN(MAX(ox, nx) + 2, mw - 1);
-	int startY = MAX(MAX(oy, ny) - 2, 0);
-	int endY = MIN(MAX(oy, ny) + 2, mh - 1);
-	// 如果完全重合（位置未改变）, 无需更新
-	if (startX == ox - 2 && endX == ox + 2 && startY == oy - 2 && endY == oy + 2)
-		return;
-
-	CMapCellInfo** pCellInfoBase = m_pMap->GetCellInfoBase();
-	if (pCellInfoBase == nullptr) return;
-
-	// 双指针：行指针遍历x轴, 列指针遍历y轴
-	for (int x = startX; x <= endX; x++)
-	{
-		CMapCellInfo** pCol = pCellInfoBase + x + startY * mw;
-		for (int y = startY; y <= endY; y++)
-		{
-			CMapCellInfo* pViewInfo = *pCol;
-			if (pViewInfo)
-			{
-				for (auto pNode = pViewInfo->m_xObjectList.getHead(); pNode != nullptr; pNode = pNode->getNext())
-				{
-					CMonsterEx* pMonster = dynamic_cast<CMonsterEx*>(pNode->getObject());
-					if (pMonster && !pMonster->IsDeath())
-						pMonster->Update();
-				}
-			}
-			pCol += mw;  // 移动到下一行的同一列
-		}
-	}
-}
-
 VOID CAliveObject::SendAroundMsg(DWORD dwFlag, WORD wCmd, WORD w1, WORD w2, WORD w3, LPVOID lpdata, int datasize)
 {
 	if (m_pMap == nullptr) return;
 	if (IsSystemFlagSeted(SF_HIDED)) return;
 	if (m_xVisibleObjectList.getCount() == 0) return;
 
-	CHAR* pBuffer = s_threadMessageBuffer;
-	int size = 0;
-	SmartEncodeMessage(pBuffer, size, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
+	CHAR* pBuffer = s_threadMessageBuffer.data();
+	int size = EncodeMsg(pBuffer, dwFlag, wCmd, w1, w2, w3, lpdata, datasize);
 	auto* pNode = m_xVisibleObjectList.getHead();
 	while (pNode) {
-		CAliveObject* pTarget = static_cast<CAliveObject*>(pNode->getObject()->pObject);
-		if (pTarget && pTarget->CanRecvMsg())
-			pTarget->OnAroundMsg(this, pBuffer, size);
+		CMapObject* pObj = pNode->getObject()->pObject;
 		pNode = pNode->getNext();
+		// 快速跳过非玩家对象，避免虚函数调用开销
+		if (pObj == nullptr || pObj->GetType() != OBJ_PLAYER) continue;
+		CHumanPlayer* pPlayer = static_cast<CHumanPlayer*>(pObj);
+		if (pPlayer->CanRecvMsg())
+			pPlayer->OnAroundMsg(this, pBuffer, size);
 	}
 }
 
@@ -1370,10 +1326,13 @@ VOID CAliveObject::SendAroundMsg(const char* szMsg, int length)
 	if (m_xVisibleObjectList.getCount() == 0) return;
 	auto* pNode = m_xVisibleObjectList.getHead();
 	while (pNode) {
-		CAliveObject* pTarget = static_cast<CAliveObject*>(pNode->getObject()->pObject);
-		if (pTarget && pTarget->CanRecvMsg())
-			pTarget->OnAroundMsg(this, szMsg, length);
+		CMapObject* pObj = pNode->getObject()->pObject;
 		pNode = pNode->getNext();
+		// 快速跳过非玩家对象，避免虚函数调用开销
+		if (pObj == nullptr || pObj->GetType() != OBJ_PLAYER) continue;
+		CHumanPlayer* pPlayer = static_cast<CHumanPlayer*>(pObj);
+		if (pPlayer->CanRecvMsg())
+			pPlayer->OnAroundMsg(this, szMsg, length);
 	}
 }
 
@@ -1397,15 +1356,16 @@ VOID CAliveObject::ToDeath(DWORD dwKiller)
 
 BOOL CAliveObject::AddProcess(e_process ident, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4, DWORD dwDelay, int repeattimes, const char* pszString, BOOL firstTime)
 {
-	OBJECTPROCESS* p = CGameWorld::GetInstance()->AllocProcess(pszString);
+	auto* pGameWorld = CGameWorld::GetInstance();
+	OBJECTPROCESS* p = pGameWorld->AllocProcess(pszString);
 	if (p == nullptr)return FALSE;
 	if (!m_xQProcess.push(p))
 	{
-		CGameWorld::GetInstance()->FreeProcess(p);
+		pGameWorld->FreeProcess(p);
 		return FALSE;
 	}
 	p->dwDelayTime = dwDelay;
-	p->dwDeliverTime = timeGetTime();
+	p->dwDeliverTime = CFrameTime::GetFrameTime();
 	p->dwParam[0] = dwParam1;
 	p->dwParam[1] = dwParam2;
 	p->dwParam[2] = dwParam3;
@@ -1419,11 +1379,12 @@ BOOL CAliveObject::AddProcess(e_process ident, DWORD dwParam1, DWORD dwParam2, D
 
 BOOL CAliveObject::AddProcess(OBJECTPROCESS* pProcess)
 {
-	OBJECTPROCESS* pNewProcess = CGameWorld::GetInstance()->AllocProcess(pProcess->pszParam);
+	auto* pGameWorld = CGameWorld::GetInstance();
+	OBJECTPROCESS* pNewProcess = pGameWorld->AllocProcess(pProcess->pszParam);
 	if (pNewProcess == nullptr)return FALSE;
 	if (!m_xQProcess.push(pNewProcess))
 	{
-		CGameWorld::GetInstance()->FreeProcess(pNewProcess);
+		pGameWorld->FreeProcess(pNewProcess);
 		return FALSE;
 	}
 	pNewProcess->dwDelayTime = pProcess->dwDelayTime;
@@ -1485,10 +1446,10 @@ VOID CAliveObject::DoProcess(OBJECTPROCESS* pProcess)
 	break;
 	case EP_MAGHEALING:
 	{
-		DWORD dwRecoverPoint = pProcess->dwParam[1];
-		if (dwRecoverPoint == 0)
-			dwRecoverPoint = CGameWorld::GetInstance()->GetVar(EVI_HPRECOVERPOINT);
-		SetAddHp(pProcess->dwParam[0], dwRecoverPoint);
+		DWORD dwRecoverSpeed = pProcess->dwParam[1];
+		if (dwRecoverSpeed == 0)
+			dwRecoverSpeed = 10;
+		SetAddHp(pProcess->dwParam[0], dwRecoverSpeed);
 	}
 	break;
 	case EP_RUSH://野蛮冲撞
@@ -1576,18 +1537,24 @@ VOID CAliveObject::DoProcess(OBJECTPROCESS* pProcess)
 		}
 		else
 		{
+			BOOL bRushBlocked = FALSE;
 			for (i = 0; i < nGrid; i++)
 			{
 				if (!DoRush(dir, 0))
 				{
+					bRushBlocked = TRUE;
 					SaySystemAttrib(CC_MAGICTIPS, "缺乏冲撞力!");
 					break;
 				}
 			}
-			int x, y;
-			GetFrontPosition(x, y);
-			if (m_pMap && m_pMap->IsPhysicsBlocked(x, y)) // 撞墙时, 自身掉血
-				BeAttack(this, nDamage3, DT_DIRECT);
+			if (bRushBlocked && m_pMap)
+			{
+				int x, y;
+				GetFrontPosition(x, y);
+				pFrontObject = (CAliveObject*)m_pMap->FindTarget(this, x, y);
+				if (!pFrontObject) // 撞墙时掉血，撞活物不掉血。
+					BeAttack(this, nDamage3, DT_DIRECT);
+			}
 		}
 	}
 	break;
@@ -1675,18 +1642,24 @@ VOID CAliveObject::DoProcess(OBJECTPROCESS* pProcess)
 		}
 		else
 		{
+			BOOL bRushBlocked = FALSE;
 			for (i = 0; i < nGrid; i++)
 			{
 				if (!DoRush(dir, 2))
 				{
+					bRushBlocked = TRUE;
 					SaySystemAttrib(CC_MAGICTIPS, "缺乏冲撞力!");
 					break;
 				}
 			}
-			int x, y;
-			GetFrontPosition(x, y);
-			if (m_pMap && m_pMap->IsPhysicsBlocked(x, y)) // 撞墙时, 自身掉血
-				BeAttack(this, nDamage3, DT_DIRECT);
+			if (bRushBlocked && m_pMap)
+			{
+				int x, y;
+				GetFrontPosition(x, y);
+				pFrontObject = (CAliveObject*)m_pMap->FindTarget(this, x, y);
+				if (!pFrontObject) // 撞墙时掉血，撞活物不掉血。
+					BeAttack(this, nDamage3, DT_DIRECT);
+			}
 		}
 	}
 	break;
@@ -1740,6 +1713,7 @@ BOOL CAliveObject::FlyTo(CLogicMap* pMap, int x, int y, BOOL bShowEffect)
 		if (pMap->GetValidPoint(x, y, &pt, 1))
 			x = pt.x, y = pt.y;
 	}
+	SetAction(AT_FLY, GetDirection(), x, y, 200);
 	CLogicMap* pOldMap = m_pMap;
 	if (!pOldMap->RemoveObject(this))//如果删除对象失败
 		return FALSE;
@@ -1760,24 +1734,27 @@ BOOL CAliveObject::FlyTo(CLogicMap* pMap, int x, int y, BOOL bShowEffect)
 		pOldMap->AddObject(this);
 		return FALSE;
 	}
-	SetPreActionType(AT_FLY);
 	if (bSendMsg && bShowEffect)
 	{
 		DWORD dwView[3] = { GetFeather(), GetStatus(), GetHealth() };
 		WORD w3 = (GetSex() << 8) | (BYTE)GetDirection();
 		SendAroundMsg(GetId(), 0x321, getX(), getY(), w3, (LPVOID)dwView, sizeof(dwView));
 		SendMsg(GetId(), 0x321, getX(), getY(), w3, (LPVOID)dwView, sizeof(dwView));
-		SendFeatureChanged();
+	}
+	if (bSendMsg)
+	{
 		if (GetJingang())
 			resetHushenBuff(getX(), getY(), GetId(), 61);
 		else if (GetHushen())
 			resetHushenBuff(getX(), getY(), GetId(), 42);
+		SendFeatureChanged();
+		SendStatusChanged();
 	}
 	OnChangeMap(pOldMap, ox, oy, pMap, x, y);
 	return TRUE;
 }
 
-VOID CAliveObject::SendStatusChanged()   //改变状态
+VOID CAliveObject::SendStatusChanged() //改变状态
 {
 	DWORD dwFlag = m_Status.GetFlag();
 	WORD wSpeed = static_cast<WORD>(GetPropValue(PI_ATTACKSPEED));
@@ -2017,7 +1994,6 @@ VOID CAliveObject::OnSetPos(WORD oldx, WORD oldy, WORD newx, WORD newy)
 	}
 	if (m_pMap)
 		m_bPosLocked = m_pMap->LockPos(newx, newy);
-	CheckClearCloak();
 }
 
 BOOL CAliveObject::DoMagicPushAround(int nCount)
@@ -2031,7 +2007,7 @@ BOOL CAliveObject::DoMagicPushAround(int nCount)
 		x = getX();
 		y = getY();
 		GETNEXTPOS(x, y, i);
-		CMapCellInfo* pInfo = m_pMap->GetMapCellInfo(x, y);
+		CMapCellInfo* pInfo = m_pMap->GetMapCellInfoShared(x, y);
 		if (pInfo)
 		{
 			pNode = pInfo->m_xObjectList.getHead();
@@ -2055,7 +2031,7 @@ BOOL CAliveObject::DoPointMagic(int nDamage, int x, int y)
 	BOOL bFlag = FALSE;
 	xListHost<CMapObject>::xListNode* pNode = nullptr;
 	CMapObject* pObject = nullptr;
-	CMapCellInfo* pInfo = m_pMap->GetMapCellInfo(x, y);
+	CMapCellInfo* pInfo = m_pMap->GetMapCellInfoShared(x, y);
 	if (pInfo)
 	{
 		pNode = pInfo->m_xObjectList.getHead();
@@ -2084,7 +2060,7 @@ BOOL CAliveObject::DoLineMagic(int nDamage, int nDirection, int nCount)
 	for (int i = 0; i < nCount; i++)
 	{
 		GETNEXTPOS(x, y, nDirection);
-		CMapCellInfo* pInfo = m_pMap->GetMapCellInfo(x, y);
+		CMapCellInfo* pInfo = m_pMap->GetMapCellInfoShared(x, y);
 		if (pInfo)
 		{
 			pNode = pInfo->m_xObjectList.getHead();
@@ -2229,14 +2205,16 @@ VOID CAliveObject::OnDamage(CAliveObject* pAttacker, int nDamage, damage_type ty
 		CMonsterEx* pMon = (CMonsterEx*)this;
 		if (GetType() == OBJ_MONSTER && pMon->GetDesc() && (pMon->GetDesc()->sprop.pFlag & SF_ANTPALSY) != 0)
 			return;
-		DWORD dwRate = CSpecialEquipmentManager::GetInstance()->GetFunctionParam(SEF_PALSY, 0);
+		auto* pSpecialEquipmentManager = CSpecialEquipmentManager::GetInstance();
+		DWORD dwRate = pSpecialEquipmentManager->GetFunctionParam(SEF_PALSY, 0);
 		if (Getrand(100) < (int)dwRate)
 		{
-			DWORD dwTime = CSpecialEquipmentManager::GetInstance()->GetFunctionParam(SEF_PALSY, 1);
+			DWORD dwTime = pSpecialEquipmentManager->GetFunctionParam(SEF_PALSY, 1);
 			if (dwTime == 0)dwTime = 5000;
 			SetStatus(SI_PALSY, 0, dwTime);
 		}
 	}
+	CheckClearCloak();
 }
 
 BOOL CAliveObject::CanBePushed(CAliveObject* pAttacker)

@@ -2,12 +2,12 @@
 #include "scriptobjectmgr.h"
 #include "scriptobject.h"
 
-CScriptObjectMgr::CScriptObjectMgr(void)
+CScriptObjectMgr::CScriptObjectMgr(VOID)
+	: m_xScriptList(TRUE)
 {
-	m_xScriptList = TRUE;
 }
 
-CScriptObjectMgr::~CScriptObjectMgr(void)
+CScriptObjectMgr::~CScriptObjectMgr(VOID)
 {
 }
 

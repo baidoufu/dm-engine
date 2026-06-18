@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include ".\gameworld.h"
+#include <unordered_map>
 #include "physicsmapmgr.h"
 #include "logicmapmgr.h"
 #include "ScriptVariable.h"
@@ -45,124 +46,126 @@
 #include "mapscriptmanager.h"
 #include "guildwarmanager.h"
 #include "TaskManager.h"
+#include "BotManager.h"
 
 extern DWORD g_dwActionDelay[AT_MAX];
 
-CGameWorld::CGameWorld(void) :
-	m_pNotice(nullptr),
-	m_pStartPoints(nullptr),
+CGameWorld::CGameWorld(VOID) :
 	m_dwUpdateKey(0),
 	m_iStartPointCount(0),
 	m_iNoticeLines(0),
 	m_iNoticePtr(0),
 	m_bWorkerRunning(false),
 	m_bAsyncUpdateReady(false),
-	m_xGlobeProcessQueue(64),
 	m_fExpFactor(1.0f),
-	m_iPlayerQueue(256),
-	m_iMonsterQueue(32),
-	m_iNpcQueue(32),
 	m_DBUpdateTimer()
 {
-	memset(m_BornPoints, 0, sizeof(m_BornPoints));
-	memset(m_iBornPointCount, 0, sizeof(m_iBornPointCount));
-	memset(m_pObjectList, 0, sizeof(m_pObjectList));
-	memset(m_pNameList, 0, sizeof(m_pNameList));
-	memset(m_VarList, 0, sizeof(m_VarList));
-	memset(m_dwChannelTime, 0, sizeof(m_dwChannelTime));
-	memset(m_HumanData, 0, sizeof(m_HumanData));
-	memset(&m_FirstLoginInfo, 0, sizeof(m_FirstLoginInfo));
-	memset(m_NoticeLines, 0, sizeof(m_NoticeLines));
-
-	// 初始化临界区
-	InitializeCriticalSection(&m_csMonsterUpdateLock);
-	// 初始化分段锁
-	for (int i = 0; i < MONSTER_LOCK_SEGMENTS; i++) {
-		InitializeCriticalSection(&m_csMonsterSegmentLocks[i]);
+	m_pNameList.fill(nullptr);
+	m_VarList.fill(0);
+	m_dwChannelTime.fill(0);
+	m_iBornPointCount.fill(0);
+	
+	for (auto& arr : m_HumanData) {
+		arr.fill({});
 	}
+	for (auto& line : m_NoticeLines) {
+		line = {};
+	}
+	
+	memset(&m_FirstLoginInfo, 0, sizeof(m_FirstLoginInfo));
 
-	m_pObjectList[OBJ_MONSTER] = new MAPOBJECT_LIST;
-	m_pObjectList[OBJ_PLAYER] = new MAPOBJECT_LIST;
-	m_pObjectList[OBJ_NPC] = new MAPOBJECT_LIST;
+	m_pObjectList[OBJ_MONSTER] = std::make_unique<MAPOBJECT_LIST>();
+	m_pObjectList[OBJ_PLAYER] = std::make_unique<MAPOBJECT_LIST>();
+	m_pObjectList[OBJ_NPC] = std::make_unique<MAPOBJECT_LIST>();
 	m_DBUpdateTimer.Savetime();
 }
 
-CGameWorld::~CGameWorld(void)
+CGameWorld::~CGameWorld(VOID)
 {
-	ShutdownThreadPool(); // 关闭工作线程池
-	if (m_pObjectList[OBJ_NPC] != nullptr) {
-		delete m_pObjectList[OBJ_NPC];  // 释放内存
-		m_pObjectList[OBJ_NPC] = nullptr;  // 防止悬挂指针
-	}
-	if (m_pObjectList[OBJ_PLAYER] != nullptr) {
-		delete m_pObjectList[OBJ_PLAYER];  // 释放内存
-		m_pObjectList[OBJ_PLAYER] = nullptr;  // 防止悬挂指针
-	}
-	if (m_pObjectList[OBJ_MONSTER] != nullptr) {
-		delete m_pObjectList[OBJ_MONSTER];  // 释放内存
-		m_pObjectList[OBJ_MONSTER] = nullptr;  // 防止悬挂指针
-	}
-	// 删除临界区
-	DeleteCriticalSection(&m_csMonsterUpdateLock);
-	// 删除分段锁
-	for (int i = 0; i < MONSTER_LOCK_SEGMENTS; i++) {
-		DeleteCriticalSection(&m_csMonsterSegmentLocks[i]);
-	}
+	ShutdownThreadPool();
+	// 智能指针自动清理，无需手动delete
+}
+
+VOID CGameWorkerThread::Execute(LPVOID lpParam)
+{
+	m_pOwner->AsyncUpdateWorker();
 }
 
 VOID CGameWorld::ShowNpc(UINT nMapId)//NPC显示
 {
-	xListHelper<CMapObject>	objlist(m_pObjectList[OBJ_NPC]);
-	CScriptNpc* pNpc = nullptr;
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(nMapId);
-	if (pMap == nullptr)return;
-	for (pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
+	if (pMap == nullptr) return;
+	std::vector<CScriptNpc*> npcsToShow;
 	{
-		if (pNpc->GetMapId() == nMapId && pNpc->GetMap() == nullptr)
-			pMap->AddObject(pNpc);
+		xListHelper<CMapObject> objlist(m_pObjectList[OBJ_NPC].get());
+		SRLock lock(m_rwObjectListLock);
+		for (CScriptNpc* pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
+		{
+			if (pNpc->GetMapId() == nMapId && pNpc->GetMap() == nullptr)
+				npcsToShow.push_back(pNpc);
+		}
 	}
+	// 释放锁后再执行 AddObject
+	for (CScriptNpc* pNpc : npcsToShow)
+		pMap->AddObject(pNpc);
 }
 
 VOID CGameWorld::HideNpc(UINT nMapId)//NPC消失
 {
-	xListHelper<CMapObject>	objlist(m_pObjectList[OBJ_NPC]);
-	CScriptNpc* pNpc = nullptr;
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(nMapId);
-	if (pMap == nullptr)return;
-	for (pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
+	if (pMap == nullptr) return;
+	std::vector<CScriptNpc*> npcsToShow;
 	{
-		if (pNpc->GetMapId() == nMapId && pNpc->GetMap() == pMap)
-			pNpc->GetMap()->RemoveObject(pNpc);
+		xListHelper<CMapObject> objlist(m_pObjectList[OBJ_NPC].get());
+		SRLock lock(m_rwObjectListLock);
+		for (CScriptNpc* pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
+		{
+			if (pNpc->GetMapId() == nMapId && pNpc->GetMap() == pMap)
+				npcsToShow.push_back(pNpc);
+		}
 	}
+	// 释放锁后再执行 RemoveObject
+	for (CScriptNpc* pNpc : npcsToShow)
+		pMap->RemoveObject(pNpc);
 }
 
 VOID CGameWorld::ShowSandCityNpc()
 {
-	xListHelper<CMapObject>	objlist(m_pObjectList[OBJ_NPC]);
-	CScriptNpc* pNpc = nullptr;
-	CLogicMap* pMap = nullptr;
-	for (pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
+	std::vector<CScriptNpc*> npcsToShow;
 	{
-		if (pNpc->IsSandCityMerchant())
+		xListHelper<CMapObject>	objlist(m_pObjectList[OBJ_NPC].get());
+		SRLock lock(m_rwObjectListLock);
+		for (CScriptNpc* pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
 		{
-			pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(pNpc->GetMapId());
-			if (pMap)pMap->AddObject(pNpc);
+			if (pNpc->IsSandCityMerchant())
+				npcsToShow.push_back(pNpc);
 		}
+	}
+	// 释放锁后再执行 AddObject
+	for (CScriptNpc* pNpc : npcsToShow)
+	{
+		CLogicMap* pMap = pNpc->GetMap();
+		if (pMap) pMap->AddObject(pNpc);
 	}
 }
 
 VOID CGameWorld::HideSandCityNpc()
 {
-	xListHelper<CMapObject>	objlist(m_pObjectList[OBJ_NPC]);
-	CScriptNpc* pNpc = nullptr;
-	CLogicMap* pMap = nullptr;
-	for (pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
+	std::vector<CScriptNpc*> npcsToHide;
 	{
-		if (pNpc->IsSandCityMerchant() /*&& pNpc->GetMap() == pMap */)
+		xListHelper<CMapObject>	objlist(m_pObjectList[OBJ_NPC].get());
+		SRLock lock(m_rwObjectListLock);
+		for (CScriptNpc* pNpc = (CScriptNpc*)objlist.first(); pNpc != nullptr; pNpc = (CScriptNpc*)objlist.next())
 		{
-			pMap = pNpc->GetMap();
-			if (pMap)pMap->RemoveObject(pNpc);
+			if (pNpc->IsSandCityMerchant())
+				npcsToHide.push_back(pNpc);
 		}
+	}
+	// 释放锁后再执行 RemoveObject
+	for (CScriptNpc* pNpc : npcsToHide)
+	{
+		CLogicMap* pMap = pNpc->GetMap();
+		if (pMap) pMap->RemoveObject(pNpc);
 	}
 }
 
@@ -200,9 +203,6 @@ BOOL CGameWorld::LoadServerConfig()
 	LOADNAME(PHYSICSCACHEPATH, ".\\Data\\Maps\\Cache");
 
 	m_fExpFactor = m_sfServer.GetInteger("Setting", "ExpFactor", 100) / 100.0f;//爆率
-	m_iPlayerQueue = m_sfServer.GetInteger("Setting", "PlayerQueue", 256);//玩家处理队列数量
-	m_iMonsterQueue = m_sfServer.GetInteger("Setting", "MonsterQueue", 32);//怪物处理队列数量
-	m_iNpcQueue = m_sfServer.GetInteger("Setting", "NpcQueue", 32);//NPC处理队列数量
 
 	m_VarList[EVI_MAXGOLD] = (DWORD)m_sfServer.GetInteger("Var", "MaxGold", 5000000);
 	m_VarList[EVI_MAXBIGGOLD] = (DWORD)m_sfServer.GetInteger("Var", "MaxBigGold", 10000000);
@@ -239,10 +239,6 @@ BOOL CGameWorld::LoadServerConfig()
 	LOADVAR(MAXUPGRADETIMES, 10);
 	LOADVAR(MONGENFACTOR, 100);
 	LOADVAR(PKCURSERATE, 50);
-	LOADVAR(HPRECOVERPOINT, 9);
-	LOADVAR(HPRECOVERTIME, 500);
-	LOADVAR(MPRECOVERPOINT, 9);
-	LOADVAR(MPRECOVERTIME, 500);
 	LOADVAR(GUILDWARTIME, 3600 * 3);
 	LOADVAR(STARTGUILDMEMBERCOUNT, 64);
 	LOADVAR(DROPTARGETTIME, 3);
@@ -256,8 +252,9 @@ BOOL CGameWorld::LoadServerConfig()
 	m_dwChannelTime[CCH_GM] = (DWORD)m_sfServer.GetInteger("ChatWait", "Gm", 0);
 	m_dwChannelTime[CCH_FRIEND] = (DWORD)m_sfServer.GetInteger("ChatWait", "Friend", 2);
 
-	CStringListManager::GetInstance()->ClearAll();
-	CStringListManager::GetInstance()->Load(".\\Data\\StringList");
+	auto* pStringListManager = CStringListManager::GetInstance();
+	pStringListManager->ClearAll();
+	pStringListManager->Load(".\\Data\\StringList");
 
 	//	读取角色信息文件
 	char* pszHumanDescFile = (char*)m_sfServer.GetString("HumanData", "Warrior", nullptr);
@@ -306,11 +303,11 @@ BOOL CGameWorld::LoadServerConfig()
 	if (pszTemp != nullptr)
 	{
 		char* Params[BIGBAG_SLOT], * Params2[5];
-		int nParam = SearchParam(pszTemp, Params, BIGBAG_SLOT, '/');
+		int nParam = SearchParam(pszTemp, Params, BIGBAG_SLOT, "/");
 		int nParam2 = 0;
 		for (int i = 0; i < nParam; i++)
 		{
-			nParam2 = SearchParam(Params[i], Params2, 5, '*');
+			nParam2 = SearchParam(Params[i], Params2, 5, "*");
 			FIRSTLOGIN_ITEM* pItem = new FIRSTLOGIN_ITEM;
 			if (nParam2 == 1)
 			{
@@ -377,13 +374,11 @@ VOID CGameWorld::LoadSafeArea()
 VOID CGameWorld::LoadStartPoint()
 {
 	m_iStartPointCount = 0;
-	if (m_pStartPoints != nullptr)
-		delete[]m_pStartPoints;
-	m_pStartPoints = nullptr;
+	m_pStartPoints.reset();
 	CFmtTextFile ftfStartPoint("s32w4b3", ".\\Data\\Config\\StartPoint.csv", TRUE);
 	if (ftfStartPoint.GetCount() > 0)
 	{
-		m_pStartPoints = new start_point[ftfStartPoint.GetCount()];
+		m_pStartPoints = std::make_unique<START_POINT[]>(ftfStartPoint.GetCount());
 		for (int i = 0; i < ftfStartPoint.GetCount(); i++)
 		{
 			if (ftfStartPoint.GetStruct(i, &m_pStartPoints[m_iStartPointCount]))
@@ -418,16 +413,13 @@ VOID CGameWorld::LoadStartPoint()
 			}
 		}
 
-		if (m_BornPoints[0])
-			delete[]m_BornPoints[0];
-		if (m_BornPoints[1])
-			delete[]m_BornPoints[1];
-		if (m_BornPoints[2])
-			delete[]m_BornPoints[2];
+		m_BornPoints[0].reset();
+		m_BornPoints[1].reset();
+		m_BornPoints[2].reset();
 
-		m_BornPoints[0] = new START_POINT * [m_iBornPointCount[0]];
-		m_BornPoints[1] = new START_POINT * [m_iBornPointCount[1]];
-		m_BornPoints[2] = new START_POINT * [m_iBornPointCount[2]];
+		m_BornPoints[0] = std::make_unique<START_POINT*[]>(m_iBornPointCount[0]);
+		m_BornPoints[1] = std::make_unique<START_POINT*[]>(m_iBornPointCount[1]);
+		m_BornPoints[2] = std::make_unique<START_POINT*[]>(m_iBornPointCount[2]);
 		m_iBornPointCount[0] = 0;
 		m_iBornPointCount[1] = 0;
 		m_iBornPointCount[2] = 0;
@@ -436,7 +428,7 @@ VOID CGameWorld::LoadStartPoint()
 		{
 			if (m_pStartPoints[i].bFighterBorn)
 			{
-				m_BornPoints[0][m_iBornPointCount[0]++] = m_pStartPoints + i;
+				m_BornPoints[0][m_iBornPointCount[0]++] = m_pStartPoints.get() + i;
 				PRINT(STRING_GREEN, "战士出生点 %s ( %u, %u )[%u] %u\n",
 					m_pStartPoints[i].szName,
 					m_pStartPoints[i].x,
@@ -447,7 +439,7 @@ VOID CGameWorld::LoadStartPoint()
 			}
 			if (m_pStartPoints[i].bMagicianBorn)
 			{
-				m_BornPoints[1][m_iBornPointCount[1]++] = m_pStartPoints + i;
+				m_BornPoints[1][m_iBornPointCount[1]++] = m_pStartPoints.get() + i;
 				PRINT(STRING_GREEN, "法师出生点 %s ( %u, %u )[%u] %u\n",
 					m_pStartPoints[i].szName,
 					m_pStartPoints[i].x,
@@ -458,7 +450,7 @@ VOID CGameWorld::LoadStartPoint()
 			}
 			if (m_pStartPoints[i].bTaoshiBorn)
 			{
-				m_BornPoints[2][m_iBornPointCount[2]++] = m_pStartPoints + i;
+				m_BornPoints[2][m_iBornPointCount[2]++] = m_pStartPoints.get() + i;
 				PRINT(STRING_GREEN, "道士出生点 %s ( %u, %u )[%u] %u\n",
 					m_pStartPoints[i].szName,
 					m_pStartPoints[i].x,
@@ -474,12 +466,10 @@ VOID CGameWorld::LoadStartPoint()
 
 VOID CGameWorld::LoadNotice()
 {
-	if (m_pNotice != nullptr)
-		delete[]m_pNotice;
-	m_pNotice = (char*)LoadFile(".\\Data\\Config\\Notice.txt");
-	if (m_pNotice == nullptr)
+	m_pNotice = LoadFile(".\\Data\\Config\\Notice.txt");
+	if (!m_pNotice)
 	{
-		m_pNotice = " \n经典游戏  精彩无限";
+		m_pNotice = nullptr;
 	}
 	CStringFile sfLN(".\\Data\\Config\\LineNotice.txt");
 	m_iNoticeLines = 0;
@@ -490,14 +480,14 @@ VOID CGameWorld::LoadNotice()
 		xStringsExpander<10> ss(sfLN[i], '|');
 		if (ss.getCount() == 1)
 		{
-			o_strncpy(m_NoticeLines[i].szWords, ss[0], 255);
+			o_strncpy(m_NoticeLines[i].szWords.data(), ss[0], 255);
 			m_NoticeLines[m_iNoticeLines].dwDelay = 300000;
 			m_NoticeLines[m_iNoticeLines].timer.Savetime();
 			m_iNoticeLines++;
 		}
 		else if (ss.getCount() >= 2)
 		{
-			o_strncpy(m_NoticeLines[m_iNoticeLines].szWords, ss[1], 255);
+			o_strncpy(m_NoticeLines[m_iNoticeLines].szWords.data(), ss[1], 255);
 			m_NoticeLines[m_iNoticeLines].dwDelay = 1000 * StringToInteger(ss[0]);
 			m_NoticeLines[m_iNoticeLines].timer.Savetime();
 			m_iNoticeLines++;
@@ -508,15 +498,15 @@ VOID CGameWorld::LoadNotice()
 
 VOID CGameWorld::LoadClientKeyConfig()
 {
-	memset(m_ClientKeyConfig, 0, sizeof(m_ClientKeyConfig));
+	m_ClientKeyConfig.fill({});
 	FILE* fp = fopen(".\\Data\\Config\\ClientKeyConfig.json", "rb");
 	if (fp == nullptr)
 	{
 		PRINT(ERROR_RED, "无法打开 ClientKeyConfig.json 文件\n");
 		return;
 	}
-	char readBuffer[6144]{};
-	rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	std::array<char, 6144> readBuffer{};
+	rapidjson::FileReadStream is(fp, readBuffer.data(), readBuffer.size());
 	rapidjson::Document doc;
 	doc.ParseStream(is);
 	fclose(fp);
@@ -545,7 +535,6 @@ VOID CGameWorld::LoadClientKeyConfig()
 BOOL CGameWorld::Init()
 {
 	// 脚本系统首先读取
-	CTimeSystem::GetInstance();
 	CScriptObjectMgr::GetInstance()->Load(".\\Data\\Script");
 	CScriptVariableManager::GetInstance()->StartFind(".\\Data\\Variables", "*.txt", TRUE);
 	CScriptObject* pScriptObject = CScriptObjectMgr::GetInstance()->GetScriptObject("system");
@@ -553,8 +542,8 @@ BOOL CGameWorld::Init()
 		CSystemScript::GetInstance()->Init(pScriptObject);
 	else
 	{
-		pScriptObject = new CScriptObject();
-		CSystemScript::GetInstance()->Init(pScriptObject);
+		m_pSystemScriptObject = std::make_unique<CScriptObject>();
+		CSystemScript::GetInstance()->Init(m_pSystemScriptObject.get());
 	}
 	if (!LoadServerConfig())return FALSE;
 	CPhysicsMapMgr::GetInstance()->Init(GetName(ENI_PHYSICSMAPPATH), GetName(ENI_PHYSICSCACHEPATH));
@@ -570,12 +559,12 @@ BOOL CGameWorld::Init()
 	CItemManager::GetInstance()->LoadScriptLink(".\\Data\\ItemScript.txt");
 	CItemManager::GetInstance()->LoadPetINI(".\\Data\\Config\\PetLevel.ini");
 	CMagicManager::GetInstance()->LoadMaigc(".\\Data\\Config\\BaseMagic.csv");
-	CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv", TRUE);
+	CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv");
 	CMagicManager::GetInstance()->LoadMaigcskill(".\\Data\\Config\\MagicSkill.xml");
-	CTitleManager::GetInstance()->LoadData(".\\Data\\Config\\Titles.csv", TRUE);
-	CFengHaoGrowManager::GetInstance()->LoadData(".\\Data\\Config\\FengHaoGrow.csv", TRUE);
+	CTitleManager::GetInstance()->LoadData(".\\Data\\Config\\Titles.csv");
+	CFengHaoGrowManager::GetInstance()->LoadData(".\\Data\\Config\\FengHaoGrow.csv");
 
-	CBundleManager::GetInstance()->LoadBundle(".\\Data\\Config\\BundleItem.csv", TRUE);
+	CBundleManager::GetInstance()->LoadBundle(".\\Data\\Config\\BundleItem.csv");
 
 	CNpcManager::GetInstance()->Load(".\\Data\\NpcGens.csv");
 	CGmManager::GetInstance()->Load(".\\Data\\GameMaster\\GmList.txt");
@@ -606,6 +595,7 @@ BOOL CGameWorld::Init()
 	CBossTJ::GetInstance()->Load(".\\Data\\Config\\BossTJ.xml");
 	CTimeAchieve::GetInstance()->Load(".\\Data\\Config\\TimeAchieve.xml");
 	CGameStage::GetInstance()->Load(".\\Data\\Config\\GameStage.xml");
+	CBotManager::GetInstance()->CreateBotsFromConfig(".\\Data\\Bot\\BotConfig.csv");
 
 	InitThreadPool(); // 初始化工作线程池
 	return TRUE;
@@ -616,51 +606,59 @@ VOID CGameWorld::InitThreadPool()
 	if (m_bWorkerRunning) return;
 	m_bWorkerRunning = true;
 	m_bAsyncUpdateReady = false;
-
 	// 获取系统CPU亲和性掩码
 	DWORD_PTR systemMask = 0;
 	DWORD_PTR processMask = 0;
 	GetProcessAffinityMask(GetCurrentProcess(), &processMask, &systemMask);
+	// 计算 systemMask 中置位的位数（可用核心数）
+	int activeCoreCount = 0;
+	DWORD_PTR tempMask = systemMask;
+	while (tempMask)
+	{
+		activeCoreCount += tempMask & 1;
+		tempMask >>= 1;
+	}
+	// 动态线程数 - 根据CPU核心数决定，上限32
+	int cpuCores = std::thread::hardware_concurrency();
+	int threadCount = MIN(MAX(cpuCores, 4), 32); // 4-32个线程
+	PRINT(ORANGE, "检测到 %d 个CPU核心，初始化 %d 个工作线程\n", cpuCores, threadCount);
 
-	// 创建工作线程, 根据CPU核心数决定线程数量
-	int threadCount = std::thread::hardware_concurrency();
-	if (threadCount < 2) threadCount = 2; // 至少2个线程
-	if (threadCount >= 2) threadCount = 4; // 最多4个工作线程
 	for (int i = 0; i < threadCount; ++i)
 	{
-		m_WorkerThreads.emplace_back([this, i, threadCount, systemMask]() {
-			// 循环分配核心：线程i绑定到核心 (i % 可用核心数)
-			int coreNum = 0;
-			int assignedCore = -1;
-			// 计算 systemMask 中置位的位数
-			int activeCoreCount = 0;
-			DWORD_PTR tempMask = systemMask;
-			while (tempMask)
+		// 计算此线程绑定的核心
+		int coreNum = 0;
+		int assignedCore = -1;
+		for (int j = 0; j < 64; j++)
+		{
+			if (systemMask & (DWORD_PTR(1) << j))
 			{
-				activeCoreCount += tempMask & 1;
-				tempMask >>= 1;
-			}
-			for (int j = 0; j < 64; j++)
-			{
-				if (systemMask & (DWORD_PTR(1) << j))
-				{
-					if (coreNum == (i % activeCoreCount))
+				if (coreNum == (i % activeCoreCount))
 					{
 						assignedCore = j;
 						break;
 					}
-					coreNum++;
-				}
+				coreNum++;
 			}
+		}
+
+		auto pThread = std::make_unique<CGameWorkerThread>();
+		pThread->SetOwner(this);
+		if (pThread->Start())
+		{
+			// 设置线程核心亲和性
 			if (assignedCore >= 0)
 			{
 				DWORD_PTR affinityMask = DWORD_PTR(1) << assignedCore;
-				SetThreadAffinityMask(GetCurrentThread(), affinityMask);
+				SetThreadAffinityMask(pThread->getHandle(), affinityMask);
 			}
-			AsyncUpdateWorker();
-		});
+			m_WorkerThreads.push_back(std::move(pThread));
+		}
+		else
+		{
+			PRINT(ERROR_RED, "工作线程 %d 启动失败\n", i);
+		}
 	}
-	PRINT(ORANGE, "工作线程池已初始化, 线程数: %d\n", threadCount);
+	PRINT(ORANGE, "工作线程池已初始化, 线程数: %d\n", (int)m_WorkerThreads.size());
 }
 
 VOID CGameWorld::ShutdownThreadPool()
@@ -670,23 +668,29 @@ VOID CGameWorld::ShutdownThreadPool()
 	// 唤醒所有工作线程
 	m_WorkerQueueCV.notify_all();
 	// 等待所有工作线程结束
-	for (auto& thread : m_WorkerThreads) {
-		if (thread.joinable()) {
-			thread.join();
-		}
+	for (auto& pThread : m_WorkerThreads)
+	{
+		pThread->Terminate();
+	}
+	m_WorkerQueueCV.notify_all();
+	for (auto& pThread : m_WorkerThreads)
+	{
+		pThread->WaitFor();
 	}
 	m_WorkerThreads.clear();
 	// 清空任务队列
 	{
 		std::lock_guard<std::mutex> lock(m_WorkerQueueMutex);
-		while (!m_WorkerTaskQueue.empty()) {
+		while (!m_WorkerTaskQueue.empty())
+		{
 			m_WorkerTaskQueue.pop();
 		}
 	}
 	// 清空通告结果队列
 	{
 		std::lock_guard<std::mutex> lock(m_AsyncNoticeMutex);
-		while (!m_AsyncNoticeQueue.empty()) {
+		while (!m_AsyncNoticeQueue.empty())
+		{
 			m_AsyncNoticeQueue.pop();
 		}
 	}
@@ -694,23 +698,23 @@ VOID CGameWorld::ShutdownThreadPool()
 
 VOID CGameWorld::PostSystemMessage(const char* pszWords, DWORD dwDelay)
 {
-	char sztext[1024];
-	int len = EncodeMsg(sztext, 0, SM_SYSCHAT, 0x38ff, 0, 0, (LPVOID)pszWords);
-	AddGlobeProcess(EP_SENDCODEDTEXT, 0, 0, 0, 0, dwDelay, 1, sztext);
+	std::array<char, 1024> sztext{};
+	int len = EncodeMsg(sztext.data(), 0, SM_SYSCHAT, 0x38ff, 0, 0, (LPVOID)pszWords);
+	AddGlobeProcess(EP_SENDCODEDTEXT, 0, 0, 0, 0, dwDelay, 1, sztext.data());
 }
 
 VOID CGameWorld::PostSystemMessage(DWORD dwColor, const char* pszWords, DWORD dwDelay)
 {
-	char sztext[1024];
-	int len = EncodeMsg(sztext, 0, SM_SYSCHAT, dwColor & 0xffff, dwColor >> 16, 0, (LPVOID)pszWords);
-	AddGlobeProcess(EP_SENDCODEDTEXT, 0, 0, 0, 0, dwDelay, 1, sztext);
+	std::array<char, 1024> sztext{};
+	int len = EncodeMsg(sztext.data(), 0, SM_SYSCHAT, dwColor & 0xffff, dwColor >> 16, 0, (LPVOID)pszWords);
+	AddGlobeProcess(EP_SENDCODEDTEXT, 0, 0, 0, 0, dwDelay, 1, sztext.data());
 }
 
 VOID CGameWorld::PostSystem10Message(const char* pszWords, DWORD dwDelay)
 {
-	char sztext[1024];
-	int len = EncodeMsg(sztext, 0, SM_SYSCHAT, 0, 0, 10, (LPVOID)pszWords);
-	AddGlobeProcess(EP_SENDCODEDTEXT, 0, 0, 0, 0, dwDelay, 1, sztext);
+	std::array<char, 1024> sztext{};
+	int len = EncodeMsg(sztext.data(), 0, SM_SYSCHAT, 0, 0, 10, (LPVOID)pszWords);
+	AddGlobeProcess(EP_SENDCODEDTEXT, 0, 0, 0, 0, dwDelay, 1, sztext.data());
 }
 
 VOID CGameWorld::Update()
@@ -719,28 +723,24 @@ VOID CGameWorld::Update()
 	DWORD dwkey = (m_dwUpdateKey % 10);
 	switch (dwkey)
 	{
-	case 0: case 5:  // 因为 VOID CAliveObject::Update() 更新分了奇数偶数分帧更新
+	case 4: case 7: case 9:
 	{
-		// 根据怪物数量动态调整分批数量
-		int nCount = m_xUpdateAutoMonsterList.getCount();
-		int nBatchCount = 1;  // 默认不分批
-		if (nCount > 10000)
-			nBatchCount = 8;      // 10000+ 怪物分8批
-		else if (nCount > 5000)
-			nBatchCount = 6;      // 5000+ 怪物分6批
-		else if (nCount > 2000)
-			nBatchCount = 4;      // 2000+ 怪物分4批
-		else if (nCount > 800)
-			nBatchCount = 2;      // 800+ 怪物分2批
-
+		int nCount = 0;
+		{
+			SRLock lock(m_rwMonsterLock);
+			nCount = m_xUpdateAutoMonsterList.getCount();
+		}
+		int nBatchCount = 1;
+		int maxBatches = (int)m_WorkerThreads.size();
+		if (nCount > 300)
+			nBatchCount = MIN((nCount + 199) / 200, maxBatches);
 		if (nBatchCount > 1)
 		{
 			int nPer = nCount / nBatchCount;
-			int nRemainder = nCount % nBatchCount;
 			int nCurrentStart = 0;
 			for (int i = 0; i < nBatchCount; i++)
 			{
-				int nBatchSize = nPer + (i < nRemainder ? 1 : 0);
+				int nBatchSize = nPer + (i < nCount % nBatchCount ? 1 : 0);
 				int nEnd = nCurrentStart + nBatchSize;
 				if (nBatchSize > 0)
 				{
@@ -757,87 +757,108 @@ VOID CGameWorld::Update()
 	break;
 	case 1:
 	{
-		CDownItemMgr::GetInstance()->UpdateDownItem();//更新掉落物品
-		SubmitAsyncTask([]() {
-				CBossTJ::GetInstance()->Update(); // Boss图鉴刷新时间更新
-			});
+		SubmitAsyncTask([this]() {
+			CBossTJ::GetInstance()->Update(); // Boss图鉴刷新时间更新
+		});
+		SubmitAsyncTask([this]() {
+			CEventManager::GetInstance()->UpdateEvents();
+		});
+		CEventManager::GetInstance()->UpdateDeleteObject();
+		SubmitAsyncTask([this]() {
+			CDownItemMgr::GetInstance()->UpdateDownItem();//更新掉落物品
+		});
+		CDownItemMgr::GetInstance()->UpdateDeletedObject();
+		SubmitAsyncTask([this]() {
+			CMonsterManagerEx::GetInstance()->UpdateFreeObjects(); // 释放
+		});
+		CMonsterManagerEx::GetInstance()->UpdateDeleteMonster(); // 删除
 	}
 	break;
 	case 2:
 	{
-		CEventManager::GetInstance()->UpdateEvents();
-		SubmitAsyncTask([]() {
-			CDownItemMgr::GetInstance()->UpdateDeletedObject();
-			});
-		SubmitAsyncTask([]() {
-			CMonsterManagerEx::GetInstance()->UpdateFreeObjects(); // 释放
-			CMonsterManagerEx::GetInstance()->UpdateDeleteMonster(); // 删除
-			});
+		CTimeSystem::GetInstance()->Update(); // 时间定时器
+		CNpcManager::GetInstance()->Update(); // NPC线程
 	}
 	break;
 	case 3:
 	{
-		CEventManager::GetInstance()->UpdateDeleteObject();
 		//沙城行会战争
 		CSandCity* pSandCity = CSandCity::GetInstance();
 		if (pSandCity && pSandCity->IsWarStarted())
 			CSandCity::GetInstance()->UpdateWar();
 		CGuildWarManager::GetInstance()->Update();
-		SubmitAsyncTask([]() {
+		SubmitAsyncTask([this]() {
 			CMonsterGenManager::GetInstance()->UpdateGen(); // 刷怪
-			});
+		});
 	}
+	break;
 	case 6:
 	{
-		CTimeSystem::GetInstance()->Update(); // 时间定时器
-		CNpcManager::GetInstance()->Update(); // NPC线程
-		// 处理异步更新结果（如果有）
+		// 处理异步更新结果（如果有
 		if (m_bAsyncUpdateReady) ProcessAsyncUpdateResults();
-		if (m_iNoticeLines > 0)
-		{
-			if (m_LineNoticeTimer.IsTimeOut(m_NoticeLines[m_iNoticePtr].dwDelay))
+		SubmitAsyncTask([this]() {
+			if (m_iNoticeLines > 0 && m_LineNoticeTimer.IsTimeOut(m_NoticeLines[m_iNoticePtr].dwDelay))
 			{
-				SubmitAsyncTask([this]() { 	// 将通告处理提交到工作线程
-					char sztext[1024];
-					int len = 0;
-					DWORD dwDelay = m_NoticeLines[m_iNoticePtr].dwDelay;
+				std::array<char, 1024> sztext{};
+				int len = 0;
+				DWORD dwDelay = m_NoticeLines[m_iNoticePtr].dwDelay;
 
-					if (m_NoticeLines[m_iNoticePtr].szWords[0] != 0)
-					{
-						len = EncodeMsg(sztext, 0, 0X64, 0x38ff, 0, 0, (LPVOID)m_NoticeLines[m_iNoticePtr].szWords);
-						// 将结果放入队列供主线程处理
-						std::lock_guard<std::mutex> lock(m_AsyncNoticeMutex);
-						AsyncNoticeResult result{};
-						memcpy(result.szText, sztext, 1024);
-						result.len = len;
-						result.dwDelay = 50;
-						m_AsyncNoticeQueue.push(result);
-						m_bAsyncUpdateReady = true;
-					}
-					m_iNoticePtr++;
-					if (m_iNoticePtr >= m_iNoticeLines)
-						m_iNoticePtr = 0;
-					});
-
+				if (m_NoticeLines[m_iNoticePtr].szWords[0] != 0)
+				{
+					len = EncodeMsg(sztext.data(), 0, 0X64, 0x38ff, 0, 0, (LPVOID)m_NoticeLines[m_iNoticePtr].szWords.data());
+					// 将结果放入队列供主线程处理
+					std::lock_guard<std::mutex> lock(m_AsyncNoticeMutex);
+					AsyncNoticeResult result{};
+					memcpy(result.szText, sztext.data(), sztext.size());
+					result.len = len;
+					result.dwDelay = 50;
+					m_AsyncNoticeQueue.push(result);
+					m_bAsyncUpdateReady = true;
+				}
+				m_iNoticePtr = (m_iNoticePtr + 1) % m_iNoticeLines;
 				m_LineNoticeTimer.Savetime();
 			}
-		}
+		});
 	}
 	break;
-	case 4: case 7: // 因为 VOID CAliveObject::Update() 更新分了奇数偶数分帧更新
+	case 0: case 5: case 8:
 	{
-		UpdateMonster(m_xUpdateMonsterList, MUT_ACTIVE);// 有目标的怪线程
+		int nCount = 0;
+		{
+			SRLock lock(m_rwMonsterLock);
+			nCount = m_xUpdateMonsterList.getCount();
+		}
+		int nBatchCount = MIN((nCount + 199) / 200, (int)m_WorkerThreads.size());
+		if (nBatchCount > 1)
+		{
+			int nPer = nCount / nBatchCount;
+			int nCurrentStart = 0;
+			for (int i = 0; i < nBatchCount; i++)
+			{
+				int nBatchSize = nPer + (i < nCount % nBatchCount ? 1 : 0);
+				int nEnd = nCurrentStart + nBatchSize;
+				if (nBatchSize > 0) 
+				{
+					SubmitAsyncTask([this, nCurrentStart, nEnd]() {
+						UpdateMonster(m_xUpdateMonsterList, MUT_ACTIVE, nCurrentStart, nEnd);
+					});
+				}
+				nCurrentStart = nEnd;
+			}
+		}
+		else
+			UpdateMonster(m_xUpdateMonsterList, MUT_ACTIVE);
 	}
 	break;
 	}
-	UpdatePlayers(); // 玩家线程
+	UpdatePlayers(); // 更新所有玩家和机器人
 }
 
 VOID CGameWorld::AsyncUpdateWorker()
 {
 	while (m_bWorkerRunning)
 	{
-		std::function<void()> task;
+		std::function<VOID()> task;
 		{
 			std::unique_lock<std::mutex> lock(m_WorkerQueueMutex);
 			m_WorkerQueueCV.wait(lock, [this] { return !m_WorkerTaskQueue.empty() || !m_bWorkerRunning; });
@@ -866,14 +887,14 @@ VOID CGameWorld::ProcessAsyncUpdateResults()
 	m_bAsyncUpdateReady = !m_AsyncNoticeQueue.empty(); // 如果还有未处理的, 标记为需要继续处理
 }
 
-VOID CGameWorld::SubmitAsyncTask(std::function<void()> task)
+VOID CGameWorld::SubmitAsyncTask(std::function<VOID()> task)
 {
 	if (!m_bWorkerRunning) return;
 	{
 		std::lock_guard<std::mutex> lock(m_WorkerQueueMutex);
 		m_WorkerTaskQueue.push(std::move(task));
 	}
-	m_WorkerQueueCV.notify_all();
+	m_WorkerQueueCV.notify_one();
 }
 
 BOOL CGameWorld::AddGlobeProcess(e_process ident, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4, DWORD dwDelay, int repeattimes, const char* pszString)
@@ -886,7 +907,7 @@ BOOL CGameWorld::AddGlobeProcess(e_process ident, DWORD dwParam1, DWORD dwParam2
 		return FALSE;
 	}
 	p->dwDelayTime = dwDelay;
-	p->dwDeliverTime = timeGetTime();
+	p->dwDeliverTime = CFrameTime::GetFrameTime();
 	p->dwParam[0] = dwParam1;
 	p->dwParam[1] = dwParam2;
 	p->dwParam[2] = dwParam3;
@@ -898,15 +919,20 @@ BOOL CGameWorld::AddGlobeProcess(e_process ident, DWORD dwParam1, DWORD dwParam2
 
 BOOL CGameWorld::AddMapObject(CMapObject* pObject)
 {
-	MAPOBJECT_LIST* pList = m_pObjectList[pObject->GetType()];
-	if (pList)
-		if (!pList->addNode(pObject->GetLinkNode(LNI_WORLD))) return FALSE;
+	MAPOBJECT_LIST* pList = m_pObjectList[pObject->GetType()].get();
+	{
+		SWLock lock(m_rwObjectListLock);
+		if (pList && !pList->addNode(pObject->GetLinkNode(LNI_WORLD))) return FALSE;
+	}
 	UINT id = pObject->GetMapId();
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(id);
 	if (pMap == nullptr || !pMap->AddObject(pObject))
 	{
 		if (pList)
+		{
+			SWLock lock(m_rwObjectListLock);
 			pList->removeNode(pObject->GetLinkNode(LNI_WORLD));
+		}
 		return FALSE;
 	}
 	return TRUE;
@@ -917,17 +943,20 @@ BOOL CGameWorld::RemoveMapObject(CMapObject* pObject)
 	CLogicMap* pMap = pObject->GetMap();
 	if (pMap != nullptr)
 		pMap->RemoveObject(pObject);
-	if (pObject->GetType() >= OBJ_MAX)
+	if (pObject->GetType() < OBJ_MAX)
 	{
-		MAPOBJECT_LIST* pList = m_pObjectList[pObject->GetType()];
+		MAPOBJECT_LIST* pList = m_pObjectList[pObject->GetType()].get();
 		if (pList)
+		{
+			SWLock lock(m_rwObjectListLock);
 			pList->removeNode(pObject->GetLinkNode(LNI_WORLD));
+		}
 	}
 	if (pObject->GetType() == OBJ_MONSTER)
 	{
-		char szBuffer[1024];
+		std::array<char, 1024> szBuffer{};
 		int length = 0;
-		if (((CMonsterEx*)pObject)->GetOutViewmsg(szBuffer, length)) ((CMonsterEx*)pObject)->SendAroundMsg(szBuffer, length);
+		if (((CMonsterEx*)pObject)->GetOutViewmsg(szBuffer.data(), length)) ((CMonsterEx*)pObject)->SendAroundMsg(szBuffer.data(), length);
 	}
 	return TRUE;
 }
@@ -949,7 +978,7 @@ BOOL CGameWorld::LoadHumanDataDesc(int pro, const char* pszFile)
 	for (int i = 0; i < sf.GetLineCount(); i++)
 	{
 		if (*sf[i] == '#')continue;
-		nParam = SearchParam(sf[i], Params, 100, ',');
+		nParam = SearchParam(sf[i], Params, 100, ",");
 		if (nParam < 26)continue;
 		nLevel = atoi(Params[0]);
 		if (nLevel > MAX_LEVEL || nLevel < 1)continue;
@@ -978,7 +1007,7 @@ BOOL CGameWorld::LoadHumanDataDesc(int pro, const char* pszFile)
 		p->poisonescape = (BYTE)atoi(Params[22]) & 0xff;
 		p->poisonnicety = (BYTE)atoi(Params[23]) & 0xff;
 		p->huoli = (WORD)atoi(Params[24]) & 0xffff;
-		p->dwLevelupExp = (DWORD)atoi(Params[25]);
+		p->dwLevelupExp = (DWORD)strtoul(Params[25], nullptr, 10);
 	}
 	return TRUE;
 }
@@ -1000,11 +1029,7 @@ CAliveObject* CGameWorld::GetAliveObjectById(UINT id)
 
 USERMAGIC* CGameWorld::AllocUserMagic()
 {
-#ifdef USE_FREE_MEMORY
-	USERMAGIC* p = new USERMAGIC;
-#else
 	USERMAGIC* p = m_UserMagicPool.newObject();
-#endif
 	if (p)
 		memset(p, 0, sizeof(*p));
 	return p;
@@ -1012,11 +1037,7 @@ USERMAGIC* CGameWorld::AllocUserMagic()
 
 VOID CGameWorld::FreeUserMagic(USERMAGIC* p)
 {
-#ifdef USE_FREE_MEMORY
-	delete p;
-#else
 	m_UserMagicPool.deleteObject(p);
-#endif	
 }
 
 BOOL CGameWorld::GetBornPoint(int pro, int& mapid, int& x, int& y, char* pszName)
@@ -1040,24 +1061,36 @@ START_POINT* CGameWorld::GetBornPoint(int pro)const
 BOOL CGameWorld::GetStartPoint(const char* pszName, int& mapid, int& x, int& y)
 {
 	START_POINT* pPoint = GetStartPoint(pszName);
-	if (!pPoint)pPoint = m_pStartPoints;
+	if (!pPoint)pPoint = m_pStartPoints.get();
 	if (pPoint == nullptr)return FALSE;
 	return GetValidPointFromStartPoint(pPoint, mapid, x, y);
 }
 
 VOID CGameWorld::CleanAllMonsters()
 {
-	xListHelper<CMapObject> monsters;
-	monsters.setList(m_pObjectList[OBJ_MONSTER]);
-	for (CMonsterEx* pMonster = (CMonsterEx*)monsters.first(); pMonster != nullptr; pMonster = (CMonsterEx*)monsters.next())
+	// 先收集所有怪物指针，再逐个删除，避免遍历与删除的锁冲突
+	std::vector<CMonsterEx*> monsters;
+	{
+		xListHelper<CMapObject> helper;
+		helper.setList(m_pObjectList[OBJ_MONSTER].get());
+		SRLock lock(m_rwObjectListLock);
+		int totalCount = m_pObjectList[OBJ_MONSTER]->getCount();
+		monsters.reserve(totalCount);
+		for (CMonsterEx* pMonster = (CMonsterEx*)helper.first(); pMonster != nullptr; pMonster = (CMonsterEx*)helper.next())
+		{
+			monsters.push_back(pMonster);
+		}
+	}
+	for (CMonsterEx* pMonster : monsters)
 	{
 		RemoveMapObject((CMapObject*)pMonster);
 		CMonsterManagerEx::GetInstance()->DeleteMonster(pMonster);
 	}
 }
 
-BOOL CGameWorld::GetValidPointFromStartPoint(START_POINT* pPoint, int& map, int& x, int& y)
+BOOL CGameWorld::GetValidPointFromStartPoint(START_POINT* pPoint, int& map, int& x, int& y, int depth)
 {
+	if (depth > 10) return FALSE; // 防止无限递归
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(pPoint->mapid);
 	if (pMap == nullptr)return FALSE;
 	map = pPoint->mapid;
@@ -1074,7 +1107,7 @@ BOOL CGameWorld::GetValidPointFromStartPoint(START_POINT* pPoint, int& map, int&
 			y = pt.y;
 		}
 		else
-			return GetValidPointFromStartPoint(pPoint, map, x, y);
+			return GetValidPointFromStartPoint(pPoint, map, x, y, depth + 1);
 	}
 	else
 	{
@@ -1090,10 +1123,7 @@ VOID CGameWorld::AddUpdateMonster(CMonsterEx* pMonster)
 	xListHost<CMonsterEx>::xListNode* pNode = pMonster->getUpdateNode();
 	if (pNode == nullptr) return;
 
-	// 使用分段锁减少竞争
-	int lockIndex = GetMonsterLockIndex(pMonster);
-	EnterCriticalSection(&m_csMonsterSegmentLocks[lockIndex]);
-
+	SWLock lock(m_rwMonsterLock);
 	if (pMonster->GetRef() == 0)
 	{
 		if (pNode->BelongTo(&m_xUpdateAutoMonsterList))
@@ -1101,32 +1131,31 @@ VOID CGameWorld::AddUpdateMonster(CMonsterEx* pMonster)
 	}
 	else if (!pNode->BelongTo(&m_xUpdateAutoMonsterList))
 		m_xUpdateAutoMonsterList.addNode(pNode);
-
-	LeaveCriticalSection(&m_csMonsterSegmentLocks[lockIndex]);
-}
-
-int CGameWorld::GetMonsterLockIndex(CMonsterEx* pMonster)
-{
-	if (pMonster == nullptr) return 0;
-	// 使用怪物指针地址计算分段索引,确保同一怪物总是落在同一分段
-	UINT_PTR ptr = reinterpret_cast<UINT_PTR>(pMonster);
-	return static_cast<int>(ptr % MONSTER_LOCK_SEGMENTS);
 }
 
 VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType, int nStart, int nEnd)
 {
-	if (monsterList.getCount() <= 0) return;
-	// 预分配内存
-	int totalCount = monsterList.getCount();
-	std::vector<CMonsterEx*> updateMonsters;
-	updateMonsters.reserve(totalCount);
-	std::vector<xListHost<CMonsterEx>::xListNode*> nodesToRemove;
-	nodesToRemove.reserve(totalCount);
+	// 使用thread_local vector避免每帧内存分配
+	struct ThreadLocalBuffers {
+		std::vector<CMonsterEx*> updateMonsters;
+		std::vector<xListHost<CMonsterEx>::xListNode*> nodesToRemove;
+		std::vector<xListHost<CMonsterEx>::xListNode*> switchMonsters;
+	};
+	thread_local ThreadLocalBuffers tls;
+	tls.updateMonsters.clear();
+	tls.nodesToRemove.clear();
+	tls.switchMonsters.clear();
 	// 获取目标列表引用
 	xListHost<CMonsterEx>& targetList = (updateType == MUT_AUTO) ? m_xUpdateMonsterList : m_xUpdateAutoMonsterList;
-	// 收集需要处理的怪物和要删除的节点（持有锁）
+	// 收集需要处理的怪物和要删除的节点
 	{
-		EnterCriticalSection(&m_csMonsterUpdateLock);
+		SWLock lock(m_rwMonsterLock);
+		int totalCount = monsterList.getCount();
+		if (totalCount <= 0) return;
+		if ((int)tls.updateMonsters.capacity() < totalCount)
+			tls.updateMonsters.reserve(totalCount);
+		if ((int)tls.nodesToRemove.capacity() < totalCount)
+			tls.nodesToRemove.reserve(totalCount);
 		xListHost<CMonsterEx>::xListNode* pNode = monsterList.getHead();
 		int currentIndex = 0;
 		BOOL boBatch = (nStart != 0 || nEnd != 0);
@@ -1136,102 +1165,211 @@ VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdate
 			if (p)
 			{
 				if (p->IsDeath() || p->GetRef() == 0)
-					nodesToRemove.push_back(pNode);
+					tls.nodesToRemove.push_back(pNode);
 				else if (!boBatch || (currentIndex >= nStart && currentIndex < nEnd))
-					updateMonsters.push_back(p);
+					tls.updateMonsters.push_back(p);
 			}
 			else
-				nodesToRemove.push_back(pNode);
+				tls.nodesToRemove.push_back(pNode);
 			pNode = pNode->getNext();
 			currentIndex++;
 		}
 		// 删除无效节点
-		for (auto node : nodesToRemove)
+		for (auto node : tls.nodesToRemove)
 		{
 			monsterList.removeNode(node);
 			if (node->BelongTo(&targetList))
 				targetList.removeNode(node);
 		}
-		LeaveCriticalSection(&m_csMonsterUpdateLock);
 	}
-	// 用于批量处理需要切换列表的怪物（按锁索引分组）
-	struct MonsterSwitchInfo {
-		CMonsterEx* pMonster;
-		xListHost<CMonsterEx>::xListNode* pNode;
-	};
-	std::vector<MonsterSwitchInfo> switchMonstersBySegment[MONSTER_LOCK_SEGMENTS];
-	int estimatedSwitchCount = updateMonsters.size();
-	for (int seg = 0; seg < MONSTER_LOCK_SEGMENTS; seg++)
+	if (tls.updateMonsters.empty()) return;
+	DWORD dwUpdateKey = this->m_dwUpdateKey;
+	BOOL checkHasTarget = (updateType == MUT_AUTO);
+	// 处理更新
+	// 注意：此处怪物指针在锁外使用，安全性依赖于以下时序保证：
+	// 怪物对象的实际删除在主线程的 CMonsterManagerEx::UpdateDeleteMonster() 中执行，
+	// 该操作在 UpdateMonster 之后的帧阶段进行，因此 Update 期间指针不会悬垂。
+	// 如果未来修改调度逻辑（如将删除操作移到工作线程），需要重新评估此处安全性。
+	for (size_t idx = 0; idx < tls.updateMonsters.size(); idx++)
 	{
-		switchMonstersBySegment[seg].reserve(estimatedSwitchCount / MONSTER_LOCK_SEGMENTS + 1);
-	}
-	// 处理更新（不持有主锁, 但使用分段锁保护列表修改）
-	for (size_t idx = 0; idx < updateMonsters.size(); idx++)
-	{
-		CMonsterEx* p = updateMonsters[idx];
-		if (!p || p->IsDeath() || p->GetRef() == 0) continue;
-		// 更新怪
-		p->SetUpdateKey(this->m_dwUpdateKey);
+		CMonsterEx* p = tls.updateMonsters[idx];
+		if (p->IsDeath() || p->GetRef() == 0) continue; // 复检：锁释放后怪物可能已死亡
+		p->SetUpdateKey(dwUpdateKey);
 		p->Update();
-		// MUT_AUTO: 有目标时切换；MUT_ACTIVE: 无目标时切换
-		BOOL shouldSwitch = (updateType == MUT_AUTO) ? (p->GetTarget() != nullptr) : (p->GetTarget() == nullptr);
+
+		BOOL shouldSwitch = checkHasTarget ? (p->GetTarget() != nullptr) : (p->GetTarget() == nullptr);
 		if (shouldSwitch)
 		{
-			// 收集需要切换的怪物, 而不是立即切换
-			int lockIndex = GetMonsterLockIndex(p);
 			xListHost<CMonsterEx>::xListNode* pNode = p->getUpdateNode();
-			if (pNode && !p->IsDeath() && p->GetRef() > 0 && !pNode->BelongTo(&targetList))
-			{
-				MonsterSwitchInfo info = { p, pNode };
-				switchMonstersBySegment[lockIndex].push_back(info);
-			}
+			if (pNode && !pNode->BelongTo(&targetList))
+				tls.switchMonsters.push_back(pNode);
 		}
 	}
-	// 批量处理需要切换列表的怪物（每个分段锁只获取一次）
-	for (int seg = 0; seg < MONSTER_LOCK_SEGMENTS; seg++)
+	// 批量切换列表
+	if (!tls.switchMonsters.empty())
 	{
-		if (switchMonstersBySegment[seg].empty())
-			continue;
-		EnterCriticalSection(&m_csMonsterSegmentLocks[seg]);
-		for (const auto& info : switchMonstersBySegment[seg])
+		SWLock lock(m_rwMonsterLock);
+		for (const auto& pNode : tls.switchMonsters)
 		{
-			// 再次检查状态, 确保怪物仍然有效
-			if (!info.pMonster->IsDeath() && info.pMonster->GetRef() > 0)
-			{
-				if (!info.pNode->BelongTo(&targetList))
-					targetList.addNode(info.pNode);
-			}
+			CMonsterEx* p = pNode->getObject();
+			if (!p || p->IsDeath() || p->GetRef() == 0) continue; // 切换前复检
+			if (!pNode->BelongTo(&targetList))
+				targetList.addNode(pNode);
 		}
-		LeaveCriticalSection(&m_csMonsterSegmentLocks[seg]);
 	}
 }
 
 VOID CGameWorld::UpdatePlayers()
 {
-	xListHost<CMapObject>::xListNode* pNode = nullptr;
 	OBJECTPROCESS* pProcesses[UPDATE_GLOBE_PROCESS_COUNT] = { nullptr };
 	int	globeprocesscount = 0;
 	int i = 0;
 	while (globeprocesscount < UPDATE_GLOBE_PROCESS_COUNT && (pProcesses[globeprocesscount] = m_xGlobeProcessQueue.pop()))
 		globeprocesscount++;
-	MAPOBJECT_LIST* pList = m_pObjectList[OBJ_PLAYER];
-	for (pNode = pList->getHead(); pNode != nullptr; pNode = pNode->getNext())
+	MAPOBJECT_LIST* pList = m_pObjectList[OBJ_PLAYER].get();
+	// 使用静态缓冲区避免每次重新分配
+	struct ThreadLocalPlayerBuffers {
+		std::vector<CHumanPlayer*> players;
+	};
+	thread_local ThreadLocalPlayerBuffers ptls;
+	ptls.players.clear();
 	{
-		CHumanPlayer* p = (CHumanPlayer*)pNode->getObject();
-		// 只添加必要的全局进程, 避免对所有玩家都添加
-		if (globeprocesscount > 0 && p->NeedGlobeProcess(UPDATE_GLOBE_PROCESS_COUNT))
+		SRLock lock(m_rwObjectListLock);
+		for (auto pNode = pList->getHead(); pNode != nullptr; pNode = pNode->getNext())
 		{
-			for (i = 0; i < globeprocesscount; i++)
+			CHumanPlayer* p = (CHumanPlayer*)pNode->getObject();
+			if (p) ptls.players.push_back(p);
+		}
+	}
+	if (ptls.players.empty())
+	{
+		for (i = 0; i < globeprocesscount; i++)
+		{
+			OBJECTPROCESS* pProceess = pProcesses[i];
+			if (pProceess && pProceess->ident < EP_MAX)
+				FreeProcess(pProceess);
+		}
+		return;
+	}
+	DWORD dwUpdateKey = this->m_dwUpdateKey;
+	// 提前判断是否需要处理全局消息
+	BOOL needGlobeProcess = (globeprocesscount > 0);
+	// 定义处理单个玩家的逻辑
+	// 线程安全说明：按地图分组确保同一地图的玩家在同一线程处理，
+	// 避免跨地图共享状态冲突。ProcessPlayer内不应访问其他地图对象。
+	auto ProcessPlayer = [needGlobeProcess, pProcesses, globeprocesscount, dwUpdateKey](CHumanPlayer* p) {
+		if (needGlobeProcess && p->NeedGlobeProcess(UPDATE_GLOBE_PROCESS_COUNT))
+		{
+			for (int j = 0; j < globeprocesscount; j++)
 			{
-				OBJECTPROCESS* pProceess = pProcesses[i];
+				OBJECTPROCESS* pProceess = pProcesses[j];
 				if (pProceess && pProceess->ident < EP_MAX)
 					p->AddProcess(pProceess);
 			}
 		}
-		p->SetUpdateKey(this->m_dwUpdateKey);
+		p->SetUpdateKey(dwUpdateKey);
 		p->Update();
+	};
+	// 按地图分组进行并行处理
+	struct MapGroup {
+		std::vector<CHumanPlayer*> players;
+	};
+	// 使用thread_local复用，避免每帧堆分配
+	struct MapGroupBuffers
+	{
+		std::vector<MapGroup> groups;
+		std::unordered_map<UINT, size_t> mapIndex;
+		VOID clear()
+		{
+			for (auto& g : groups) g.players.clear();
+			groups.clear();
+			mapIndex.clear();
+		}
+	};
+	thread_local MapGroupBuffers mgBuf;
+	mgBuf.clear();
+	auto& groups = mgBuf.groups;
+	auto& mapIndex = mgBuf.mapIndex;
+	{
+		for (auto* p : ptls.players)
+		{
+			UINT mapId = p->GetMapId();
+			auto it = mapIndex.find(mapId);
+			if (it == mapIndex.end())
+			{
+				size_t idx = groups.size();
+				mapIndex[mapId] = idx;
+				MapGroup g;
+				g.players.push_back(p);
+				groups.push_back(std::move(g));
+			}
+			else
+			{
+				groups[it->second].players.push_back(p);
+			}
+		}
 	}
-
+	if (groups.size() > 1 && m_WorkerThreads.size() >= 4)
+	{
+		// 单个地图玩家数低于此阈值时，异步分发的开销大于收益，直接由主线程处理
+		static const size_t MIN_PLAYERS_PER_ASYNC_GROUP = 5;
+		// 使用原子计数 + 自旋等待
+		// 帧内同步等待时间极短（通常 < 1ms），自旋避免内核态切换开销
+		CSpinBarrier barrier((int)groups.size());
+		// 主线程采用 work-stealing 策略：处理一个较大的分组，避免空等
+		int mainThreadGroupIdx = -1;
+		for (size_t i = 0; i < groups.size(); i++)
+		{
+			auto& group = groups[i];
+			if (group.players.size() < MIN_PLAYERS_PER_ASYNC_GROUP)
+			{
+				// 小分组：直接由主线程处理，省去异步队列的锁竞争和上下文切换开销
+				for (auto* p : group.players)
+				{
+					ProcessPlayer(p);
+				}
+				barrier.Signal();
+			}
+			else if (mainThreadGroupIdx < 0)
+			{
+				// 主线程偷取第一个大分组自己处理（work-stealing）
+				mainThreadGroupIdx = (int)i;
+			}
+			else
+			{
+				// 其余大分组提交到工作线程并行处理
+				SubmitAsyncTask([&barrier, &group, &ProcessPlayer]() {
+					for (auto* p : group.players)
+					{
+						ProcessPlayer(p);
+					}
+					barrier.Signal();
+				});
+			}
+		}
+		// 主线程处理偷取的大分组
+		if (mainThreadGroupIdx >= 0)
+		{
+			for (auto* p : groups[mainThreadGroupIdx].players)
+			{
+				ProcessPlayer(p);
+			}
+			barrier.Signal();
+		}
+		// 自旋等待所有工作线程完成（无需内核态切换）
+		barrier.Arrive();
+	}
+	else
+	{
+		// 单地图或 worker 数量不足时，直接同步处理，避免不必要的分发开销
+		for (auto& group : groups)
+		{
+			for (auto* p : group.players)
+			{
+				ProcessPlayer(p);
+			}
+		}
+	}
 	for (i = 0; i < globeprocesscount; i++)
 	{
 		OBJECTPROCESS* pProceess = pProcesses[i];

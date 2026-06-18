@@ -7,15 +7,15 @@
 #include "eventmanager.h"
 //CFireBurnEvent g_FireBurnEvent;
 xObjectPool<CFireBurnEvent>	CFireBurnEvent::m_xEventPool;
-CFireBurnEvent::CFireBurnEvent(void)
+CFireBurnEvent::CFireBurnEvent(VOID)
 {
 	m_nDamage = 0;
 	m_pOwner = nullptr;
 	m_dwOwnerInstanceKey = 0;
-	memset(m_pEvents, 0, sizeof(m_pEvents));
+	m_pEvents.fill(nullptr);
 }
 
-CFireBurnEvent::~CFireBurnEvent(void)
+CFireBurnEvent::~CFireBurnEvent(VOID)
 {
 }
 
@@ -32,7 +32,9 @@ VOID CFireBurnEvent::OnUpdate(CVisibleEvent* pEvent)
 			return;
 		}
 	}
-	CMapCellInfo* pInfo = pEvent->GetMap()->GetMapCellInfo(pEvent->getX(), pEvent->getY());
+	CLogicMap* pEventMap = pEvent->GetMap();
+	if (pEventMap == nullptr) { Destroy(); return; }
+	CMapCellInfo* pInfo = pEventMap->GetMapCellInfoShared(pEvent->getX(), pEvent->getY());
 	if (pInfo)
 	{
 		xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();
@@ -53,12 +55,12 @@ VOID CFireBurnEvent::OnUpdate(CVisibleEvent* pEvent)
 VOID CFireBurnEvent::OnClose(CVisibleEvent* pEvent)
 {
 	int	count = 0;
-	for (int i = 0; i < 5; i++)
+	for (auto& event : m_pEvents)
 	{
-		if (m_pEvents[i] != nullptr)
+		if (event != nullptr)
 		{
-			if (m_pEvents[i] == pEvent)
-				m_pEvents[i] = nullptr;
+			if (event == pEvent)
+				event = nullptr;
 			else
 				count++;
 		}
@@ -78,20 +80,22 @@ CFireBurnEvent* CFireBurnEvent::Create(CAliveObject* pOwner, int x, int y, int n
 	pEvent->m_pOwner = pOwner;
 	pEvent->m_dwOwnerInstanceKey = pOwner->GetInstanceKey();
 
-	memset(pEvent->m_pEvents, 0, sizeof(pEvent->m_pEvents));
-	static const POINT	ptFire[5] = {
+	pEvent->m_pEvents.fill(nullptr);
+	static const std::array<POINT, 5> ptFire =
+	{{
 		{ 0, 0 },//中
 		{ -1, 0 }, { 1, 0 },//左、右
 		{ 0, -1 }, { 0, 1 },//上、下
-	};
+	}};
 	int successcount = 0;
+	auto* pEventManager = CEventManager::GetInstance();
 	for (int i = 0; i < 5; i++)
 	{
 		int targetX = x + ptFire[i].x;
 		int targetY = y + ptFire[i].y;
 		// 检查边界
 		if (targetX < 0 || targetX >= pMap->GetWidth() || targetY < 0 || targetY >= pMap->GetHeight()) continue;
-		pEvent->m_pEvents[i] = CEventManager::GetInstance()->NewVisibleEvent(pOwner->GetMap(), targetX, targetY, VE_FIREWALL, dwTick, dwLastTime, pEvent);
+		pEvent->m_pEvents[i] = pEventManager->NewVisibleEvent(pOwner->GetMap(), targetX, targetY, VE_FIREWALL, dwTick, dwLastTime, pEvent);
 		if (pEvent->m_pEvents[i] != nullptr)
 			successcount++;
 	}
@@ -101,18 +105,18 @@ CFireBurnEvent* CFireBurnEvent::Create(CAliveObject* pOwner, int x, int y, int n
 		pEvent = nullptr;
 	}
 	else
-		CEventManager::GetInstance()->AddEventProcessor(pEvent);
+		pEventManager->AddEventProcessor(pEvent);
 	return pEvent;
 }
 
 VOID CFireBurnEvent::Destroy()
 {
-	for (int i = 0; i < 5; i++)
+	for (auto& event : m_pEvents)
 	{
-		if (m_pEvents[i])
+		if (event)
 		{
-			m_pEvents[i]->Close();
-			m_pEvents[i] = nullptr;
+			event->Close();
+			event = nullptr;
 		}
 	}
 	m_nDamage = 0;
@@ -122,8 +126,8 @@ VOID CFireBurnEvent::Destroy()
 
 VOID CFireBurnEvent::Update()
 {
-	for (int i = 0; i < 5; i++)
+	for (auto& event : m_pEvents)
 	{
-		if (m_pEvents[i]) m_pEvents[i]->UpdateValid();
+		if (event) event->UpdateValid();
 	}
 }

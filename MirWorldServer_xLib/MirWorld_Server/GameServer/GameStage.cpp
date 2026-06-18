@@ -3,22 +3,21 @@
 #include "tinyxml.h"
 #include "HumanPlayer.h"
 
-CGameStage::CGameStage(void)
+CGameStage::CGameStage(VOID)
 {
 	m_nStageCount = 0;
-	memset(m_pStageList, 0, sizeof(m_pStageList));
+	m_pStageList.fill(nullptr);
 	m_pStageVar = nullptr;
 }
 
-CGameStage::~CGameStage(void)
+CGameStage::~CGameStage(VOID)
 {
 	Clear();
 }
 
 VOID CGameStage::Clear()
 {
-	delete m_pStageVar;
-	m_pStageVar = nullptr;
+	m_pStageVar.reset();
 
 	for (int i = 0; i < m_nStageCount; i++)
 	{
@@ -39,7 +38,7 @@ VOID CGameStage::Clear()
 				delete pContent;
 				pContent = pStageInfo->pContents;
 			}
-			m_StageHash.HDel(pStageInfo->szName);
+			m_StageHash.HDel(pStageInfo->szName.data());
 			delete pStageInfo;
 		}
 		m_pStageList[i] = nullptr;
@@ -65,17 +64,16 @@ VOID CGameStage::Load(const char* pszFilename)
 	TiXmlElement* stageVarElem = root->FirstChildElement("StageVar");
 	if (stageVarElem != nullptr)
 	{
-		m_pStageVar = new STAGEVAR;
-		memset(m_pStageVar, 0, sizeof(STAGEVAR));
+		m_pStageVar = std::make_unique<STAGEVAR>();
 		const char* pszCurStage = stageVarElem->Attribute("cur_stage");
 		if (pszCurStage != nullptr)
-			o_strncpy(m_pStageVar->szCurStage, pszCurStage, 127);
+			o_strncpy(m_pStageVar->szCurStage.data(), pszCurStage, 127);
 		const char* pszCurDay = stageVarElem->Attribute("cur_day");
 		if (pszCurDay != nullptr)
-			o_strncpy(m_pStageVar->szCurDay, pszCurDay, 127);
+			o_strncpy(m_pStageVar->szCurDay.data(), pszCurDay, 127);
 		const char* pszSelfLv = stageVarElem->Attribute("self_lv");
 		if (pszSelfLv != nullptr)
-			o_strncpy(m_pStageVar->szSelfLv, pszSelfLv, 127);
+			o_strncpy(m_pStageVar->szSelfLv.data(), pszSelfLv, 127);
 	}
 
 	for (TiXmlElement* stageElem = root->FirstChildElement("Stage"); stageElem != nullptr; stageElem = stageElem->NextSiblingElement("Stage"))
@@ -86,7 +84,7 @@ VOID CGameStage::Load(const char* pszFilename)
 		stageElem->QueryIntAttribute("id", &pStageInfo->nId);
 		const char* pszName = stageElem->Attribute("name");
 		if (pszName != nullptr)
-			o_strncpy(pStageInfo->szName, pszName, 63);
+			o_strncpy(pStageInfo->szName.data(), pszName, 63);
 
 		stageElem->QueryIntAttribute("day", &pStageInfo->nDay);
 		stageElem->QueryIntAttribute("maxlevel", &pStageInfo->nMaxLevel);
@@ -98,7 +96,7 @@ VOID CGameStage::Load(const char* pszFilename)
 			memset(pContent, 0, sizeof(STAGECONTENT));
 			const char* pszContentName = contentElem->Attribute("name");
 			if (pszContentName != nullptr)
-				o_strncpy(pContent->szName, pszContentName, 63);
+				o_strncpy(pContent->szName.data(), pszContentName, 63);
 			contentElem->QueryIntAttribute("looks", &pContent->nLooks);
 			// 读取Item列表
 			STAGEITEM* pLastItem = nullptr;
@@ -111,7 +109,7 @@ VOID CGameStage::Load(const char* pszFilename)
 
 				const char* pszDesc = itemElem->Attribute("desc");
 				if (pszDesc != nullptr)
-					o_strncpy(pItem->szDesc, pszDesc, 127);
+					o_strncpy(pItem->szDesc.data(), pszDesc, 127);
 				if (pLastItem == nullptr)
 					pContent->pItems = pItem;
 				else
@@ -128,7 +126,7 @@ VOID CGameStage::Load(const char* pszFilename)
 		if (m_nStageCount < MAXGAMESTAGE)
 		{
 			m_pStageList[m_nStageCount++] = pStageInfo;
-			m_StageHash.HAdd(pStageInfo->szName, (LPVOID)pStageInfo);
+			m_StageHash.HAdd(pStageInfo->szName.data(), (LPVOID)pStageInfo);
 		}
 		else
 		{
@@ -152,61 +150,60 @@ VOID CGameStage::Load(const char* pszFilename)
 	}
 }
 
-static char g_szTempBuffer[65536];
 VOID CGameStage::SendPlayerMapJumpHome(CHumanPlayer* pPlayer)
 {
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	const char* s1C = "CheckPlayerMapJump";
-	packet.push(s1C);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
 	int nValue = 0x61;
-	packet.push((LPVOID)&nValue, 1);
+	packet->push((LPVOID)&nValue, 1);
 	nValue = m_nStageCount + 1;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	//插入当前阶段名字
 	char szCurStage[128];
-	ProcFmtText(m_pStageVar->szCurStage, szCurStage, 128, pPlayer->GetScriptTarget());
+	ProcFmtText(m_pStageVar->szCurStage.data(), szCurStage, 128, pPlayer->GetScriptTarget());
 	int nCurStage = StringToInteger(szCurStage);
 	STAGEINFO* pStageInfo = m_pStageList[nCurStage];
-	packet.push(pStageInfo->szName);
-	packet.push(1);
+	packet->push(pStageInfo->szName.data());
+	packet->push(1);
 	//插入阶段排序名字
 	for (int i = 0; i < m_nStageCount; i++)
 	{
 		STAGEINFO* pStage = m_pStageList[i];
 		if (pStage)
 		{
-			packet.push(pStage->szName);
-			packet.push(1);
+			packet->push(pStage->szName.data());
+			packet->push(1);
 		}
 	}
 	nValue = 1;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	char szCurDay[128];
-	ProcFmtText(m_pStageVar->szCurDay, szCurDay, 128, pPlayer->GetScriptTarget());
+	ProcFmtText(m_pStageVar->szCurDay.data(), szCurDay, 128, pPlayer->GetScriptTarget());
 	int nStageVar = StringToInteger(szCurDay);
-	packet.push((LPVOID)&nStageVar, 4);
-	packet.push(12); // 12个空
+	packet->push((LPVOID)&nStageVar, 4);
+	packet->push(12); // 12个空
 	nValue = 1;
-	packet.push((LPVOID)&nValue, 4);
-	packet.push((LPVOID)&nStageVar, 4);
-	packet.push(4); // 4个空
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nStageVar, 4);
+	packet->push(4); // 4个空
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	// 发送当前阶段
 	if (pStageInfo)
-		SendPlayerMapJumpPage(pPlayer, pStageInfo->szName);
+		SendPlayerMapJumpPage(pPlayer, pStageInfo->szName.data());
 }
 
 VOID CGameStage::SendPlayerMapJumpPage(CHumanPlayer* pPlayer, const char* pszName)
 {
 	STAGEINFO* pStageInfo = (STAGEINFO*)m_StageHash.HGet(pszName);
 	if (pStageInfo == nullptr) return;
-	xPacket packet(g_szTempBuffer, 65535);
+	xPacketPool::ScopedPacket packet(65535);
 	const char* s1C = "CheckPlayerMapJump";
-	packet.push(s1C);
-	packet.push(1);
+	packet->push(s1C);
+	packet->push(1);
 	int nValue = 0x62;
-	packet.push((LPVOID)&nValue, 1);
+	packet->push((LPVOID)&nValue, 1);
 	STAGECONTENT* pContent = pStageInfo->pContents;
 	int nContentCount = 0;
 	while (pContent != nullptr)
@@ -214,42 +211,42 @@ VOID CGameStage::SendPlayerMapJumpPage(CHumanPlayer* pPlayer, const char* pszNam
 		nContentCount++;
 		pContent = pContent->pNext;
 	}
-	packet.push((LPVOID)&nContentCount, 4);
+	packet->push((LPVOID)&nContentCount, 4);
 	pContent = pStageInfo->pContents;
 	while (pContent != nullptr)
 	{
 		char szBuffer[2048] = { 0 };
 		int nPos = 0;
 		nPos += sprintf_s(szBuffer + nPos, sizeof(szBuffer) - nPos, "%d;%s;",
-			pContent->nLooks, pContent->szName);
+			pContent->nLooks, pContent->szName.data());
 		STAGEITEM* pItem = pContent->pItems;
 		while (pItem != nullptr)
 		{
 			nPos += sprintf_s(szBuffer + nPos, sizeof(szBuffer) - nPos, "%d;%s;",
-				pItem->nLooks, pItem->szDesc);
+				pItem->nLooks, pItem->szDesc.data());
 			pItem = pItem->pNext;
 		}
-		packet.push(szBuffer);
-		packet.push(1);
+		packet->push(szBuffer);
+		packet->push(1);
 		pContent = pContent->pNext;
 	}
 	nValue = 3;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = pStageInfo->nDay;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = pStageInfo->nMaxLevel;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	char szSelfLv[128];
-	ProcFmtText(m_pStageVar->szSelfLv, szSelfLv, 128, pPlayer->GetScriptTarget());
+	ProcFmtText(m_pStageVar->szSelfLv.data(), szSelfLv, 128, pPlayer->GetScriptTarget());
 	int nSelfLv = StringToInteger(szSelfLv);
-	packet.push((LPVOID)&nSelfLv, 4);
-	packet.push(12); // 12个空
+	packet->push((LPVOID)&nSelfLv, 4);
+	packet->push(12); // 12个空
 	nValue = 3;
-	packet.push((LPVOID)&nValue, 4);
+	packet->push((LPVOID)&nValue, 4);
 	nValue = pStageInfo->nDay;
-	packet.push((LPVOID)&nValue, 4);
-	packet.push(12); // 12个空
-	packet.push((LPVOID)&nSelfLv, 4);
-	packet.push(4); // 4个空
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	packet->push((LPVOID)&nValue, 4);
+	packet->push(12); // 12个空
+	packet->push((LPVOID)&nSelfLv, 4);
+	packet->push(4); // 4个空
+	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }

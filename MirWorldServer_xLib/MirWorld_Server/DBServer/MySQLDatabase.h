@@ -2,8 +2,9 @@
 #include "virtualdatabase.h"
 #include <mysql.h>
 #include <errmsg.h>
+#include <array>
+#include <memory>
 
-// 定义 SQL 类型常量
 #ifndef SQL_C_CHAR
 #define SQL_C_CHAR           1
 #define SQL_C_LONG           4
@@ -31,20 +32,20 @@ constexpr UINT MAXBUFLEN = 1024;
 class CMySQLDataUnit :
 	public CVirtualDataUnit
 {
-	int m_nRowCount;
-	int m_nCols;
-	int m_nCurCols;
-	MYSQL_ROW m_pCurrentRow;
-	int m_nCurrentRowIndex;
+	int m_nRowCount{ 0 };
+	int m_nCols{ 0 };
+	int m_nCurCols{ 0 };
+	MYSQL_ROW m_pCurrentRow{ nullptr };
+	int m_nCurrentRowIndex{ -1 };
 public:
-	CMySQLDataUnit();
-	~CMySQLDataUnit();
+	CMySQLDataUnit() = default;
+	~CMySQLDataUnit() = default;
 	VOID SetId(UINT id) { m_Id = id; }
 	UINT GetId()const { return m_Id; }
 	VOID SetDBConnection(CVirtualDBConnection* pConnection) { m_pConnection = pConnection; }
 	CVirtualDBConnection* GetDBConnection() { return m_pConnection; }
 public:
-	SERVER_ERROR Init(void*);
+	SERVER_ERROR Init(VOID*);
 	SERVER_ERROR UnInit();
 
 	int	GetColCount() { return m_nCols; }
@@ -66,57 +67,59 @@ public:
 	SERVER_ERROR GetColDesc(int nCol, ColumnInfo* pInfo);
 private:
 	SERVER_ERROR PrepareColAndRow();
-	MYSQL_RES* m_pResult;
-	UINT m_Id;
-	CVirtualDBConnection* m_pConnection;
+	MYSQL_RES* m_pResult{ nullptr };
+	UINT m_Id{ 0 };
+	CVirtualDBConnection* m_pConnection{ nullptr };
 };
 
 class CMySQLDBConnection :
 	public CVirtualDBConnection
 {
 public:
-	CMySQLDBConnection();
-	~CMySQLDBConnection();
+	CMySQLDBConnection() = default;
+	~CMySQLDBConnection() = default;
 	VOID SetId(UINT id) { m_Id = id; }
 	UINT GetId()const { return m_Id; }
 	VOID SetDatabase(CVirtualDatabase* pDatabase) { m_pDatabase = pDatabase; }
 	CVirtualDatabase* GetDatabase() { return m_pDatabase; }
 public:
-	SERVER_ERROR Init(void*);
+	SERVER_ERROR Init(VOID*);
 	SERVER_ERROR UnInit();
 	SERVER_ERROR Connect(const char* pServerName, const char* pPort, const char* pdbname, const char* pId, const char* pPassword);
 	SERVER_ERROR Disconnect();
-	SERVER_ERROR Reconnect();
+	SERVER_ERROR Reconnect() override;
 	CVirtualDataUnit* GetDataUnit();
 	SERVER_ERROR DelDataUnit(CVirtualDataUnit* pDataUnit);
 	UINT GetFreeUnitCount() { return m_DataUnits.GetCount(); }
 	BOOL GetIsstart() { return IsstartDB; }
 	BOOL IsConnectionValid();
 	MYSQL* GetConnectionHandle()const { return m_pMySQL; }
+	std::string EscapeString(const char* pszInput) override;
+	VOID ResetForPoolReuse();
 private:
 	CIndexList<CMySQLDataUnit, MAX_DATAUNIT > m_DataUnits;
-	MYSQL* m_pMySQL;
-	UINT m_Id;
-	BOOL IsstartDB;
-	CVirtualDatabase* m_pDatabase;
-	char m_szServerName[256];
-	char m_szPort[32];
-	char m_szDBName[256];
-	char m_szId[256];
-	char m_szPassword[256];
+	MYSQL* m_pMySQL{ nullptr };
+	UINT m_Id{ 0 };
+	BOOL IsstartDB{ FALSE };
+	CVirtualDatabase* m_pDatabase{ nullptr };
+	std::array<char, 256> m_szServerName{};
+	std::array<char, 32> m_szPort{};
+	std::array<char, 256> m_szDBName{};
+	std::array<char, 256> m_szId{};
+	std::array<char, 256> m_szPassword{};
 };
 
 class CMySQLDatabase :
 	public CVirtualDatabase
 {
 public:
-	CMySQLDatabase(void);
-	virtual ~CMySQLDatabase(void);
+	CMySQLDatabase(VOID);
+	virtual ~CMySQLDatabase(VOID);
 	SERVER_ERROR Init();
 	SERVER_ERROR UnInit();
 	CVirtualDBConnection* GetConnection();
 	SERVER_ERROR DelConnection(CVirtualDBConnection* pConnection);
 private:
 	CIndexList<CMySQLDBConnection, MAX_CONNECTION > m_DbConnections;
-	MYSQL* m_pMySQL;
+	MYSQL* m_pMySQL{ nullptr };
 };

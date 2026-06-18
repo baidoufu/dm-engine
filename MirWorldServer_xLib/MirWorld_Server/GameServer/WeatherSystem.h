@@ -3,7 +3,7 @@
 class CWeatherSystem : public xSingletonClass<CWeatherSystem>, public CTimeEventObject
 {
 public:
-	CWeatherSystem(void);
-	virtual ~CWeatherSystem(void);
+	CWeatherSystem(VOID);
+	virtual ~CWeatherSystem(VOID);
 	VOID OnMinuteChange(CSystemTime& curTime);
 };

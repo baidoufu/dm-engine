@@ -1,5 +1,6 @@
 #pragma once
 #include "findfile.h"
+#include <array>
 
 constexpr int MONSTERGEN_MAX_COUNT = 200000; // 20万个刷怪节点, 根据 MonGens 文件夹下的文件配置, 每行算1个.
 constexpr int BATCH_SIZE = 100;  // 每批处理的刷怪点数量, 可根据需要调整
@@ -27,8 +28,8 @@ public:
 class CMonsterGenManager : public CFindFile, public xSingletonClass<CMonsterGenManager>
 {
 public:
-	CMonsterGenManager(void);
-	virtual ~CMonsterGenManager(void);
+	CMonsterGenManager(VOID);
+	virtual ~CMonsterGenManager(VOID);
 	BOOL LoadMonGen(const char* pszPath);
 	VOID UpdateGen();
 	MONSTERGEN* AddMonsterGen(const char* pszGenDesc);
@@ -36,7 +37,7 @@ public:
 	// 统一的刷怪核心方法
 	BOOL UpdateGenEx(MONSTERGEN* p, IMonsterSpawnStrategy* pStrategy, int maxcount = 10, BOOL bSetGenPtr = TRUE, BOOL bGotoTarget = FALSE, WORD wTargetX = 0, WORD wTargetY = 0, int* initGenCount = nullptr);
 protected:
-	MONSTERGEN* m_MonsterGens[MONSTERGEN_MAX_COUNT];
+	std::array<MONSTERGEN*, MONSTERGEN_MAX_COUNT> m_MonsterGens{};
 	int	m_iMonsterGenCount;
 	int	m_iRefreshMonGenIndex;
 	VOID OnFoundFile(const char* pszFilename, UINT nParam = 0);

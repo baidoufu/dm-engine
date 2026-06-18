@@ -7,6 +7,10 @@
 #else
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+// 解决 C++17 std::byte 与 Windows SDK byte 的冲突
+#define _HAS_STD_BYTE 0
+
 #include <WinSock2.h>
 // Windows 头文件:
 #include <windows.h>

@@ -2,17 +2,17 @@
 #include ".\bundlemanager.h"
 #include "fmttextfile.h"
 
-CBundleManager::CBundleManager(void)
+CBundleManager::CBundleManager(VOID)
 {
 }
 
-CBundleManager::~CBundleManager(void)
+CBundleManager::~CBundleManager(VOID)
 {
 }
 
-VOID CBundleManager::LoadBundle(const char* pszBundleFile, BOOL bCSV)
+VOID CBundleManager::LoadBundle(const char* pszBundleFile)
 {
-	CFmtTextFile ftfBundle("s20s20d", pszBundleFile, bCSV);
+	CFmtTextFile ftfBundle("s20s20d", pszBundleFile, TRUE);
 	BUNDLEINFO bundleinfo, * pBundleInfo = nullptr;
 	for (int i = 0; i < ftfBundle.GetCount(); i++)
 	{
@@ -20,10 +20,10 @@ VOID CBundleManager::LoadBundle(const char* pszBundleFile, BOOL bCSV)
 		{
 			pBundleInfo = new BUNDLEINFO;
 			*pBundleInfo = bundleinfo;
-			if (!m_BundleNameHash.HAdd(bundleinfo.szName, pBundleInfo))
+			if (!m_BundleNameHash.HAdd(bundleinfo.szName.data(), pBundleInfo))
 			{
 				delete pBundleInfo;
-				pBundleInfo = (BUNDLEINFO*)m_BundleNameHash.HGet(bundleinfo.szName);
+				pBundleInfo = (BUNDLEINFO*)m_BundleNameHash.HGet(bundleinfo.szName.data());
 				if (pBundleInfo)
 				{
 					if (memcmp(pBundleInfo, &bundleinfo, sizeof(bundleinfo)) != 0)
@@ -39,7 +39,7 @@ BOOL CBundleManager::GetBundleInfo(const char* pszName, char* pszExtractItemName
 	BUNDLEINFO* pInfo = (BUNDLEINFO*)m_BundleNameHash.HGet(pszName);
 	if (pInfo)
 	{
-		o_strncpy(pszExtractItemName, pInfo->szExtractName, 19);
+		o_strncpy(pszExtractItemName, pInfo->szExtractName.data(), 19);
 		count = pInfo->count;
 		return TRUE;
 	}

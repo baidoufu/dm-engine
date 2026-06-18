@@ -15,12 +15,12 @@ public:
 
     bool SendCommand(const std::string& command);
 
-    void SetOutputHandle(HANDLE hStdOut) { m_hOutput = hStdOut; }
-    void SetAutoRestart(bool enable) { m_bAutoRestart = enable; }
+    VOID SetOutputHandle(HANDLE hStdOut) { m_hOutput = hStdOut; }
+    VOID SetAutoRestart(bool enable) { m_bAutoRestart = enable; }
     bool IsAutoRestartEnabled() const { return m_bAutoRestart; }
-    void SetRestartCallback(std::function<void(ServerProcess*)> callback) { m_restartCallback = callback; }
+    VOID SetRestartCallback(std::function<VOID(ServerProcess*)> callback) { m_restartCallback = callback; }
     int GetRestartCount() const { return m_restartCount; }
-    void ResetRestartCount() { m_restartCount = 0; }
+    VOID ResetRestartCount() { m_restartCount = 0; }
 
 private:
     std::string m_name;
@@ -35,10 +35,10 @@ private:
     bool m_bManualStop;
     int m_restartCount;
     std::chrono::steady_clock::time_point m_lastRestartTime;
-    std::function<void(ServerProcess*)> m_restartCallback;
+    std::function<VOID(ServerProcess*)> m_restartCallback;
 
-    static unsigned __stdcall ReadOutputThread(void* param);
-    static unsigned __stdcall MonitorThread(void* param);
-    void ReadOutput();
-    void MonitorProcess();
+    static unsigned __stdcall ReadOutputThread(VOID* param);
+    static unsigned __stdcall MonitorThread(VOID* param);
+    VOID ReadOutput();
+    VOID MonitorProcess();
 };

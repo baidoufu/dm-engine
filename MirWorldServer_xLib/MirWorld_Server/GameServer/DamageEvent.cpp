@@ -7,7 +7,7 @@
 #include ".\eventmanager.h"
 
 xObjectPool<CDamageEvent> CDamageEvent::m_xPool;
-CDamageEvent::CDamageEvent(void)
+CDamageEvent::CDamageEvent(VOID)
 {
 	m_pOwner = nullptr;
 	m_pVisibleEvent = nullptr;
@@ -17,7 +17,7 @@ CDamageEvent::CDamageEvent(void)
 	m_DamageType = DT_PHYSICS;
 }
 
-CDamageEvent::~CDamageEvent(void)
+CDamageEvent::~CDamageEvent(VOID)
 {
 }
 
@@ -29,7 +29,8 @@ CDamageEvent* CDamageEvent::Create(UINT mapid, int x, int y, UINT nRange, UINT n
 	if (y >= pMap->GetHeight())return nullptr;
 	CDamageEvent* pEvent = NewEvent();
 	if (pEvent == nullptr)return nullptr;
-	pEvent->m_pVisibleEvent = CEventManager::GetInstance()->NewVisibleEvent(pMap, x, y, nView, nRunTime, nKeepTime, pEvent, dwParam1, dwParam2);
+	auto* pEventManager = CEventManager::GetInstance();
+	pEvent->m_pVisibleEvent = pEventManager->NewVisibleEvent(pMap, x, y, nView, nRunTime, nKeepTime, pEvent, dwParam1, dwParam2);
 	if (pEvent->m_pVisibleEvent == nullptr)
 	{
 		DeleteEvent(pEvent);
@@ -40,7 +41,7 @@ CDamageEvent* CDamageEvent::Create(UINT mapid, int x, int y, UINT nRange, UINT n
 	pEvent->m_nDamage = nDamage;
 	pEvent->m_DamageType = damagetype;
 	pEvent->m_nRange = nRange;
-	CEventManager::GetInstance()->AddEventProcessor(pEvent);
+	pEventManager->AddEventProcessor(pEvent);
 	return pEvent;
 }
 
@@ -92,7 +93,7 @@ VOID CDamageEvent::OnUpdate(CVisibleEvent* pEvent)
 		for (int y = nStartY; y <= nEndY; y++)
 		{
 			//if( y < 0 || y > mh )continue;
-			pInfo = pMap->GetMapCellInfo(x, y);
+			pInfo = pMap->GetMapCellInfoShared(x, y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
 			{
 				xListHost<CMapObject>::xListNode* pNode = pInfo->m_xObjectList.getHead();

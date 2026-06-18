@@ -5,14 +5,13 @@
 CFlagEventEx::CFlagEventEx(UINT id, CFlagEventListener* pListener, UINT nCount)
 {
 	m_pListener = pListener;
-	m_xFlags = nullptr;
 	m_nMaxCount = 0;
 	Create(nCount);
 	SetId(id);
 	Clear();
 }
 
-CFlagEventEx::~CFlagEventEx(void)
+CFlagEventEx::~CFlagEventEx(VOID)
 {
 	Destroy();
 }
@@ -20,18 +19,14 @@ CFlagEventEx::~CFlagEventEx(void)
 BOOL CFlagEventEx::Create(UINT nCount)
 {
 	if (nCount == 0)return 0;
-	m_xFlags = new FlagEventEx[nCount];
+	m_xFlags = std::make_unique<FlagEventEx[]>(nCount);
 	this->m_nMaxCount = nCount;
 	return TRUE;
 }
 
 VOID CFlagEventEx::Destroy()
 {
-	if (m_xFlags)
-	{
-		delete[]m_xFlags;
-		m_xFlags = nullptr;
-	}
+	m_xFlags.reset();
 }
 
 BOOL CFlagEventEx::IsSeted(UINT index)
@@ -113,7 +108,8 @@ VOID CFlagEventEx::Update()
 
 VOID CFlagEventEx::Clear()
 {
-	memset(m_xFlags, 0, sizeof(m_xFlags));
+	if (m_xFlags)
+		memset(m_xFlags.get(), 0, sizeof(FlagEventEx) * m_nMaxCount);
 }
 
 DWORD CFlagEventEx::GetFlagValue(UINT nOffset)

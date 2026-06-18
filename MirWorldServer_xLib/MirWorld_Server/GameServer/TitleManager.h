@@ -1,5 +1,7 @@
 #pragma once
-typedef char TITLE_NAME[64];
+#include <memory>
+#include <array>
+typedef std::array<char, 64> TITLE_NAME;
 typedef struct tag_Title
 {
 	tag_Title()
@@ -8,7 +10,7 @@ typedef struct tag_Title
 	}
 	DWORD dwLevel;
 	DWORD dwExp;
-	TITLE_NAME strTitle[3];
+	std::array<TITLE_NAME, 3> strTitle{};
 }TITLE;
 class CHumanPlayer;
 
@@ -16,15 +18,15 @@ class CHumanPlayer;
 class CTitleManager : public xSingletonClass<CTitleManager>
 {
 public:
-	CTitleManager(void);
-	virtual ~CTitleManager(void);
+	CTitleManager(VOID);
+	virtual ~CTitleManager(VOID);
 	// 加载玩家封号标题数据
-	VOID LoadData(const char* pszData, BOOL bCSV = FALSE);
+	VOID LoadData(const char* pszData);
 	// 获取封号标题
 	BOOL GetTitle(CHumanPlayer* player, char* pszTitle);
 	// 获取封号标题
 	BOOL GetTitle(CHumanPlayer* player, char* pszTitle, int& index);
 private:
-	TITLE* m_pTitles;
+	std::unique_ptr<TITLE[]> m_pTitles;
 	int	m_iTitleCount;
 };

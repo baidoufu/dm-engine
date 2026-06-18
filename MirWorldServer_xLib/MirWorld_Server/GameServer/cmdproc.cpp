@@ -27,7 +27,13 @@ BOOL CCommandManager::AddCommand(const char* pszCommand, fnCommandProc proc)
 
 fnCommandProc CCommandManager::GetCommandProc(const char* pszCommand)
 {
-	return (fnCommandProc)m_xCommandList.ObjectOf(pszCommand);
+	auto it = m_xCache.find(pszCommand);
+	if (it != m_xCache.end())
+		return it->second;
+	fnCommandProc proc = (fnCommandProc)m_xCommandList.ObjectOf(pszCommand);
+	if (proc)
+		m_xCache[pszCommand] = proc;
+	return proc;
 }
 
 BOOL CCommandManager::ChangeCommandName(const char* pszCommand, const char* pszNewName)

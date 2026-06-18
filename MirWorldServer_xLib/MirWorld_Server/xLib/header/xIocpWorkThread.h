@@ -1,20 +1,19 @@
 #pragma once
 #include "xThread.h"
 
-class xIocpWorkThread :
-	public xThread
+// 每次批量出队的最大完成包数量
+constexpr DWORD IOCP_BATCH_DEQUEUE_COUNT = 32;
+
+class xIocpWorkThread : public xThread
 {
 public:
-	xIocpWorkThread(void);
+	xIocpWorkThread(VOID);
 	xIocpWorkThread(HANDLE hIocp);
-	virtual ~xIocpWorkThread(void);
-
-	void	setIocpHandle(HANDLE hIocp)
-	{
-		m_hIocp = hIocp;
-	}
+	virtual ~xIocpWorkThread(VOID);
+	VOID setIocpHandle(HANDLE hIocp) { m_hIocp = hIocp; }
 protected:
-	void Execute(LPVOID lpParam);
+	VOID Execute(LPVOID lpParam);
 private:
-	HANDLE	m_hIocp;
+	HANDLE m_hIocp;
+	OVERLAPPED_ENTRY m_olEntries[IOCP_BATCH_DEQUEUE_COUNT];
 };

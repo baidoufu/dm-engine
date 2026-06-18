@@ -1,11 +1,12 @@
 #pragma once
+#include <array>
 typedef struct tagGoods
 {
 	tagGoods()
 	{
 		FILLSELF(0);
 	}
-	char szName[32];
+	std::array<char, 32> szName{};
 	WORD wCount;
 	WORD wRefreshTime;
 	tagGoods* pNext;
@@ -39,14 +40,14 @@ typedef struct tagCallParamEx
 		pszParam = "";
 	}
 
-	tagCallParamEx& operator =(tagCallParamEx& p1)
+	tagCallParamEx& operator =(const tagCallParamEx& p1)
 	{
 		nParam = p1.nParam;
 		this->pszParam = p1.pszParam;
-		if (p1.pszParam == p1.szbuffer)
+		if (p1.pszParam == p1.szbuffer.data())
 		{
-			o_strncpy(szbuffer, p1.szbuffer, 19);
-			this->pszParam = szbuffer;
+			o_strncpy(szbuffer.data(), p1.szbuffer.data(), 19);
+			this->pszParam = szbuffer.data();
 		}
 		else if (this->pszParam == nullptr)
 			this->pszParam = "";
@@ -71,14 +72,14 @@ typedef struct tagCallParamEx
 	tagCallParamEx& operator =(UINT val)
 	{
 		nParam = val;
-		pszParam = szbuffer;
-		sprintf(szbuffer, "%u", val);
+		pszParam = szbuffer.data();
+		sprintf(szbuffer.data(), "%u", val);
 		return *this;
 	}
 
 	char* pszParam;
 	UINT nParam;
-	char szbuffer[20];
+	std::array<char, 20> szbuffer{};
 }CallParamEx;
 
 class CScriptShell;
@@ -94,37 +95,37 @@ typedef struct tagGetVariableStruct
 	{
 		FILLSELF(0);
 	}
-	void SetValue(int nVal)
+	VOID SetValue(int nVal)
 	{
 		nType = 0;
 		nValue = (UINT)nVal;
 	}
-	void SetValue(DWORD nVal)
+	VOID SetValue(DWORD nVal)
 	{
 		nType = 0;
 		nValue = (UINT)nVal;
 	}
-	void SetValue(WORD nVal)
+	VOID SetValue(WORD nVal)
 	{
 		nType = 0;
 		nValue = (UINT)nVal;
 	}
-	void SetValue(BYTE nVal)
+	VOID SetValue(BYTE nVal)
 	{
 		nType = 0;
 		nValue = (UINT)nVal;
 	}
-	void SetValue(UINT nVal)
+	VOID SetValue(UINT nVal)
 	{
 		nType = 0;
 		nValue = nVal;
 	}
-	void SetValue(char* pszVal)
+	VOID SetValue(char* pszVal)
 	{
 		nType = 1;
 		pszValue = pszVal;
 	}
-	void SetValue(const char* pszVal)
+	VOID SetValue(const char* pszVal)
 	{
 		nType = 1;
 		pszValue = (char*)pszVal;

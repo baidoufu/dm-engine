@@ -3,11 +3,11 @@
 #include "gameworld.h"
 #include "TimeSystem.h"
 
-CWeatherSystem::CWeatherSystem(void)
+CWeatherSystem::CWeatherSystem(VOID)
 {
 }
 
-CWeatherSystem::~CWeatherSystem(void)
+CWeatherSystem::~CWeatherSystem(VOID)
 {
 }
 

@@ -4,12 +4,12 @@
 
 VOID CHumanPlayer::SendFengHaoGrowInfo()
 {
-	xPacket packet3(2048);
-	xPacket packet5(1024);
+	xPacketPool::ScopedPacket packet3;
+	xPacketPool::ScopedPacket packet5;
 
 	int nCount = m_FenghaoInfo.GetCount();
-	packet3.push(&nCount, 4);
-	packet5.push(&nCount, 4);
+	packet3->push(&nCount, 4);
+	packet5->push(&nCount, 4);
 
 	DWORD dwNow = (DWORD)time(nullptr);
 	CFengHaoGrowManager* pMgr = CFengHaoGrowManager::GetInstance();
@@ -18,7 +18,7 @@ VOID CHumanPlayer::SendFengHaoGrowInfo()
 	{
 		if (m_FenghaoInfo.mFengHaoRow[i].boActivation)
 		{
-			packet3.push(&i, 4);
+			packet3->push(&i, 4);
 			FengHaoGrowItem* pConfig = pMgr->GetItem(i);
 			if (pConfig && pConfig->btLastDay > 0 && m_FenghaoInfo.mFengHaoRow[i].dwLastDate > 0)
 			{
@@ -26,25 +26,25 @@ VOID CHumanPlayer::SendFengHaoGrowInfo()
 				if (nLastDate > 0)
 				{
 					nLastDate = (int)(nLastDate / 3600);
-					packet5.push(&nLastDate, 4);
+					packet5->push(&nLastDate, 4);
 				}
 				else
-					packet5.push(4);
+					packet5->push(4);
 			}
 			else
-				packet5.push(4);
+				packet5->push(4);
 		}
 	}
-	packet3.push((LPVOID)packet5.getbuf(), packet5.getsize());
+	packet3->push((LPVOID)packet5->getbuf(), packet5->getsize());
 	int nType1 = (int)m_FenghaoInfo.btType1;
-	packet3.push(&nType1, 4);
+	packet3->push(&nType1, 4);
 	int nTypeVal = 0;
 	if (m_FenghaoInfo.btType2 > 0)
 		nTypeVal = (int)m_FenghaoInfo.btType2;
 	else
 		nTypeVal = (int)m_FenghaoInfo.btType3;
-	packet3.push(&nTypeVal, 4);
-	SendMsg(GetId(), 0x9b0, 0, 0, 0, (LPVOID)packet3.getbuf(), packet3.getsize());
+	packet3->push(&nTypeVal, 4);
+	SendMsg(GetId(), 0x9b0, 0, 0, 0, (LPVOID)packet3->getbuf(), packet3->getsize());
 }
 
 VOID CHumanPlayer::SendFengHaoEquip(int nCount)
@@ -139,14 +139,15 @@ VOID CHumanPlayer::SendFengHaoEquip(int nCount)
 
 VOID CHumanPlayer::SendFengHaoData()
 {
-	char szBuffer[12910]{};
-	int size = EncodeMsgRaw(szBuffer, GetId(), 0x9b0, 3, 0, 0, (LPVOID)g_sData.c_str(), (int)g_sData.length());
-	OnAroundMsg(this, szBuffer, size);
+	std::array<char, 12910> szBuffer{};
+	int size = EncodeMsgRaw(szBuffer.data(), GetId(), 0x9b0, 3, 0, 0, (LPVOID)g_sData.c_str(), (int)g_sData.length());
+	OnAroundMsg(this, szBuffer.data(), size);
 }
 
 VOID CHumanPlayer::RecalcFengHaoProp(BYTE index, BOOL boOperate, BOOL boProp)
 {
 	FengHaoGrowItem* pConfig = CFengHaoGrowManager::GetInstance()->GetItem(index);
+	if (pConfig == nullptr) return;
 	for (int i = 0; i < pConfig->nAttrCnt; i++)
 	{
 		switch (pConfig->attrs[i].nAttrType)

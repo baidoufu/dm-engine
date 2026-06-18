@@ -1,4 +1,6 @@
 #pragma once
+#include <array>
+
 enum string_define
 {
 	SD_EXECCMDERROR_BADCOMMAND,
@@ -36,6 +38,7 @@ enum string_define
 	SD_MAPLIMITED_NOESCAPE,
 	SD_MAPLIMITED_NOHOME,
 	SD_YOURWEAPONGOTEVIL,
+	SD_YOURWEAPONGOTFAIL,
 	SD_YOURWEAPONGOTLUCKY,
 	SD_CANNOTUSESANDCITYHOME,
 	SD_STUDYSKILL_WRONGJOB,
@@ -50,7 +53,7 @@ enum string_define
 	SD_MAX,
 };
 
-static char* g_xStrings[SD_MAX] = {
+static const std::array<const char*, SD_MAX> g_xStrings = {
 	"您输入了错误的命令",					//	SD_BAGCOMMAND,
 	"您的权限不够, 无法执行该GM命令!",		//	SD_GMEXECCMDLEVELLOW
 	"您等级不够, 无法使用该命令.",			//	SD_PLAYEREXECCMDLEVELLOW,
@@ -85,7 +88,8 @@ static char* g_xStrings[SD_MAX] = {
 	"当前地图不能使用随机",					//	SD_MAPLIMITED_NORANDOMMOVE
 	"当前地图不能使用逃脱",					//	SD_MAPLIMITED_NOESCAPE
 	"当前地图不能使用回城",					//	SD_MAPLIMITED_NOHOME
-	"你的武器被诅咒",						//	SD_YOURWEAPONGOTEVIL
+	"你的武器被诅咒了",						//	SD_YOURWEAPONGOTEVIL
+	"你的武器被幸运失败",					//	SD_YOURWEAPONGOTFAIL
 	"你的武器获得了幸运",					//	SD_YOURWEAPONGOTLUCKY
 	"你不能使用沙城回城",					//	SD_CANNOTUSESANDCITYHOME
 	"职业不符, 无法学习此技能",				//	SD_STUDYSKILL_WRONGJOB

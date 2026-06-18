@@ -3,20 +3,13 @@
 #include ".\humanplayer.h"
 #include ".\Itemmanager.h"
 
-CSpecialEquipmentManager::CSpecialEquipmentManager(void)
+CSpecialEquipmentManager::CSpecialEquipmentManager(VOID)
 {
-	m_pSpecialEquipmentArray = nullptr;
 	m_iSpecialEquipmentCount = 0;
 }
 
-CSpecialEquipmentManager::~CSpecialEquipmentManager(void)
+CSpecialEquipmentManager::~CSpecialEquipmentManager(VOID)
 {
-	if (m_pSpecialEquipmentArray)
-	{
-		delete[]m_pSpecialEquipmentArray;
-		m_pSpecialEquipmentArray = nullptr;
-	}
-	m_iSpecialEquipmentCount = 0;
 }
 
 BOOL CSpecialEquipmentManager::MatchFunction(CHumanPlayer* pPlayer, special_equipment_func func)
@@ -84,7 +77,7 @@ VOID CSpecialEquipmentManager::LoadSpecialEquipmentFunction(const char* pszFilen
 		}
 	}
 	nElementCount += SEF_MAX;
-	this->m_pSpecialEquipmentArray = new SpecialEquipment[nElementCount];
+	this->m_pSpecialEquipmentArray = std::make_unique<SpecialEquipment[]>(nElementCount);
 	m_iSpecialEquipmentCount = 0;
 	for (int t = 0; t < SEF_MAX; t++)
 	{
@@ -100,7 +93,7 @@ VOID CSpecialEquipmentManager::LoadSpecialEquipmentFunction(const char* pszFilen
 		{
 			xStringsExtracter<100> spp(pSpecial, ",", " \t");
 			m_SpecialFunctionDefine[t].paramcount = spp.getCount();
-			m_SpecialFunctionDefine[t].pParams = new DWORD[m_SpecialFunctionDefine[t].paramcount];
+			m_SpecialFunctionDefine[t].pParams = std::make_unique<DWORD[]>(m_SpecialFunctionDefine[t].paramcount);
 			for (int paramindex = 0; paramindex < m_SpecialFunctionDefine[t].paramcount; paramindex++)
 			{
 				m_SpecialFunctionDefine[t].pParams[paramindex] = StringToInteger(spp[paramindex]);

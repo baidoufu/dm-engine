@@ -3,18 +3,20 @@
 #include <chrono>
 #include <thread>
 #include <sstream>
+#include <memory>
 
 constexpr int UPDATE_GLOBE_PROCESS_COUNT = 32;
+constexpr DWORD ENTER_GAME_TIMEOUT = 60 * 1000; // 进入游戏条目超时时间60秒
 
 class CGameWorld;
 
-class CServer : public CBaseServer, public xIndexObjectPool<CClientObj>
+class CServer : public CBaseServer, public xIndexObjectPool<CClientObj>, public xSingletonClass<CServer>
 {
 public:
-	CServer(void);
-	virtual ~CServer(void);
+	CServer(VOID);
+	virtual ~CServer(VOID);
 public:
-	void OnInput(const char* pString);
+	VOID OnInput(const char* pString);
 	CClientObject* GetClientObject(UINT id) { return getObject(id); }
 	CClientObject* NewClientObject();
 	VOID DeleteClientObject(CClientObject* pObject);
@@ -25,18 +27,17 @@ public:
 	VOID OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszData, int datasize);
 	SERVER_ERROR AddEnterAccount(UINT nLoginId, UINT nSelCharId, const char* pszAccount, const char* pszName, WORD wIndex);
 	BOOL GetEnterInfo(UINT nLoginId, UINT nSelCharId, const char* pszAccount, ENTERGAMESERVER& enterinfo);
-	static CServer* GetInstance()
-	{
-		if (m_pInstance == nullptr)
-			m_pInstance = new CServer;
-		return m_pInstance;
-	}
+	VOID CleanupExpiredEnterInfos();
 	VOID KickAll();
 
 	VOID OnTerminated(BOOL bExcepted = FALSE);
+private:
+	// 主线程处理：消费活跃连接队列的数据包
+	VOID ProcessClientPackets();
+	// 主线程处理：刷新所有连接的批量发送缓冲区
+	VOID FlushAllBatchBuffers();
 protected:
 	BOOL m_bWillClose;
-	static CServer* m_pInstance;
 	CIntHash<1024> m_Inthash;
 	CIndexListEx<ENTERGAMESERVER> m_EnterObjects;
 	CGameWorld* m_pGameWorld;
@@ -56,7 +57,7 @@ public:
 	{
 		Stop();
 	}
-	void Stop() const
+	VOID Stop() const
 	{
 		auto endTimepoint = std::chrono::high_resolution_clock::now();
 		auto start = std::chrono::time_point_cast<std::chrono::microseconds>(m_STartTimepoint).time_since_epoch().count();
@@ -67,7 +68,7 @@ public:
 		std::ostringstream oss;
 		oss << endThreadId;
 		const char* sameThread = (m_ThreadId == endThreadId) ? "相同" : "不同";
-		CServer::GetInstance()->GetIoConsole()->OutPut(SUCCESS_GREEN, "[%s][线程:%s][%s] %.3f 毫秒\n", m_Name, oss.str().c_str(), sameThread, ms);
+		PRINT(SUCCESS_GREEN, "[%s][线程:%s][%s] %.3f 毫秒\n", m_Name, oss.str().c_str(), sameThread, ms);
 	}
 private:
 	const char* m_Name;

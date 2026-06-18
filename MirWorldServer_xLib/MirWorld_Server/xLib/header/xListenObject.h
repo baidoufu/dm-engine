@@ -2,6 +2,7 @@
 #include "xsupport.h"
 #include "xsocket.h"
 #include "xserverobject.h"
+#include <array>
 
 class xIocpUnit;
 class xListenObject;
@@ -13,18 +14,18 @@ public:
 	xAcceptSocket()
 	{
 		m_pListenObject = nullptr;
-		memset(m_szBuffer, 0, sizeof(m_szBuffer));
+		m_szBuffer.fill(0);
 	}
 	xListenObject* getListenObject() { return m_pListenObject; }
-	void setListenObject(xListenObject* pObject) { m_pListenObject = pObject; }
+	VOID setListenObject(xListenObject* pObject) { m_pListenObject = pObject; }
 
-	char* getBuffer() { return m_szBuffer; }
-	void reset() {
+	char* getBuffer() { return m_szBuffer.data(); }
+	VOID reset() {
 		makeSocket();
 	}
 
 private:
-	char m_szBuffer[sizeof(SOCKADDR_IN) * 2 + 32];
+	std::array<char, sizeof(SOCKADDR_IN) * 2 + 32> m_szBuffer;
 	xListenObject* m_pListenObject;
 };
 class xListenObject :
@@ -33,10 +34,10 @@ class xListenObject :
 	public xServerObject
 {
 public:
-	xListenObject(void);
-	virtual ~xListenObject(void);
+	xListenObject(VOID);
+	virtual ~xListenObject(VOID);
 	VOID OnEvent(xEventSender* pSender, int iEvent, int iParam, LPVOID lpParam);
-	void postAccept(int nAccept);
+	VOID postAccept(int nAccept);
 	UINT getId() { return m_Id; }
 	VOID setId(UINT id) { m_Id = id; }
 private:
@@ -49,5 +50,5 @@ private:
 		if (p)p->setListenObject(this);
 		return p;
 	}
-	void releaseAcceptSocket(xAcceptSocket* pAcceptSocket) { m_xAccpetSocketPool.deleteObject(pAcceptSocket); }
+	VOID releaseAcceptSocket(xAcceptSocket* pAcceptSocket) { m_xAccpetSocketPool.deleteObject(pAcceptSocket); }
 };

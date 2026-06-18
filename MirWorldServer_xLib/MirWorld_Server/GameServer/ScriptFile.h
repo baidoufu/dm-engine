@@ -2,8 +2,8 @@
 class CScriptFile
 {
 public:
-	CScriptFile(void);
-	virtual ~CScriptFile(void);
+	CScriptFile(VOID);
+	virtual ~CScriptFile(VOID);
 	BOOL Load(const char* pszFileName);
 	VOID Close();
 	char* FirstLine();
@@ -16,11 +16,11 @@ public:
 	{
 		m_nLineIndex = index;
 	}
-	const char* GetFileName() { return m_szFileName; }
+	const char* GetFileName() { return m_szFileName.data(); }
 protected:
 	BOOL ProtectedLoad();
-	char m_szFileName[1024];
+	std::array<char, 1024> m_szFileName;
 	UINT m_nLineIndex;
 	CStringFile m_fScript;
-	BYTE* m_pData;
+	std::unique_ptr<char[]> m_pData;
 };

@@ -7,20 +7,19 @@
 class CLogFile : public xSingletonClass<CLogFile>
 {
 public:
-	CLogFile(void);
-	virtual ~CLogFile(void);
+	CLogFile(VOID);
+	virtual ~CLogFile(VOID);
 	BOOL Init(const char* pszPath);
 	VOID NextLine();
 	VOID LogDate();
 	VOID LogText(const char* pszString, ...);
 	VOID LogTextRt(const char* pszString, ...);
 	VOID LogTextWithDate(const char* pszString, ...);
-	VOID LogBinary(LPVOID lpData, int nSize, int nLineSize = 80);
 	VOID ChangeLogFile();
 private:
-	FILE* m_fpLog;
+	std::unique_ptr<FILE, decltype(&fclose)> m_fpLog{nullptr, &fclose};
 	SYSTEMTIME	m_stFileTime;
-	char m_szFile[1024];
-	char m_szCache[16384];
+	std::array<char, 1024> m_szFile;
+	std::array<char, 16384> m_szCache;
 	THREAD_PROTECT_DEFINE;
 };

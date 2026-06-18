@@ -4,16 +4,15 @@
 #include "localsupport.h"
 #include "GameWorld.h"
 
-CItemManager::CItemManager(void)
+CItemManager::CItemManager(VOID)
 {
-	m_pErrorMsg = nullptr;
 	m_nTempItemCount = 0;
 	m_nCreateItemCount = 0;
 	m_nDeleteTempItemCount = 0;
 	m_nIdentCount = 0;
 }
 
-CItemManager::~CItemManager(void)
+CItemManager::~CItemManager(VOID)
 {
 }
 
@@ -28,31 +27,18 @@ VOID CItemManager::Load(const char* pszfile)
 
 VOID CItemManager::ClearItemData()
 {
-	xListHost<ITEMCLASS>::xListNode* pNode = m_xItemClassPool.GetUsedHeadNode();
-	while (pNode != nullptr)
-	{
-		xListHost<ITEMCLASS>::xListNode* pNext = pNode->getNext();
-		ITEMCLASS* pObject = pNode->getObject();
+	// 先清理 hash 中的引用
+	m_xItemClassPool.forEach([this](ITEMCLASS* pObject) {
 		if (pObject != nullptr)
 		{
 			char szFullName[32];
 			o_strncpy(szFullName, pObject->szFullName, 16);
 			m_ItemClassHash.HDel(szFullName);
 		}
-		pNode = pNext;
-	}
-
-	pNode = m_xItemClassPool.GetUsedHeadNode();
-	while (pNode != nullptr)
-	{
-		xListHost<ITEMCLASS>::xListNode* pNext = pNode->getNext();
-		ITEMCLASS* pObject = pNode->getObject();
-		if (pObject != nullptr)
-		{
-			m_xItemClassPool.deleteObject(pObject);
-		}
-		pNode = pNext;
-	}
+		return true; // 继续遍历
+	});
+	// 清空对象池
+	m_xItemClassPool.clearAll([](ITEMCLASS*) {}); // 不需要额外清理
 	ClearStringPool();
 }
 
@@ -66,10 +52,10 @@ WORD CItemManager::AddStringToPool(const char* pszString)
 	m_vStringData.insert(m_vStringData.end(), pszString, pszString + wLength);
 	m_vStringData.push_back('\0');
 
-	StringPoolEntry entry;
+	m_vStringIndex.emplace_back();
+	auto& entry = m_vStringIndex.back();
 	entry.wOffset = wOffset;
 	entry.wLength = wLength;
-	m_vStringIndex.push_back(entry);
 
 	return (WORD)m_vStringIndex.size(); // 返回ID（从1开始）
 }
@@ -83,7 +69,7 @@ const char* CItemManager::GetStringFromPool(WORD wStringId)
 	return &m_vStringData[entry.wOffset];
 }
 
-void CItemManager::ClearStringPool()
+VOID CItemManager::ClearStringPool()
 {
 	m_vStringIndex.clear();
 	m_vStringData.clear();
@@ -308,17 +294,14 @@ BOOL CItemManager::DeleteItem(DWORD dwMakeIndex)
 	return FALSE;
 }
 
-BOOL CItemManager::AddItemClassString(const char* pszItemClassDesc)
+BOOL CItemManager::AddItemClassString(char* pszItemClassDesc)
 {
-	char szBuffer[841];
-	o_strncpy(szBuffer, pszItemClassDesc, 840);
-
 	char* Params[28];
-	int nParam = SearchParam(szBuffer, Params, 28, ',');
+	int nParam = SearchParam(pszItemClassDesc, Params, 28, ",");
 	if (*Params[0] == '#') return TRUE;
 	if (nParam < 22)
 	{
-		m_pErrorMsg = "BaseItem.csv物品库数量不对";
+		m_strErrorMsg = "BaseItem.csv物品库数量不对";
 		return FALSE;
 	}
 	ITEMCLASS	itemclass;
@@ -363,22 +346,21 @@ BOOL CItemManager::AddItemClassString(const char* pszItemClassDesc)
 	pClass->wPageId = 0;
 	if (nParam > 22)
 	{
-		if (*Params[22] == '#')
+		if (nParam > 22 && *Params[22] == '#')
 			pClass->wPageId = AddStringToPool(Params[22] + 1);
-		if (*Params[23] == '#')
+		if (nParam > 23 && *Params[23] == '#')
 			pClass->wPageId = AddStringToPool(Params[23] + 1);
-		if (*Params[24] == '#')
+		if (nParam > 24 && *Params[24] == '#')
 			pClass->wPageId = AddStringToPool(Params[24] + 1);
-		if (*Params[25] == '#')
+		if (nParam > 25 && *Params[25] == '#')
 			pClass->wPageId = AddStringToPool(Params[25] + 1);
-		if (*Params[26] == '#')
+		if (nParam > 26 && *Params[26] == '#')
 			pClass->wPageId = AddStringToPool(Params[26] + 1);
-		if (*Params[27] == '#')
+		if (nParam > 27 && *Params[27] == '#')
 			pClass->wPageId = AddStringToPool(Params[27] + 1);
 	}
 	if (!AddItemClass(pClass))
 	{
-		delete pClass;
 		return FALSE;
 	}
 	return TRUE;
@@ -400,7 +382,7 @@ BOOL CItemManager::AddItemClass(ITEMCLASS* pItemclass)
 
 		if (p == nullptr)
 		{
-			m_pErrorMsg = "加入到名字表中失败!";
+			m_strErrorMsg = "加入到名字表中失败!";
 			return FALSE;
 		}
 
@@ -492,18 +474,6 @@ BOOL CItemManager::MakeupTemplateItem(const char* pszName, ITEM& item)
 	o_strncpy(item.szFullName, pClass->szFullName, 16);
 	SetItemClassPtr(item, pClass);
 	return TRUE;
-}
-
-static BYTE MaxAdd(BYTE b1, BYTE b2)
-{
-	if (b1 < 255)
-	{
-		if (255 - b1 < b2)
-			b1 = 255;
-		else
-			b1 += b2;
-	}
-	return b1;
 }
 
 BOOL CItemManager::MakeupRandomUpgradeItemTemplate(const char* pszName, ITEM& item, int ratefix)
@@ -616,7 +586,7 @@ static VOID GetUpgradeDura(int count, int rate, WORD& wDura, WORD& wMaxDura)
 				wMaxDura += wAddDura;
 		}
 	}
-	wDura = Getrand(wMaxDura / 2) + wMaxDura / 2;;
+	wDura = Getrand(wMaxDura / 2) + wMaxDura / 2;
 }
 
 VOID CItemManager::GetUpgradeValues(BYTE btStdMode, BYTE btShape, int ratefix, WORD& wDura, WORD& wMaxDura, BYTE* pValues)
@@ -770,6 +740,11 @@ VOID CItemManager::GetUpgradeValues(BYTE btStdMode, BYTE btShape, int ratefix, W
 		GetUpgradeDura(5, 5, wDura, wMaxDura);
 	}
 	break;
+	case 40: //肉类
+	{
+		wDura = ratefix * 1000;
+	}
+	break;
 	}
 }
 
@@ -795,7 +770,7 @@ VOID CItemManager::DamageDura(ITEM& item, WORD wDura)
 	{
 		wDura *= pClass->duratimes;
 	}
-	if (wDura > item.wCurDura)
+	if (wDura >= item.wCurDura)
 	{
 		item.wCurDura = 0;
 		item.dwParam[3] = UR_DELETED;
@@ -821,120 +796,11 @@ BOOL CItemManager::CheckDura(ITEM& item, WORD wDura)
 	return (item.wCurDura >= wDura);
 }
 
-char m_szTempBuffer[1024];
-BOOL CItemManager::ModifyItem(ITEM& item, const char* pszModifyString)
-{
-	o_strncpy(m_szTempBuffer, pszModifyString, 1020);
-	xStringsExtracter<50> mstr(m_szTempBuffer, ",", " \t");
-	for (UINT i = 0; i < mstr.getCount(); i++)
-	{
-		xStringsExtracter<2> exps(mstr[i], "=", " \t");
-		if (exps.getCount() < 2)
-			continue;
-		if (_stricmp(exps[0], "stdmode") == 0)
-			item.baseitem.btStdMode = (BYTE)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "shape") == 0)
-			item.baseitem.btShape = (BYTE)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "weight") == 0)
-			item.baseitem.btWeight = (BYTE)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "defdura") == 0)
-			item.baseitem.wMaxDura = (WORD)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "curdura") == 0)
-			item.wCurDura = (WORD)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "maxdura") == 0)
-			item.wMaxDura = (WORD)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "ac1") == 0)
-		{
-			item.baseitem.Ac1 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Ac1 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "ac2") == 0)
-		{
-			item.baseitem.Ac2 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Ac2 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "mac1") == 0)
-		{
-			item.baseitem.Mac1 = (BYTE)StringToInteger(exps[1]);
-		}
-		//BYTE Mac1 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "mac2") == 0)
-		{
-			item.baseitem.Mac2 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Mac2 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "dc1") == 0)
-		{
-			item.baseitem.Dc1 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Dc1 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "dc2") == 0)
-		{
-			item.baseitem.Dc2 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Dc2 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "mc1") == 0)
-		{
-			item.baseitem.Mc1 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Mc1 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "mc2") == 0)
-		{
-			item.baseitem.Mc2 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Mc2 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "sc1") == 0)
-		{
-			item.baseitem.Sc1 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Sc1 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "sc2") == 0)
-		{
-			item.baseitem.Sc2 = (BYTE)StringToInteger(exps[1]);
-		}
-		//Sc2 = (BYTE)StringToInteger( exps[1] );
-		else if (_stricmp(exps[0], "price") == 0)
-			item.baseitem.nPrice = StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "image") == 0)
-			item.baseitem.wImageIndex = (WORD)StringToInteger(exps[1]);
-		else if (_stricmp(exps[0], "limit") == 0)
-		{
-			//xStringsExtracter<20> flags( exps[1], "|", " \t" );
-			WORD	wLimit = 0;
-			xStringsExtracter<40> limit(exps[1], "|", " \t");
-			if (limit.getCount() == 0)continue;
-
-			for (UINT n = 0; n < limit.getCount(); n++)
-			{
-				item_limit l = GetItemLimit(limit[n]);
-				if (l == IL_MAX)continue;
-				wLimit |= (1 << (int)l);
-			}
-			UPGRADEADDMASK mask;
-			mask.dwValue = item.dwParam[0];
-			mask.wItemLimit = wLimit;
-			item.dwParam[0] = mask.dwValue;
-		}
-		else if (_stricmp(exps[0], "name") == 0)
-		{
-			BYTE btLen = strlen(exps[1]);
-			if (btLen > 14)
-			{
-				exps[1][14] = 0;
-				btLen = 14;
-			}
-			memcpy(item.baseitem.szName, exps[1], 14);
-			item.baseitem.btNameLength = btLen;
-		}
-	}
-	return TRUE;
-}
-
 BOOL CItemManager::UpgradeItem(ITEM& item, const char* pszUpgradeString)
 {
-	//PRINT(ERROR_RED, pszUpgradeString);
-	o_strncpy(m_szTempBuffer, pszUpgradeString, 1020);
-	xStringsExtracter<50> mstr(m_szTempBuffer, ",", " \t");
+	char szTempBuffer[1024];
+	o_strncpy(szTempBuffer, pszUpgradeString, 1020);
+	xStringsExtracter<50> mstr(szTempBuffer, ",", " \t");
 	for (UINT i = 0; i < mstr.getCount(); i++)
 	{
 		xStringsExtracter<2> exps(mstr[i], "=", " \t");
@@ -954,180 +820,47 @@ BOOL CItemManager::UpgradeItem(ITEM& item, const char* pszUpgradeString)
 			opr = 2;
 			pValue = TrimEx(pValue + 1);
 		}
-
-		if (_stricmp(exps[0], "stdmode") == 0)
+		// 属性修改器映射表
+		using ItemModifier = std::function<void(ITEM*, int opr, int val)>;
+		static const std::unordered_map<std::string, ItemModifier> modifiers =
 		{
-			if (opr == 0)
-				item.baseitem.btStdMode = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.btStdMode -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.btStdMode += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "shape") == 0)
+			{"stdmode", [](ITEM* p, int o, int v) { p->baseitem.btStdMode   = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.btStdMode - v : p->baseitem.btStdMode + v); }},
+			{"shape",   [](ITEM* p, int o, int v) { p->baseitem.btShape     = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.btShape - v : p->baseitem.btShape + v); }},
+			{"weight",  [](ITEM* p, int o, int v) { p->baseitem.btWeight    = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.btWeight - v : p->baseitem.btWeight + v); }},
+			{"defdura", [](ITEM* p, int o, int v) { p->baseitem.wMaxDura    = (WORD)(o == 0 ? v : o == 1 ? p->baseitem.wMaxDura - v : p->baseitem.wMaxDura + v); }},
+			{"curdura", [](ITEM* p, int o, int v) { p->wCurDura             = (WORD)(o == 0 ? v : o == 1 ? p->wCurDura - v : p->wCurDura + v); }},
+			{"maxdura", [](ITEM* p, int o, int v) { p->wMaxDura             = (WORD)(o == 0 ? v : o == 1 ? p->wMaxDura - v : p->wMaxDura + v); }},
+			{"ac1",     [](ITEM* p, int o, int v) { p->baseitem.Ac1         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Ac1 - v : p->baseitem.Ac1 + v); }},
+			{"ac2",     [](ITEM* p, int o, int v) { p->baseitem.Ac2         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Ac2 - v : p->baseitem.Ac2 + v); }},
+			{"mac1",    [](ITEM* p, int o, int v) { p->baseitem.Mac1        = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Mac1 - v : p->baseitem.Mac1 + v); }},
+			{"mac2",    [](ITEM* p, int o, int v) { p->baseitem.Mac2        = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Mac2 - v : p->baseitem.Mac2 + v); }},
+			{"dc1",     [](ITEM* p, int o, int v) { p->baseitem.Dc1         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Dc1 - v : p->baseitem.Dc1 + v); }},
+			{"dc2",     [](ITEM* p, int o, int v) { p->baseitem.Dc2         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Dc2 - v : p->baseitem.Dc2 + v); }},
+			{"mc1",     [](ITEM* p, int o, int v) { p->baseitem.Mc1         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Mc1 - v : p->baseitem.Mc1 + v); }},
+			{"mc2",     [](ITEM* p, int o, int v) { p->baseitem.Mc2         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Mc2 - v : p->baseitem.Mc2 + v); }},
+			{"sc1",     [](ITEM* p, int o, int v) { p->baseitem.Sc1         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Sc1 - v : p->baseitem.Sc1 + v); }},
+			{"sc2",     [](ITEM* p, int o, int v) { p->baseitem.Sc2         = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.Sc2 - v : p->baseitem.Sc2 + v); }},
+			{"price",   [](ITEM* p, int o, int v) { p->baseitem.nPrice      = (o == 0 ? v : o == 1 ? p->baseitem.nPrice - v : p->baseitem.nPrice + v); }},
+			{"image",   [](ITEM* p, int o, int v) { p->baseitem.wImageIndex = (WORD)(o == 0 ? v : o == 1 ? p->baseitem.wImageIndex - v : p->baseitem.wImageIndex + v); }},
+		};
+		// 通用属性修改
+		auto it = modifiers.find(exps[0]);
+		if (it != modifiers.end())
 		{
-			if (opr == 0)
-				item.baseitem.btShape = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.btShape -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.btShape += (BYTE)StringToInteger(pValue);
+			int val = StringToInteger(pValue);
+			it->second(&item, opr, val);
 		}
-		else if (_stricmp(exps[0], "weight") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.btWeight = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.btWeight -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.btWeight += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "defdura") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.wMaxDura = (WORD)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.wMaxDura -= (WORD)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.wMaxDura += (WORD)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "curdura") == 0)
-		{
-			if (opr == 0)
-				item.wCurDura = (WORD)StringToInteger(pValue);
-			else if (opr == 1)
-				item.wCurDura -= (WORD)StringToInteger(pValue);
-			else if (opr == 2)
-				item.wCurDura += (WORD)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "maxdura") == 0)
-		{
-			if (opr == 0)
-				item.wMaxDura = (WORD)StringToInteger(pValue);
-			else if (opr == 1)
-				item.wMaxDura -= (WORD)StringToInteger(pValue);
-			else if (opr == 2)
-				item.wMaxDura += (WORD)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "ac1") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Ac1 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Ac1 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Ac1 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "ac2") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Ac2 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Ac2 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Ac2 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "mac1") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Mac1 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Mac1 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Mac1 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "mac2") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Mac2 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Mac2 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Mac2 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "dc1") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Dc1 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Dc1 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Dc1 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "dc2") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Dc2 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Dc2 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Dc2 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "mc1") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Mc1 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Mc1 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Mc1 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "mc2") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Mc2 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Mc2 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Mc2 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "sc1") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Sc1 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Sc1 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Sc1 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "sc2") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.Sc2 = (BYTE)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.Sc2 -= (BYTE)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.Sc2 += (BYTE)StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "price") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.nPrice = StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.nPrice -= StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.nPrice += StringToInteger(pValue);
-		}
-		else if (_stricmp(exps[0], "image") == 0)
-		{
-			if (opr == 0)
-				item.baseitem.wImageIndex = (WORD)StringToInteger(pValue);
-			else if (opr == 1)
-				item.baseitem.wImageIndex -= (WORD)StringToInteger(pValue);
-			else if (opr == 2)
-				item.baseitem.wImageIndex += (WORD)StringToInteger(pValue);
-		}
+		// limit: 特殊bitmask操作
 		else if (_stricmp(exps[0], "limit") == 0)
 		{
-			//xStringsExtracter<20> flags( pValue, "|", " \t" );
 			WORD wLimit = 0;
 			xStringsExtracter<40> limit(pValue, "|", " \t");
-			if (limit.getCount() == 0)continue;
+			if (limit.getCount() == 0) continue;
 
 			for (UINT n = 0; n < limit.getCount(); n++)
 			{
 				item_limit l = GetItemLimit(limit[n]);
-				if (l == IL_MAX)continue;
+				if (l == IL_MAX) continue;
 				wLimit |= (1 << (int)l);
 			}
 			UPGRADEADDMASK mask;
@@ -1140,9 +873,10 @@ BOOL CItemManager::UpgradeItem(ITEM& item, const char* pszUpgradeString)
 				mask.wItemLimit |= wLimit;
 			item.dwParam[0] = mask.dwValue;
 		}
+		// name: 特殊字符串操作
 		else if (_stricmp(exps[0], "name") == 0)
 		{
-			BYTE btLen = strlen(pValue);
+			BYTE btLen = static_cast<BYTE>(strlen(pValue));
 			if (btLen > 14)
 			{
 				pValue[14] = 0;
@@ -1158,8 +892,9 @@ BOOL CItemManager::UpgradeItem(ITEM& item, const char* pszUpgradeString)
 BOOL CItemManager::UpgradePetItem(ITEM& item, const char* pszUpgradeString)
 {
 	BOOL b = FALSE;
-	o_strncpy(m_szTempBuffer, pszUpgradeString, 1020);
-	xStringsExtracter<50> mstr(m_szTempBuffer, ",", " \t");
+	char szTempBuffer[1024];
+	o_strncpy(szTempBuffer, pszUpgradeString, 1020);
+	xStringsExtracter<50> mstr(szTempBuffer, ",", " \t");
 	for (UINT i = 0; i < mstr.getCount(); i++)
 	{
 		xStringsExtracter<2> exps(mstr[i], "=", " \t");

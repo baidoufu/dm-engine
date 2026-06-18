@@ -8,8 +8,8 @@ class CAliveObject;
 class CFireNimoBurnEvent : public CEventProcessor
 {
 public:
-	CFireNimoBurnEvent(void);
-	virtual ~CFireNimoBurnEvent(void);
+	CFireNimoBurnEvent(VOID);
+	virtual ~CFireNimoBurnEvent(VOID);
 	CFireNimoBurnEvent(const CFireNimoBurnEvent&) = delete;           // 禁止拷贝构造
 	CFireNimoBurnEvent& operator=(const CFireNimoBurnEvent&) = delete; // 禁止拷贝赋值
 	// 事件更新处理
@@ -35,6 +35,6 @@ private:
 	CVisibleEvent* m_pEvents[MAX_FIRENIMOEVENT_COUNT]; // 事件数组
 	// 对象池相关方法
 	static CFireNimoBurnEvent* NewObject() { return m_xEventPool.newObject(); } // 创建新对象
-	static void RemoveObject(CFireNimoBurnEvent* e) { e->Destroy(); m_xEventPool.deleteObject(e); } // 删除对象
+	static VOID RemoveObject(CFireNimoBurnEvent* e) { e->Destroy(); m_xEventPool.deleteObject(e); } // 删除对象
 	static xObjectPool<CFireNimoBurnEvent> m_xEventPool; // 对象池
 };

@@ -27,7 +27,7 @@ VOID CHumanPlayer::SendSpecialStatusChanged(BOOL bToAround)
 	if (IsSystemFlagSeted(SF_GODBLESS)) // 护身
 	{
 		wFlag |= 4;
-		wSecond = m_SystemFlag.GetTimeOut(SF_GODBLESS) / 1000;
+		wSecond = static_cast<WORD>(m_SystemFlag.GetTimeOut(SF_GODBLESS) / 1000);
 	}
 	if (bToAround)
 		SendAroundMsg(GetId(), 0x532c, wFlag, wSecond, 0);
@@ -108,9 +108,9 @@ int CHumanPlayer::CalcLucky()
 	}
 	int nlucky = GetPropValue(PI_LUCKY) - GetPropValue(PI_DAWN);
 	if (nlucky > 0 && Getrand(100) < g_pLucky[nlucky])
-		minmc = maxmc - (maxmc - minmc) * max(10 - nlucky, 0) / 10;
+		minmc = maxmc - (maxmc - minmc) * MAX(10 - nlucky, 0) / 10;
 	else if (nlucky < 0)
-		maxmc = minmc + (maxmc - minmc) * max(nlucky + 10, 0) / 10;
+		maxmc = minmc + (maxmc - minmc) * MAX(nlucky + 10, 0) / 10;
 	return GetRangeRand(minmc, maxmc);
 }
 
@@ -121,13 +121,14 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 	if (pMagic == nullptr) return FALSE;
 	const char* szName = pMagic->pClass->szName;
 	CLogicMap* pMap = GetMap();
-	std::vector<std::string> dwExtraParams;
 	// 地图检查：禁止使用技能
-	if (pMap && pMap->IsFlagSeted(MF_NOSKILL, g_dwInterFlag, dwExtraParams))
+	DWORD dwInterFlag = 0;
+	std::vector<std::string> szExtraParams;
+	if (pMap && pMap->IsFlagSeted(MF_NOSKILL, dwInterFlag, szExtraParams))
 	{
-		for (int i = 0; i < dwExtraParams.size(); i++)
+		for (size_t i = 0; i < szExtraParams.size(); i++)
 		{
-			if (szName == dwExtraParams[i])
+			if (szName == szExtraParams[i])
 			{
 				SaySystem("此地图禁止使用 %s 技能!", szName);
 				return FALSE;
@@ -375,7 +376,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			}
 			const int maxDis = skillData.value1; // 飞行最大距离
-			if (DISTANCE(x, y, nSrcX, nSrcY) > maxDis)
+			if (static_cast<int>(DISTANCE(x, y, nSrcX, nSrcY)) > maxDis)
 			{
 				SaySystem("距离太远, 移形换影使用失败!");
 				break;
@@ -534,7 +535,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 									btLevel = 3 + pCallMagic->magic.btLevel / 2;
 								}
 								char szClassName[64];
-								sprintf(szClassName, "%s%d", pMonster->GetDesc()->base.szViewName, btLevel);
+								snprintf(szClassName, sizeof(szClassName), "%s%d", pMonster->GetDesc()->base.szViewName, btLevel);
 								MonsterClass* pDesc = CMonsterManagerEx::GetInstance()->GetClassByName(szClassName);
 								if (pDesc)
 									pMonster->SetDesc(pDesc);
@@ -674,7 +675,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			}
 			const int maxDis = skillData.value1; // 飞行最大距离
-			if (DISTANCE(x, y, nSrcX, nSrcY) > maxDis)
+			if (static_cast<int>(DISTANCE(x, y, nSrcX, nSrcY)) > maxDis)
 			{
 				SaySystem("距离太远, 化身蝙蝠使用失败!");
 				break;
@@ -705,7 +706,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		case 52: // 玄冰刃
 		{
-			static int effectdir[4] = { 1, 3, 5, 7 };
+			static constexpr std::array<int, 4> effectdir = { 1, 3, 5, 7 };
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
 			nDamage = MAX(0, nDamage);
@@ -724,7 +725,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		case 53: // 五雷轰
 		{
-			static POINT ptEffect[4] = { { 1, 1}, { -1, 1}, { 1, -1}, { -1, -1} }; // 四个方向点
+			static constexpr std::array<POINT, 4> ptEffect = {{ { 1, 1}, { -1, 1}, { 1, -1}, { -1, -1} }}; // 四个方向点
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
 			nDamage = MAX(0, nDamage);
@@ -921,7 +922,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			}
 			char szClassName[100];
 			DWORD nLevel = GetTianXuanCallLevel(btLevel);
-			sprintf(szClassName, "%s%u", pMagic->pClass->szSpecial, nLevel);
+			snprintf(szClassName, sizeof(szClassName), "%s%u", pMagic->pClass->szSpecial, nLevel);
 			bTrain = SummonPet(szClassName);
 			if (bTrain) this->m_wPetSkill = wMagicId;
 		}
@@ -977,7 +978,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			}
 			char szClassName[100];
 			DWORD nLevel = GetTianXuanCallLevel(btLevel);
-			sprintf(szClassName, "%s%u", pMagic->pClass->szSpecial, nLevel);
+			snprintf(szClassName, sizeof(szClassName), "%s%u", pMagic->pClass->szSpecial, nLevel);
 			bTrain = SummonPet(szClassName);
 			if (bTrain) this->m_wPetSkill = wMagicId;
 		}
@@ -1000,12 +1001,14 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			else
 			{
 				GETNEXTPOS(tx, ty, dir);
+				if (m_pMap == nullptr) return FALSE;
 				pFrontObject = (CAliveObject*)m_pMap->FindTarget(this, tx, ty);
 			}
 			CAliveObject* pFrontObject2 = nullptr;
 			if (btLevel == 3)
 			{
 				GETNEXTPOS(tx, ty, dir);
+				if (m_pMap == nullptr) return FALSE;
 				pFrontObject2 = (CAliveObject*)m_pMap->FindTarget(this, tx, ty);
 				if (pFrontObject2 == nullptr || (pFrontObject2 && pFrontObject2->IsDeath()) || (pFrontObject2 && !pFrontObject2->CanBePushed(this)))
 					pFrontObject2 = nullptr;
@@ -1080,7 +1083,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				}
 				char szClassName[100];
 				DWORD nLevel = GetTianXuanCallLevel(btLevel);
-				sprintf(szClassName, "%s%u", pMagic->pClass->szSpecial, nLevel);
+				snprintf(szClassName, sizeof(szClassName), "%s%u", pMagic->pClass->szSpecial, nLevel);
 				bTrain = SummonPet(szClassName, 1, pObject->getX(), pObject->getY());
 				if (bTrain)
 				{
@@ -1133,7 +1136,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 							((CMonsterEx*)pNode->getObject()->pObject)->SetTarget(pReplacer);
 							nCount++;
 						}
-						if (nCount > value2) break;
+						if (static_cast<int>(nCount) > value2) break;
 						pNode = pNode->getNext();
 					}
 				}
@@ -1223,7 +1226,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			bTrain = FALSE;
 			char szClassName[100];
 			DWORD nLevel = GetTianXuanCallLevel(btLevel);
-			sprintf(szClassName, "%s%u", pMagic->pClass->szSpecial, nLevel);
+			snprintf(szClassName, sizeof(szClassName), "%s%u", pMagic->pClass->szSpecial, nLevel);
 			if (m_iPetCount > 1)
 			{
 				bShowEffect = FALSE;
@@ -1249,7 +1252,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		case 72: // 心灵召唤
 		{
-			if (m_iPetCount == 0) 
+			if (m_iPetCount == 0 || m_pMap == nullptr)
 			{
 				bTrain = FALSE;
 				break;
@@ -1299,7 +1302,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			}
 			const int maxDis = skillData.value1; // 飞行最大距离
-			if (DISTANCE(x, y, nSrcX, nSrcY) > maxDis)
+			if (static_cast<int>(DISTANCE(x, y, nSrcX, nSrcY)) > maxDis)
 			{
 				SaySystem("距离太远, 遁地使用失败!");
 				break;
@@ -1343,7 +1346,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 
 	if (bSuccess)
 	{
-		SetCurAttackType(DT_MAGIC);
 		SetPreActionType(AT_SPELLSKILL);
 		pMagic->useTimer.Savetime();
 		if (bCostMp)// 当有魔法值消耗时, 处理魔法值
@@ -1381,10 +1383,10 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			char szmagicid[20];
 			sprintf(szmagicid, "%u", wMagicId);
 			SendAroundMsg(GetId(), SM_SPELLSKILL, 0, 0, wMagicId, szmagicid);
-			DWORD dwArray[2] = { nTarget, pMagic->dwColor };
+			const std::array<DWORD, 2> dwArray = { nTarget, pMagic->dwColor };
 			WORD wEffect = (((int)pMagic->pClass->btEffectType) << 8) | pMagic->pClass->btEffectValue;
-			SendAroundMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, (LPVOID)dwArray, sizeof(dwArray));
-			SendMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, (LPVOID)dwArray, sizeof(dwArray));
+			SendAroundMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, (LPVOID)dwArray.data(), sizeof(dwArray));
+			SendMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, (LPVOID)dwArray.data(), sizeof(dwArray));
 		}
 		if (bTrain) TrainMagic(pMagic);
 		return TRUE;
@@ -1414,13 +1416,14 @@ BOOL CHumanPlayer::SpellFly(int x, int y, WORD wMagicId)
 	batfly.header.wY = nSrcY;
 	batfly.header.bt1 = bt1Value;
 	batfly.header.btColor = btColorValue;
-	batfly.header.btSm = wMagicId;
+	batfly.header.btSm = static_cast<BYTE>(wMagicId);
 	batfly.header.btSm2 = btSm2Value;
 	batfly.header.dwFeature = dwFeature;
 	batfly.header.dwStatus = dwStatus;
 	batfly.header.wCurHp = wCurHp;
 	batfly.header.wMaxHp = wMaxHp;
-	strcpy(batfly.szName, pszName);
+	strncpy(batfly.szName, pszName, sizeof(batfly.szName) - 1);
+	batfly.szName[sizeof(batfly.szName) - 1] = '\0';
 	
 	int nDis = DISTANCE(x, y, nSrcX, nSrcY);
 	int nBaseTime = 60;
@@ -1448,13 +1451,14 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	if (pMagic == nullptr) return FALSE;
 	const char* szName = pMagic->pClass->szName;
 	CLogicMap* pMap = GetMap();
-	std::vector<std::string> dwExtraParams;
 	// 地图检查：禁止使用技能
-	if (pMap && pMap->IsFlagSeted(MF_NOSKILL, g_dwInterFlag, dwExtraParams))
+	DWORD dwInterFlag = 0;
+	std::vector<std::string> szExtraParams;
+	if (pMap && pMap->IsFlagSeted(MF_NOSKILL, dwInterFlag, szExtraParams))
 	{
-		for (int i = 0; i < dwExtraParams.size(); i++)
+		for (size_t i = 0; i < szExtraParams.size(); i++)
 		{
-			if (szName == dwExtraParams[i])
+			if (szName == szExtraParams[i])
 			{
 				SaySystem("此地图禁止使用 %s 技能!", szName);
 				return FALSE;
@@ -1487,7 +1491,7 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	// 获取攻击目标
 	int tx = getX(), ty = getY();
 	GETNEXTPOS(tx, ty, dir);
-	CAliveObject* pObject = m_pMap->FindTarget(this, tx, ty, FALSE);
+	CAliveObject* pObject = m_pMap ? m_pMap->FindTarget(this, tx, ty, FALSE) : nullptr;
 	// 目标检查
 	BOOL SendBUF = FALSE;
 	if (pObject)
@@ -1524,9 +1528,9 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 		wMsg = 0x13;
 		int px = getX(), py = getY();
 		GETNEXTPOS(px, py, dir);
-		CAliveObject* pTarget1 = m_pMap->FindTarget(this, px, py);
+		CAliveObject* pTarget1 = m_pMap ? m_pMap->FindTarget(this, px, py) : nullptr;
 		GETNEXTPOS(px, py, dir);
-		CAliveObject* pTarget2 = m_pMap->FindTarget(this, px, py);
+		CAliveObject* pTarget2 = m_pMap ? m_pMap->FindTarget(this, px, py) : nullptr;
 		int nSecPower = CalculateBonusDamage(nPower, wSkillId);
 		SendBUF = TRUE;
 		if (pTarget1)
@@ -1538,7 +1542,7 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	case 25: // 半月弯刀
 	{
 		wMsg = 0x18;
-		constexpr int widtattack[4] = { 2, 1, 0, 7 };
+		constexpr std::array<int, 4> widtattack = { 2, 1, 0, 7 };
 		const int nSecPower = CalculateBonusDamage(nPower, wSkillId);
 		int nCalcPower = 0;
 		SendBUF = TRUE;
@@ -1549,10 +1553,10 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 			const int nAttackDir = (dir + widtattack[i]) % 8;
 			int px = nX, py = nY;
 			GETNEXTPOS(px, py, nAttackDir);
-			CAliveObject* pTarget = m_pMap->FindTarget(this, px, py);
+			CAliveObject* pTarget = m_pMap ? m_pMap->FindTarget(this, px, py) : nullptr;
 			if (pTarget && !pTarget->IsDeath())
 			{
-				if ( i == 2)
+				if (i == 2)
 					nCalcPower = nPower;
 				else
 					nCalcPower = nSecPower * (i + 1) / 4;
@@ -1596,7 +1600,7 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	case 43: // 抱月刀
 	{
 		wMsg = 0x18;
-		constexpr int widtattack[8] = { 5, 6, 7, 0, 1, 2, 3, 4 };
+		constexpr std::array<int, 8> widtattack = { 5, 6, 7, 0, 1, 2, 3, 4 };
 		const int nSecPower = CalculateBonusDamage(nPower, wSkillId);
 		int nCalcPower = 0;
 		SendBUF = TRUE;
@@ -1607,7 +1611,7 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 			int px = nX, py = nY;
 			const int nAttackDir = (dir + widtattack[i]) % 8;
 			GETNEXTPOS(px, py, nAttackDir);
-			CAliveObject* pTarget = m_pMap->FindTarget(this, px, py);
+			CAliveObject* pTarget = m_pMap ? m_pMap->FindTarget(this, px, py) : nullptr;
 			if (pTarget && !pTarget->IsDeath())
 			{
 				if (i < 3)
@@ -1629,7 +1633,7 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 		if (m_pClientObj)
 			m_pClientObj->PostMsg("#+UTHU!", 7);
 		nPower += CalculateBonusDamage(nPower, wSkillId);
-		dwFlag = DF_TARGETEFFECT | 2;
+		dwFlag = DF_TARGETEFFECT | TE_THU;
 		dwType = DT_MAGIC;
 		bSaveSkillTime = FALSE;
 		if (SendBUF)
@@ -1713,7 +1717,6 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 		TrainMagic(pMagic);
 		UpdateAutoMagic();
 	}
-	SetCurAttackType(DT_MAGIC);
 	return TRUE;
 }
 

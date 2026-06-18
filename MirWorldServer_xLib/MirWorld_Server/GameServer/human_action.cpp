@@ -48,11 +48,10 @@ VOID CHumanPlayer::PetsFlyto(CLogicMap* pToMap, UINT nToX, UINT nToY, BOOL IsBlo
 		m_pPet->FlyTo(pToMap, x, y);
 		nPetCount++;
 	}
-	if (IsPetsActive() && m_iPetCount > 0) // ±¦±¦·É
+	if (m_iPetCount > 0) // ±¦±¦·É
 	{
-		for (int i = 0; i < m_iPetCount; i++)
+		for (const auto& monster : m_pPets)
 		{
-			CMonsterEx* monster = m_pPets[i];
 			if (monster == nullptr || monster->IsDeath()) continue;
 			monster->SetTarget(nullptr);
 			monster->FlyTo(pToMap, x, y);
@@ -66,7 +65,7 @@ VOID CHumanPlayer::PetsFlyto(CLogicMap* pToMap, UINT nToX, UINT nToY, BOOL IsBlo
 		{
 			int dir = GetFlyDirection(pt.x, pt.y, nToX, nToY);
 			SetDirection((e_direction)dir);
-			ResetPos(pt.x, pt.y);
+			ResetPos(static_cast<WORD>(pt.x), static_cast<WORD>(pt.y));
 		}
 		else
 			return;
@@ -81,9 +80,9 @@ VOID CHumanPlayer::OnChangeMap(CLogicMap* pFromMap, UINT nFromX, UINT nFromY, CL
 		{
 			DWORD dwMakeIndex = GetStatusParam(SI_ITEMTRACED);
 			ITEM* pItem = m_ItemBox.FindItem(dwMakeIndex);
-			ITEM item = *pItem;
 			if (pItem)
 			{
+				ITEM item = *pItem;
 				this->DeleteBagItem(dwMakeIndex);
 				SendTakeBagItem(&item);
 				CDownItemMgr::GetInstance()->DropItem(pFromMap, item, nFromX, nFromY, FALSE);

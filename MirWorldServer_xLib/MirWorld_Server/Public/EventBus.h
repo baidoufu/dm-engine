@@ -36,10 +36,10 @@ class EventHandler
 {
 public:
     virtual ~EventHandler() = default;
-    virtual void handle(const BaseEvent& event) = 0;
+    virtual VOID handle(const BaseEvent& event) = 0;
     virtual SubscriptionToken getToken() const = 0;
     virtual bool isValid() const = 0;
-    virtual void invalidate() = 0;
+    virtual VOID invalidate() = 0;
 };
 
 /**
@@ -49,8 +49,8 @@ template<typename EventType>
 class FastEventHandler : public EventHandler
 {
 public:
-    using HandlerFuncPtr = void(*)(const EventType&);
-    using HandlerFuncObj = std::function<void(const EventType&)>;
+    using HandlerFuncPtr = VOID(*)(const EventType&);
+    using HandlerFuncObj = std::function<VOID(const EventType&)>;
 
     // 函数指针构造函数（零开销）
     FastEventHandler(HandlerFuncPtr func, SubscriptionToken token) noexcept : funcPtr_(func), token_(token), valid_(true), useFuncPtr_(true) {}
@@ -62,15 +62,15 @@ public:
     template<typename Func>
     FastEventHandler(Func&& func, SubscriptionToken token) : funcObj_(std::forward<Func>(func)), token_(token), valid_(true), useFuncPtr_(false) {}
 
-    void handle(const BaseEvent& event) noexcept override
+    VOID handle(const BaseEvent& event) noexcept override
     {
         const EventType& typedEvent = static_cast<const EventType&>(event);
         invoke(typedEvent);
     }
     SubscriptionToken getToken() const noexcept override { return token_; }
     bool isValid() const noexcept override { return valid_.load(std::memory_order_acquire); }
-    void invalidate() noexcept override { valid_.store(false, std::memory_order_release); }
-    inline void invoke(const EventType& event) const noexcept
+    VOID invalidate() noexcept override { valid_.store(false, std::memory_order_release); }
+    inline VOID invoke(const EventType& event) const noexcept
     {
         if (!valid_) return;
         if (useFuncPtr_ && funcPtr_) funcPtr_(event);
@@ -103,14 +103,15 @@ public:
      * 使用编译期优化的函数指针, 运行时零分配
      */
     template<typename EventType>
-    SubscriptionToken subscribe(void(*handler)(const EventType&))
+    SubscriptionToken subscribe(VOID(*handler)(const EventType&))
     {
         SubscriptionToken token = nextToken_.fetch_add(1, std::memory_order_relaxed);
         using HandlerType = FastEventHandler<EventType>;
         auto handlerPtr = std::make_shared<HandlerType>(handler, token);
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
-            fastHandlers_[typeid(EventType)].push_back(handlerPtr);
+            fastHandlers_[typeid(EventType)].emplace_back(std::move(handlerPtr));
+            m_tokenTypeIndex.emplace(token, typeid(EventType));
         }
         return token;
     }
@@ -126,7 +127,8 @@ public:
         auto handlerPtr = std::make_shared<HandlerType>(std::forward<Func>(handler), token);
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
-            fastHandlers_[typeid(EventType)].push_back(handlerPtr);
+            fastHandlers_[typeid(EventType)].emplace_back(std::move(handlerPtr));
+            m_tokenTypeIndex.emplace(token, typeid(EventType));
         }
         return token;
     }
@@ -134,7 +136,7 @@ public:
      * @brief 发布事件
      */
     template<typename EventType>
-    void publish(const EventType& event)
+    VOID publish(const EventType& event)
     {
         thread_local std::vector<FastEventHandler<EventType>*> handlerPtrs;
         handlerPtrs.clear();
@@ -176,7 +178,7 @@ public:
      * @brief 批量发布事件
      */
     template<typename EventType>
-    void publishBatch(const std::vector<EventType>& events)
+    VOID publishBatch(const std::vector<EventType>& events)
     {
         if (events.empty()) return;
         thread_local std::vector<FastEventHandler<EventType>*> handlerPtrs;
@@ -234,26 +236,29 @@ public:
         }
     }
     /**
-     * @brief 通过令牌精确取消订阅
+     * @brief 通过令牌精确取消订阅（O(1) 反向索引查找）
      */
-    void unsubscribe(SubscriptionToken token) const
+    VOID unsubscribe(SubscriptionToken token)
     {
-        for (const auto& pair : fastHandlers_)
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        auto it = m_tokenTypeIndex.find(token);
+        if (it == m_tokenTypeIndex.end())
+            return;
+        auto& handlers = fastHandlers_[it->second];
+        for (auto& handler : handlers)
         {
-            for (const auto& handler : pair.second)
+            if (handler->getToken() == token)
             {
-                if (handler->getToken() == token)
-                {
-                    handler->invalidate();
-                    return;
-                }
+                handler->invalidate();
+                break;
             }
         }
+        m_tokenTypeIndex.erase(it);
     }
     /**
      * @brief 清理无效的订阅
      */
-    void cleanupInvalidHandlers() 
+    VOID cleanupInvalidHandlers() 
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         for (auto& pair : fastHandlers_) 
@@ -274,7 +279,9 @@ public:
                 for (int j = 0; j < 8; ++j)
                 {
                     if (valid[j])
-                        cleaned.push_back(std::move(handlers[i + j]));
+                        cleaned.emplace_back(std::move(handlers[i + j]));
+                    else
+                        m_tokenTypeIndex.erase(handlers[i + j]->getToken());
                 }
                 i += 8;
             }
@@ -282,13 +289,17 @@ public:
             for (; i < handlers.size(); ++i)
             {
                 if (handlers[i]->isValid())
-                    cleaned.push_back(std::move(handlers[i]));
+                    cleaned.emplace_back(std::move(handlers[i]));
+                else
+                    m_tokenTypeIndex.erase(handlers[i]->getToken());
             }
 #else
             for (auto& handler : handlers) 
             {
                 if (handler->isValid())
-                    cleaned.push_back(std::move(handler));
+                    cleaned.emplace_back(std::move(handler));
+                else
+                    m_tokenTypeIndex.erase(handler->getToken());
             }
 #endif
             handlers.swap(cleaned);
@@ -298,18 +309,25 @@ public:
      * @brief 取消指定类型的所有订阅
      */
     template<typename EventType>
-    void unsubscribeAll() 
+    VOID unsubscribeAll() 
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        fastHandlers_.erase(typeid(EventType));
+        auto it = fastHandlers_.find(typeid(EventType));
+        if (it != fastHandlers_.end())
+        {
+            for (const auto& handler : it->second)
+                m_tokenTypeIndex.erase(handler->getToken());
+            fastHandlers_.erase(it);
+        }
     }
     /**
      * @brief 清空所有订阅
      */
-    void clear() noexcept
+    VOID clear() noexcept
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         fastHandlers_.clear();
+        m_tokenTypeIndex.clear();
     }
     /**
      * @brief 获取指定类型的订阅数量
@@ -341,6 +359,8 @@ private:
 
     // 高性能事件处理器映射
     std::unordered_map<std::type_index, std::vector<std::shared_ptr<EventHandler>>> fastHandlers_;
+    // token → type_index 反向索引，支持 O(1) 取消订阅
+    std::unordered_map<SubscriptionToken, std::type_index> m_tokenTypeIndex;
     mutable std::shared_mutex mutex_;
     std::atomic<SubscriptionToken> nextToken_{1};
 };

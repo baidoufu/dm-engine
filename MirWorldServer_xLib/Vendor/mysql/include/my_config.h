@@ -1,14 +1,21 @@
-/* Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2009, 2023, Oracle and/or its affiliates.
  
  This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; version 2 of the License.
- 
+ it under the terms of the GNU General Public License, version 2.0,
+ as published by the Free Software Foundation.
+
+ This program is also distributed with certain software (including
+ but not limited to OpenSSL) that is licensed under separate terms,
+ as designated in a particular file or component or in included license
+ documentation.  The authors of MySQL hereby grant you an additional
+ permission to link the program and your derivative works with the
+ separately licensed software that they have included with MySQL.
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
+ GNU General Public License, version 2.0, for more details.
+
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
@@ -30,11 +37,12 @@
 /* #undef HAVE_LIBDL */
 /* #undef HAVE_LIBRT */
 /* #undef HAVE_LIBWRAP */
+/* #undef HAVE_LIBWRAP_PROTOTYPES */
 
 /* Header files */
 /* #undef HAVE_ALLOCA_H */
 /* #undef HAVE_ARPA_INET_H */
-/* #undef HAVE_DIRENT_H */
+/* #undef HAVE_CRYPT_H */
 /* #undef HAVE_DLFCN_H */
 /* #undef HAVE_EXECINFO_H */
 /* #undef HAVE_FPU_CONTROL_H */
@@ -60,8 +68,7 @@
 /* #undef HAVE_SYS_PARAM_H */
 /* #undef HAVE_FNMATCH_H */
 /* #undef HAVE_SYS_UN_H */
-/* #undef HAVE_VIS_H */
-/* #undef HAVE_SASL_SASL_H */
+#define HAVE_SASL_SASL_H 1
 
 /* Libevent */
 /* #undef HAVE_DEVPOLL */
@@ -90,7 +97,7 @@
 /* #undef HAVE_FSYNC */
 /* #undef HAVE_GETHOSTBYADDR_R */
 /* #undef HAVE_GETHRTIME */
-#define HAVE_GETNAMEINFO 1
+/* #undef HAVE_GETNAMEINFO */
 /* #undef HAVE_GETPASS */
 /* #undef HAVE_GETPASSPHRASE */
 /* #undef HAVE_GETPWNAM */
@@ -116,7 +123,6 @@
 /* #undef HAVE_PREAD */
 /* #undef HAVE_PTHREAD_CONDATTR_SETCLOCK */
 /* #undef HAVE_PTHREAD_SIGMASK */
-/* #undef HAVE_READDIR_R */
 /* #undef HAVE_READLINK */
 /* #undef HAVE_REALPATH */
 /* #undef HAVE_SETFD */
@@ -138,7 +144,7 @@
 /* #undef DNS_USE_CPU_CLOCK_FOR_ID */
 /* #undef HAVE_EPOLL */
 /* #undef HAVE_EVENT_PORTS */
-#define HAVE_INET_NTOP 1
+/* #undef HAVE_INET_NTOP */
 /* #undef HAVE_WORKING_KQUEUE */
 /* #undef HAVE_TIMERADD */
 /* #undef HAVE_TIMERCLEAR */
@@ -169,8 +175,8 @@
 /* #undef WORDS_BIGENDIAN */
 
 /* Type sizes */
-#define SIZEOF_VOIDP     8
-#define SIZEOF_CHARP     8
+#define SIZEOF_VOIDP     4
+#define SIZEOF_CHARP     4
 #define SIZEOF_LONG      4
 #define SIZEOF_SHORT     2
 #define SIZEOF_INT       4
@@ -181,6 +187,7 @@
 /* #undef HAVE_ULONG */
 /* #undef HAVE_U_INT32_T */
 #define HAVE_STRUCT_TIMESPEC
+/* #undef HAVE_TM_GMTOFF */
 
 /* Support for tagging symbols with __attribute__((visibility("hidden"))) */
 /* #undef HAVE_VISIBILITY_HIDDEN */
@@ -193,13 +200,13 @@
 /* #undef HAVE_FAKE_PAUSE_INSTRUCTION */
 /* #undef HAVE_HMT_PRIORITY_INSTRUCTION */
 /* #undef HAVE_ABI_CXA_DEMANGLE */
-/* #undef HAVE_BSS_START */
 /* #undef HAVE_BUILTIN_UNREACHABLE */
 /* #undef HAVE_BUILTIN_EXPECT */
 /* #undef HAVE_BUILTIN_STPCPY */
 /* #undef HAVE_GCC_ATOMIC_BUILTINS */
 /* #undef HAVE_GCC_SYNC_BUILTINS */
 /* #undef HAVE_VALGRIND */
+/* #undef HAVE_PTHREAD_THREADID_NP */
 
 /* IPV6 */
 /* #undef HAVE_NETINET_IN6_H */
@@ -214,17 +221,18 @@
 /*
  * Platform specific CMake files
  */
-#define MACHINE_TYPE "x86_64"
+#define MACHINE_TYPE "AMD64"
 /* #undef HAVE_LINUX_LARGE_PAGES */
 /* #undef HAVE_SOLARIS_LARGE_PAGES */
 /* #undef HAVE_SOLARIS_ATOMIC */
 /* #undef HAVE_SOLARIS_STYLE_GETHOST */
-#define SYSTEM_TYPE "Win64"
+#define SYSTEM_TYPE "Win32"
 /* Windows stuff, mostly functions, that have Posix analogs but named differently */
 /* #undef IPPROTO_IPV6 */
 /* #undef IPV6_V6ONLY */
 /* This should mean case insensitive file system */
 #define FN_NO_CASE_SENSE 1
+/* #undef APPLE_ARM */
 
 /*
  * From main CMakeLists.txt
@@ -236,14 +244,14 @@
 #define ENABLED_PROFILING 1
 /* #undef HAVE_ASAN */
 #define ENABLED_LOCAL_INFILE 1
-/* #undef OPTIMIZER_TRACE */
-#define DEFAULT_MYSQL_HOME "C:/Program Files/MySQL/MySQL Server 6.1"
+#define OPTIMIZER_TRACE 1
+#define DEFAULT_MYSQL_HOME "C:/Program Files/MySQL/MySQL Server 5.7"
 #define SHAREDIR "share"
-#define DEFAULT_BASEDIR "C:/Program Files/MySQL/MySQL Server 6.1"
-#define MYSQL_DATADIR "C:/Program Files/MySQL/MySQL Server 6.1/data"
-#define MYSQL_KEYRINGDIR "C:/Program Files/MySQL/MySQL Server 6.1/keyring"
-#define DEFAULT_CHARSET_HOME "C:/Program Files/MySQL/MySQL Server 6.1"
-#define PLUGINDIR "C:/Program Files/MySQL/MySQL Server 6.1/lib/plugin"
+#define DEFAULT_BASEDIR "C:/Program Files/MySQL/MySQL Server 5.7"
+#define MYSQL_DATADIR "C:/Program Files/MySQL/MySQL Server 5.7/data"
+#define MYSQL_KEYRINGDIR "C:/Program Files/MySQL/MySQL Server 5.7/keyring"
+#define DEFAULT_CHARSET_HOME "C:/Program Files/MySQL/MySQL Server 5.7"
+#define PLUGINDIR "C:/Program Files/MySQL/MySQL Server 5.7/lib/plugin"
 /* #undef DEFAULT_SYSCONFDIR */
 #define DEFAULT_TMPDIR ""
 #define INSTALL_SBINDIR "/bin"
@@ -277,11 +285,19 @@
 /* #undef USE_LIBEDIT_INTERFACE */
 /* #undef HAVE_HIST_ENTRY */
 /* #undef USE_NEW_EDITLINE_INTERFACE */
+/* #undef EDITLINE_HAVE_COMPLETION_CHAR */
+/* #undef EDITLINE_HAVE_COMPLETION_INT */
 
 /*
  * Libedit
  */
-/* #undef HAVE_DECL_TGOTO */
+/* #undef HAVE_GETLINE */
+/* #undef HAVE___SECURE_GETENV */
+/* #undef HAVE_SECURE_GETENV */
+/* #undef HAVE_VIS */
+/* #undef HAVE_UNVIS */
+/* #undef HAVE_GETPW_R_DRAFT */
+/* #undef HAVE_GETPW_R_POSIX */
 
 /*
  * DTrace
@@ -343,7 +359,7 @@
 /*
  * Performance schema
  */
-/* #undef WITH_PERFSCHEMA_STORAGE_ENGINE */
+#define WITH_PERFSCHEMA_STORAGE_ENGINE 1
 /* #undef DISABLE_PSI_THREAD */
 /* #undef DISABLE_PSI_MUTEX */
 /* #undef DISABLE_PSI_RWLOCK */
@@ -387,17 +403,17 @@
  * MySQL version
  */
 #define DOT_FRM_VERSION 6
-#define MYSQL_VERSION_MAJOR 6
-#define MYSQL_VERSION_MINOR 1
-#define MYSQL_VERSION_PATCH 11
+#define MYSQL_VERSION_MAJOR 5
+#define MYSQL_VERSION_MINOR 7
+#define MYSQL_VERSION_PATCH 44
 #define MYSQL_VERSION_EXTRA ""
 #define PACKAGE "mysql"
 #define PACKAGE_BUGREPORT ""
 #define PACKAGE_NAME "MySQL Server"
-#define PACKAGE_STRING "MySQL Server 6.1.11"
+#define PACKAGE_STRING "MySQL Server 5.7.44"
 #define PACKAGE_TARNAME "mysql"
-#define PACKAGE_VERSION "6.1.11"
-#define VERSION "6.1.11"
+#define PACKAGE_VERSION "5.7.44"
+#define VERSION "5.7.44"
 #define PROTOCOL_VERSION 10
 
 /*

@@ -2,16 +2,16 @@
 #include ".\clientobj.h"
 #include ".\server.h"
 
-CClientObj::CClientObj(void)
+CClientObj::CClientObj(VOID)
 {
 	Clean();
 }
 
-CClientObj::~CClientObj(void)
+CClientObj::~CClientObj(VOID)
 {
 }
 
-void CClientObj::Clean()
+VOID CClientObj::Clean()
 {
 	CClientObject::Clean();
 	memset(&m_RegInfo, 0, sizeof(m_RegInfo));
@@ -35,6 +35,12 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	{
 	case SCM_GETGAMESERVERADDR:
 	{
+		if (datasize == 0)
+		{
+			pMsg->wParam[0] = SE_INVALIDPARAM;
+			SendMsg(pMsg, 0);
+			break;
+		}
 		pMsg->wParam[0] = pServer->FindServer(ST_GAMESERVER, pMsg->data, (FINDSERVER_RESULT*)pMsg->data);
 		if (pMsg->wParam[0] == SE_OK)
 			datasize = sizeof(FINDSERVER_RESULT);
@@ -43,6 +49,12 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	break;
 	case SCM_REGISTERSERVER:
 	{
+		if (datasize < (int)sizeof(REGISTER_SERVER_INFO))
+		{
+			pMsg->wParam[0] = SE_INVALIDPARAM;
+			SendMsg(pMsg, 0);
+			break;
+		}
 		pMsg->wParam[0] = pServer->RegisterServer(this, (REGISTER_SERVER_INFO*)pMsg->data, (REGISTER_SERVER_RESULT*)pMsg->data);
 		SendMsg(pMsg, sizeof(REGISTER_SERVER_RESULT));
 		if (pMsg->wParam[0] != SE_OK)
@@ -58,6 +70,12 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	break;
 	case SCM_FINDSERVER:
 	{
+		if (datasize == 0)
+		{
+			pMsg->wParam[0] = SE_INVALIDPARAM;
+			SendMsg(pMsg, 0);
+			break;
+		}
 		pMsg->wParam[0] = pServer->FindServer((servertype)pMsg->wParam[0], pMsg->data, (FINDSERVER_RESULT*)pMsg->data);
 		if (pMsg->wParam[0] == SE_OK)
 			datasize = sizeof(FINDSERVER_RESULT);
@@ -68,7 +86,7 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	{
 		UINT id = pMsg->wParam[2];
 		CClientObj* pObj = (CClientObj*)pServer->getObject(id);
-		if (pObj)
+		if (pObj && pObj->IsConnected())
 		{
 			pMsg->wParam[1] = m_RegInfo.Ident.bType;
 			pMsg->wParam[2] = getId();
@@ -77,4 +95,9 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 	}
 	break;
 	}
+}
+
+VOID CClientObj::OnConnection()
+{
+	EnableBatchMode(TRUE);
 }

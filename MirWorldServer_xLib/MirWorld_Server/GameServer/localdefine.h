@@ -3,16 +3,19 @@
 #include "marketdef.h"
 #include "stringdef.h"
 #include <cmath>
+#include <string_view>
 
 #ifdef _DEBUG
-#define DPRINT CServer::GetInstance()->GetIoConsole()->OutPut
+#define DPRINT(color, ...) do { if (ShouldOutputLog(color)) CServer::GetInstance()->GetIoConsole()->OutPut(color, __VA_ARGS__); } while(0)
 #define DSYSMSG	SaySystem
 #else
-inline void empty_func(...) {}
+inline VOID empty_func(...) {}
 #define DPRINT empty_func
 #define	DSYSMSG empty_func
 #endif
-#define PRINT CServer::GetInstance()->GetIoConsole()->OutPut
+// 日志级别过滤: release模式下自动跳过 TEXT_WHITE/COOL_BLUE/STRING_GREEN/KEYWORD_PINK/FUNC_PURPLE/CYAN/ORANGE
+// 使用 do{}while(0) 惰性求值, 当日志级别被过滤时参数表达式不会被执行
+#define PRINT(color, ...) do { if (ShouldOutputLog(color)) CServer::GetInstance()->GetIoConsole()->OutPut(color, __VA_ARGS__); } while(0)
 
 typedef struct tagStringCacheNode
 {
@@ -125,19 +128,19 @@ static const char* g_pChatChannelDesc[CCH_MAX] =
 	"好友",
 };
 
-const DWORD CC_RED = 0x38ff;		//红色
-const DWORD CC_REDPET = 16529663ul;	//红色宠物
-const DWORD CC_PETDIE = 0xfdff;		//宠物死亡
-const DWORD CC_GREEN = 0xfcffdb;	//绿色
-const DWORD CC_GREENS = 9961435ul;	//绿色S
-const DWORD CC_GREENB = 3735515ul;	//宝宝B
-const DWORD CC_MAGICTIPS = 0xdbffdb;//魔法提示
-const DWORD CC_CRY = 0x389700;		//大喊
-const DWORD CC_NORMAL = 0xff00;		//普通
-const DWORD CC_WISPER = 0xfffc;		//密语
-const DWORD CC_GROUP = 0xff2f;		//组队
-const DWORD CC_EXCHANGE = 0xfcfffc;	//交易
-const DWORD CC_GROUPTIPS = 0xfcff00;//组队提示
+constexpr DWORD CC_RED = 0x38ff;		//红色
+constexpr DWORD CC_REDPET = 16529663ul;	//红色宠物
+constexpr DWORD CC_PETDIE = 0xfdff;		//宠物死亡
+constexpr DWORD CC_GREEN = 0xfcffdb;	//绿色
+constexpr DWORD CC_GREENS = 9961435ul;	//绿色S
+constexpr DWORD CC_GREENB = 3735515ul;	//宝宝B
+constexpr DWORD CC_MAGICTIPS = 0xdbffdb;//魔法提示
+constexpr DWORD CC_CRY = 0x389700;		//大喊
+constexpr DWORD CC_NORMAL = 0xff00;		//普通
+constexpr DWORD CC_WISPER = 0xfffc;		//密语
+constexpr DWORD CC_GROUP = 0xff2f;		//组队
+constexpr DWORD CC_EXCHANGE = 0xfcfffc;	//交易
+constexpr DWORD CC_GROUPTIPS = 0xfcff00;//组队提示
 
 static const DWORD g_ChatChannelAttrib[CCH_MAX] =
 {
@@ -228,10 +231,6 @@ enum e_varindex	//变量索引
 	EVI_MAXUPGRADETIMES,		//最大升级次数
 	EVI_MONGENFACTOR,			//怪物生成倍数
 	EVI_PKCURSERATE,			//PK点扣除倍数
-	EVI_HPRECOVERPOINT,			//生命恢复点
-	EVI_HPRECOVERTIME,			//生命恢复时间
-	EVI_MPRECOVERPOINT,			//魔法恢复点
-	EVI_MPRECOVERTIME,			//魔法恢复时间
 	EVI_GUILDWARTIME,			//行会战时间
 	EVI_STARTGUILDMEMBERCOUNT,	//行会创建成员数
 	EVI_GUILDLEVELNUM,			//行会等级数量
@@ -241,18 +240,14 @@ enum e_varindex	//变量索引
 
 typedef struct tagOBJECTPROCESS //对象线程
 {
-	tagOBJECTPROCESS()
-	{
-		FILLSELF(0);
-	}
-	e_process ident;
-	DWORD dwParam[4];
-	char* pszParam;
-	int iStringSize;
-	int repeattimes;		//当前剩余次数
-	DWORD dwDelayTime;		//缓冲时间
-	DWORD dwDeliverTime;	//添加时间
-	BOOL btFirstTime;		//是否添加就执行
+	e_process ident{};
+	DWORD dwParam[4]{};
+	char* pszParam{};
+	int iStringSize{};
+	int repeattimes{};		//当前剩余次数
+	DWORD dwDelayTime{};	//缓冲时间
+	DWORD dwDeliverTime{};	//添加时间
+	BOOL btFirstTime{};		//是否添加就执行
 	//DWORD dwtarget;		//攻击目标
 	//UINT listid;			//表中的id
 	//e_object_type attacktype;
@@ -266,7 +261,7 @@ typedef struct tagOBJECTPROCESS //对象线程
 //}START_POINT;
 
 // 幸运概率表
-static const BYTE g_pLucky[11] =
+static constexpr BYTE g_pLucky[11] =
 {
 	0,
 	0,
@@ -286,66 +281,50 @@ constexpr int SEARCH_COUNT = 80;//掉落物品搜索数量
 
 typedef struct tagNpcGoodsItemList //NPC列表物品
 {
-	tagNpcGoodsItemList()
-	{
-		FILLSELF(0);
-	}
-	tagNpcGoodsItemList* pNext;
-	ITEM item;
-	DWORD dwPutTime;
-	UINT listid;
+	tagNpcGoodsItemList* pNext{};
+	ITEM item{};
+	DWORD dwPutTime{};
+	UINT listid{};
 }NpcGoodsItemList;
 
 typedef struct tagNpcGoodsList //NPC物品列表
 {
-	tagNpcGoodsList()
-	{
-		FILLSELF(0);
-	}
-	tagNpcGoodsList* pNext;
-	char szTemplate[32];	//名字
-	int	defaultcount;		//0
-	int currentcount;		//金币数
-	int refreshtime;		//刷新时间
-	DWORD dwTemplatePrice;
-	DWORD dwLastRefreshTime;
-	UINT listid;
-	NpcGoodsItemList* pItemList;
+	tagNpcGoodsList* pNext{};
+	std::array<char, 32> szTemplate{};	//名字
+	int	defaultcount{};		//0
+	int currentcount{};		//金币数
+	int refreshtime{};		//刷新时间
+	DWORD dwTemplatePrice{};
+	DWORD dwLastRefreshTime{};
+	UINT listid{};
+	NpcGoodsItemList* pItemList{};
 }NpcGoodsList;
 
 #pragma pack(push)
 #pragma pack(1)
 typedef struct tagViewDetail //观察其他角色信息
 {
-	tagViewDetail()
-	{
-		FILLSELF(0);
-	}
-	DWORD dwFeature;			//外观特征 LOOKS (RaceImg+武器+头发+衣服)
-	BYTE btNamelen;
-	CHAR szName[15];			//玩家姓名
-	DWORD dwNameColor;			//名字颜色
-	BYTE btGuildNamelen;
-	CHAR szGuildName[14];		//行会名字
-	BYTE btTitleNameLen;
-	CHAR szTitleName[15];		//称号
-	BYTE btSex;					//性别
-	ITEMCLIENT items[_U_MAX]; // 装备槽位
+	DWORD dwFeature{};			//外观特征 LOOKS (RaceImg+武器+头发+衣服)
+	BYTE btNamelen{};
+	CHAR szName[15]{};			//玩家姓名
+	DWORD dwNameColor{};		//名字颜色
+	BYTE btGuildNamelen{};
+	CHAR szGuildName[14]{};		//行会名字
+	BYTE btTitleNameLen{};
+	CHAR szTitleName[15]{};		//称号
+	BYTE btSex{};				//性别
+	ITEMCLIENT items[_U_MAX]{}; // 装备槽位
 }VIEWDETAIL;
 
 typedef struct tagViewDetailEx //观察其他角色扩展信息
 {
-	tagViewDetailEx()
-	{
-		FILLSELF(0);
-	}
-	BYTE btExt[10]; //扩展数据
-	BYTE btJob; //职业
-	BYTE btRideStatus; // 骑战状态
-	BYTE btKown[86]; //未知属性
-	WORD wLevel; // 玩家等级-凡人最高71级、72开始是天人1重-最高99重、171开始是天仙1重-最高99重、270开始是上仙1重-最高99重
-	BYTE btExtKown[17]; // 未知数据
-	DWORD btFunc; //功能-开启(用位计算开启：本体、魔器、骑术、境界、万兽谱、天书 等等...)
+	BYTE btExt[10]{}; //扩展数据
+	BYTE btJob{}; //职业
+	BYTE btRideStatus{}; // 骑战状态
+	BYTE btKown[86]{}; //未知属性
+	WORD wLevel{}; // 玩家等级-凡人最高71级、72开始是天人1重-最高99重、171开始是天仙1重-最高99重、270开始是上仙1重-最高99重
+	BYTE btExtKown[17]{}; // 未知数据
+	DWORD btFunc{}; //功能-开启(用位计算开启：本体、魔器、骑术、境界、万兽谱、天书 等等...)
 }VIEWDETAIL_EX;
 #pragma pack(pop)
 
@@ -367,28 +346,21 @@ enum e_mapflag //地图标志
 	EMF_CANWALKTHROUGH = 128,	//允许穿人
 };
 
-enum e_object_type //对象类型
+enum e_object_type // 对象类型
 {
 	OBJ_DOWNITEM,		//掉落物品
-	OBJ_MONSTER,		//怪物
 	OBJ_NPC,			//NPC
-	OBJ_GUARD,			//卫士、弓箭手
-	OBJ_PLAYER,			//玩家
 	OBJ_VISIBLEEVENT,	//可见事件
-	OBJ_PET,			//宠物
 	OBJ_EVENT,			//事件
+	OBJ_PLAYER,			//玩家
+	OBJ_MONSTER,		//怪物
+	OBJ_PET,			//宠物
+	OBJ_GUARD,			//卫士、弓箭手
+	OBJ_TREE,			//树木
 	OBJ_MAX,
 };
 
-enum e_object_ApprType //怪物外观分类类型
-{
-	APPR_MONSTER,		//怪物
-	APPR_GUARD,			//卫士、弓箭手
-	APPR_TREE,			//树木
-	APPR_MAX,
-};
-
-enum e_class_type //类的类型
+enum e_class_type // 类的类型
 {
 	CLS_UNKNOWN,	//未知
 	CLS_ALIVEOBJECT,//生物
@@ -408,90 +380,78 @@ struct tagMonItems;
 
 typedef struct tag_monsterdesc //怪物描述
 {
-	tag_monsterdesc()
-	{
-		FILLSELF(0);
-	}
-	char szName[32];
-	char szTitle[32];
-	BYTE view;
-	WORD wHp;
-	BYTE mindc;
-	BYTE maxdc;
-	BYTE minac;
-	BYTE maxac;
-	BYTE minmac;
-	BYTE maxmac;
-	DWORD dwExp;
-	DWORD dwDelay;
-	BOOL bAuto;
-	tagMonItems* pDownItems;
-	DWORD nRace;
-	DWORD nAiFlag;
-	DWORD dwParam1;
-	DWORD dwParam2;
+	char szName[32]{};
+	char szTitle[32]{};
+	BYTE view{};
+	WORD wHp{};
+	BYTE mindc{};
+	BYTE maxdc{};
+	BYTE minac{};
+	BYTE maxac{};
+	BYTE minmac{};
+	BYTE maxmac{};
+	DWORD dwExp{};
+	DWORD dwDelay{};
+	BOOL bAuto{};
+	tagMonItems* pDownItems{};
+	DWORD nRace{};
+	DWORD nAiFlag{};
+	DWORD dwParam1{};
+	DWORD dwParam2{};
 }MONSTERDESC;
 
 class CMonsterEx;
 typedef struct tag_monstergen //怪物生成
 {
-	tag_monstergen()
-	{
-		FILLSELF(0);
-	}
-	char szName[32]; //怪类名
-	int	mapid; //地图ID
-	int	x; //X坐标
-	int	y; //Y坐标
-	int	range; //范围  1000 以上的数值是刷怪方式类型
-	int	count; //数量
-	DWORD dwRefreshDelay; //刷新间隔(分)
-	int	curcount;
-	int	errortime;
-	DWORD dwLastRefreshTime;
-	CServerTimer tmrRefresh;
-	char* pszScriptPage;
-	BOOL bStartWhenAllDead;
-	xIndexPtrList<CMonsterEx> xMonsterList; // 怪物列表指针
+	char szName[32]{}; //怪类名
+	int	mapid{}; //地图ID
+	int	x{}; //X坐标
+	int	y{}; //Y坐标
+	int	range{}; //范围  1000 以上的数值是刷怪方式类型
+	int	count{}; //数量
+	DWORD dwRefreshDelay{}; //刷新间隔(分)
+	int	curcount{};
+	int	errortime{};
+	DWORD dwLastRefreshTime{};
+	CServerTimer tmrRefresh{};
+	char* pszScriptPage{};
+	BOOL bStartWhenAllDead{};
+	xIndexPtrList<CMonsterEx> xMonsterList{}; // 怪物列表指针
 }MONSTERGEN;
 
 typedef struct tag_humandatadesc //人物数据描述
 {
-	tag_humandatadesc()
-	{
-		FILLSELF(0);
-	}
-	WORD wHp;
-	WORD wMp;
-	DWORD dwLevelupExp;
-	BYTE minac;
-	BYTE maxac;
-	BYTE minmac;
-	BYTE maxmac;
+	WORD wHp{};
+	WORD wMp{};
+	DWORD dwLevelupExp{};
+	BYTE minac{};
+	BYTE maxac{};
+	BYTE minmac{};
+	BYTE maxmac{};
 
-	BYTE mindc;
-	BYTE maxdc;
-	BYTE minmc;
-	BYTE maxmc;
+	BYTE mindc{};
+	BYTE maxdc{};
+	BYTE minmc{};
+	BYTE maxmc{};
 
-	BYTE minsc;
-	BYTE maxsc;
-	WORD bagweight;
+	BYTE minsc{};
+	BYTE maxsc{};
+	WORD bagweight{};
 
-	BYTE escape;		//躲避
-	BYTE hitrate;		//命中
-	BYTE bodyweight;
-	BYTE handweight;
+	BYTE escape{};		//躲避
+	BYTE hitrate{};		//命中
+	BYTE bodyweight{};
+	BYTE handweight{};
 
-	BYTE magicrecover;
-	BYTE hprecover;
-	BYTE magescape;		//魔法躲避
-	BYTE magicnicety;	//魔法命中
-	BYTE poisonescape;	//中毒躲避
-	BYTE poisonnicety;	//中毒命中
+	BYTE magicrecover{};
+	BYTE hprecover{};
+	BYTE magescape{};	//魔法躲避
+	BYTE magicnicety{};	//魔法命中
+	BYTE poisonescape{};//中毒躲避
+	BYTE poisonnicety{};//中毒命中
 
-	WORD huoli;
-	WORD wUnknown;
+	WORD huoli{};
+	WORD wUnknown{};
 }HUMANDATADESC;
 
 #define ROUND(f) (int)(f+0.5) //四舍五入
@@ -519,29 +479,25 @@ enum e_skill_need_item //技能需要物品
 
 typedef struct tagMAGICCLASS //技能类
 {
-	tagMAGICCLASS()
-	{
-		FILLSELF(0);
-	}
-	char szName[20];
-	DWORD id; // 序号
-	BYTE btJob; // 职业
-	BYTE btEffectType; // 效果类型
-	BYTE btEffectValue; // 效果标志
-	BYTE btNeedLv[4]; // 等级需求
-	DWORD dwNeedExp[4]; // 经验需求
-	WORD sSpell; // 施法值
-	WORD sDefSpell; // 默认施法值
-	WORD wDelay; // CD时间(毫秒)
-	WORD wNeedMagic[3]; // 必须先学列表
-	WORD wMutexMagic[3]; // 同类技能列表
-	DWORD dwFlag; // 技能标识
-	WORD wCharmCount; // 耗道符数
-	WORD wRedPoisonCount; // 耗红毒点数
-	WORD wGreenPoisonCount; // 耗绿毒点数
-	WORD wStrawManCount; // 耗雄稻草人(男)点数
-	WORD wStrawWomanCount; // 耗雌稻草人(女)点数
-	char szSpecial[256]; // 附加参数
+	char szName[20]{};
+	DWORD id{}; // 序号
+	BYTE btJob{}; // 职业
+	BYTE btEffectType{}; // 效果类型
+	BYTE btEffectValue{}; // 效果标志
+	BYTE btNeedLv[4]{}; // 等级需求
+	DWORD dwNeedExp[4]{}; // 经验需求
+	WORD sSpell{}; // 施法值
+	WORD sDefSpell{}; // 默认施法值
+	WORD wDelay{}; // CD时间(毫秒)
+	WORD wNeedMagic[3]{}; // 必须先学列表
+	WORD wMutexMagic[3]{}; // 同类技能列表
+	DWORD dwFlag{}; // 技能标识
+	WORD wCharmCount{}; // 耗道符数
+	WORD wRedPoisonCount{}; // 耗红毒点数
+	WORD wGreenPoisonCount{}; // 耗绿毒点数
+	WORD wStrawManCount{}; // 耗雄稻草人(男)点数
+	WORD wStrawWomanCount{}; // 耗雌稻草人(女)点数
+	char szSpecial[256]{}; // 附加参数
 	//获取使用技能时消耗的魔法值
 	int GetSpellPoint(int nLevel)const
 	{
@@ -549,23 +505,23 @@ typedef struct tagMAGICCLASS //技能类
 	}
 }MAGICCLASS;
 
-#define USERMAGICFLAG_ACTIVED	0x80000000	//激活
+constexpr BYTE USERMAGICMAX = 21;	//最多可学技能数量
+constexpr DWORD USERMAGICFLAG_ACTIVED = 0x80000000;	//激活
 
 typedef struct tagUSERMAGIC //使用技能
 {
 	tagUSERMAGIC()
 	{
-		FILLSELF(0);
 		useTimer.Savetime();
 	}
-	MAGICDB	magic;
-	MAGICCLASS* pClass;
-	tagUSERMAGIC* pNext;
+	MAGICDB	magic{};
+	MAGICCLASS* pClass{};
+	tagUSERMAGIC* pNext{};
 	//DWORD	dwLastUseTime;
-	CServerTimer	useTimer;
-	DWORD	dwFlag;
-	int	nAddPower;
-	DWORD	dwColor;
+	CServerTimer	useTimer{};
+	DWORD	dwFlag{};
+	int	nAddPower{};
+	DWORD	dwColor{};
 }USERMAGIC;
 
 enum status_index //状态索引 0 - 31
@@ -622,13 +578,13 @@ enum e_systemflag //系统标志索引 0 - 31
 
 class xStatus
 {
-	DWORD m_dwFlag;
-	DWORD m_dwSetter[32];
-	DWORD m_dwParam[32];
-	DWORD m_dwLastTime[32];
-	CServerTimer m_timer[32];
+	DWORD m_dwFlag{};
+	DWORD m_dwSetter[32]{};
+	DWORD m_dwParam[32]{};
+	DWORD m_dwLastTime[32]{};
+	CServerTimer m_timer[32]{};
 public:
-	xStatus(){ FILLSELF(0); }
+	xStatus() = default;
 	DWORD GetFlag()const { return m_dwFlag; }
 	VOID AddTime(int index, DWORD dwTime)
 	{
@@ -672,7 +628,7 @@ public:
 		if (!IsSeted(index))return;
 		m_dwSetter[index] = dwSetter;
 	}
-	VOID Clean() { FILLSELF(0); }
+	VOID Clean() { *this = xStatus{}; }
 	BOOL SetStatus(int index, DWORD dwParam = 0, DWORD dwLastTime = 0)
 	{
 		if (index < 0 || index >= 32)return FALSE;
@@ -709,7 +665,7 @@ public:
 	{
 		if (!IsSeted(index)) return 0;
 		if (m_dwLastTime[index] == 0xffffffff)return 0;
-		DWORD dwTimeOut = GetTimeToTime(m_timer[index].GetSavedTime(), timeGetTime());
+		DWORD dwTimeOut = GetTimeToTime(m_timer[index].GetSavedTime(), CFrameTime::GetFrameTime());
 		if (m_dwLastTime[index] > dwTimeOut)
 			return (m_dwLastTime[index] - dwTimeOut);
 		return 0;
@@ -720,120 +676,80 @@ public:
 #pragma pack(1)
 typedef struct tagGuildmgr // 行会管理-时长区
 {
-	tagGuildmgr()
-	{
-		FILLSELF(0);
-	}
-	char szTite[9];
-	BYTE btCode;
-	int nType;
+	char szTite[9]{};
+	BYTE btCode{};
+	int nType{};
 }Guildmgr;
 
 typedef struct tagGameTimeMgr // 充值游戏时长-时长区
 {
-	tagGameTimeMgr()
-	{
-		FILLSELF(0);
-	}
-	char szTite[12];
-	BYTE btCode;
-	BYTE btUnknow;
-	int nValue[3];
+	char szTite[12]{};
+	BYTE btCode{};
+	BYTE btUnknow{};
+	int nValue[3]{};
 }GameTimeMgr;
 
 typedef struct tagExpBack // 每日经验-时长区
 {
-	tagExpBack()
-	{
-		FILLSELF(0);
-	}
-	char szTite[12];
-	BYTE btCode;
-	int nType;
+	char szTite[12]{};
+	BYTE btCode{};
+	int nType{};
 }ExpBack;
 
 typedef struct tagActivityScore2014 // 活动-时长区
 {
-	tagActivityScore2014()
-	{
-		FILLSELF(0);
-	}
-	char szTite[19];
-	BYTE btCode;
+	char szTite[19]{};
+	BYTE btCode{};
 }ActivityScore2014;
 
 typedef struct tagMapJump // 服务器阶段-时长区
 {
-	tagMapJump()
-	{
-		FILLSELF(0);
-	}
-	char szTite[19];
-	BYTE btCode;
-	int nType;
-	char szPage[21];
+	char szTite[19]{};
+	BYTE btCode{};
+	int nType{};
+	char szPage[21]{};
 }MapJump;
 
 typedef struct tagBossTJ // BOSS图解-时长区
 {
-	tagBossTJ()
-	{
-		FILLSELF(0);
-	}
-	char szTite[9];
-	BYTE btCode;
-	int nNum;
-	char sName[21];
-	int btUnKnow;
+	char szTite[9]{};
+	BYTE btCode{};
+	int nNum{};
+	char sName[21]{};
+	int btUnKnow{};
 }BossTJ;
 
 typedef struct tagClientKeyState // 自定义快捷键-时长区
 {
-	tagClientKeyState()
-	{
-		FILLSELF(0);
-	}
-	BYTE Key1;
-	BYTE Key2;
-	WORD unknow;
+	BYTE Key1{};
+	BYTE Key2{};
+	WORD unknow{};
 }ClientKeyState;
 
 typedef struct tagHealthStatus // 健康状态-时长区
 {
-	tagHealthStatus()
-	{
-		FILLSELF(0);
-	}
-	DWORD dwId;
-	int nHPChange;
-	WORD wEffect;
-	DWORD dwHP;
-	DWORD dwMaxHP;
-	DWORD dwMP;
-	DWORD dwMaxMP;
+	DWORD dwId{};
+	int nHPChange{};
+	WORD wEffect{};
+	DWORD dwHP{};
+	DWORD dwMaxHP{};
+	DWORD dwMP{};
+	DWORD dwMaxMP{};
 }HealthStatus;
 
 typedef struct tagPersonSetting // 个性化设置
 {
-	tagPersonSetting()
-	{
-		FILLSELF(0);
-	}
-	char szSetBan[20]; // 个性封号设置
-	char szPersonSign[20]; // 个性化签名
-	char szTempBan[60]; //
+	char szSetBan[20]{}; // 个性封号设置
+	char szPersonSign[20]{}; // 个性化签名
+	char szTempBan[60]{}; //
 	
 }PersonSetting;
 
 typedef struct tagTreasureBoxItem // 宝箱开启物品
 {
-	tagTreasureBoxItem()
-	{
-		FILLSELF(0);
-	}
-	WORD Looks; // 物品外形
-	BYTE btGoodType; // 物品类型 1普通, 2为贵重物品, 要求闪金光
-	char szName[15]; // 物品名字
+	WORD Looks{}; // 物品外形
+	BYTE btGoodType{}; // 物品类型 1普通, 2为贵重物品, 要求闪金光
+	char szName[15]{}; // 物品名字
 }TreasureBoxItem;
 #pragma pack(pop)
 
@@ -842,20 +758,16 @@ typedef struct tagTreasureBoxItem // 宝箱开启物品
 #pragma pack(2)
 struct tag_batfly_header //化身蝙蝠-头信息
 {
-	tag_batfly_header()
-	{
-		FILLSELF(0);
-	}
-	DWORD dwFeature;
-	DWORD dwStatus;
-	WORD wCurHp;
-	WORD wMaxHp;
-	WORD wX;
-	WORD wY;
-	BYTE bt1;
-	BYTE btColor;
-	BYTE btSm;
-	BYTE btSm2;
+	DWORD dwFeature{};
+	DWORD dwStatus{};
+	WORD wCurHp{};
+	WORD wMaxHp{};
+	WORD wX{};
+	WORD wY{};
+	BYTE bt1{};
+	BYTE btColor{};
+	BYTE btSm{};
+	BYTE btSm2{};
 };
 
 struct tag_batfly //飞行移动技能-信息
@@ -865,15 +777,16 @@ struct tag_batfly //飞行移动技能-信息
 };
 #pragma pack(pop)
 
-#define DF_NOSAFE			0x80000000	//不受伤害
-#define DF_NOSTRUCKACTION	0x40000000	//不受击打动作
-#define DF_SUPERHIT			0x20000000	//超级命中
-#define DF_TARGETEFFECT		0x10000000	//破盾 破击 风火轮等新技能的击中后魔法效果
+constexpr DWORD DF_NOSAFE = 0x80000000;			//不受伤害
+constexpr DWORD DF_NOSTRUCKACTION = 0x40000000;	//不受击打动作
+constexpr DWORD DF_SUPERHIT = 0x20000000;		//超级命中
+constexpr DWORD DF_TARGETEFFECT = 0x10000000;	//破盾 破击 烈火 雷霆剑 风火轮等新技能的击中后魔法效果
 
-#define TE_POJI			6	//破击
-#define TE_PODUN		7	//破盾
-#define	TE_FIREWHEEL	3	//火轮
-#define	TE_FIRE			1	//火墙
+constexpr int TE_PODUN = 7; //破盾
+constexpr int TE_POJI = 6; //破击
+constexpr int TE_FIREWHEEL = 3;	//风火轮
+constexpr int TE_THU = 2; //雷霆剑
+constexpr int TE_FIRE = 1; //烈火
 
 enum damage_type //伤害类型
 {
@@ -929,7 +842,7 @@ typedef struct start_point //玩家出生点
 enum e_visible_event //可见事件
 {
 	VE_ZOMBIHOLE = 0x1,	//僵尸洞
-    VE_STONEMINE = 0x2,	//矿石
+	VE_STONEMINE = 0x2,	//矿石
 	VE_MINESTONE = 0x3,	//堆石 矿石被挖
 	VE_SOULWALL = 0x4,	//光锥
 	VE_FIREWALL = 0x5,	//火墙
@@ -938,10 +851,10 @@ enum e_visible_event //可见事件
 	VE_FIRERAIN = 0X16,	//火云
 };
 
-#define SMALLBAG_SLOT 46	//小背包格子数
-#define BIGBAG_SLOT	66		//大背包格子数
-#define TYPEFLAG_TARGETOBJECT ((DWORD)((1<<OBJ_PLAYER) | (1<<OBJ_MONSTER)) | (1<<OBJ_PET))	//可被攻击的对象
-#define DISTANCE( x1, y1, x2, y2 ) (UINT)(max( abs((int)x1 - x2 ), abs( (int)y1 - y2 ) )) // 切比雪夫距离
+constexpr int SMALLBAG_SLOT = 46;	//小背包格子数
+constexpr int BIGBAG_SLOT = 66;		//大背包格子数
+constexpr DWORD TYPEFLAG_TARGETOBJECT = ((DWORD)((1 << OBJ_PLAYER) | (1 << OBJ_MONSTER)) | (1 << OBJ_PET));	//可被攻击的对象
+constexpr UINT DISTANCE(int x1, int y1, int x2, int y2) { return (UINT)(MAX(abs(x1 - x2), abs(y1 - y2))); } // 切比雪夫距离
 
 typedef struct tagMonsterBase // 怪物基础信息
 {
@@ -1218,13 +1131,6 @@ typedef struct tagMonsterClass //怪物类
 	ChangeInto changeinto[3];
 	tagMonItems* pDownItems;
 	UINT nCount;
-	//StringCacheNode * pBornScriptPage;
-	//StringCacheNode * pHurtScriptPage;
-	//StringCacheNode * pScriptPage;
-	//StringCacheNode * pBornScriptPage;
-	//StringCacheNode * pBornScriptPage;
-	//StringCacheNode * pBornScriptPage;
-	//char	szBornScriptPage[256];
 	char* pszBornScript;
 	char* pszGotTargetScript;
 	char* pszKillTargetScript;
@@ -1523,8 +1429,6 @@ enum special23_prop_index //23特殊属性
 	S23_SC2,
 };
 
-//#define	USE_FREE_MEMORY
-
 enum special_godbless //附身
 {
 	SG_IMMDIE = 1,		//秒杀
@@ -1670,16 +1574,6 @@ static const char* g_special_equipment_table[SEF_MAX] =
 	"TianXuanHalf",
 };
 
-//通过名字获取特殊装备函数
-inline special_equipment_func get_special_equipment_func_by_name(const char* pszName)
-{
-	for (int f = 0; f < SEF_MAX; f++)
-	{
-		if (_stricmp(g_special_equipment_table[f], pszName) == 0)return (special_equipment_func)f;
-	}
-	return SEF_MAX;
-}
-
 typedef struct tagSpecialEquipment //特殊装备
 {
 	tagSpecialEquipment()
@@ -1701,7 +1595,7 @@ typedef struct tagSpecialEquipmentFunction //特殊装备函数
 	}
 	char* pszSpecial;
 	int paramcount;
-	DWORD* pParams;
+	std::unique_ptr<DWORD[]> pParams;
 	int index;
 }SpecialEquipmentFunction;
 
@@ -1768,12 +1662,12 @@ static int g_iErrorCode = 0;
 #define	SETERROR( code ) g_iErrorCode = (int)(code)	//设置错误码
 
 //通过名字获取聊天频道
-inline e_chatchannel GetChannelFromString(const char* pszString)
+inline e_chatchannel GetChannelFromString(std::string_view pszString)
 {
 	for (int i = 0; i < CCH_MAX; i++)
 	{
-		if (strcmp(g_pChatChannelDesc[i], pszString) == 0)
-			return (e_chatchannel)i;
+		if (strcmp(g_pChatChannelDesc[i], pszString.data()) == 0)
+			return static_cast<e_chatchannel>(i);
 	}
 	return CCH_MAX;
 }
@@ -1788,6 +1682,7 @@ enum actiontype //动作类型
 	AT_FLY,			//飞地图
 	AT_ATTACK,		//攻击
 	AT_GETMEAL,		//挖肉
+	AT_MINE,		//挖矿
 	AT_BEATTACK,	//被攻击
 	AT_SPELLSKILL,	//施放技能
 	AT_RUSH,		//冲锋
@@ -1805,16 +1700,16 @@ inline actiontype GetActionType(const char* pszName)
 	if (_stricmp(pszName, "stand") == 0) return AT_STAND;
 	if (_stricmp(pszName, "walk") == 0) return AT_WALK;
 	if (_stricmp(pszName, "run") == 0) return AT_RUN;
-    if (_stricmp(pszName, "back") == 0) return AT_BACK;
-    if (_stricmp(pszName, "turn") == 0) return AT_TURN;
+	if (_stricmp(pszName, "back") == 0) return AT_BACK;
+	if (_stricmp(pszName, "turn") == 0) return AT_TURN;
 	if (_stricmp(pszName, "attack") == 0) return AT_ATTACK;
-    if (_stricmp(pszName, "getmeal") == 0) return AT_GETMEAL;
+	if (_stricmp(pszName, "getmeal") == 0) return AT_GETMEAL;
 	if (_stricmp(pszName, "beattack") == 0) return AT_BEATTACK;
 	if (_stricmp(pszName, "spellskill") == 0) return AT_SPELLSKILL;
-    if (_stricmp(pszName, "rush") == 0) return AT_RUSH;
-    if (_stricmp(pszName, "aiaction") == 0) return AT_AIACTION;
+	if (_stricmp(pszName, "rush") == 0) return AT_RUSH;
+	if (_stricmp(pszName, "aiaction") == 0) return AT_AIACTION;
 	if (_stricmp(pszName, "privateshop") == 0) return AT_PRIVATESHOP;
-    if (_stricmp(pszName, "specialhit") == 0) return AT_SPECIALHIT;
+	if (_stricmp(pszName, "specialhit") == 0) return AT_SPECIALHIT;
 	return AT_MAX;
 }
 
@@ -1837,25 +1732,23 @@ enum item_limit //物品限制
 	IL_MAX,
 };
 
-#define	COMPANDRETURNITEMLIMIT( name ) if( _stricmp( pszLimit, #name ) == 0 )return IL_##name;	//通过名字获取物品限制
-
 //通过名字获取物品限制
-inline item_limit GetItemLimit(const char* pszLimit)
+inline item_limit GetItemLimit(std::string_view pszLimit)
 {
-	COMPANDRETURNITEMLIMIT(NODROP);			//不能扔掉
-	COMPANDRETURNITEMLIMIT(NODEADDROP);		//死亡不掉
-	COMPANDRETURNITEMLIMIT(DEADDROP);		//死亡必掉
-	COMPANDRETURNITEMLIMIT(NOEXCHANGE);		//无法交易
-	COMPANDRETURNITEMLIMIT(NOSELL);			//无法卖给ＮＰＣ
-	COMPANDRETURNITEMLIMIT(NOPRIVATESHOP);	//无法放入摆摊物品
-	COMPANDRETURNITEMLIMIT(NOREPAIR);		//不能修理
-	COMPANDRETURNITEMLIMIT(NOTAKEOFF);		//不能卸下来
-	COMPANDRETURNITEMLIMIT(NOSTORAGE);		//不能存仓库
-	COMPANDRETURNITEMLIMIT(NOUPDATETODB);	//不能更新到数据库
-	COMPANDRETURNITEMLIMIT(TRACEDITEM);		//跟踪该物品
-	COMPANDRETURNITEMLIMIT(NOUPGRADE);		//不能升级武器
-	COMPANDRETURNITEMLIMIT(DEADDELETE);		//死亡销毁
-	COMPANDRETURNITEMLIMIT(EQUDEADDELETE);	//装备死亡销毁
+	if (_stricmp(pszLimit.data(), "NODROP") == 0) return IL_NODROP;			//不能扔掉
+	if (_stricmp(pszLimit.data(), "NODEADDROP") == 0) return IL_NODEADDROP;	//死亡不掉
+	if (_stricmp(pszLimit.data(), "DEADDROP") == 0) return IL_DEADDROP;		//死亡必掉
+	if (_stricmp(pszLimit.data(), "NOEXCHANGE") == 0) return IL_NOEXCHANGE;	//无法交易
+	if (_stricmp(pszLimit.data(), "NOSELL") == 0) return IL_NOSELL;			//无法卖给ＮＰＣ
+	if (_stricmp(pszLimit.data(), "NOPRIVATESHOP") == 0) return IL_NOPRIVATESHOP;	//无法放入摆摊物品
+	if (_stricmp(pszLimit.data(), "NOREPAIR") == 0) return IL_NOREPAIR;		//不能修理
+	if (_stricmp(pszLimit.data(), "NOTAKEOFF") == 0) return IL_NOTAKEOFF;		//不能卸下来
+	if (_stricmp(pszLimit.data(), "NOSTORAGE") == 0) return IL_NOSTORAGE;		//不能存仓库
+	if (_stricmp(pszLimit.data(), "NOUPDATETODB") == 0) return IL_NOUPDATETODB;	//不能更新到数据库
+	if (_stricmp(pszLimit.data(), "TRACEDITEM") == 0) return IL_TRACEDITEM;	//跟踪该物品
+	if (_stricmp(pszLimit.data(), "NOUPGRADE") == 0) return IL_NOUPGRADE;		//不能升级武器
+	if (_stricmp(pszLimit.data(), "DEADDELETE") == 0) return IL_DEADDELETE;	//死亡销毁
+	if (_stricmp(pszLimit.data(), "EQUDEADDELETE") == 0) return IL_EQUDEADDELETE;	//装备死亡销毁
 	return IL_MAX;
 }
 

@@ -8,18 +8,13 @@ CSubMarket::CSubMarket(UINT nMarketId, UINT nId, const char* pszName)
 {
 	m_nMarketId = nMarketId;
 	this->m_Id = nId;
-	if (pszName == nullptr || *pszName == 0)
-		m_pszName = "";
-	else
-		m_pszName = copystring(pszName);
-	m_pItemArray = nullptr;
+	if (pszName && *pszName != 0)
+		m_pszName.reset(copystring(pszName));
 	m_nItemCount = 0;
 }
 
-CSubMarket::~CSubMarket(void)
+CSubMarket::~CSubMarket(VOID)
 {
-	if (m_pszName && m_pszName[0] != 0)
-		delete[]m_pszName;
 	if (m_pItemArray)
 	{
 		for (UINT i = 0; i < m_nItemCount; i++)
@@ -29,13 +24,12 @@ CSubMarket::~CSubMarket(void)
 				CMarketManager::GetInstance()->deleteItem(m_pItemArray[i]);
 			}
 		}
-		delete[]m_pItemArray;
 	}
 }
 
 BOOL CSubMarket::InitItemArray(UINT nSize)
 {
-	m_pItemArray = new MarketItem * [nSize];
+	m_pItemArray = std::make_unique<MarketItem*[]>(nSize);
 	m_nItemCount = 0;
 	if (m_pItemArray)return TRUE;
 	return FALSE;
@@ -59,8 +53,8 @@ BOOL CSubMarket::AddItem(UINT nImage, UINT nShowImage, const char* pszViewName, 
 		pItem->nSellCount = 0;
 		pItem->nShowImage = nShowImage;
 		pItem->pszTips = ProcItemTips(pszTips);
-		o_strncpy(pItem->szItemName, pszItemName, 60);
-		o_strncpy(pItem->szName, pszViewName, 60);
+		o_strncpy(pItem->szItemName.data(), pszItemName, 60);
+		o_strncpy(pItem->szName.data(), pszViewName, 60);
 		pItem->wCount = nCount;
 		pItem->wPrice = nPrice;
 		pItem->bBind = bBind;
@@ -70,9 +64,10 @@ BOOL CSubMarket::AddItem(UINT nImage, UINT nShowImage, const char* pszViewName, 
 	return FALSE;
 }
 
-static char g_szTempString[65536];
 char* CSubMarket::ProcItemTips(const char* pszTips)
 {
+	xPacketPool::ScopedPacket packet(65535);
+	char* buf = (char*)packet->getbuf();
 	UINT nWidth = 0;
 	UINT nOutPutPtr = 0;
 	char* p = (char*)pszTips;
@@ -87,27 +82,27 @@ char* CSubMarket::ProcItemTips(const char* pszTips)
 				bHz = TRUE;
 		}
 
-		g_szTempString[nOutPutPtr++] = *p;
+		buf[nOutPutPtr++] = *p;
 		nWidth++;
 		if (nWidth == 20)
 		{
 			if (bHz)
 			{
-				g_szTempString[nOutPutPtr - 1] = '\\';
-				g_szTempString[nOutPutPtr++] = '\\';
-				g_szTempString[nOutPutPtr++] = *p;
+				buf[nOutPutPtr - 1] = '\\';
+				buf[nOutPutPtr++] = '\\';
+				buf[nOutPutPtr++] = *p;
 			}
 			else
 			{
-				g_szTempString[nOutPutPtr++] = '\\';
-				g_szTempString[nOutPutPtr++] = '\\';
+				buf[nOutPutPtr++] = '\\';
+				buf[nOutPutPtr++] = '\\';
 			}
 			nWidth = 0;
 		}
 		p++;
 	}
-	g_szTempString[nOutPutPtr] = 0;
-	return copystring(g_szTempString);
+	buf[nOutPutPtr] = 0;
+	return copystring(buf);
 }
 
 BOOL CSubMarket::LoadSubMarket(const char* pszFilename)
@@ -137,27 +132,27 @@ BOOL CSubMarket::LoadSubMarket(const char* pszFilename)
 
 VOID CSubMarket::QueryItems(CHumanPlayer* pPlayer, UINT nMarketId)
 {
-	xPacket packet(g_szTempString, 65536);
+	xPacketPool::ScopedPacket packet(65536);
 	//1268|827|00109|双倍经验晚间卡（天）|4|1
-	sprintf((char*)packet.getfreebuf(), "%02u%02u&", nMarketId, GetId());
-	packet.addsize((int)strlen(packet.getfreebuf()));
+	sprintf((char*)packet->getfreebuf(), "%02u%02u&", nMarketId, GetId());
+	packet->addsize((int)strlen(packet->getfreebuf()));
 	UINT nItemId = 0;
 	for (UINT i = 0; i < this->m_nItemCount; i++)
 	{
 		if (this->m_pItemArray[i])
 		{
-			sprintf((char*)packet.getfreebuf(), "%u|%u|%05u|%s|%u|%u&",
+			sprintf((char*)packet->getfreebuf(), "%u|%u|%05u|%s|%u|%u&",
 				this->m_pItemArray[i]->nId,
 				this->m_pItemArray[i]->nImage,
 				this->m_pItemArray[i]->nShowImage,
-				this->m_pItemArray[i]->szName,
+				this->m_pItemArray[i]->szName.data(),
 				this->m_pItemArray[i]->wPrice,
 				this->m_pItemArray[i]->wCount);
 			if (nItemId == 0)nItemId = this->m_pItemArray[i]->nId;
-			packet.addsize((int)strlen(packet.getfreebuf()));
+			packet->addsize((int)strlen(packet->getfreebuf()));
 		}
 	}
-	pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 3, 0, 0, (LPVOID)packet.getbuf(), packet.getsize());
+	pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 3, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	if (nItemId != 0)
 		CMarketManager::GetInstance()->QueryItemTips(pPlayer, nItemId);
 }

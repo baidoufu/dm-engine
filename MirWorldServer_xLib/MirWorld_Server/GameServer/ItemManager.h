@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
+#include <string>
 
 //物品管理
 class CItemManager : public xSingletonClass<CItemManager>
 {
 public:
-	CItemManager(void);
-	virtual ~CItemManager(void);
+	CItemManager(VOID);
+	virtual ~CItemManager(VOID);
 	//清空物品数据
 	VOID ClearItemData();
 	//加载物品数据BaseItem.csv
@@ -22,9 +23,9 @@ public:
 	// 从池里获取字符串
 	const char* GetStringFromPool(WORD wStringId);
 	// 清除字符串池
-	void ClearStringPool();
+	VOID ClearStringPool();
 	//添加物品类
-	BOOL AddItemClassString(const char* pszItemClassDesc);
+	BOOL AddItemClassString(char* pszItemClassDesc);
 	// 豹子升级经验, type是豹子类型
 	int GetPetLevelInfo(int lv, BYTE type)
 	{
@@ -86,7 +87,7 @@ public:
 	//通过名字获取物品类
 	ITEMCLASS* GetItemClassByName(const char* pszName);
 	//获取错误信息
-	const char* GetErrorMsg() { return m_pErrorMsg; }
+	const char* GetErrorMsg() { return m_strErrorMsg.c_str(); }
 	//更新物品位置
 	BOOL UpdateItemPos(DWORD dwItemIndex, BYTE btFlag, WORD wPos);
 	//更新物品所有者
@@ -117,8 +118,6 @@ public:
 	ITEMCLASS* GetItemClass(ITEM& item);
 	//物品是否是限制
 	BOOL ItemLimited(ITEM& item, item_limit limit);
-	//修改物品
-	BOOL ModifyItem(ITEM& item, const char* pszModifyString);
 	//升级物品
 	BOOL UpgradeItem(ITEM& item, const char* pszUpgradeString);
 	//升级宠物物品
@@ -169,7 +168,7 @@ private:
 	xIdAllocorEx<2000000> m_xTempItemIdAllocor;
 	xObjectPool<ITEMCLASS> m_xItemClassPool;
 
-	char* m_pErrorMsg;
+	std::string m_strErrorMsg;
 	
 	DWORD m_nIdentCount;
 	DWORD m_nTempItemCount;

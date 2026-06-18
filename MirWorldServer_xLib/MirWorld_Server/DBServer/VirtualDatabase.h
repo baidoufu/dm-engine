@@ -1,5 +1,6 @@
 #pragma once
 #include "..\public\public.h"
+#include <string>
 
 typedef struct tagDBIMAGE
 {
@@ -28,7 +29,7 @@ typedef struct tagColumnInfo
 class CVirtualDataUnit
 {
 public:
-	virtual SERVER_ERROR Init(void*) = 0;
+	virtual SERVER_ERROR Init(VOID*) = 0;
 	virtual SERVER_ERROR UnInit() = 0;
 
 	virtual int	GetColCount() = 0;
@@ -53,7 +54,7 @@ public:
 class CVirtualDBConnection
 {
 public:
-	virtual SERVER_ERROR Init(void*) = 0;
+	virtual SERVER_ERROR Init(VOID*) = 0;
 	virtual SERVER_ERROR UnInit() = 0;
 
 	virtual SERVER_ERROR Connect(const char* pServerName, const char* pPort, const char* pdbname, const char* pId, const char* pPassword) = 0;
@@ -62,6 +63,9 @@ public:
 	virtual SERVER_ERROR DelDataUnit(CVirtualDataUnit* pDataUnit) = 0;
 	virtual UINT GetFreeUnitCount() = 0;
 	virtual BOOL GetIsstart() = 0;
+	virtual std::string EscapeString(const char* pszInput) = 0;
+	virtual BOOL IsConnectionValid() = 0;
+	virtual SERVER_ERROR Reconnect() = 0;
 };
 
 class CVirtualDatabase

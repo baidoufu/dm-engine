@@ -4,8 +4,8 @@ class CGroupObject;
 class CGroupObjectMgr : public xSingletonClass<CGroupObjectMgr>
 {
 public:
-	CGroupObjectMgr(void);
-	virtual ~CGroupObjectMgr(void);
+	CGroupObjectMgr(VOID);
+	virtual ~CGroupObjectMgr(VOID);
 	BOOL CreateGroup(CHumanPlayer* pLeader, CHumanPlayer* pFirstMember);
 	VOID DestroyGroup(CGroupObject* pObject);
 private:

@@ -1,22 +1,19 @@
 #pragma once
 #include "clientobj.h"
+#include <array>
 
 constexpr UINT MAX_CLIENTOBJECT = 8;
+constexpr int MAX_SERVER_COUNT = 64;
 
 typedef struct tagSERVERARRAY
 {
-	UINT Ids[64];
-	int count;
-	int	pickptr;
-	tagSERVERARRAY()
+	std::array<UINT, MAX_SERVER_COUNT> Ids{ 0 };
+	int count{ 0 };
+	int pickptr{ 0 };
+
+	VOID DelId(UINT id)
 	{
-		count = 0;
-		pickptr = 0;
-	}
-	void DelId(UINT id)
-	{
-		int i = 0;
-		for (i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
 			if (Ids[i] == id)
 			{
@@ -25,13 +22,19 @@ typedef struct tagSERVERARRAY
 					Ids[j] = Ids[j + 1];
 				}
 				count--;
+				// 调整pickptr：如果被删除元素在pickptr之前，pickptr前移
+				if (pickptr > i && pickptr > 0)
+					pickptr--;
+				// 如果pickptr超出范围，回绕到0
+				if (pickptr >= count)
+					pickptr = 0;
 				break;
 			}
 		}
 	}
 	BOOL AddId(UINT id)
 	{
-		if (count >= 64)return FALSE;
+		if (count >= MAX_SERVER_COUNT) return FALSE;
 		Ids[count++] = id;
 		return TRUE;
 	}
@@ -43,9 +46,9 @@ class CServer :
 	public xSingletonClass<CServer>
 {
 public:
-	CServer(void);
-	virtual ~CServer(void);
-	void OnInput(const char* pString) { CBaseServer::OnInput(pString); }
+	CServer(VOID);
+	virtual ~CServer(VOID);
+	VOID OnInput(const char* pString) { CBaseServer::OnInput(pString); }
 	CClientObject* GetClientObject(UINT id) { return getObject(id); }
 	CClientObject* NewClientObject();
 	VOID DeleteClientObject(CClientObject* pObject);
@@ -60,5 +63,5 @@ public:
 	VOID SendDBServer(SERVERADDR* pAddr, int count);
 	int PrepareServer(int type, int count, SERVERADDR* pAddrArray);
 protected:
-	SERVERARRAY	m_ServerArrays[ST_GAMESERVER];
+	SERVERARRAY	m_ServerArrays[ST_MAX];
 };
