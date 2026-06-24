@@ -16,6 +16,14 @@
 #include "monsterex.h"
 #include "ScriptNpc.h"
 #include "TimeAchieve.h"
+#include "ECSWorld.h"
+#include "RateLimitComponent.h"
+#include "ShieldStateComponent.h"
+#include "SpecialEquipComponent.h"
+#include "RateLimitSystem.h"
+#include "ShieldStateSystem.h"
+#include "SpecialEquipSystem.h"
+#include "PlayerTimerSystem.h"
 
 class CClientObj;
 class CScriptPage;
@@ -229,20 +237,66 @@ public:
 	VOID SendPetName(ITEM* pItem);
 
 	BOOL EquipItem(int pos, ITEM& item, BOOL bForced = FALSE, BOOL bNoticePlayer = TRUE);
+	BOOL EquipItem(DWORD dwMakeIndex);
 	BOOL EquipItem(int pos, DWORD dwMakeIndex);
 	BOOL UnEquipItem(int pos, DWORD dwMakeIndex);
 
 	// 频率限制检查(防加速外挂)
-	BOOL CanmMine() { return m_tmrMine.IsTimeOut(800); }
-	VOID SaveMineTime() { m_tmrMine.Savetime(); }
-	BOOL CanUseItem() { return m_tmrUseItem.IsTimeOut(250); }
-	VOID SaveUseItemTime() { m_tmrUseItem.Savetime(); }
-	BOOL CanPickupItem() { return m_tmrPickupItem.IsTimeOut(300); }
-	VOID SavePickupItemTime() { m_tmrPickupItem.Savetime(); }
-	BOOL CanDropItem() { return m_tmrDropItem.IsTimeOut(200); }
-	VOID SaveDropItemTime() { m_tmrDropItem.Savetime(); }
-	BOOL CanEquipChange() { return m_tmrEquipChange.IsTimeOut(200); }
-	VOID SaveEquipChangeTime() { m_tmrEquipChange.Savetime(); }
+	BOOL CanmMine()
+	{
+		auto* rl = GetRateLimit();
+		return rl ? rl->TryExecute(RateLimitComponent::ACT_MINE, CFrameTime::GetFrameTime()) : FALSE;
+	}
+	BOOL CanUseItem()
+	{
+		auto* rl = GetRateLimit();
+		return rl ? rl->TryExecute(RateLimitComponent::ACT_USE_ITEM, CFrameTime::GetFrameTime()) : FALSE;
+	}
+	BOOL CanPickupItem()
+	{
+		auto* rl = GetRateLimit();
+		return rl ? rl->TryExecute(RateLimitComponent::ACT_PICKUP_ITEM, CFrameTime::GetFrameTime()) : FALSE;
+	}
+	BOOL CanDropItem()
+	{
+		auto* rl = GetRateLimit();
+		return rl ? rl->TryExecute(RateLimitComponent::ACT_DROP_ITEM, CFrameTime::GetFrameTime()) : FALSE;
+	}
+	BOOL CanEquipChange()
+	{
+		auto* rl = GetRateLimit();
+		return rl ? rl->TryExecute(RateLimitComponent::ACT_EQUIP_CHANGE, CFrameTime::GetFrameTime()) : FALSE;
+	}
+
+	// ========== ECS 组件访问器 (统一入口) ==========
+	inline RateLimitComponent* GetRateLimit()
+	{
+		return RateLimitSystem::GetInstance()->GetRateLimit(this);
+	}
+	inline ShieldStateComponent* GetShieldState()
+	{
+		return ShieldStateSystem::GetInstance()->GetShieldState(this);
+	}
+	inline SpecialEquipComponent* GetSpecialEquip()
+	{
+		return SpecialEquipSystem::GetInstance()->GetSpecialEquip(this);
+	}
+	inline BOOL CheckTimer(TimerType type, DWORD intervalMs)
+	{
+		return PlayerTimerSystem::GetInstance()->CheckTimer(GetId(), type, intervalMs);
+	}
+	inline BOOL CheckTimerNoReset(TimerType type, DWORD intervalMs, int& outLastTickMs)
+	{
+		return PlayerTimerSystem::GetInstance()->CheckTimerNoReset(GetId(), type, intervalMs, outLastTickMs);
+	}
+	inline VOID ResetTimer(TimerType type)
+	{
+		PlayerTimerSystem::GetInstance()->ResetTimer(GetId(), type);
+	}
+	inline VOID OffsetTimer(TimerType type, int offsetMs)
+	{
+		PlayerTimerSystem::GetInstance()->OffsetTimer(GetId(), type, offsetMs);
+	}
 
 	BOOL Trade(CHumanPlayer* pPlayer = nullptr);
 	BOOL PutTradeItem(DWORD dwMakeIndex);
@@ -605,16 +659,25 @@ public:
 	int getHushenbuf() { return hushenbuff[hushenleve]; }
 	//获取魔法盾和金刚护体免伤的百分比
 	int GetNoDamage() {
-		if (IsStatusSet(SI_BUBBLEDEFENCEUP))//获取魔法盾百分比
-			return NoDamage;
-		if (IsSystemFlagSeted(SF_STRONGSHIELD))//金刚护体百分比
-			return JingganNoDamage;
+		auto* ss = GetShieldState();
+		if (ss)
+		{
+			if (IsStatusSet(SI_BUBBLEDEFENCEUP))
+				return ss->magShieldNoDamage;
+			if (IsSystemFlagSeted(SF_STRONGSHIELD))
+				return ss->jingangNoDamage;
+		}
 		return 0;
 	}
 	int SecondResMag_count() {
-		if (ResMag_Count != 0)
-			ResMag_Count--;
-		return ResMag_Count;
+		auto* ss = GetShieldState();
+		if (ss)
+		{
+			if (ss->magShieldResCount != 0)
+				ss->magShieldResCount--;
+			return ss->magShieldResCount;
+		}
+		return 0;
 	}
 	//发送生命值、魔法值 变化消息
 	VOID SendHpMpChanged(int damage = 0, WORD wEffect = 57)
@@ -723,43 +786,31 @@ public:
 	VOID SendMagicExpChg(USERMAGIC* pMagic);
 	VOID OnPetDie(CAliveObject* pPet, CAliveObject* pKiller);
 	VOID RefreshSpecialEquipment();
-	VOID ChangeHair(BYTE	btHair);
+	VOID ChangeHair(BYTE btHair);
 	VOID ChangeWeaponView(BYTE btView);
 	BOOL CheckEquipment(int pos, int stdmode, int image, int& posout);
 	BOOL IsSpecialEquipmentFunctionOn(special_equipment_func func)
 	{
-		if (func >= SEF_MAX)return FALSE;
-		if (func < 0)return FALSE;
-		if (m_dwSpecialEquipmentFunctionFlags[func] & 0x80000000)
-			return TRUE;
-		return FALSE;
+		auto* se = GetSpecialEquip();
+		return se ? se->IsOn(func) : FALSE;
+	}
+	DWORD GetSpecialEquipmentFlag(special_equipment_func func)
+	{
+		return SpecialEquipSystem::GetInstance()->GetSpecialEquipFlag(this, func);
 	}
 	VOID ProcSpecialEquipmentFunctionOff();
 	VOID ProcSpecialEquipmentFunctionOn();
 	VOID SetSpecialEquipmentFunctionOn(special_equipment_func func, DWORD dwPosFlag)
 	{
-		if (func >= SEF_MAX)return;
-		if (func < 0)return;
-		dwPosFlag |= 0x80000000;
-		if (m_dwSpecialEquipmentFunctionFlags[func] & 0x80000000)
-			m_dwSpecialEquipmentFunctionFlags[func] = dwPosFlag;
-		else
-		{
-			m_dwSpecialEquipmentFunctionFlags[func] = dwPosFlag;
+		auto* se = GetSpecialEquip();
+		if (se && se->SetOn(func, dwPosFlag))
 			OnSpecialEquipmentFunctionOn(func);
-		}
 	}
 	VOID SetSpecialEquipmentFunctionOff(special_equipment_func func)
 	{
-		if (func >= SEF_MAX)return;
-		if (func < 0)return;
-		if (m_dwSpecialEquipmentFunctionFlags[func] & 0x80000000)
-		{
-			m_dwSpecialEquipmentFunctionFlags[func] = 0;
+		auto* se = GetSpecialEquip();
+		if (se && se->SetOff(func))
 			OnSpecialEquipmentFunctionOff(func);
-		}
-		else
-			m_dwSpecialEquipmentFunctionFlags[func] = 0;
 	}
 	VOID OnSpecialEquipmentFunctionOn(special_equipment_func func);
 	VOID OnSpecialEquipmentFunctionOff(special_equipment_func func);
@@ -993,14 +1044,10 @@ protected:
 	AbilityShellRef m_xAbilityShellRef;
 	//char m_szCurrentNpcPage[128];
 
-	CServerTimer m_tmrGameTime; // 时长区-计时
-
 	CSystemTime m_LoginTime;
 	std::array<char, 256> m_szTempScriptVarValue{};
 
 	DWORD m_dwPkValue;
-	CServerTimer m_tmrPkTimer;
-	CServerTimer m_tmrJustPk;
 	BOOL m_bJustPk;
 	VOID CheckPk(CAliveObject* pTarget);
 
@@ -1008,7 +1055,6 @@ protected:
 
 	CHumanPlayer* m_pAddToGuildRequester;
 	DWORD m_dwAddToGuildRequesterInstanceKey;
-	CServerTimer m_AddToGuildTimer;
 	CGuildEx* m_pGuild;
 	std::array<char, 64> m_szGuildTitle{};
 	int	 m_iGuildTitleLevel;
@@ -1021,7 +1067,6 @@ protected:
 	CItemBox m_ItemPetBag; // 宠物背包
 
 	std::array<BOOL, CCH_MAX> m_bChatChannelDisabled;
-	std::array<CServerTimer, CCH_MAX> m_ChatChannelTimer;
 	e_chatchannel m_ChatChannel;
 	std::array<char, 32> m_szCurWisperTarget{};
 
@@ -1039,8 +1084,6 @@ protected:
 	USERMAGIC* m_pMagic;
 
 	BOOL m_fMagicLoaded;
-	CServerTimer m_DBTimer; // 保存数据检查
-	CServerTimer m_StaminaTimer; // 精力值检查
 
 	std::array<CMonsterEx*, 5> m_pPets{}; // 宠物对象列表
 	CMonsterEx* m_pPet;//豹子对象
@@ -1064,14 +1107,11 @@ protected:
 	mutable std::array<char, 20> petname{};//豹子的名字
 	BOOL ISzhaohuan;//是否召唤出来
 	DWORD m_baozhiID;
-	int ResMag_Count = 0;//魔法盾抵抗次数
 	int NoDamage = 0;//魔法盾抵抗百分比
 	int JingganNoDamage = 0;//金刚护体免伤
 	BOOL m_bRideHorse;
-	CServerTimer m_HorseTimer;
 	CAliveObject* m_pSeizedObject;
 	int	m_iSeizedTimes;
-	CServerTimer m_PkPointTimer;
 
 	int	m_iPrivateShopItemCount;
 	std::array<PrivateShopItemCache, 10> m_PrivateShopCache;
@@ -1082,16 +1122,8 @@ protected:
 	std::array<S_CHARNAME, 3> m_sStudents; // 3个徒弟
 	std::array<S_CHARNAME, 32> m_sFriends; // 32个好友
 
-	std::array<DWORD, SEF_MAX> m_dwSpecialEquipmentFunctionFlags;
 	DWORD m_dwMineCounter;
 
-	CServerTimer m_tmrSpecialAttackSkill; // 战士技能使用频率限制
-	CServerTimer m_tmrMine; // 挖矿频率限制
-	CServerTimer m_tmrRelive;		// 复活频率限制
-	CServerTimer m_tmrUseItem;		// 物品使用频率限制
-	CServerTimer m_tmrPickupItem;	// 拾取物品频率限制
-	CServerTimer m_tmrDropItem;		// 丢弃物品频率限制
-	CServerTimer m_tmrEquipChange;	// 装备穿脱频率限制
 	ITEM m_UpgradeItem;
 	BOOL m_bHorseRest; // 马是否休息
 
@@ -1106,7 +1138,6 @@ protected:
 	BYTE m_btChatColor;
 
 	FenghaoInfo m_FenghaoInfo; // 玩家时长封号信息
-	CServerTimer m_tmrFenghaoTime; // 时长区-封号计时
 	AchievementData m_Achievement;  // 成就数据
 
 	TASKINFO m_TaskInfo;

@@ -1066,7 +1066,7 @@ public:
 		if (!IsCreated()) return 0;
 		UINT count = 0;
 		UINT idx = m_pHeadIdx;
-		while (idx != 0)
+		while (idx != 0 && idx <= (UINT)MAXCOUNT)
 		{
 			if (m_vData[idx])
 			{
@@ -1081,7 +1081,7 @@ public:
 	{
 		SRLock lock(m_rwLock);
 		if (!IsCreated()) return nullptr;
-		if (m_totel == 0 || m_pHeadIdx == 0)
+		if (m_totel == 0 || m_pHeadIdx == 0 || m_pHeadIdx > (UINT)MAXCOUNT)
 			return nullptr;
 		m_pThroughIdx = m_pHeadIdx;
 		return m_vData[m_pThroughIdx].get();
@@ -1090,7 +1090,7 @@ public:
 	{
 		SRLock lock(m_rwLock);
 		if (!IsCreated()) return nullptr;
-		if (m_pThroughIdx != 0 && IsSlotInUse(m_pThroughIdx))
+		if (m_pThroughIdx != 0 && m_pThroughIdx <= (UINT)MAXCOUNT && IsSlotInUse(m_pThroughIdx))
 			return m_vData[m_pThroughIdx].get();
 		return nullptr;
 	}
@@ -1098,9 +1098,9 @@ public:
 	{
 		SRLock lock(m_rwLock);
 		if (!IsCreated()) return nullptr;
-		if (m_pThroughIdx != 0)
+		if (m_pThroughIdx != 0 && m_pThroughIdx <= (UINT)MAXCOUNT)
 			m_pThroughIdx = m_Slots[m_pThroughIdx].next;
-		if (m_pThroughIdx != 0)
+		if (m_pThroughIdx != 0 && m_pThroughIdx <= (UINT)MAXCOUNT)
 			return m_vData[m_pThroughIdx].get();
 		return nullptr;
 	}
@@ -1108,7 +1108,7 @@ public:
 	{
 		SRLock lock(m_rwLock);
 		if (!IsCreated()) return nullptr;
-		if (m_pTailIdx != 0)
+		if (m_pTailIdx != 0 && m_pTailIdx <= (UINT)MAXCOUNT)
 			return m_vData[m_pTailIdx].get();
 		return nullptr;
 	}
@@ -2461,21 +2461,41 @@ T ceil_div(T a, T b)
 //原子计数 + 自旋等待(自旋可避免内核态切换开销)
 //注意：Arrive() 无超时机制，若某个参与者未调用 Signal()，调用者将永久阻塞。
 //请确保所有参与者必定会调用 Signal()，且在 Arrive() 之前已启动。
+//推荐使用 Arrive(dwTimeoutMs) 带超时版本，避免因工作线程异常导致主线程永久卡死。
 class CSpinBarrier
 {
 public:
 	CSpinBarrier(int count) : m_remaining(count) {}
+	// 无超时等待（仅用于确认所有参与者必定会Signal的场景）
 	VOID Arrive()
 	{
-		// 先自旋等几微秒（适合游戏帧内同步，通常很快完成）
 		int spins = 0;
 		while (m_remaining.load(std::memory_order_acquire) > 0) {
 			if (++spins > 64)
 			{
-				std::this_thread::yield(); // 自旋太久，让出CPU
+				std::this_thread::yield();
 				spins = 0;
 			}
 		}
+	}
+	// 带超时等待：返回 TRUE 表示所有参与者已完成，FALSE 表示超时
+	// 超时后调用者可执行降级逻辑（日志+断言），避免整个主循环卡死
+	BOOL Arrive(DWORD dwTimeoutMs)
+	{
+		auto startTime = std::chrono::steady_clock::now();
+		int spins = 0;
+		while (m_remaining.load(std::memory_order_acquire) > 0) {
+			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now() - startTime).count();
+			if (elapsed >= (long long)dwTimeoutMs)
+				return FALSE;
+			if (++spins > 64)
+			{
+				std::this_thread::yield();
+				spins = 0;
+			}
+		}
+		return TRUE;
 	}
 	VOID Signal()
 	{

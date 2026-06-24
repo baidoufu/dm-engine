@@ -205,7 +205,6 @@ VOID CClientObj::HandleDropItem(PMIRMSG pMsg, int datasize)
 	if (!m_pPlayer->CanDropItem()) return;
 	if (m_pPlayer->DropBagItem(pMsg->dwFlag))
 	{
-		m_pPlayer->SaveDropItemTime();
 		m_pPlayer->SendMsg(pMsg->dwFlag, 0x258, 0, 0, 0);
 		m_pPlayer->SendWeightChanged();
 	}
@@ -221,7 +220,6 @@ VOID CClientObj::HandlePickupItem(PMIRMSG pMsg, int datasize)
 	{
 		if (m_pPlayer->PickupItem())
 		{
-			m_pPlayer->SavePickupItemTime();
 			m_pPlayer->SendWeightChanged();
 		}
 	}
@@ -232,21 +230,18 @@ VOID CClientObj::HandleTakeOnItem(PMIRMSG pMsg, int datasize)
 	if (!m_pPlayer->CanEquipChange()) return;
 	BOOL bResult = m_pPlayer->EquipItem((int)pMsg->wParam[0], pMsg->dwFlag);
 	SendEquipItemResult(bResult, (int)pMsg->wParam[0], pMsg->dwFlag);
-	m_pPlayer->SaveEquipChangeTime();
 }
 
 VOID CClientObj::HandleTakeOffItem(PMIRMSG pMsg, int datasize)
 {
 	if (!m_pPlayer->CanEquipChange()) return;
 	SendUnEquipItemResult(m_pPlayer->UnEquipItem((int)pMsg->wParam[0], pMsg->dwFlag), (int)pMsg->wParam[0], pMsg->dwFlag);
-	m_pPlayer->SaveEquipChangeTime();
 }
 
 VOID CClientObj::HandleUseItem(PMIRMSG pMsg, int datasize)
 {
 	if (!m_pPlayer->CanUseItem()) return;
 	m_pPlayer->UseItem(pMsg->dwFlag, static_cast<DWORD>(MAKELONG(pMsg->wParam[0], pMsg->wParam[1])));
-	m_pPlayer->SaveUseItemTime();
 }
 
 VOID CClientObj::HandleDigCorpse(PMIRMSG pMsg, int datasize)
@@ -1151,7 +1146,6 @@ VOID CClientObj::HandleMine(PMIRMSG pMsg, int datasize)
 	if (m_pPlayer->DoMine(dir, x, y))
 	{
 		bSuccess = TRUE;
-		m_pPlayer->SaveMineTime();
 	}
 	SendActionResult(bSuccess);
 }

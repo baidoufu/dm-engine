@@ -145,4 +145,5 @@ private:
 	CServerTimer m_tmrMsgRate; // 消息频率统计窗口定时器
 	DWORD m_dwMsgCount; // 当前窗口内消息计数
 	DWORD m_dwMsgWarnCount; // 连续超警告次数
+	BOOL m_bInDisconnect; // 重入保护标志，防止 OnDisconnect 递归调用
 };

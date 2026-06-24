@@ -2,6 +2,8 @@
 #include ".\humanplayermgr.h"
 #include ".\gameworld.h"
 #include "BotManager.h"
+#include "AliveTimerSystem.h"
+#include "PlayerTimerSystem.h"
 
 CHumanPlayerMgr::CHumanPlayerMgr(VOID)
 {
@@ -48,8 +50,9 @@ VOID CHumanPlayerMgr::RemovePlayerNameList(const char* pszName)
 	m_PlayerNameHash.HDel(pszName);
 }
 
-BOOL CHumanPlayerMgr::RegisterBotPlayer(CHumanPlayer* pPlayer, const char* pszName)
+BOOL CHumanPlayerMgr::RegisterBotPlayer(CHumanPlayer* pPlayer)
 {
+	const char* pszName = pPlayer->GetName();
 	if (pszName == nullptr || pszName[0] == '\0')
 		return FALSE;
 	// 检查是否已存在同名玩家
@@ -58,14 +61,18 @@ BOOL CHumanPlayerMgr::RegisterBotPlayer(CHumanPlayer* pPlayer, const char* pszNa
 		LG2("机器人注册: 名字 [%s] 已存在\n", pszName);
 		return FALSE;
 	}
+	RegEcs(pPlayer);
 	return m_PlayerNameHash.HAdd(pszName, (LPVOID)pPlayer);
 }
 
-VOID CHumanPlayerMgr::UnregisterBotPlayer(const char* pszName)
+VOID CHumanPlayerMgr::UnregisterBotPlayer(CHumanPlayer* pPlayer)
 {
+	const char* pszName = pPlayer->GetName();
 	if (pszName == nullptr || pszName[0] == '\0')
 		return;
 	m_PlayerNameHash.HDel(pszName);
+	UINT rawId = pPlayer->GetId();
+	UnregEcs(rawId);
 }
 
 CHumanPlayer* CHumanPlayerMgr::NewPlayer()
@@ -83,13 +90,29 @@ CHumanPlayer* CHumanPlayerMgr::NewPlayer()
 	if (id == 0 || pPlayer == nullptr) return nullptr;
 	id |= (OBJ_PLAYER << 24);
 	pPlayer->SetId(id);
+	RegEcs(pPlayer);
 	return pPlayer;
 }
 
 BOOL CHumanPlayerMgr::DeletePlayer(CHumanPlayer* pPlayer)
 {
-	UINT id = (pPlayer->GetId() & 0xffffff);
+	UINT rawId = pPlayer->GetId();
+	UINT id = rawId & 0xffffff;
 	m_PlayerNameHash.HDel(pPlayer->GetName());
 	pPlayer->Clean();
+	UnregEcs(rawId);
 	return m_HumanPlayers.Del(id);
+}
+
+VOID CHumanPlayerMgr::RegEcs(CHumanPlayer* pPlayer)
+{
+	PlayerTimerSystem::GetInstance()->CreatePlayerTimers(pPlayer);
+}
+
+VOID CHumanPlayerMgr::UnregEcs(UINT id)
+{
+	RateLimitSystem::GetInstance()->OnPlayerLogout(id);
+	ShieldStateSystem::GetInstance()->OnPlayerLogout(id);
+	SpecialEquipSystem::GetInstance()->OnPlayerLogout(id);
+	PlayerTimerSystem::GetInstance()->OnPlayerLogout(id);
 }

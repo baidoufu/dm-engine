@@ -72,19 +72,24 @@ public:
 	VOID SimulateRest(DWORD dwDuration);  // 休息
 	BOOL SimulateUsePotion(BOOL bHP);     // 使用药水
 	BOOL SimulateUseItem(const char* pszItemName);// 使用物品
+	BOOL SimulateEquipItem(const char* pszItemName);// 穿戴装备
 	BOOL SimulateUseSkill(WORD wMagicId); // 使用技能
 
 	// 获取创建描述
 	const BOT_CREATE_DESC& GetBotDesc() const { return m_BotDesc; }
 
-	// 视野对象访问（CBotContext需要访问protected的m_xVisibleObjectList）
+	// 视野对象访问（CBotContext需要访问）
 	xListHost<VISIBLE_OBJECT>* GetVisibleObjectList() { return &m_xVisibleObjectList; }
+	xListHost<VISIBLE_OBJECT>* GetVisibleItemsList() { return &m_xVisibleItemsList; }
 
 	// 清理AI相关资源
 	VOID CleanupAI();
 
 	// 智能寻路：使用BFS在局部范围内搜索绕过障碍物的路径
 	int FindPathBFS(int targetX, int targetY);
+
+	// 自适应思考间隔：战斗中400ms / 巡逻1000ms / 安全区3000ms / 死亡跳过
+	DWORD ComputeThinkInterval();
 
 private:
 	CBotContext* m_pContext;             // 决策上下文（替代AIController）

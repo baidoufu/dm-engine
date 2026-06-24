@@ -1,6 +1,6 @@
 #pragma once
 #include "mapobject.h"
-#include <mutex>
+#include "AliveTimerSystem.h"
 #include <memory>
 #include <unordered_map>
 #include <array>
@@ -180,6 +180,16 @@ public:
 	VOID SetWalkSpeed(BYTE btSpeed) { m_btWalkSpeed = btSpeed; }
 	virtual BYTE GetRunSpeed() { return m_btRunSpeed; }
 	VOID SetRunSpeed(BYTE btSpeed) { m_btRunSpeed = btSpeed; }
+
+	// ========== ECS 定时器访问器 ==========
+	inline BOOL CheckTimer(TimerType type, DWORD intervalMs)
+	{
+		return AliveTimerSystem::GetInstance()->CheckTimer(GetId(), type, intervalMs);
+	}
+	inline VOID ResetTimer(TimerType type)
+	{
+		AliveTimerSystem::GetInstance()->ResetTimer(GetId(), type);
+	}
 
 	WORD GetDeInvisibleLevel() { return m_wDeInvisibleLevel; }
 	e_direction GetDirection()const { return m_Direction; }
@@ -581,13 +591,9 @@ protected:
 	DWORD m_dwAddMpSpeed; // 增加魔法值速度
 	CServerTimer m_AddMpTimer; // 加魔法值定时器
 
-	CServerTimer m_HpRecoverTimer; // 恢复生命值定时器
 	DWORD m_dwHpRecoverTick; // 恢复生命值间隔时间
-
-	CServerTimer m_MpRecoverTimer; // 恢复魔法值定时器
 	DWORD m_dwMpRecoverTick; // 恢复魔法值间隔时间
 
-	CServerTimer m_ActionTimer; // 动作定时器
 	CServerTimer m_CustomTimer; // 自定义使用定时器
 
 	BOOL m_bSuperHit;
@@ -616,8 +622,8 @@ protected:
 	xListHost<VISIBLE_OBJECT> m_xVisibleObjectList;
 	xListHost<VISIBLE_OBJECT> m_xVisibleItemsList;
 
-	std::unordered_map<CMapObject*, VISIBLE_OBJECT*> m_mapVisibleObject; // 活体对象快速查找
-	std::unordered_map<CMapObject*, VISIBLE_OBJECT*> m_mapVisibleItems; // 物品对象快速查找
+	std::unordered_map<CMapObject*, VISIBLE_OBJECT*> m_mapVisibleObject; // 活体对象快速查找（单线程访问：同一地图对象由同一UpdatePlayers线程组处理）
+	std::unordered_map<CMapObject*, VISIBLE_OBJECT*> m_mapVisibleItems; // 物品对象快速查找（单线程访问：同上）
 
 	BOOL m_bDead;
 	BOOL m_bPosLocked;

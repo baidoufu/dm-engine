@@ -35,6 +35,7 @@ VOID CClientObj::Clean()
 	m_tmrMsgRate.Savetime();
 	m_dwMsgCount = 0;
 	m_dwMsgWarnCount = 0;
+	m_bInDisconnect = FALSE;
 }
 
 VOID CClientObj::Update()
@@ -291,6 +292,10 @@ VOID CClientObj::SendActionResult(BOOL bSuccess)
 
 VOID CClientObj::OnDisconnect()
 {
+	// 重入保护：防止包处理触发 Disconnect 导致递归调用
+	if (m_bInDisconnect) return;
+	m_bInDisconnect = TRUE;
+
 	// 处理所有排队的数据包，避免断开时丢失数据
 	xPacket* pPacket = nullptr;
 	while ((pPacket = m_xPacketQueue.pop()) != nullptr)
@@ -300,32 +305,34 @@ VOID CClientObj::OnDisconnect()
 	}
 	if (m_pPlayer != nullptr)
 	{
-		CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "LogoutEnv.Logout", FALSE);
-		if (m_pPlayer->GetGuild()) // 行会处理
-			m_pPlayer->GetGuild()->MemberLogoff(m_pPlayer);
-		if (m_pPlayer->GetExchangeObject() != nullptr) // 交易处理
-			m_pPlayer->GetExchangeObject()->End(m_pPlayer, ET_CANCEL);
-		if (m_pPlayer->GetGroupObject()) // 组队处理
-			m_pPlayer->GetGroupObject()->DelMember(m_pPlayer);
-		if (m_pPlayer->GetMap() != nullptr) // 地图处理
+		CHumanPlayer* pPlayer = m_pPlayer;
+		m_pPlayer = nullptr; // 立即置空，防止重入时重复操作
+		CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), "LogoutEnv.Logout", FALSE);
+		if (pPlayer->GetGuild()) // 行会处理
+			pPlayer->GetGuild()->MemberLogoff(pPlayer);
+		if (pPlayer->GetExchangeObject() != nullptr) // 交易处理
+			pPlayer->GetExchangeObject()->End(pPlayer, ET_CANCEL);
+		if (pPlayer->GetGroupObject()) // 组队处理
+			pPlayer->GetGroupObject()->DelMember(pPlayer);
+		if (pPlayer->GetMap() != nullptr) // 地图处理
 		{
 			DWORD dwParam = 0;
-			if (m_pPlayer->GetMap()->IsFlagSeted(MF_NORECONNECT, dwParam))
+			if (pPlayer->GetMap()->IsFlagSeted(MF_NORECONNECT, dwParam))
 			{
-				if (!m_pPlayer->RandomTeleport(dwParam))
-					m_pPlayer->Home();
+				if (!pPlayer->RandomTeleport(dwParam))
+					pPlayer->Home();
 			}
 		}
-		CTopManager::GetInstance()->UpdateTopInfo(m_pPlayer); // 更新排行榜
-		m_pPlayer->CleanPets();//清除宠物
-		m_pPlayer->NoticeFriendOffline();//朋友上下线通知
-		m_pPlayer->SaveVars();//保存变量
-		m_pPlayer->UpdateToDB();//更新到数据库
-		m_pPlayer->UpdateTaskToDB();//更新任务到数据库
-		m_pPlayer->UpdateFengHaoToDB();//更新时长封号到数据库
-		m_pPlayer->UpdateItemsToDB();//更新物品到数据库
-		CGameWorld::GetInstance()->RemoveMapObject(m_pPlayer);//从地图中移除玩家
-		CHumanPlayerMgr::GetInstance()->DeletePlayer(m_pPlayer);//释放玩家, 
+		CTopManager::GetInstance()->UpdateTopInfo(pPlayer); // 更新排行榜
+		pPlayer->CleanPets();//清除宠物
+		pPlayer->NoticeFriendOffline();//朋友上下线通知
+		pPlayer->SaveVars();//保存变量
+		pPlayer->UpdateToDB();//更新到数据库
+		pPlayer->UpdateTaskToDB();//更新任务到数据库
+		pPlayer->UpdateFengHaoToDB();//更新时长封号到数据库
+		pPlayer->UpdateItemsToDB();//更新物品到数据库
+		CGameWorld::GetInstance()->RemoveMapObject(pPlayer);//从地图中移除玩家
+		CHumanPlayerMgr::GetInstance()->DeletePlayer(pPlayer);//释放玩家, 
 	}
 
 	if (!m_bCompetlyQuit && this->m_State == GSUM_VERIFIED)

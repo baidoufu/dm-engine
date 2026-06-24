@@ -107,6 +107,27 @@
     <Filter Include="机器人">
       <UniqueIdentifier>{c6abfd78-7e7f-4edf-9466-dcf7138f1a35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="库包相关\ECS">
+      <UniqueIdentifier>{92e4e8b9-30e4-4dbe-af48-680ecc92ef28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS公共">
+      <UniqueIdentifier>{72a5923f-8ad0-4910-8f42-840137072f45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\玩家\组件管理">
+      <UniqueIdentifier>{87c349f5-1a47-4584-8df1-a07584350148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\地图\组件管理">
+      <UniqueIdentifier>{b06d6b36-42da-4f53-993d-4b6031db9f77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\玩家\组件">
+      <UniqueIdentifier>{50d0ff5e-503e-49d9-aaf4-72d2624c3d21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ECS公共\组件公共">
+      <UniqueIdentifier>{bf8433a8-f780-4d68-bf2a-ccd98b3b9ac9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\怪物\组件管理">
+      <UniqueIdentifier>{03822e3f-181c-487d-80fa-e43bdecfb5f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\public.rc">
@@ -471,6 +492,21 @@
     <ClCompile Include="BotContext.cpp">
       <Filter>机器人</Filter>
     </ClCompile>
+    <ClCompile Include="AliveTimerSystem.cpp">
+      <Filter>功能处理\地图\组件管理</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerTimerSystem.cpp">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClCompile>
+    <ClCompile Include="RateLimitSystem.cpp">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClCompile>
+    <ClCompile Include="ShieldStateSystem.cpp">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClCompile>
+    <ClCompile Include="SpecialEquipSystem.cpp">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMap.h">
@@ -800,5 +836,58 @@
     <ClInclude Include="BotContext.h">
       <Filter>机器人</Filter>
     </ClInclude>
+    <ClInclude Include="ECS.h">
+      <Filter>库包相关\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="ECSComponentPool.h">
+      <Filter>库包相关\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="ECSDefines.h">
+      <Filter>库包相关\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="ECSRegistry.h">
+      <Filter>库包相关\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="ECSView.h">
+      <Filter>库包相关\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="RateLimitComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="ShieldStateComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecialEquipComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="AliveTimerSystem.h">
+      <Filter>功能处理\地图\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerTimerSystem.h">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="RateLimitSystem.h">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="ShieldStateSystem.h">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecialEquipSystem.h">
+      <Filter>功能处理\玩家\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerComponent.h">
+      <Filter>ECS公共\组件公共</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerSystem.h">
+      <Filter>ECS公共\组件公共</Filter>
+    </ClInclude>
+    <ClInclude Include="ECSWorld.h">
+      <Filter>ECS公共</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Docs\ECS_使用手册.md">
+      <Filter>库包相关\ECS</Filter>
+    </None>
   </ItemGroup>
 </Project>

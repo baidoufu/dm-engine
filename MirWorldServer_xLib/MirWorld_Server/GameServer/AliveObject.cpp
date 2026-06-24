@@ -509,8 +509,8 @@ BOOL CAliveObject::SetAction(actiontype action, e_direction dir, WORD x, WORD y,
 	if (this->m_pMap == nullptr) return FALSE;
 	// 防止在相同帧内对同一位置发起重复的移动动作
 	// 如果当前已在执行相同的动作且目标坐标相同，跳过重复设置
-	if (m_ActionType == action && m_wActionX == x && m_wActionY == y && !m_ActionTimer.IsTimeOut(m_dwActionCompleteTime))
-		return TRUE;
+	if (m_ActionType == action && m_wActionX == x && m_wActionY == y)
+		return !CheckTimer(TimerType::TMR_ACTION, m_dwActionCompleteTime);
 	WORD wOldX = getX();
 	WORD wOldY = getY();
 	if (wOldX != x || wOldY != y)
@@ -523,7 +523,7 @@ BOOL CAliveObject::SetAction(actiontype action, e_direction dir, WORD x, WORD y,
 	m_wActionX = x;
 	m_wActionY = y;
 	m_dwActionCompleteTime = dwActionTime;
-	m_ActionTimer.Savetime();
+	ResetTimer(TimerType::TMR_ACTION);
 	OnDoAction(action);
 	return TRUE;
 }
@@ -546,8 +546,8 @@ BOOL CAliveObject::CompleteAction()
 	SetDirection(m_ActionDirection);
 	if (GetType() == OBJ_PLAYER)
 	{
-		m_HpRecoverTimer.Savetime();
-		m_MpRecoverTimer.Savetime();
+		ResetTimer(TimerType::TMR_HP_RECOVER);
+		ResetTimer(TimerType::TMR_MP_RECOVER);
 	}
 	return TRUE;
 }
@@ -635,8 +635,7 @@ BOOL CAliveObject::CanDoAction(actiontype action)
 			// 但至少需要经过动作延迟的80%时间,防止恶意客户端高频刷移动包
 			DWORD dwMinInterval = m_dwActionCompleteTime * 8 / 10;
 			if (dwMinInterval < 100) dwMinInterval = 100;
-			if (!m_ActionTimer.IsTimeOut(dwMinInterval))
-				return FALSE;
+			return CheckTimer(TimerType::TMR_ACTION, dwMinInterval);
 		}
 	}
 	if (GetType() == OBJ_PLAYER && action == AT_ATTACK) // 玩家的判断
@@ -700,7 +699,9 @@ VOID CAliveObject::Update()
 				nHp = GetAutoRecoverHp();
 				if (GetPropValue(PI_CURHP) < GetPropValue(PI_MAXHP) || nHp < 0)
 				{
-					if (m_HpRecoverTimer.IsTimeOut(GetAutoRecoverHptime()))
+					const DWORD dwHpInterval = GetAutoRecoverHptime();
+					const BOOL bExpired = CheckTimer(TimerType::TMR_HP_RECOVER, dwHpInterval);
+					if (bExpired)
 					{
 						if (nHp != 0)
 						{
@@ -709,7 +710,7 @@ VOID CAliveObject::Update()
 							else
 								DecPropValue(PI_CURHP, -nHp);
 							bSendHpChanged = TRUE;
-							m_HpRecoverTimer.Savetime();
+							ResetTimer(TimerType::TMR_HP_RECOVER);
 						}
 					}
 				}
@@ -719,7 +720,9 @@ VOID CAliveObject::Update()
 				int nMp = GetAutoRecoverMp();
 				if (GetPropValue(PI_CURMP) < GetPropValue(PI_MAXMP) || nMp < 0)
 				{
-					if (m_MpRecoverTimer.IsTimeOut(GetAutoRecoverMptime()))
+					const DWORD dwMpInterval = GetAutoRecoverMptime();
+					const BOOL bExpired = CheckTimer(TimerType::TMR_MP_RECOVER, dwMpInterval);
+					if (bExpired)
 					{
 						if (nMp != 0)
 						{
@@ -728,7 +731,7 @@ VOID CAliveObject::Update()
 							else
 								DecPropValue(PI_CURMP, -nMp);
 							bSendMpChanged = TRUE;
-							m_MpRecoverTimer.Savetime();
+							ResetTimer(TimerType::TMR_MP_RECOVER);
 						}
 					}
 				}
@@ -774,8 +777,8 @@ VOID CAliveObject::Update()
 
 	if (m_ActionType != AT_STAND && m_dwActionCompleteTime != 0xffffffff)
 	{
-		if (m_ActionTimer.IsTimeOut(m_dwActionCompleteTime))
-			CompleteAction();
+		const BOOL bActionComplete = CheckTimer(TimerType::TMR_ACTION, m_dwActionCompleteTime);
+		if (bActionComplete) CompleteAction();
 	}
 	// 队列对象线程处理
 	OBJECTPROCESS* p = nullptr;

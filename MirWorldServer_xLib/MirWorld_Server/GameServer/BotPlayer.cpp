@@ -156,20 +156,29 @@ VOID CBotPlayer::Update()
 	// 检查是否需要思考
 	if (!m_bRunning || m_bPaused)
 		return;
-	// 思考间隔控制（模拟人类反应速度）
-	DWORD dwActualInterval = CBotHumanBehavior::RandomizeThinkInterval(m_dwThinkInterval);
+
+	// 帧级预计算：刷新时间戳和目标缓存（无论是否跑 BT，为状态判定提供最新数据）
+	m_pContext->SetFrameTime(dwNow);
+	m_pContext->PrecomputeTarget();
+
+	// 自适应思考间隔：战斗中400ms / 巡逻1000ms / 安全区3000ms / 死亡跳过
+	DWORD dwBaseInterval = ComputeThinkInterval();
+	if (dwBaseInterval == 0) return;
+	DWORD dwActualInterval = CBotHumanBehavior::RandomizeThinkInterval(dwBaseInterval);
 	if (!m_tmrThinkInterval.IsTimeOut(dwActualInterval))
 		return;
 	m_tmrThinkInterval.Savetime();
 	// 随机发呆（模拟真人行为）
-	if (CBotHumanBehavior::ShouldIdle(m_dwIdleChance))
-		return;
+	/*if (CBotHumanBehavior::ShouldIdle(m_dwIdleChance))
+		return;*/
 	// 随机聊天
-	if (CBotHumanBehavior::ShouldChat(m_dwChatChance))
-		SimulateRandomChat();
-	// 执行行为树（唯一决策入口）
+	/*if (CBotHumanBehavior::ShouldChat(m_dwChatChance))
+		SimulateRandomChat();*/
+	// 执行行为树（唯一决策入口，SetFrameTime/PrecomputeTarget 已在上面处理）
 	if (m_pBehaviorTree && m_pBehaviorTree->IsLoaded())
+	{
 		m_pBehaviorTree->Execute(this);
+	}
 }
 
 // ============================================================================
@@ -181,15 +190,37 @@ BOOL CBotPlayer::CanRecvMsg()
 }
 
 // ============================================================================
+// 自适应思考间隔：根据 Bot 当前状态动态调整
+// 战斗中有目标 → 400ms（更快响应）/ 巡逻无目标 → 1000ms / 安全区 → 3000ms / 死亡 → 0
+// ============================================================================
+DWORD CBotPlayer::ComputeThinkInterval()
+{
+	if (IsDeath() || !m_pContext)
+		return 0;
+
+	BOOL bInSafeArea = InSafeArea();
+	CAliveObject* pTarget = m_pContext->GetCachedTarget();
+
+	if (pTarget && !bInSafeArea)
+		return 400;   // 战斗状态：更快响应（默认 400）
+
+	if (bInSafeArea)
+		return 3000;  // 安全区内发呆：大幅降速（默认 3000）
+
+	return 1000;      // 野外巡逻找怪：适度降速（默认 1000）
+}
+
+// ============================================================================
 // 死亡处理
 // ============================================================================
 VOID CBotPlayer::OnDeath(DWORD dwKiller)
 {
+	CAliveObject* pKiller = CGameWorld::GetInstance()->GetAliveObjectById(dwKiller);
 	// 先执行玩家基础死亡处理
 	CHumanPlayer::OnDeath(dwKiller);
 	// 停止机器人
 	m_bRunning = FALSE;
-	LG2("机器人: 死亡 [%s] 击杀者[%u]\n", GetName(), dwKiller);
+	LG2("机器人: 死亡 [%s] 击杀者[%s]\n", GetName(), pKiller->GetName());
 }
 
 // ============================================================================
@@ -429,7 +460,6 @@ VOID CBotPlayer::SimulatePickupItem()
 	if (!CanPickupItem()) return;
 	if (PickupItem())
 	{
-		SavePickupItemTime();
 		SendWeightChanged();
 	}
 }
@@ -441,7 +471,6 @@ VOID CBotPlayer::SimulateUseItem(DWORD dwMakeIndex)
 {
 	if (!CanUseItem()) return;
 	UseItem(dwMakeIndex, 0);
-	SaveUseItemTime();
 }
 
 // ============================================================================
@@ -639,6 +668,21 @@ BOOL CBotPlayer::SimulateUseItem(const char* pszItemName)
 
 	SimulateUseItem(dwItemIndex);
 	return TRUE;
+}
+
+// ============================================================================
+// 穿戴装备（通过CBotContext查找）
+// ============================================================================
+BOOL CBotPlayer::SimulateEquipItem(const char* pszItemName)
+{
+	if (!m_pContext)
+		return FALSE;
+
+	DWORD dwItemIndex = m_pContext->FindItemInBag(pszItemName);
+	if (dwItemIndex == 0)
+		return FALSE;
+
+	return EquipItem(dwItemIndex);
 }
 
 // ============================================================================

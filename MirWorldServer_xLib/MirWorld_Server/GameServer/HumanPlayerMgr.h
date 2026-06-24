@@ -20,9 +20,9 @@ public:
 	//从名字集合中移除玩家
 	VOID RemovePlayerNameList(const char* pszName);
 	//注册机器人玩家到名字哈希（CBotPlayer由CBotManager管理，不走对象池）
-	BOOL RegisterBotPlayer(CHumanPlayer* pPlayer, const char* pszName);
+	BOOL RegisterBotPlayer(CHumanPlayer* pPlayer);
 	//从名字哈希中注销机器人玩家
-	VOID UnregisterBotPlayer(const char* pszName);
+	VOID UnregisterBotPlayer(CHumanPlayer* pPlayer);
 	//获取在线玩家数量
 	int getCount() { return m_HumanPlayers.GetCount(); }
 	//获取在线玩家列表
@@ -31,6 +31,11 @@ public:
 	VOID SetTestMode() { m_boTest = Encrypt(TRUE); }
 	//是否是测试模式
 	BOOL IsTestMode() const { return Decrypt(m_boTest); }
+private:
+	//注册ECS组件
+	VOID RegEcs(CHumanPlayer* pPlayer);
+	//注销ECS组件
+	VOID UnregEcs(UINT id);
 private:
 	CIndexListEx<CHumanPlayer> m_HumanPlayers;
 	CNameHash m_PlayerNameHash; // 所有玩家名字集合

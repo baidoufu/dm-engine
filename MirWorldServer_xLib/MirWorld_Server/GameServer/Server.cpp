@@ -80,20 +80,23 @@ VOID CServer::ProcessClientPackets()
 	CClientObj* pObject = nullptr;
 	while (pObject = (CClientObj*)activeQueue.pop())
 	{
+		// 防御ABA：对象被 DeleteClientObject 清理后 m_Id==0，跳过（槽位复用前）
+		// 槽位复用后 m_Id!=0，配合 xClientObject::Clean() 中 m_bInActiveList 重置，
+		// 可确保新客户端从干净的初始状态启动
+		if (pObject->getId() == 0) continue;
 		// 重置活跃标记（允许后续收包再次推入）
-		pObject->m_bInActiveList.store(FALSE, std::memory_order_release); // 重置标记
+		pObject->m_bInActiveList.store(FALSE, std::memory_order_release);
 		if (!pObject->IsConnected()) continue;
-		int processCount = 0;
-		while (processCount < 10 && pObject->GetPacketQueueCount() > 0)
+		while (pObject->GetPacketQueueCount() > 0)
 		{
 			pObject->Update(); // 取一个包 → OnDataPacket → 解析 → 业务处理
-			processCount++;
 		}
 		// 如果还有剩余包，重新推入活跃队列
 		if (pObject->GetPacketQueueCount() > 0)
 		{
-			BOOL expected = FALSE;
-			if (pObject->m_bInActiveList.compare_exchange_strong(expected, TRUE))
+			// exchange(TRUE) 原子地设置 TRUE 并返回旧值：
+			// 旧值==FALSE → 首次获取，推入队列；旧值==TRUE → 已在队列中，跳过
+			if (!pObject->m_bInActiveList.exchange(TRUE, std::memory_order_acq_rel))
 				m_xIocpServer.PushActiveClientQueue(pObject);
 		}
 	}
@@ -104,8 +107,9 @@ VOID CServer::FlushAllBatchBuffers()
 	// 遍历所有连接，刷新批量发送缓冲区 + 心跳检测
 	// GameServer 的 ProcessClientPackets 只对活跃连接调 Update()
 	// 空闲连接需要在这里补上心跳检测
-	CClientObj* pFlushObj = m_ObjectPool.First();
-	while (pFlushObj)
+	// 使用 ForEach 替代 First/Next：整个遍历期间持有共享读锁，防止 IOCP 工作线程
+	// 通过 NewClientObject→DeleteClientObject 并发修改链表导致迭代器失效
+	m_ObjectPool.ForEach([](CClientObj* pFlushObj)
 	{
 		if (pFlushObj->IsConnected())
 		{
@@ -115,8 +119,7 @@ VOID CServer::FlushAllBatchBuffers()
 			if (pFlushObj->GetPacketQueueCount() == 0)
 				pFlushObj->UpdateStarPing();
 		}
-		pFlushObj = m_ObjectPool.Next();
-	}
+	});
 }
 
 VOID CServer::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszData, int datasize)

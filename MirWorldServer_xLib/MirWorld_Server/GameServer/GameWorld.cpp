@@ -723,76 +723,76 @@ VOID CGameWorld::Update()
 	DWORD dwkey = (m_dwUpdateKey % 10);
 	switch (dwkey)
 	{
-	case 4: case 7: case 9:
+	case 0: case 4:
 	{
-		int nCount = 0;
-		{
-			SRLock lock(m_rwMonsterLock);
-			nCount = m_xUpdateAutoMonsterList.getCount();
-		}
-		int nBatchCount = 1;
-		int maxBatches = (int)m_WorkerThreads.size();
-		if (nCount > 300)
-			nBatchCount = MIN((nCount + 199) / 200, maxBatches);
-		if (nBatchCount > 1)
-		{
-			int nPer = nCount / nBatchCount;
-			int nCurrentStart = 0;
-			for (int i = 0; i < nBatchCount; i++)
-			{
-				int nBatchSize = nPer + (i < nCount % nBatchCount ? 1 : 0);
-				int nEnd = nCurrentStart + nBatchSize;
-				if (nBatchSize > 0)
-				{
-					SubmitAsyncTask([this, nCurrentStart, nEnd]() {
-						UpdateMonster(m_xUpdateAutoMonsterList, MUT_AUTO, nCurrentStart, nEnd);
-						});
-				}
-				nCurrentStart = nEnd;
-			}
-		}
+		if (m_xUpdateAutoMonsterList.getCount() > 1000)
+			UpdateMonsterParallel(m_xUpdateAutoMonsterList, MUT_AUTO, 1000);
 		else
-			UpdateMonster(m_xUpdateAutoMonsterList, MUT_AUTO);// 闲散怪物线程
+			UpdateMonster(m_xUpdateAutoMonsterList, MUT_AUTO);
 	}
 	break;
-	case 1:
+	case 1: case 5:
 	{
-		SubmitAsyncTask([this]() {
+		if (m_xUpdateMonsterList.getCount() > 600)
+			UpdateMonsterParallel(m_xUpdateMonsterList, MUT_ACTIVE, 600);
+		else
+			UpdateMonster(m_xUpdateMonsterList, MUT_ACTIVE);
+	}
+	break;
+	case 2: case 7:
+	{
+		CSpinBarrier barrier(1);
+		SubmitAsyncTask([&barrier]() {
+			CTimeSystem::GetInstance()->Update(); // 时间定时器
+			barrier.Signal();
+			});
+		SubmitAsyncTask([&barrier]() {
 			CBossTJ::GetInstance()->Update(); // Boss图鉴刷新时间更新
+			barrier.Signal();
 		});
-		SubmitAsyncTask([this]() {
+		SubmitAsyncTask([&barrier]() {
 			CEventManager::GetInstance()->UpdateEvents();
+			barrier.Signal();
 		});
-		CEventManager::GetInstance()->UpdateDeleteObject();
-		SubmitAsyncTask([this]() {
+		SubmitAsyncTask([&barrier]() {
 			CDownItemMgr::GetInstance()->UpdateDownItem();//更新掉落物品
+			barrier.Signal();
 		});
-		CDownItemMgr::GetInstance()->UpdateDeletedObject();
-		SubmitAsyncTask([this]() {
+		SubmitAsyncTask([&barrier]() {
 			CMonsterManagerEx::GetInstance()->UpdateFreeObjects(); // 释放
+			barrier.Signal();
 		});
+		barrier.Arrive();
+		CEventManager::GetInstance()->UpdateDeleteObject();
+		CDownItemMgr::GetInstance()->UpdateDeletedObject();
 		CMonsterManagerEx::GetInstance()->UpdateDeleteMonster(); // 删除
 	}
 	break;
-	case 2:
+	case 3: case 8:
 	{
-		CTimeSystem::GetInstance()->Update(); // 时间定时器
-		CNpcManager::GetInstance()->Update(); // NPC线程
-	}
-	break;
-	case 3:
-	{
-		//沙城行会战争
-		CSandCity* pSandCity = CSandCity::GetInstance();
-		if (pSandCity && pSandCity->IsWarStarted())
-			CSandCity::GetInstance()->UpdateWar();
-		CGuildWarManager::GetInstance()->Update();
-		SubmitAsyncTask([this]() {
+		CSpinBarrier barrier(1);
+		SubmitAsyncTask([&barrier]() {
+			CSandCity* pSandCity = CSandCity::GetInstance();
+			if (pSandCity && pSandCity->IsWarStarted())
+				CSandCity::GetInstance()->UpdateWar();
+			barrier.Signal();
+			});
+		SubmitAsyncTask([&barrier]() {
+			CGuildWarManager::GetInstance()->Update();
+			barrier.Signal();
+			});
+		SubmitAsyncTask([&barrier]() {
+			CNpcManager::GetInstance()->Update(); // NPC线程
+			barrier.Signal();
+			});
+		SubmitAsyncTask([&barrier]() {
 			CMonsterGenManager::GetInstance()->UpdateGen(); // 刷怪
+			barrier.Signal();
 		});
+		barrier.Arrive();
 	}
 	break;
-	case 6:
+	case 6: case 9:
 	{
 		// 处理异步更新结果（如果有
 		if (m_bAsyncUpdateReady) ProcessAsyncUpdateResults();
@@ -819,35 +819,6 @@ VOID CGameWorld::Update()
 				m_LineNoticeTimer.Savetime();
 			}
 		});
-	}
-	break;
-	case 0: case 5: case 8:
-	{
-		int nCount = 0;
-		{
-			SRLock lock(m_rwMonsterLock);
-			nCount = m_xUpdateMonsterList.getCount();
-		}
-		int nBatchCount = MIN((nCount + 199) / 200, (int)m_WorkerThreads.size());
-		if (nBatchCount > 1)
-		{
-			int nPer = nCount / nBatchCount;
-			int nCurrentStart = 0;
-			for (int i = 0; i < nBatchCount; i++)
-			{
-				int nBatchSize = nPer + (i < nCount % nBatchCount ? 1 : 0);
-				int nEnd = nCurrentStart + nBatchSize;
-				if (nBatchSize > 0) 
-				{
-					SubmitAsyncTask([this, nCurrentStart, nEnd]() {
-						UpdateMonster(m_xUpdateMonsterList, MUT_ACTIVE, nCurrentStart, nEnd);
-					});
-				}
-				nCurrentStart = nEnd;
-			}
-		}
-		else
-			UpdateMonster(m_xUpdateMonsterList, MUT_ACTIVE);
 	}
 	break;
 	}
@@ -1133,7 +1104,7 @@ VOID CGameWorld::AddUpdateMonster(CMonsterEx* pMonster)
 		m_xUpdateAutoMonsterList.addNode(pNode);
 }
 
-VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType, int nStart, int nEnd)
+VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType)
 {
 	// 使用thread_local vector避免每帧内存分配
 	struct ThreadLocalBuffers {
@@ -1147,9 +1118,8 @@ VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdate
 	tls.switchMonsters.clear();
 	// 获取目标列表引用
 	xListHost<CMonsterEx>& targetList = (updateType == MUT_AUTO) ? m_xUpdateMonsterList : m_xUpdateAutoMonsterList;
-	// 收集需要处理的怪物和要删除的节点
+	// 收集有效怪物 & 移除死节点
 	{
-		SWLock lock(m_rwMonsterLock);
 		int totalCount = monsterList.getCount();
 		if (totalCount <= 0) return;
 		if ((int)tls.updateMonsters.capacity() < totalCount)
@@ -1157,8 +1127,6 @@ VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdate
 		if ((int)tls.nodesToRemove.capacity() < totalCount)
 			tls.nodesToRemove.reserve(totalCount);
 		xListHost<CMonsterEx>::xListNode* pNode = monsterList.getHead();
-		int currentIndex = 0;
-		BOOL boBatch = (nStart != 0 || nEnd != 0);
 		while (pNode)
 		{
 			CMonsterEx* p = pNode->getObject();
@@ -1166,13 +1134,12 @@ VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdate
 			{
 				if (p->IsDeath() || p->GetRef() == 0)
 					tls.nodesToRemove.push_back(pNode);
-				else if (!boBatch || (currentIndex >= nStart && currentIndex < nEnd))
+				else
 					tls.updateMonsters.push_back(p);
 			}
 			else
 				tls.nodesToRemove.push_back(pNode);
 			pNode = pNode->getNext();
-			currentIndex++;
 		}
 		// 删除无效节点
 		for (auto node : tls.nodesToRemove)
@@ -1185,17 +1152,17 @@ VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdate
 	if (tls.updateMonsters.empty()) return;
 	DWORD dwUpdateKey = this->m_dwUpdateKey;
 	BOOL checkHasTarget = (updateType == MUT_AUTO);
-	// 处理更新
-	// 注意：此处怪物指针在锁外使用，安全性依赖于以下时序保证：
+	// 注意：此处怪物指针的安全性依赖于以下时序保证：
 	// 怪物对象的实际删除在主线程的 CMonsterManagerEx::UpdateDeleteMonster() 中执行，
 	// 该操作在 UpdateMonster 之后的帧阶段进行，因此 Update 期间指针不会悬垂。
-	// 如果未来修改调度逻辑（如将删除操作移到工作线程），需要重新评估此处安全性。
 	for (size_t idx = 0; idx < tls.updateMonsters.size(); idx++)
 	{
 		CMonsterEx* p = tls.updateMonsters[idx];
-		if (p->IsDeath() || p->GetRef() == 0) continue; // 复检：锁释放后怪物可能已死亡
+		if (p->IsDeath() || p->GetRef() == 0) continue; // 复检：可能已被脚本置为死亡
 		p->SetUpdateKey(dwUpdateKey);
 		p->Update();
+		// 怪物可能在 Update() 中自删除，跳过后续成员访问
+		if (p->IsDeath() || p->GetRef() == 0) continue;
 
 		BOOL shouldSwitch = checkHasTarget ? (p->GetTarget() != nullptr) : (p->GetTarget() == nullptr);
 		if (shouldSwitch)
@@ -1205,16 +1172,112 @@ VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdate
 				tls.switchMonsters.push_back(pNode);
 		}
 	}
-	// 批量切换列表
+	// 量切换列表
 	if (!tls.switchMonsters.empty())
 	{
-		SWLock lock(m_rwMonsterLock);
 		for (const auto& pNode : tls.switchMonsters)
 		{
 			CMonsterEx* p = pNode->getObject();
 			if (!p || p->IsDeath() || p->GetRef() == 0) continue; // 切换前复检
 			if (!pNode->BelongTo(&targetList))
 				targetList.addNode(pNode);
+		}
+	}
+}
+
+VOID CGameWorld::UpdateMonsterParallel(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType, int nBatchSize)
+{
+	// 主线程收集所有有效怪物 & 移除死节点（持锁）
+	std::vector<CMonsterEx*> validMonsters;
+	{
+		SWLock lock(m_rwMonsterLock);
+		int totalCount = monsterList.getCount();
+		if (totalCount <= 0) return;
+		validMonsters.reserve(totalCount);
+
+		xListHost<CMonsterEx>& targetList = (updateType == MUT_AUTO) ? m_xUpdateMonsterList : m_xUpdateAutoMonsterList;
+		xListHost<CMonsterEx>::xListNode* pNode = monsterList.getHead();
+		std::vector<xListHost<CMonsterEx>::xListNode*> deadNodes;
+		deadNodes.reserve(totalCount);
+
+		while (pNode)
+		{
+			CMonsterEx* p = pNode->getObject();
+			if (p && !p->IsDeath() && p->GetRef() != 0)
+				validMonsters.push_back(p);
+			else
+				deadNodes.push_back(pNode);
+			pNode = pNode->getNext();
+		}
+		for (auto node : deadNodes)
+		{
+			monsterList.removeNode(node);
+			if (node->BelongTo(&targetList))
+				targetList.removeNode(node);
+		}
+	}
+	if (validMonsters.empty()) return;
+
+	// 按批次并行怪物 AI 更新（无锁，每批次独立收集切换节点）
+	int totalMonsters = (int)validMonsters.size();
+	int numBatches = (totalMonsters + nBatchSize - 1) / nBatchSize;
+	DWORD dwUpdateKey = m_dwUpdateKey;
+	BOOL checkHasTarget = (updateType == MUT_AUTO);
+
+	// 每个批次有独立的切换节点向量，避免跨线程竞争
+	std::vector<std::vector<xListHost<CMonsterEx>::xListNode*>> batchSwitchNodes(numBatches);
+
+	// 预计算目标列表指针，避免工作线程直接读取CGameWorld成员变量（消除benign data race）
+	xListHost<CMonsterEx>* pTargetList = (updateType == MUT_AUTO) ? &m_xUpdateMonsterList : &m_xUpdateAutoMonsterList;
+
+	CSpinBarrier barrier(numBatches);
+	for (int batch = 0; batch < numBatches; batch++)
+	{
+		int start = batch * nBatchSize;
+		int end = MIN((batch + 1) * nBatchSize, totalMonsters);
+		SubmitAsyncTask([&barrier, &validMonsters, &batchSwitchNodes, pTargetList, start, end, dwUpdateKey, checkHasTarget, batch]() {
+			auto& switchNodes = batchSwitchNodes[batch];
+			xListHost<CMonsterEx>& targetList = *pTargetList;
+			for (int i = start; i < end; i++)
+			{
+				CMonsterEx* p = validMonsters[i];
+				if (p->IsDeath() || p->GetRef() == 0) continue; // 复检：锁释放后可能已死亡
+				p->SetUpdateKey(dwUpdateKey);
+				p->Update();
+				// 怪物可能在 Update() 中自删除（m_pDesc==nullptr → DeleteMonster），
+				// 此时应跳过后续成员访问，防止使用已标记删除的对象
+				if (p->IsDeath() || p->GetRef() == 0) continue;
+
+				BOOL shouldSwitch = checkHasTarget ? (p->GetTarget() != nullptr) : (p->GetTarget() == nullptr);
+				if (shouldSwitch)
+				{
+					xListHost<CMonsterEx>::xListNode* pNode = p->getUpdateNode();
+					if (pNode && !pNode->BelongTo(&targetList))
+						switchNodes.push_back(pNode);
+				}
+			}
+			barrier.Signal();
+		});
+	}
+	// 3秒超时：若工作线程异常未能Signal，避免主线程永久卡死
+	if (!barrier.Arrive(3000))
+	{
+		assert(!"UpdateMonsterParallel: worker tasks did not complete within 3s timeout");
+	}
+
+	// 主线程合并各批次切换节点，批量列表迁移（持锁）
+	{
+		SWLock lock(m_rwMonsterLock);
+		xListHost<CMonsterEx>& targetList = (updateType == MUT_AUTO) ? m_xUpdateMonsterList : m_xUpdateAutoMonsterList;
+		for (int batch = 0; batch < numBatches; batch++)
+		{
+			for (auto pNode : batchSwitchNodes[batch])
+			{
+				CMonsterEx* p = pNode->getObject();
+				if (!p || p->IsDeath() || p->GetRef() == 0) continue; // 切换前复检
+				if (!pNode->BelongTo(&targetList))
+					targetList.addNode(pNode);
+			}
 		}
 	}
 }

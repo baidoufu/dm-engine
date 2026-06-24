@@ -125,6 +125,11 @@
     <ClCompile Include="DamageEvent.cpp" />
     <ClCompile Include="DownItemMgr.cpp" />
     <ClCompile Include="DownItemObject.cpp" />
+    <ClCompile Include="RateLimitSystem.cpp" />
+    <ClCompile Include="ShieldStateSystem.cpp" />
+    <ClCompile Include="SpecialEquipSystem.cpp" />
+    <ClCompile Include="PlayerTimerSystem.cpp" />
+    <ClCompile Include="AliveTimerSystem.cpp" />
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="EventObject.cpp" />
@@ -251,6 +256,22 @@
     <ClInclude Include="BotManager.h" />
     <ClInclude Include="BotPlayer.h" />
     <ClInclude Include="BundleManager.h" />
+    <ClInclude Include="ECS.h" />
+    <ClInclude Include="ECSComponentPool.h" />
+    <ClInclude Include="ECSDefines.h" />
+    <ClInclude Include="RateLimitComponent.h" />
+    <ClInclude Include="ECSRegistry.h" />
+    <ClInclude Include="ShieldStateComponent.h" />
+    <ClInclude Include="SpecialEquipComponent.h" />
+    <ClInclude Include="TimerComponent.h" />
+    <ClInclude Include="ECSView.h" />
+    <ClInclude Include="TimerSystem.h" />
+    <ClInclude Include="ECSWorld.h" />
+    <ClInclude Include="RateLimitSystem.h" />
+    <ClInclude Include="ShieldStateSystem.h" />
+    <ClInclude Include="SpecialEquipSystem.h" />
+    <ClInclude Include="PlayerTimerSystem.h" />
+    <ClInclude Include="AliveTimerSystem.h" />
     <ClInclude Include="gsClientMsgTable.h" />
     <ClInclude Include="TimeAchieve.h" />
     <ClInclude Include="ChangeMapEvent.h" />
@@ -353,6 +374,9 @@
       <Project>{bf28a1d6-551e-4857-a8de-38eab6e67dc3}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Docs\ECS_使用手册.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

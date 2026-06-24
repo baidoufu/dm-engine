@@ -89,7 +89,8 @@ class CGameWorld : public xSingletonClass<CGameWorld>
 	SRWLOCK m_rwMonsterLock = SRWLOCK_INIT; // 用于保护m_xUpdateMonsterList和m_xUpdateAutoMonsterList的读写锁
 private:
 	enum MonsterUpdateType { MUT_AUTO, MUT_ACTIVE };
-	VOID UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType, int nStart = 0, int nEnd = 0);
+	VOID UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType);
+	VOID UpdateMonsterParallel(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType, int nBatchSize);
 	VOID UpdatePlayers();
 public:
 	UINT GetUpdateMonsterListCount() 

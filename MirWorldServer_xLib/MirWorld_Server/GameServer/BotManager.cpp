@@ -171,7 +171,7 @@ CBotPlayer* CBotManager::CreateBot(BOT_CREATE_DESC& desc)
 		delete pBot;
 		return nullptr;
 	}
-	if (!CHumanPlayerMgr::GetInstance()->RegisterBotPlayer(pBot, desc.dbinfo.szName))
+	if (!CHumanPlayerMgr::GetInstance()->RegisterBotPlayer(pBot))
 	{
 		LG2("机器人管理器: 注册机器人 [%s] 到玩家管理器失败\n", desc.dbinfo.szName);
 		pBot->Clean();
@@ -182,7 +182,7 @@ CBotPlayer* CBotManager::CreateBot(BOT_CREATE_DESC& desc)
 	{
 		LG2("机器人管理器: 机器人 [%s] 进入地图 [%d] 失败\n",
 			desc.dbinfo.szName, desc.dbinfo.mapid);
-		CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(desc.dbinfo.szName);
+		CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(pBot);
 		pBot->Clean();
 		delete pBot;
 		return nullptr;
@@ -202,7 +202,7 @@ BOOL CBotManager::DeleteBot(CBotPlayer* pBot)
 	LG2("机器人管理器: 删除机器人 [%s]\n", pBot->GetName());
 	pBot->StopBot();
 	RemoveBotFromList(pBot);
-	CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(pBot->GetName());
+	CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(pBot);
 	CGameWorld::GetInstance()->RemoveMapObject(pBot);
 	pBot->Clean();
 	delete pBot;
@@ -304,7 +304,7 @@ VOID CBotManager::Cleanup()
 		if (pBot)
 		{
 			pBot->StopBot();
-			CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(pBot->GetName());
+			CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(pBot);
 			CGameWorld::GetInstance()->RemoveMapObject(pBot);
 			pBot->Clean();
 			delete pBot;

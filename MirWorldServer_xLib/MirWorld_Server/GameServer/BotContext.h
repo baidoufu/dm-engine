@@ -18,20 +18,28 @@ const int BOT_VIEW_RANGE = 16;
 class CBotContext
 {
 public:
-	CBotContext() : m_pBot(nullptr) 
+	CBotContext() : m_pBot(nullptr)
 	{
 		m_dwTargetUpdateInterval = 0;
 		m_dwTargetUpdateTime = 0;
+		m_dwFrameTime = 0;
 	}
 	~CBotContext() {}
 
 	// 绑定机器人
 	VOID Bind(CBotPlayer* pBot) { m_pBot = pBot; }
 
+	// 帧时间缓存
+	VOID SetFrameTime(DWORD dwTime) { m_dwFrameTime = dwTime; }
+	DWORD GetFrameTime() const { return m_dwFrameTime; }
+
 	// 目标查询
 	CAliveObject* FindNearestMonster(int nRange = BOT_VIEW_RANGE);
 	CAliveObject* GetCachedTarget();
 	BOOL IsTargetValid(CAliveObject* pTarget);
+
+	// 预计算：在 BT 执行前刷新目标缓存，避免重型搜索进入 BT 热路径
+	VOID PrecomputeTarget();
 
 	// 自身状态查询
 	int GetHpPercent();
@@ -64,4 +72,5 @@ private:
 	CRefObject m_refCachedTarget;	// 缓存的目标引用
 	DWORD m_dwTargetUpdateTime;		// 目标更新时间
 	DWORD m_dwTargetUpdateInterval;	// 目标更新间隔(ms)
+	DWORD m_dwFrameTime;			// 当前帧时间缓存
 };

@@ -227,9 +227,8 @@ VOID xClientObject::OnEvent(xEventSender* pSender, int iEvent, int iParam, LPVOI
 			//	失败断开连接
 			if (m_xPacketQueue.push(pPacket))
 			{
-				// 首次收包时推入活跃队列（CAS 避免重复推入）
-				BOOL expected = FALSE;
-				if (m_bInActiveList.compare_exchange_strong(expected, TRUE))
+				// 首次收包时推入活跃队列（exchange 避免重复推入）
+				if (!m_bInActiveList.exchange(TRUE, std::memory_order_acq_rel))
 				{
 					pServer->PushActiveClientQueue(this);
 				}
@@ -357,6 +356,7 @@ VOID xClientObject::Clean()
 	m_dwSendBytes = 0;
 	m_bQueryDisconnect = FALSE;
 	m_stats = SocketStats{};
+	m_bInActiveList.store(FALSE, std::memory_order_release); // 重置活跃标记：避免复用槽位时残留上一周期的 TRUE 状态
 	xPacket* pPacket = nullptr;
 	auto* pServer = getServer();
 	while (pPacket = m_xPacketQueue.pop())

@@ -48,14 +48,34 @@ CAliveObject* CBotContext::FindNearestMonster(int nRange)
 	if (pBestTarget)
 	{
 		m_refCachedTarget.SetObject(pBestTarget);
-		m_dwTargetUpdateTime = CFrameTime::GetFrameTime();
+		m_dwTargetUpdateTime = m_dwFrameTime;
 	}
 
 	return pBestTarget;
 }
 
 // ============================================================================
-// 获取缓存目标
+// 预计算目标：在 BT 执行前调用，将重型 FindNearestMonster 提前到冷路径
+// 同一帧内 BT 节点再调用 GetCachedTarget 时直接命中缓存，O(1) 返回
+// ============================================================================
+VOID CBotContext::PrecomputeTarget()
+{
+	// 仅当缓存失效时才触发搜索（同一帧内第二次调用无开销）
+	if (!m_refCachedTarget.IsValid())
+	{
+		m_refCachedTarget.SetObject(nullptr);
+		FindNearestMonster();
+		return;
+	}
+	CAliveObject* pTarget = m_refCachedTarget.getObject();
+	if (!pTarget || pTarget->GetType() != OBJ_MONSTER || !IsTargetValid(pTarget))
+	{
+		FindNearestMonster();
+	}
+}
+
+// ============================================================================
+// 获取缓存目标（保留 lazy 逻辑作为兜底：目标在 BT 执行期间异常失效时仍能工作）
 // ============================================================================
 CAliveObject* CBotContext::GetCachedTarget()
 {
@@ -113,7 +133,7 @@ int CBotContext::GetMpPercent()
 BOOL CBotContext::IsDead()
 {
 	if (!m_pBot) return TRUE;
-	return m_pBot->GetPropValue(PI_CURHP) <= 0;
+	return m_pBot->IsDeath();
 }
 
 BOOL CBotContext::InSafeArea()
@@ -173,47 +193,35 @@ WORD CBotContext::FindBestAttackSkill(int nTargetDistance)
 	if (!m_pBot) return 0;
 
 	BYTE btPro = m_pBot->GetPro();
-	WORD wBestSkill = 0;
-	int nBestWeight = 0;
 
 	// 遍历已学技能，选择权重最高的攻击技能
-	// 简化实现：根据职业和距离选择
 	if (btPro == PRO_WARRIOR)
 	{
-		// 战士：近距离使用技能攻击
 		if (nTargetDistance <= 2)
 		{
-			// 优先烈火、半月等近战技能
-			USERMAGIC* pMagic = m_pBot->GetMagic(25); // 烈火
-			if (pMagic && IsSkillReady(25)) return 25;
-			pMagic = m_pBot->GetMagic(12); // 半月
-			if (pMagic && IsSkillReady(12)) return 12;
+			if (IsSkillReady(26)) return 26; // 烈火
+			if (IsSkillReady(25)) return 25; // 半月
 		}
 	}
 	else if (btPro == PRO_MAGICIAN)
 	{
-		// 法师：中远距离使用魔法攻击
 		if (nTargetDistance <= 8)
 		{
-			USERMAGIC* pMagic = m_pBot->GetMagic(8); // 雷电
-			if (pMagic && IsSkillReady(8)) return 8;
-			pMagic = m_pBot->GetMagic(26); // 爆裂火焰
-			if (pMagic && IsSkillReady(26)) return 26;
+			if (IsSkillReady(11)) return 11; // 雷电
+			if (IsSkillReady(23)) return 23; // 爆裂火焰
 		}
 	}
 	else if (btPro == PRO_TAOSHI)
 	{
-		// 道士：中距离使用施毒和灵魂火符
 		if (nTargetDistance <= 7)
 		{
-			USERMAGIC* pMagic = m_pBot->GetMagic(13); // 施毒
-			if (pMagic && IsSkillReady(13)) return 13;
-			pMagic = m_pBot->GetMagic(27); // 灵魂火符
-			if (pMagic && IsSkillReady(27)) return 27;
+			if (IsSkillReady(6))  return 6;  // 施毒
+			if (IsSkillReady(67)) return 67; // 幽冥火咒
+			if (IsSkillReady(13)) return 13; // 灵魂火符
 		}
 	}
 
-	return wBestSkill;
+	return 0;
 }
 
 BOOL CBotContext::IsSkillReady(WORD wSkillId)
@@ -221,12 +229,13 @@ BOOL CBotContext::IsSkillReady(WORD wSkillId)
 	if (!m_pBot) return FALSE;
 	USERMAGIC* pMagic = m_pBot->GetMagic(wSkillId);
 	if (pMagic == nullptr) return FALSE;
-	// 检查技能冷却（简化实现）
+	// 检查技能冷却时间
+	if (!pMagic->useTimer.IsTimeOut(pMagic->pClass->wDelay)) return FALSE;
 	return TRUE;
 }
 
 // ============================================================================
-// 距离/方向计算
+// 距离计算
 // ============================================================================
 int CBotContext::DistanceTo(CAliveObject* pTarget)
 {
@@ -236,6 +245,9 @@ int CBotContext::DistanceTo(CAliveObject* pTarget)
 		pTarget->getX(), pTarget->getY());
 }
 
+// ============================================================================
+// 方向计算
+// ============================================================================
 int CBotContext::DirectionTo(CAliveObject* pTarget)
 {
 	if (!m_pBot || !pTarget) return 0;
@@ -253,6 +265,9 @@ UINT CBotContext::GetCurrentMapId()
 	return m_pBot->GetMapId();
 }
 
+// ============================================================================
+// 坐标是否遮挡
+// ============================================================================
 BOOL CBotContext::IsWalkable(int x, int y)
 {
 	if (!m_pBot) return FALSE;

@@ -630,7 +630,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		case 31: // 魔法盾
 		{
-			ResMag_Count = skillData.value2 * skillData.value5; // 魔法盾抵抗次数
+			ShieldStateSystem::GetInstance()->SetShieldCount(this, skillData.value2 * skillData.value5);// 魔法盾抵抗次数
 			NoDamage = skillData.value3; // 魔法盾抵抗百分比
 			const int pow = skillData.value1;
 			const int time = skillData.value4;
@@ -1709,7 +1709,6 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	// 保存技能时间
 	if (bSaveSkillTime)
 	{
-		m_tmrSpecialAttackSkill.Savetime();
 		m_tmrAttack.Savetime();
 	}
 	if (SendBUF)

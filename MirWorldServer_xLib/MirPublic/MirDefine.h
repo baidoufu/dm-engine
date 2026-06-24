@@ -1711,6 +1711,7 @@ enum PROP_INDEX
 	PI_MAXHP,			//最大生命值
 	PI_MAXMP,			//最大魔法值
 	PI_HPPERCENT,		//生命值百分比的分子
+	PI_MPPERCENT,		//魔法值百分比的分子
 	PI_EXP,				//经验
 	PI_LEVELUPEXP,		//升级所需经验
 	PI_EXPPERCENT,		//升级经验百分比的分子

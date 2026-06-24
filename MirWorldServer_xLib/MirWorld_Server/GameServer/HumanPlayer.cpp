@@ -74,15 +74,6 @@ VOID CHumanPlayer::Clean()
 	m_fMagicLoaded = FALSE;
 	m_iPetCount = 0;
 	CAliveObject::Clean();
-	m_DBTimer.Savetime();
-	m_StaminaTimer.Savetime();
-	m_tmrSpecialAttackSkill.Savetime();
-	m_tmrMine.Savetime();
-	m_tmrGameTime.Savetime();
-	m_tmrUseItem.Savetime();
-	m_tmrPickupItem.Savetime();
-	m_tmrDropItem.Savetime();
-	m_tmrEquipChange.Savetime();
 	m_pExchangeObj = nullptr;
 	m_pGroupObject = nullptr;
 	m_dwStartPointIndex = 0;
@@ -106,7 +97,6 @@ VOID CHumanPlayer::Clean()
 	m_pAddToGuildRequester = nullptr;
 	m_pHorse = nullptr;
 	m_bRideHorse = FALSE;
-	m_HorseTimer.Savetime();
 	m_dwPkValue = 0;
 	m_bJustPk = FALSE;
 	m_pSeizedObject = nullptr;
@@ -125,7 +115,6 @@ VOID CHumanPlayer::Clean()
 	m_bRefuseAddFriend = FALSE;
 	m_pTimeOutDeActiveMagic = nullptr;
 
-	m_dwSpecialEquipmentFunctionFlags.fill(0);
 	m_dwMineCounter = 0;
 	
 	memset(&m_UpgradeItem, 0, sizeof(m_UpgradeItem));
@@ -296,7 +285,7 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 	}
 	ChangeChatChannel(CCH_NORMAL);
 	SaySystemAttrib( CC_GREEN, "更改频道 CTRL+S 查看频道信息 @ccinfo" );
-	m_tmrPkTimer.Savetime();
+	ResetTimer(TimerType::TMR_PK);
 	m_dwPkValue = m_Humandesc.dbinfo.dwFlag[1];
 	UpdateViewName();
 	SendFengHaoData();
@@ -566,6 +555,63 @@ BYTE CHumanPlayer::GetShape(DWORD dwMakeIndex)
 	return S;
 }
 
+BOOL CHumanPlayer::EquipItem(DWORD dwMakeIndex)
+{
+	ITEM* pItem = m_ItemBox.FindItem(dwMakeIndex);
+	switch (pItem->baseitem.btStdMode)
+	{
+	case 10: case 11:
+		return EquipItem(_U_DRESS, *pItem);
+	case 5: case 6:
+		return EquipItem(_U_WEAPON, *pItem);
+	case 30: case 32:
+		return EquipItem(_U_CHARM, *pItem);
+	case 19: case 20: case 21:
+		return EquipItem(_U_NECKLACE, *pItem);
+	case 15:
+		return EquipItem(_U_HELMET, *pItem);
+	case 24: case 26:
+	{
+		ITEM* item = m_Equipments.GetEquipment(_U_ARMRINGR);
+		if (item == nullptr)
+			return EquipItem(_U_ARMRINGR, *pItem);
+		else
+			return EquipItem(_U_ARMRINGL, *pItem);
+	}
+	case 22: case 23:
+	{
+		ITEM* item = m_Equipments.GetEquipment(_U_RINGR);
+		if (item == nullptr)
+			return EquipItem(_U_RINGR, *pItem);
+		else
+			return EquipItem(_U_RINGL, *pItem);
+	}
+	case 81:
+		return EquipItem(_U_SHOE, *pItem);
+	case 58:
+		return EquipItem(_U_BELT, *pItem);
+	case 59: case 60: case 61:
+		return EquipItem(_U_STONE, *pItem);
+	case 25: case 34: // 毒和道符
+	{
+		ITEM* item = m_Equipments.GetEquipment(_U_ARMRINGR);
+		if (item == nullptr)
+			return EquipItem(_U_ARMRINGR, *pItem);
+		else
+			return EquipItem(_U_POISON, *pItem);
+	}
+	case 33: // 马牌
+	{
+		ITEM* item = m_Equipments.GetEquipment(_U_CHARM);
+		if (item == nullptr)
+			return EquipItem(_U_CHARM, *pItem);
+		else
+			return EquipItem(_U_POISON, *pItem);
+	}
+	}
+	return FALSE;
+}
+
 BOOL CHumanPlayer::EquipItem(int pos, DWORD dwMakeIndex)
 {
 	ITEM* pItem = m_ItemBox.FindItem(dwMakeIndex);
@@ -632,12 +678,12 @@ BOOL CHumanPlayer::UnEquipItem(int pos, DWORD dwMakeIndex)
 
 BOOL CHumanPlayer::AddGroupMember(CHumanPlayer* pObject)
 {
-	return TRUE;
+	return AddGroupMember(pObject->GetName());
 }
 
 BOOL CHumanPlayer::RemoveGroupMember(CHumanPlayer* pObject)
 {
-	return TRUE;
+	return RemoveGroupMember(pObject->GetName());
 }
 
 int CHumanPlayer::GetPropValue(PROP_INDEX index)
@@ -721,7 +767,8 @@ int CHumanPlayer::GetPropValue(PROP_INDEX index)
 	case PI_CURMP:			sRet = m_Humandesc.dbinfo.mp; break;
 	case PI_MAXHP:			sRet = m_Humandesc.dbinfo.maxhp + (this->m_xAbilityShellRef.pShell == nullptr ? 0 : this->m_xAbilityShellRef.pShell->wAddHp); break;
 	case PI_MAXMP:			sRet = m_Humandesc.dbinfo.maxmp + (this->m_xAbilityShellRef.pShell == nullptr ? 0 : this->m_xAbilityShellRef.pShell->wAddMp); break;
-	case PI_HPPERCENT:		sRet = ROUND(m_Humandesc.dbinfo.hp / GetPropValue(PI_MAXHP));break;
+	case PI_HPPERCENT:		sRet = ROUND(m_Humandesc.dbinfo.hp / GetPropValue(PI_MAXHP)); break;
+	case PI_MPPERCENT:		sRet = ROUND(m_Humandesc.dbinfo.mp / GetPropValue(PI_MAXMP));break;
 	case PI_EXP:			sRet = m_Humandesc.dbinfo.dwCurExp; break;
 	case PI_LEVELUPEXP:		sRet = (m_pHumanDataDesc == nullptr ? 0 : m_pHumanDataDesc->dwLevelupExp);break;
 	case PI_EXPPERCENT:		sRet = (m_pHumanDataDesc == nullptr || m_pHumanDataDesc->dwLevelupExp == 0) ? 0 : ROUND(m_Humandesc.dbinfo.dwCurExp / m_pHumanDataDesc->dwLevelupExp);break;
@@ -1444,7 +1491,7 @@ VOID CHumanPlayer::Update()
 	{
 		if (m_bJustPk)// 检测PK
 		{
-			if (m_tmrJustPk.IsTimeOut(CGameWorld::GetInstance()->GetVar(EVI_GRAYNAMETIME) * 1000))
+			if (CheckTimer(TimerType::TMR_JUST_PK, CGameWorld::GetInstance()->GetVar(EVI_GRAYNAMETIME) * 1000))
 			{
 				m_bJustPk = FALSE;
 				SendChangeName();
@@ -1452,17 +1499,17 @@ VOID CHumanPlayer::Update()
 		}
 		if (m_dwPkValue > 0) // PK值大于0
 		{
-			if (m_PkPointTimer.IsTimeOut(CGameWorld::GetInstance()->GetVar(EVI_ONEPKPOINTTIME) * 1000))
+			if (CheckTimer(TimerType::TMR_PK_POINT, CGameWorld::GetInstance()->GetVar(EVI_ONEPKPOINTTIME) * 1000))
 			{
 				BYTE btColor = GetNameColor(this);
 				m_dwPkValue--;
-				m_PkPointTimer.Savetime();
+				ResetTimer(TimerType::TMR_PK_POINT);
 				if (btColor != GetNameColor(this))
 					SendChangeName();
 			}
 		}
 		// 6分钟检查
-		if (m_Humandesc.dbinfo.wLevel >= 7 && m_StaminaTimer.IsTimeOut(6 * 60 * 1000))
+		if (m_Humandesc.dbinfo.wLevel >= 7 && CheckTimer(TimerType::TMR_STAMINA, 6 * 60 * 1000))
 		{
 			int expFactor = (m_pMap != nullptr) ? (int)ceilf(m_pMap->GetExpFactor()) : 1;
 			if (expFactor > 1)
@@ -1476,27 +1523,28 @@ VOID CHumanPlayer::Update()
 			}
 			else
 				m_wStamina = m_wMaxStamina;
-			m_StaminaTimer.Savetime();
+			ResetTimer(TimerType::TMR_STAMINA);
 		}
 		// 30分钟保存数据 —— 按playerId错开存档时间
 		// 偏移 = (playerId % 30) * 10 秒，分成 30 个时间片，避免所有玩家同时冲击DB
 		// 每次保存后撤回偏移，保证后续间隔统一为固定30分钟
 		DWORD dwSaveInterval = CGameWorld::GetInstance()->GetVar(EVI_CHARINFOBACKUPTIME) * 60 * 1000;
 		DWORD dwSaveOffset = (GetId() % 30) * 10 * 1000;
-		if (m_DBTimer.IsTimeOut(dwSaveInterval + dwSaveOffset))
+		if (CheckTimer(TimerType::TMR_DB_SAVE, dwSaveInterval + dwSaveOffset))
 		{
 			if (CGameWorld::GetInstance()->CanSaveToDB())
 			{
 				CGameWorld::GetInstance()->UpdateDBUpdateTimer();
-				m_DBTimer.Savetime();
-				m_DBTimer.SetSavedTime(m_DBTimer.GetSavedTime() - dwSaveOffset);
+				ResetTimer(TimerType::TMR_DB_SAVE);
+				// 对应原 m_DBTimer.SetSavedTime(m_DBTimer.GetSavedTime() - dwSaveOffset)
+				OffsetTimer(TimerType::TMR_DB_SAVE, dwSaveOffset);
 				UpdateToDB();
 			}
 		}
 		// 1秒检查
-		if (m_tmrGameTime.IsTimeOut(1000))
+		if (CheckTimer(TimerType::TMR_GAME_TIME, 1000))
 		{
-			m_tmrGameTime.Savetime();
+			ResetTimer(TimerType::TMR_GAME_TIME);
 			if (m_Humandesc.dbinfo.nGameTime > -1) // 时长区-游戏时间计算
 			{
 				if (m_Humandesc.dbinfo.nGameTime != 0)
@@ -1516,9 +1564,9 @@ VOID CHumanPlayer::Update()
 			}
 		}
 		// 60秒检查
-		if (m_tmrFenghaoTime.IsTimeOut(60*1000))
+		if (CheckTimer(TimerType::TMR_FENGHAO, 60*1000))
 		{
-			m_tmrFenghaoTime.Savetime();
+			ResetTimer(TimerType::TMR_FENGHAO);
 			CheckFengHaoTimeOut();
 		}
 	}
@@ -1535,7 +1583,7 @@ VOID CHumanPlayer::Update()
 		}
 		if (m_pAddToGuildRequester != nullptr) // 请求加入行会人
 		{
-			if (m_AddToGuildTimer.IsTimeOut(60 * 1000))
+			if (CheckTimer(TimerType::TMR_ADD_TO_GUILD, 60 * 1000))
 				ReplyAddToGuildRequest(FALSE);
 		}
 		// 检测烈火剑法、雷霆剑
@@ -2909,13 +2957,16 @@ VOID CHumanPlayer::ChannelSay(e_chatchannel channel, const char* pszParam, const
 	if (channel < 0 || channel >= CCH_MAX) channel = GetChatChannel();
 	if (channel < 0 || channel >= CCH_MAX) return;
 	DWORD dwWaitTime = CGameWorld::GetInstance()->GetChannelWaitTime(channel);
-	if (!m_ChatChannelTimer[channel].IsTimeOut(dwWaitTime))
+
+	TimerType chatType = ChatChannelToTimerType(channel);
+	int nLastTickMs = 0;
+	if (!CheckTimerNoReset(chatType, dwWaitTime, nLastTickMs))
 	{
-		DWORD dwTime = GetTimeToTime(m_ChatChannelTimer[channel].GetSavedTime(), CFrameTime::GetFrameTime());
+		DWORD dwTime = GetTimeToTime(nLastTickMs, CFrameTime::GetFrameTime());
 		SaySystem("%s频道 %u 秒后才能继续发言!", g_pChatChannelDesc[channel], (dwWaitTime + 999 - dwTime) / 1000);
 		return;
 	}
-	m_ChatChannelTimer[channel].Savetime();
+	ResetTimer(chatType);
 
 	char szBuff[248];
 	o_strncpy(szBuff, pszWords, 120);
@@ -3296,7 +3347,7 @@ BOOL CHumanPlayer::PostAddToGuildRequest(CHumanPlayer* poster)
 	{
 		m_dwAddToGuildRequesterInstanceKey = poster->GetInstanceKey();
 		SendMsg(0, 0xc7ff, 0, 0, 0, (LPVOID)poster->GetName());
-		m_AddToGuildTimer.Savetime();
+		ResetTimer(TimerType::TMR_ADD_TO_GUILD);
 	}
 	return TRUE;
 }
@@ -3370,7 +3421,7 @@ BOOL CHumanPlayer::RideHorse()
 				m_pHorse->setXY(x, y);
 				m_pHorse->SetMapId(GetMapId());
 				CGameWorld::GetInstance()->AddMapObject((CMapObject*)m_pHorse);
-				m_HorseTimer.Savetime();
+				ResetTimer(TimerType::TMR_HORSE);
 				return TRUE;
 			}
 		}
@@ -3413,12 +3464,11 @@ BOOL CHumanPlayer::RideHorse()
 				SaySystem("您的马不在身边!");
 				return FALSE;
 			}
-			if (!m_HorseTimer.IsTimeOut(3000))
+			if (!CheckTimer(TimerType::TMR_HORSE, 3000))
 			{
 				SaySystem("三秒钟之后才能骑马!");
 				return FALSE;
 			}
-			m_HorseTimer.Savetime();
 			int x = m_pHorse->getX();
 			int y = m_pHorse->getY();
 			//m_pHorse->GetMap()->RemoveObject(m_pHorse);
@@ -3453,11 +3503,11 @@ VOID CHumanPlayer::CheckPk(CAliveObject* pTarget)
 	if (pTarget->GetType() != OBJ_PLAYER || ((CHumanPlayer*)pTarget)->NoLawProtect())
 		return;
 	if (m_bJustPk)
-		m_tmrJustPk.Savetime();
+		ResetTimer(TimerType::TMR_JUST_PK);
 	else if (GetPkValue() < CGameWorld::GetInstance()->GetVar(EVI_REDPKPOINT))
 	{
 		m_bJustPk = TRUE;
-		m_tmrJustPk.Savetime();
+		ResetTimer(TimerType::TMR_JUST_PK);
 		SendChangeName();
 	}
 }
@@ -3542,7 +3592,7 @@ VOID CHumanPlayer::AddPkPoint(DWORD btPoint)
 	else if (!m_bJustPk)
 		m_bJustPk = TRUE;
 	if (m_bJustPk)
-		m_tmrJustPk.Savetime();
+		ResetTimer(TimerType::TMR_JUST_PK);
 	BYTE btColor2 = GetNameColor(this);
 	if (btColor != btColor2)
 		SendChangeName();
@@ -4273,7 +4323,7 @@ BOOL CHumanPlayer::CanDoAction(actiontype action)
 	}
 	if (action == AT_SPECIALHIT)
 	{
-		return m_tmrSpecialAttackSkill.IsTimeOut(g_dwActionDelay[AT_ATTACK] - 80 * GetPropValue(PI_ATTACKSPEED));
+		return RateLimitSystem::GetInstance()->TryRateLimit(this, RateLimitComponent::ACT_SPECIAL_ATTACK);
 	}
 	return CAliveObject::CanDoAction(action);
 }

@@ -5,6 +5,7 @@
 #include "monsterex.h"
 #include "monitemsmgr.h"
 #include "gameworld.h"
+#include "AliveTimerSystem.h"
 
 CMonsterManagerEx::CMonsterManagerEx(VOID)
 {
@@ -82,6 +83,7 @@ BOOL CMonsterManagerEx::AddExtraMonster(CMonsterEx* pMonster)
 	if (id == 0)return FALSE;
 	id |= (OBJ_MONSTER << 24);
 	pMonster->SetId(id);
+	RegEcs(pMonster);
 	return TRUE;
 }
 
@@ -140,6 +142,7 @@ CMonsterEx* CMonsterManagerEx::newObject()//创建一个怪物OBJECT, 并设置ID
 	{
 		id |= (OBJ_MONSTER << 24);
 		pMonster->SetId(id);
+		RegEcs(pMonster);
 	}
 	return pMonster;
 }
@@ -147,7 +150,9 @@ CMonsterEx* CMonsterManagerEx::newObject()//创建一个怪物OBJECT, 并设置ID
 VOID CMonsterManagerEx::deleteObject(CMonsterEx* pObject)
 {
 	if (pObject == nullptr)return;
-	m_xMonsterList.delObject(pObject->GetId() & 0xffffff);
+	UINT rawId = pObject->GetId();
+	UnregEcs(rawId);
+	m_xMonsterList.delObject(rawId & 0xffffff);
 	pObject->Clean();
 	m_xMonsterPool.deleteObject(pObject);
 }
@@ -477,4 +482,14 @@ VOID CMonsterManagerEx::UpdateFreeObjects()
 		m_nCurFreeIndex++;
 		if (static_cast<int>(i) >= nCount - 1)return;
 	}
+}
+
+VOID CMonsterManagerEx::RegEcs(CMonsterEx* pMon)
+{
+	AliveTimerSystem::GetInstance()->CreateAliveTimers(pMon);
+}
+
+VOID CMonsterManagerEx::UnregEcs(UINT id)
+{
+	AliveTimerSystem::GetInstance()->OnObjectDestroy(id);
 }

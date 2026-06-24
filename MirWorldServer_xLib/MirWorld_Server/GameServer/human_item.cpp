@@ -598,7 +598,7 @@ VOID CHumanPlayer::OnSpecialEquipmentFunctionOn(special_equipment_func func)
 			dwTime = 0;
 		else
 			dwTime -= 2 * 60 * 1000;
-		m_tmrRelive.SetSavedTime(dwTime);
+		RateLimitSystem::GetInstance()->GmSetRateLimitInterval(this, RateLimitComponent::ACT_RELIVE, dwTime);
 	}
 	break;
 	case SEF_CLOAK:
@@ -773,18 +773,19 @@ VOID CHumanPlayer::OnDoAction(actiontype action)
 
 BOOL CHumanPlayer::WillDie()
 {
-	if (IsSpecialEquipmentFunctionOn(SEF_RELIVE) && m_tmrRelive.IsTimeOut(60 * 2 * 1000))
+	if (IsSpecialEquipmentFunctionOn(SEF_RELIVE))
 	{
-		AddPropValue(PI_CURHP, GetPropValue(PI_MAXHP));
-		//SendHpMpChanged();
-		DamageSpecialEquipment(SEF_RELIVE, 1000);
-		char* p = CSpecialEquipmentManager::GetInstance()->GetFunctionString(SEF_RELIVE);
-		if (p != nullptr && p[0] != 0)
+		auto* rl = GetRateLimit();
+		if (rl && rl->TryExecute(RateLimitComponent::ACT_RELIVE, CFrameTime::GetFrameTime()))
 		{
-			SaySystem(p);
+			AddPropValue(PI_CURHP, GetPropValue(PI_MAXHP));
+			//SendHpMpChanged();
+			DamageSpecialEquipment(SEF_RELIVE, 1000);
+			char* p = CSpecialEquipmentManager::GetInstance()->GetFunctionString(SEF_RELIVE);
+			if (p != nullptr && p[0] != 0)
+				SaySystem(p);
+			return FALSE;
 		}
-		m_tmrRelive.Savetime();
-		return FALSE;
 	}
 	return TRUE;
 }
@@ -796,7 +797,7 @@ VOID CHumanPlayer::DamageSpecialEquipment(special_equipment_func func, int iDama
 	for (int i = 0; i < _U_MAX; i++)
 	{
 		dwPosFlag = 1 << i;
-		if (this->m_dwSpecialEquipmentFunctionFlags[func] & dwPosFlag)
+		if (GetSpecialEquipmentFlag(func) & dwPosFlag)
 		{
 			DamageDura(i, iDamage);
 		}

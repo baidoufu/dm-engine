@@ -1,5 +1,6 @@
 #pragma	once
 
+#include <atomic>
 #include <array>
 #include <charconv>
 #include <string_view>
@@ -16,16 +17,34 @@ public:
 	}
 	UINT allocid()
 	{
-		if (m_nCacheCount > 0)
-			return m_IdCache[--m_nCacheCount];
-		return (++m_nIdPtr);
+		UINT count = m_nCacheCount.load(std::memory_order_acquire);
+		while (count > 0)
+		{
+			if (m_nCacheCount.compare_exchange_weak(count, count - 1,
+				std::memory_order_acquire, std::memory_order_relaxed))
+			{
+				return m_IdCache[count - 1];
+			}
+		}
+		return m_nIdPtr.fetch_add(1, std::memory_order_acq_rel) + 1;
 	}
 	VOID freeid(UINT id)
 	{
-		if (id == m_nIdPtr)
-			m_nIdPtr--;
-		else if (m_nCacheCount < MAXCOUNT)
-			m_IdCache[m_nCacheCount++] = id;
+		UINT expected = id;
+		if (m_nIdPtr.compare_exchange_strong(expected, id - 1,
+			std::memory_order_acq_rel, std::memory_order_relaxed))
+			return;
+
+		UINT count = m_nCacheCount.load(std::memory_order_relaxed);
+		while (count < MAXCOUNT)
+		{
+			if (m_nCacheCount.compare_exchange_weak(count, count + 1,
+				std::memory_order_release, std::memory_order_relaxed))
+			{
+				m_IdCache[count] = id;
+				return;
+			}
+		}
 	}
 	BOOL isused(UINT id)
 	{
@@ -33,15 +52,15 @@ public:
 	}
 private:
 	std::array<UINT, MAXCOUNT> m_IdCache;
-	UINT m_nCacheCount;
-	UINT m_nIdPtr;
+	std::atomic<UINT> m_nCacheCount;
+	std::atomic<UINT> m_nIdPtr;
 };
 
 template<int MAXCOUNT>
 class xIdAllocor
 {
 public:
-	xIdAllocor() : m_iFree(0), m_iCount(0)
+	xIdAllocor() : m_head(0), m_iCount(0)
 	{
 		for (UINT i = 0; i < MAXCOUNT; i++)
 		{
@@ -50,32 +69,52 @@ public:
 	}
 	UINT allocid()
 	{
-		if (m_iFree >= MAXCOUNT) return 0;
-		UINT id = m_iFree + 1;
-		m_iFree = m_NextFree[m_iFree];
-		m_NextFree[id - 1] = 0xffffffff;
-		m_iCount++;
-		return id;
+		UINT64 head = m_head.load(std::memory_order_acquire);
+		while (true)
+		{
+			UINT free = static_cast<UINT>(head & 0xFFFFFFFFULL);
+			if (free >= MAXCOUNT) return 0;
+			UINT next = m_NextFree[free];
+			UINT64 newHead = ((head + 0x100000000ULL) & 0xFFFFFFFF00000000ULL) | next;
+			if (m_head.compare_exchange_weak(head, newHead,
+				std::memory_order_acquire, std::memory_order_relaxed))
+			{
+				UINT id = free + 1;
+				m_NextFree[id - 1] = 0xffffffff;
+				m_iCount.fetch_add(1, std::memory_order_release);
+				return id;
+			}
+		}
 	}
 	VOID freeid(UINT id)
 	{
 		if (id == 0 || id > MAXCOUNT) return;
-		id--;
-		if (m_NextFree[id] != 0xffffffff) return;
-		m_NextFree[id] = m_iFree;
-		m_iFree = id;
-		m_iCount--;
+		UINT idx = id - 1;
+		if (m_NextFree[idx] != 0xffffffff) return;
+		UINT64 head = m_head.load(std::memory_order_relaxed);
+		while (true)
+		{
+			UINT free = static_cast<UINT>(head & 0xFFFFFFFFULL);
+			m_NextFree[idx] = free;
+			UINT64 newHead = (head & 0xFFFFFFFF00000000ULL) | idx;
+			if (m_head.compare_exchange_weak(head, newHead,
+				std::memory_order_release, std::memory_order_relaxed))
+			{
+				m_iCount.fetch_sub(1, std::memory_order_release);
+				return;
+			}
+		}
 	}
 	BOOL isused(UINT id)
 	{
 		return (id > 0 && id <= MAXCOUNT && m_NextFree[id - 1] == 0xffffffff);
 	}
-	UINT getcount() { return m_iCount; }
-	BOOL isfull() { return (m_iCount >= MAXCOUNT); }
+	UINT getcount() { return m_iCount.load(std::memory_order_acquire); }
+	BOOL isfull() { return (m_iCount.load(std::memory_order_acquire) >= MAXCOUNT); }
 private:
 	std::array<UINT, MAXCOUNT + 1> m_NextFree;
-	UINT m_iFree;
-	UINT m_iCount;
+	std::atomic<UINT64> m_head;		// low 32: m_iFree, high 32: ABA version tag
+	std::atomic<UINT> m_iCount;
 };
 
 template<class T>
