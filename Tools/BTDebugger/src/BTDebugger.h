@@ -9,7 +9,7 @@
 #include "BTNode.h"
 #include "BTEngine.h"
 
-// ¿Ø¼şID
+// æ§ä»¶ID
 #define ID_TREEVIEW      1001
 #define ID_PROPLIST      1002
 #define ID_LOGEDIT       1003
@@ -17,22 +17,12 @@
 #define ID_BTN_STEP      2002
 #define ID_BTN_AUTO      2003
 #define ID_BTN_RESET     2004
-#define ID_BTN_SAVE      2005
-#define ID_SPEED_SLIDER  2006
-#define ID_SPEED_LABEL   2007
+#define ID_SPEED_SLIDER  2005
+#define ID_SPEED_LABEL   2006
 #define ID_STATUS_BAR    3001
 #define ID_TIMER_AUTO    4001
 
-// Ê÷½ÚµãÓÒ¼ü²Ëµ¥ ID
-#define IDM_RENAME_NODE   5001
-#define IDM_ADD_CHILD     5002
-#define IDM_DELETE_NODE   5003
-#define IDM_MOVE_UP       5004
-#define IDM_MOVE_DOWN     5005
-#define IDM_EDIT_PROPS    5006
-#define IDM_CHANGE_TYPE   5007
-
-// ´°¿ÚÀà
+// çª—å£ç±»
 class CBTDebugger
 {
 public:
@@ -55,47 +45,45 @@ private:
     HWND m_hBtnStep;
     HWND m_hBtnAuto;
     HWND m_hBtnReset;
-    HWND m_hBtnSave;
     HWND m_hSpeedSlider;
     HWND m_hSpeedLabel;
 
-    // ·Ö¸ôÌõ
+    // åˆ†éš”æ¡
     int m_splitterPos;
     bool m_dragging;
     int m_rightSplitterPos;
 
-    // ĞĞÎªÊ÷Êı¾İ
+    // è¡Œä¸ºæ ‘æ•°æ®
     std::shared_ptr<BTNode> m_pRoot;
     BTEngine m_engine;
     std::wstring m_currentFile;
 
-    // ×Ô¶¯Ö´ĞĞ
+    // è‡ªåŠ¨æ‰§è¡Œ
     bool m_isAutoRunning;
     int m_autoSpeed; // ms
 
-    // ËÑË÷×´Ì¬
+    // æœç´¢çŠ¶æ€
     std::wstring m_selectedNodeId;
 
-    // ´°¿Ú³ß´ç
+    // çª—å£å°ºå¯¸
     int m_width, m_height;
 
-    // ³õÊ¼»¯
+    // åˆå§‹åŒ–
     void CreateControls();
     void LayoutControls();
     void InitTreeViewImages();
 
-    // ÏûÏ¢´¦Àí
+    // æ¶ˆæ¯å¤„ç†
     void OnSize(int width, int height);
     void OnCommand(WORD id);
-    LRESULT OnNotify(NMHDR* pnmh);
+    void OnNotify(NMHDR* pnmh);
     void OnTimer(UINT_PTR id);
     void OnPaint(HDC hdc);
 
-    // ĞĞÎªÊ÷²Ù×÷
+    // è¡Œä¸ºæ ‘æ“ä½œ
     void LoadXMLFile();
     void LoadXMLFromString(const std::string& xml);
     bool LoadBuiltInSample(const std::wstring& name);
-    void SaveXMLFile();
     void PopulateTreeView();
     void PopulateTreeViewRecursive(HTREEITEM hParent, std::shared_ptr<BTNode> node);
     void UpdateNodeStates();
@@ -109,29 +97,17 @@ private:
     void UpdateLogPanel();
     void UpdateStatusBar();
 
-    // ½Úµã±à¼­
-    void OnTreeContextMenu(POINT pt);
-    void RenameSelectedNode();
-    void AddChildToSelectedNode();
-    void DeleteSelectedNode();
-    void MoveSelectedNodeUp();
-    void MoveSelectedNodeDown();
-    void EditNodeProperties();
-    void ChangeNodeType();
-    void OnPropListDoubleClick();
-    std::shared_ptr<BTNode> GetSelectedNode();
-
-    // ·Ö¸ôÌõ
+    // åˆ†éš”æ¡
     void OnLButtonDown(int x, int y);
     void OnMouseMove(int x, int y);
     void OnLButtonUp();
 
-    // ¹¤¾ßº¯Êı
+    // å·¥å…·å‡½æ•°
     std::string WStringToUTF8(const std::wstring& wstr);
     std::wstring UTF8ToWString(const std::string& str);
     void SetLogText(const std::wstring& text);
     void AppendLogText(const std::wstring& text);
 
-    // ¾²Ì¬ÊµÀıÖ¸Õë
+    // é™æ€å®ä¾‹æŒ‡é’ˆ
     static CBTDebugger* s_pInstance;
 };

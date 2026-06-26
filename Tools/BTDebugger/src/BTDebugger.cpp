@@ -3,277 +3,258 @@
 #include <sstream>
 #include <codecvt>
 #include <map>
-#include <algorithm>
 #include <CommCtrl.h>
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-// ============================================================================
-// ◊‘÷∆∂‘ª∞øÚ¥∞ø⁄π˝≥Ã
-// ============================================================================
-static LRESULT CALLBACK DlgFrameWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    switch (msg)
-    {
-    case WM_COMMAND:
-        // Ω´ WM_COMMAND ◊™∑¢Œ™◊‘∂®“Âœ˚œ¢£¨»√ƒ£Ã¨—≠ª∑ƒ‹≤∂ªÒ
-        PostMessageW(hWnd, WM_USER + 100, wParam, lParam);
-        return 0;
-    case WM_CLOSE:
-        PostMessageW(hWnd, WM_USER + 101, 0, 0);
-        return 0;
-    }
-    return DefWindowProcW(hWnd, msg, wParam, lParam);
-}
-
 CBTDebugger* CBTDebugger::s_pInstance = nullptr;
 
-// ƒ⁄÷√ æ¿˝ ˝æ›
+// ÂÜÖÁΩÆÁ§∫‰æãÊï∞ÊçÆ
 static const std::map<std::wstring, std::string> g_builtInSamples = {
-    { L"’Ω ø’Ω∂∑––Œ™ ˜", R"BT(<?xml version="1.0" encoding="GBK"?>
-<BehaviorTree name="’Ω ø’Ω∂∑––Œ™ ˜ - Warrior v2.0">
-    <Selector name="’Ω ø÷˜æˆ≤ﬂ">
-        <Sequence name="∞≤»´«¯ª÷∏¥––Œ™">
-            <ConditionInSafeArea name="ºÏ≤‚ «∑Ò‘⁄∞≤»´«¯" />
-            <Parallel name="∞≤»´«¯ƒ⁄∂‡»ŒŒÒ¥¶¿Ì">
-                <Sequence name="∞≤»´«¯ªÿ—™">
-                    <ConditionLowHP name="HP≤ª◊„70%" percent="70" />
-                    <Probability name="≥‘“©”Ã‘•(30%)" chance="30">
-                        <ActionUsePotion name=" π”√HP“©ÀÆ" hpType="1" />
+    { L"ÊàòÂ£´ÊàòÊñóË°å‰∏∫Ê†ë", R"(<?xml version="1.0" encoding="GBK"?>
+<BehaviorTree name="ÊàòÂ£´ÊàòÊñóË°å‰∏∫Ê†ë - Warrior v2.0">
+    <Selector name="ÊàòÂ£´‰∏ªÂÜ≥Á≠ñ">
+        <Sequence name="ÂÆâÂÖ®Âå∫ÊÅ¢Â§çË°å‰∏∫">
+            <ConditionInSafeArea name="Ê£ÄÊµãÊòØÂê¶Âú®ÂÆâÂÖ®Âå∫" />
+            <Parallel name="ÂÆâÂÖ®Âå∫ÂÜÖÂ§ö‰ªªÂä°Â§ÑÁêÜ">
+                <Sequence name="ÂÆâÂÖ®Âå∫ÂõûË°Ä">
+                    <ConditionLowHP name="HP‰∏çË∂≥70%" percent="70" />
+                    <Probability name="ÂêÉËçØÁäπË±´(30%)" chance="30">
+                        <ActionUsePotion name="‰ΩøÁî®HPËçØÊ∞¥" hpType="1" />
                     </Probability>
                 </Sequence>
-                <Sequence name="∞≤»´«¯ªÿ¿∂">
-                    <ConditionLowMP name="MP≤ª◊„40%" percent="40" />
-                    <ActionUsePotion name=" π”√MP“©ÀÆ" hpType="0" />
+                <Sequence name="ÂÆâÂÖ®Âå∫ÂõûËìù">
+                    <ConditionLowMP name="MP‰∏çË∂≥40%" percent="40" />
+                    <ActionUsePotion name="‰ΩøÁî®MPËçØÊ∞¥" hpType="0" />
                 </Sequence>
-                <Probability name="—≤¬ﬂ∏≈¬ (40%)" chance="40">
-                    <ActionPatrol name="∞≤»´«¯ƒ⁄—≤¬ﬂ" />
+                <Probability name="Â∑°ÈÄªÊ¶ÇÁéá(40%)" chance="40">
+                    <ActionPatrol name="ÂÆâÂÖ®Âå∫ÂÜÖÂ∑°ÈÄª" />
                 </Probability>
-                <Sequence name="∞≤»´«¯…ÁΩª">
-                    <Probability name="¡ƒÃÏ∏≈¬ (60%)" chance="60">
-                        <ActionChat name="ÀÊª˙¡ƒÃÏ" />
+                <Sequence name="ÂÆâÂÖ®Âå∫Á§æ‰∫§">
+                    <Probability name="ËÅäÂ§©Ê¶ÇÁéá(60%)" chance="60">
+                        <ActionChat name="ÈöèÊú∫ËÅäÂ§©" />
                     </Probability>
                 </Sequence>
             </Parallel>
         </Sequence>
-        <Sequence name="±≥∞¸“—¬˙¥¶¿Ì">
-            <ConditionBagFull name="±≥∞¸ «∑Ò“—¬˙" />
-            <ActionUseItem name=" π”√ªÿ≥«æÌ" itemName="ªÿ≥«æÌ" />
+        <Sequence name="ËÉåÂåÖÂ∑≤Êª°Â§ÑÁêÜ">
+            <ConditionBagFull name="ËÉåÂåÖÊòØÂê¶Â∑≤Êª°" />
+            <ActionUseItem name="‰ΩøÁî®ÂõûÂüéÂç∑" itemName="ÂõûÂüéÂç∑" />
         </Sequence>
-        <Sequence name="ΩÙº±Ã”…˙≤ﬂ¬‘">
-            <ConditionLowHP name="HPµÕ”⁄20%±ÙÀ¿" percent="20" />
-            <Parallel name="Ã”…˙∂‡∂Ø◊˜">
-                <ActionFlee name="œÚ∞≤»´∑ΩœÚÃ”≈‹" />
-                <Probability name="¥´ÀÕ∏≈¬ (20%)" chance="20">
-                    <ActionUseItem name="ÀÊª˙¥´ÀÕæÌÃ”Õ—" itemName="ÀÊª˙¥´ÀÕæÌ" />
+        <Sequence name="Á¥ßÊÄ•ÈÄÉÁîüÁ≠ñÁï•">
+            <ConditionLowHP name="HP‰Ωé‰∫é20%ÊøíÊ≠ª" percent="20" />
+            <Parallel name="ÈÄÉÁîüÂ§öÂä®‰Ωú">
+                <ActionFlee name="ÂêëÂÆâÂÖ®ÊñπÂêëÈÄÉË∑ë" />
+                <Probability name="‰º†ÈÄÅÊ¶ÇÁéá(20%)" chance="20">
+                    <ActionUseItem name="ÈöèÊú∫‰º†ÈÄÅÂç∑ÈÄÉËÑ±" itemName="ÈöèÊú∫‰º†ÈÄÅÂç∑" />
                 </Probability>
             </Parallel>
         </Sequence>
-        <Sequence name="’Ω∂∑≤ﬂ¬‘">
-            <ConditionHasTarget name="ºÏ≤È «∑Ò”–ƒø±Í" />
-            <ActionChangeAttackMode name="«–ªª»´ÃÂπ•ª˜ƒ£ Ω" attackMode="1" />
-            <Parallel name="’Ω∂∑≤¢––––Œ™">
-                <Sequence name="’Ω∂∑÷˜—≠ª∑">
-                    <ActionMoveToTarget name="“∆œÚƒø±Í" />
-                    <Selector name="π•ª˜∑Ω Ω—°‘Ò">
-                        <Sequence name="ººƒ‹π•ª˜≥¢ ‘">
-                            <Probability name="ººƒ‹”Ã‘•(10%)" chance="10">
-                                <ActionUseSkill name=" π”√’Ω øººƒ‹π•ª˜" magicId="0" />
+        <Sequence name="ÊàòÊñóÁ≠ñÁï•">
+            <ConditionHasTarget name="Ê£ÄÊü•ÊòØÂê¶ÊúâÁõÆÊ†á" />
+            <ActionChangeAttackMode name="ÂàáÊç¢ÂÖ®‰ΩìÊîªÂáªÊ®°Âºè" attackMode="1" />
+            <Parallel name="ÊàòÊñóÂπ∂Ë°åË°å‰∏∫">
+                <Sequence name="ÊàòÊñó‰∏ªÂæ™ÁéØ">
+                    <ActionMoveToTarget name="ÁßªÂêëÁõÆÊ†á" />
+                    <Selector name="ÊîªÂáªÊñπÂºèÈÄâÊã©">
+                        <Sequence name="ÊäÄËÉΩÊîªÂáªÂ∞ùËØï">
+                            <Probability name="ÊäÄËÉΩÁäπË±´(10%)" chance="10">
+                                <ActionUseSkill name="‰ΩøÁî®ÊàòÂ£´ÊäÄËÉΩÊîªÂáª" magicId="0" />
                             </Probability>
                         </Sequence>
-                        <ActionAttack name="∆’Õ®π•ª˜" />
+                        <ActionAttack name="ÊôÆÈÄöÊîªÂáª" />
                     </Selector>
                 </Sequence>
-                <Sequence name="’Ω∂∑≤π∏¯">
-                    <Sequence name="’Ω∂∑∫»∫Ï">
-                        <ConditionLowHP name="HPµÕ”⁄50%" percent="50" />
-                        <Probability name="¡¢øÃ∫»“©∏≈¬ (80%)" chance="80">
-                            <ActionUsePotion name="’Ω∂∑÷–∫»HP“©ÀÆ" hpType="1" />
+                <Sequence name="ÊàòÊñóË°•Áªô">
+                    <Sequence name="ÊàòÊñóÂñùÁ∫¢">
+                        <ConditionLowHP name="HP‰Ωé‰∫é50%" percent="50" />
+                        <Probability name="Á´ãÂàªÂñùËçØÊ¶ÇÁéá(80%)" chance="80">
+                            <ActionUsePotion name="ÊàòÊñó‰∏≠ÂñùHPËçØÊ∞¥" hpType="1" />
                         </Probability>
                     </Sequence>
-                    <Sequence name="’Ω∂∑∫»¿∂">
-                        <ConditionLowMP name="MPµÕ”⁄30%" percent="30" />
-                        <ActionUsePotion name="’Ω∂∑÷–∫»MP“©ÀÆ" hpType="0" />
+                    <Sequence name="ÊàòÊñóÂñùËìù">
+                        <ConditionLowMP name="MP‰Ωé‰∫é30%" percent="30" />
+                        <ActionUsePotion name="ÊàòÊñó‰∏≠ÂñùMPËçØÊ∞¥" hpType="0" />
                     </Sequence>
                 </Sequence>
             </Parallel>
         </Sequence>
-        <Sequence name="◊‘”…¬˛”Œ≤ﬂ¬‘">
-            <ActionPickupItem name=" ∞»°µÿ…œŒÔ∆∑" />
-            <Random name="œ–π‰ÀÊª˙––Œ™">
-                <ActionPatrol name="ÀÊª˙—≤¬ﬂ◊ﬂ∂Ø" />
-                <ActionRest name="‘≠µÿ–›œ¢" duration="5000" />
-                <ActionChat name="ÀÊª˙¡ƒÃÏ" />
+        <Sequence name="Ëá™Áî±Êº´Ê∏∏Á≠ñÁï•">
+            <ActionPickupItem name="ÊãæÂèñÂú∞‰∏äÁâ©ÂìÅ" />
+            <Random name="Èó≤ÈÄõÈöèÊú∫Ë°å‰∏∫">
+                <ActionPatrol name="ÈöèÊú∫Â∑°ÈÄªËµ∞Âä®" />
+                <ActionRest name="ÂéüÂú∞‰ºëÊÅØ" duration="5000" />
+                <ActionChat name="ÈöèÊú∫ËÅäÂ§©" />
             </Random>
         </Sequence>
     </Selector>
-</BehaviorTree>)BT" },
+</BehaviorTree>)" },
 
-    { L"∑® ¶’Ω∂∑––Œ™ ˜", R"BT(<?xml version="1.0" encoding="GBK"?>
-<BehaviorTree name="∑® ¶’Ω∂∑––Œ™ ˜ - Mage v2.0">
-    <Selector name="∑® ¶÷˜æˆ≤ﬂ">
-        <Sequence name="∞≤»´«¯––Œ™">
-            <ConditionInSafeArea name="‘⁄∞≤»´«¯" />
-            <Parallel name="∞≤»´«¯≤¢––––Œ™">
-                <Sequence name="∞≤»´«¯ªÿ—™">
-                    <ConditionLowHP name="HP≤ª◊„60%" percent="60" />
-                    <ActionUsePotion name="∫»HP“©ÀÆ" hpType="1" />
+    { L"Ê≥ïÂ∏àÊàòÊñóË°å‰∏∫Ê†ë", R"(<?xml version="1.0" encoding="GBK"?>
+<BehaviorTree name="Ê≥ïÂ∏àÊàòÊñóË°å‰∏∫Ê†ë - Mage v2.0">
+    <Selector name="Ê≥ïÂ∏à‰∏ªÂÜ≥Á≠ñ">
+        <Sequence name="ÂÆâÂÖ®Âå∫Ë°å‰∏∫">
+            <ConditionInSafeArea name="Âú®ÂÆâÂÖ®Âå∫" />
+            <Parallel name="ÂÆâÂÖ®Âå∫Âπ∂Ë°åË°å‰∏∫">
+                <Sequence name="ÂÆâÂÖ®Âå∫ÂõûË°Ä">
+                    <ConditionLowHP name="HP<60%" percent="60" />
+                    <ActionUsePotion name="ÂñùHPËçØÊ∞¥" hpType="1" />
                 </Sequence>
-                <Sequence name="∞≤»´«¯ªÿ¿∂">
-                    <ConditionLowMP name="MP≤ª◊„50%" percent="50" />
-                    <ActionUsePotion name="∫»MP“©ÀÆ" hpType="0" />
+                <Sequence name="ÂÆâÂÖ®Âå∫ÂõûËìù">
+                    <ConditionLowMP name="MP<50%" percent="50" />
+                    <ActionUsePotion name="ÂñùMPËçØÊ∞¥" hpType="0" />
                 </Sequence>
-                <Probability name="∞≤»´«¯—≤¬ﬂ(30%)" chance="30">
-                    <ActionPatrol name="∞≤»´«¯—≤¬ﬂ" />
+                <Probability name="ÂÆâÂÖ®Âå∫Â∑°ÈÄª(30%)" chance="30">
+                    <ActionPatrol name="ÂÆâÂÖ®Âå∫Â∑°ÈÄª" />
                 </Probability>
-                <Probability name="∞≤»´«¯¡ƒÃÏ(50%)" chance="50">
-                    <ActionChat name="∞≤»´«¯¡ƒÃÏ" />
+                <Probability name="ÂÆâÂÖ®Âå∫ËÅäÂ§©(50%)" chance="50">
+                    <ActionChat name="ÂÆâÂÖ®Âå∫ËÅäÂ§©" />
                 </Probability>
             </Parallel>
         </Sequence>
-        <Sequence name="±≥∞¸¬˙¥¶¿Ì">
-            <ConditionBagFull name="±≥∞¸¬˙" />
-            <ActionUseItem name=" π”√ªÿ≥«æÌ" itemName="ªÿ≥«æÌ" />
+        <Sequence name="ËÉåÂåÖÊª°Â§ÑÁêÜ">
+            <ConditionBagFull name="ËÉåÂåÖÊª°" />
+            <ActionUseItem name="‰ΩøÁî®ÂõûÂüéÂç∑" itemName="ÂõûÂüéÂç∑" />
         </Sequence>
-        <Sequence name="∑® ¶ΩÙº±Ã”…˙">
-            <ConditionLowHP name="HP≤ª◊„25%±ÙÀ¿" percent="25" />
-            <Parallel name="Ã”…˙∂‡∂Ø◊˜">
-                <Probability name="ÀÊª˙¥´ÀÕ(40%)" chance="40">
-                    <ActionUseItem name="ÀÊª˙¥´ÀÕÃ”≈‹" itemName="ÀÊª˙¥´ÀÕæÌ" />
+        <Sequence name="Ê≥ïÂ∏àÁ¥ßÊÄ•ÈÄÉÁîü">
+            <ConditionLowHP name="HP<25%ÊøíÊ≠ª" percent="25" />
+            <Parallel name="ÈÄÉÁîüÂ§öÂä®‰Ωú">
+                <Probability name="ÈöèÊú∫‰º†ÈÄÅ(40%)" chance="40">
+                    <ActionUseItem name="ÈöèÊú∫‰º†ÈÄÅÈÄÉË∑ë" itemName="ÈöèÊú∫‰º†ÈÄÅÂç∑" />
                 </Probability>
-                <ActionFlee name="œÚ∞≤»´∑ΩœÚÃ”≈‹" />
+                <ActionFlee name="ÂêëÂÆâÂÖ®ÊñπÂêëÈÄÉË∑ë" />
             </Parallel>
         </Sequence>
-        <Sequence name="’Ω∂∑≤ﬂ¬‘">
-            <ConditionHasTarget name="”–ƒø±Í" />
-            <Sequence name="∑® ¶’Ω∂∑¡˜≥Ã">
-                <ActionChangeAttackMode name="«–ªª»´ÃÂπ•ª˜" attackMode="1" />
-                <Selector name="∑® ¶π•ª˜∑Ω Ω—°‘Ò">
-                    <Sequence name="‘∂≥Ãººƒ‹π•ª˜">
-                        <ActionUseSkill name="‘∂≥Ãººƒ‹π•ª˜" magicId="0" />
-                        <Probability name="π•ª˜∫ÛÕ£∂Ÿ(20%)" chance="20">
-                            <ActionRest name="∂Ã‘›Õ£∂Ÿ" duration="800" />
+        <Sequence name="ÊàòÊñóÁ≠ñÁï•">
+            <ConditionHasTarget name="ÊúâÁõÆÊ†á" />
+            <Sequence name="Ê≥ïÂ∏àÊàòÊñóÊµÅÁ®ã">
+                <ActionChangeAttackMode name="ÂàáÊç¢ÂÖ®‰ΩìÊîªÂáª" attackMode="1" />
+                <Selector name="Ê≥ïÂ∏àÊîªÂáªÊñπÂºèÈÄâÊã©">
+                    <Sequence name="ËøúÁ®ãÊäÄËÉΩÊîªÂáª">
+                        <ActionUseSkill name="ËøúÁ®ãÊäÄËÉΩÊîªÂáª" magicId="0" />
+                        <Probability name="ÊîªÂáªÂêéÂÅúÈ°ø(20%)" chance="20">
+                            <ActionRest name="Áü≠ÊöÇÂÅúÈ°ø" duration="800" />
                         </Probability>
                     </Sequence>
-                    <Sequence name="∆’Õ®π•ª˜">
-                        <ActionAttack name="∆’Õ®π•ª˜" />
+                    <Sequence name="ÊôÆÈÄöÊîªÂáª">
+                        <ActionAttack name="ÊôÆÈÄöÊîªÂáª" />
                     </Sequence>
                 </Selector>
-                <ActionMoveToTarget name="µ˜’˚”Îƒø±Íæ‡¿Î" />
-                <Parallel name="’Ω∂∑≤π∏¯≤¢––">
-                    <Sequence name="’Ω∂∑∫»∫Ï">
-                        <ConditionLowHP name="HP≤ª◊„45%" percent="45" />
-                        <ActionUsePotion name="∫»HP“©ÀÆ" hpType="1" />
+                <ActionMoveToTarget name="Ë∞ÉÊï¥‰∏éÁõÆÊ†áË∑ùÁ¶ª" />
+                <Parallel name="ÊàòÊñóË°•ÁªôÂπ∂Ë°å">
+                    <Sequence name="ÊàòÊñóÂñùÁ∫¢">
+                        <ConditionLowHP name="HP<45%" percent="45" />
+                        <ActionUsePotion name="ÂñùHPËçØÊ∞¥" hpType="1" />
                     </Sequence>
-                    <Sequence name="’Ω∂∑∫»¿∂">
-                        <ConditionLowMP name="MP≤ª◊„40%" percent="40" />
-                        <ActionUsePotion name="∫»MP“©ÀÆ" hpType="0" />
+                    <Sequence name="ÊàòÊñóÂñùËìù">
+                        <ConditionLowMP name="MP<40%" percent="40" />
+                        <ActionUsePotion name="ÂñùMPËçØÊ∞¥" hpType="0" />
                     </Sequence>
                 </Parallel>
             </Sequence>
         </Sequence>
-        <Sequence name="◊‘”…¬˛”Œ">
-            <ActionPickupItem name=" ∞»°ŒÔ∆∑" />
-            <Random name="¬˛”ŒÀÊª˙––Œ™">
-                <ActionPatrol name="—≤¬ﬂ" />
-                <ActionRest name="–›œ¢" duration="3000" />
-                <ActionChat name="¡ƒÃÏ" />
-                <Sequence name="∑¢¥Ù">
-                    <Probability name="∑¢¥Ù∏≈¬ " chance="10" />
+        <Sequence name="Ëá™Áî±Êº´Ê∏∏">
+            <ActionPickupItem name="ÊãæÂèñÁâ©ÂìÅ" />
+            <Random name="Êº´Ê∏∏ÈöèÊú∫Ë°å‰∏∫">
+                <ActionPatrol name="Â∑°ÈÄª" />
+                <ActionRest name="‰ºëÊÅØ" duration="3000" />
+                <ActionChat name="ËÅäÂ§©" />
+                <Sequence name="ÂèëÂëÜ">
+                    <Probability name="ÂèëÂëÜÊ¶ÇÁéá" chance="10" />
                 </Sequence>
             </Random>
         </Sequence>
     </Selector>
-</BehaviorTree>)BT" },
+</BehaviorTree>)" },
 
-    { L"µ¿ ø’Ω∂∑––Œ™ ˜", R"BT(<?xml version="1.0" encoding="GBK"?>
-<BehaviorTree name="µ¿ ø’Ω∂∑––Œ™ ˜ - Taoist v2.0">
-    <Selector name="µ¿ ø÷˜æˆ≤ﬂ">
-        <Sequence name="∞≤»´«¯◊‘∂Øª÷∏¥">
-            <ConditionInSafeArea name="‘⁄∞≤»´«¯" />
-            <Parallel name="∞≤»´«¯––Œ™">
-                <Sequence name="ªÿ—™">
-                    <ConditionLowHP name="HP≤ª◊„65%" percent="65" />
-                    <ActionUsePotion name="∫»HP" hpType="1" />
+    { L"ÈÅìÂ£´ÊàòÊñóË°å‰∏∫Ê†ë", R"(<?xml version="1.0" encoding="GBK"?>
+<BehaviorTree name="ÈÅìÂ£´ÊàòÊñóË°å‰∏∫Ê†ë - Taoist v2.0">
+    <Selector name="ÈÅìÂ£´‰∏ªÂÜ≥Á≠ñ">
+        <Sequence name="ÂÆâÂÖ®Âå∫Ëá™Âä®ÊÅ¢Â§ç">
+            <ConditionInSafeArea name="Âú®ÂÆâÂÖ®Âå∫" />
+            <Parallel name="ÂÆâÂÖ®Âå∫Ë°å‰∏∫">
+                <Sequence name="ÂõûË°Ä">
+                    <ConditionLowHP name="HP<65%" percent="65" />
+                    <ActionUsePotion name="ÂñùHP" hpType="1" />
                 </Sequence>
-                <Sequence name="ªÿ¿∂">
-                    <ConditionLowMP name="MP≤ª◊„35%" percent="35" />
-                    <ActionUsePotion name="∫»MP" hpType="0" />
+                <Sequence name="ÂõûËìù">
+                    <ConditionLowMP name="MP<35%" percent="35" />
+                    <ActionUsePotion name="ÂñùMP" hpType="0" />
                 </Sequence>
-                <Probability name="—≤¬ﬂ(25%)" chance="25">
-                    <ActionPatrol name="∞≤»´«¯—≤¬ﬂ" />
+                <Probability name="Â∑°ÈÄª(25%)" chance="25">
+                    <ActionPatrol name="ÂÆâÂÖ®Âå∫Â∑°ÈÄª" />
                 </Probability>
-                <Probability name="¡ƒÃÏ(65%)" chance="65">
-                    <ActionChat name="∞≤»´«¯¡ƒÃÏ" />
+                <Probability name="ËÅäÂ§©(65%)" chance="65">
+                    <ActionChat name="ÂÆâÂÖ®Âå∫ËÅäÂ§©" />
                 </Probability>
             </Parallel>
         </Sequence>
-        <Sequence name="±≥∞¸“—¬˙">
-            <ConditionBagFull name="∞¸¬˙" />
-            <ActionUseItem name="ªÿ≥«" itemName="ªÿ≥«æÌ" />
+        <Sequence name="ËÉåÂåÖÂ∑≤Êª°">
+            <ConditionBagFull name="ÂåÖÊª°" />
+            <ActionUseItem name="ÂõûÂüé" itemName="ÂõûÂüéÂç∑" />
         </Sequence>
-        <Sequence name="ΩÙº±◊‘æ»">
-            <ConditionLowHP name="HP≤ª◊„30%" percent="30" />
-            <ActionFlee name="Ã”≈‹" />
+        <Sequence name="Á¥ßÊÄ•Ëá™Êïë">
+            <ConditionLowHP name="HP<30%" percent="30" />
+            <ActionFlee name="ÈÄÉË∑ë" />
         </Sequence>
-        <Sequence name="’Ω∂∑÷˜¡˜≥Ã">
-            <ConditionHasTarget name="”–ƒø±Í" />
-            <ActionChangeAttackMode name="«–…∆∂Òƒ£ Ω" attackMode="0" />
-            <Sequence name="’Ω«∞MPºÏ≤È">
-                <ConditionLowMP name="MP≤ª◊„50%" percent="50" />
-                <ActionUsePotion name="’Ω«∞∫»¿∂" hpType="0" />
+        <Sequence name="ÊàòÊñó‰∏ªÊµÅÁ®ã">
+            <ConditionHasTarget name="ÊúâÁõÆÊ†á" />
+            <ActionChangeAttackMode name="ÂàáÂñÑÊÅ∂Ê®°Âºè" attackMode="0" />
+            <Sequence name="ÊàòÂâçMPÊ£ÄÊü•">
+                <ConditionLowMP name="MP<50%" percent="50" />
+                <ActionUsePotion name="ÊàòÂâçÂñùËìù" hpType="0" />
             </Sequence>
-            <Parallel name="’Ω∂∑≤¢––≤ﬂ¬‘">
-                <Sequence name="◊‘Œ“÷Œ¡∆">
-                    <ConditionLowHP name="HP≤ª◊„50%º”—™" percent="50" />
-                    <ActionUseSkill name=" π”√÷Œ”˙ ı" magicId="0" />
+            <Parallel name="ÊàòÊñóÂπ∂Ë°åÁ≠ñÁï•">
+                <Sequence name="Ëá™ÊàëÊ≤ªÁñó">
+                    <ConditionLowHP name="HP<50%Âä†Ë°Ä" percent="50" />
+                    <ActionUseSkill name="‰ΩøÁî®Ê≤ªÊÑàÊúØ" magicId="0" />
                 </Sequence>
-                <Sequence name="π•ª˜–Ú¡–">
-                    <ActionUseSkill name="µ¿ ıπ•ª˜" magicId="0" />
-                    <Probability name="◊∑º”π•ª˜(20%)" chance="20">
-                        <ActionUseSkill name="◊∑º”π•ª˜" magicId="0" />
+                <Sequence name="ÊîªÂáªÂ∫èÂàó">
+                    <ActionUseSkill name="ÈÅìÊúØÊîªÂáª" magicId="0" />
+                    <Probability name="ËøΩÂä†ÊîªÂáª(20%)" chance="20">
+                        <ActionUseSkill name="ËøΩÂä†ÊîªÂáª" magicId="0" />
                     </Probability>
-                    <ActionMoveToTarget name="±∆Ω¸ƒø±Í" />
+                    <ActionMoveToTarget name="ÈÄºËøëÁõÆÊ†á" />
                 </Sequence>
-                <Sequence name="’Ω∂∑≤π∏¯">
-                    <Selector name="≤π∏¯—°‘Ò">
-                        <Sequence name="∫»HP">
-                            <ConditionLowHP name="HP≤ª◊„40%" percent="40" />
-                            <ActionUsePotion name="∫»HP" hpType="1" />
+                <Sequence name="ÊàòÊñóË°•Áªô">
+                    <Selector name="Ë°•ÁªôÈÄâÊã©">
+                        <Sequence name="ÂñùHP">
+                            <ConditionLowHP name="HP<40%" percent="40" />
+                            <ActionUsePotion name="ÂñùHP" hpType="1" />
                         </Sequence>
-                        <Sequence name="∫»MP">
-                            <ConditionLowMP name="MP≤ª◊„25%" percent="25" />
-                            <ActionUsePotion name="∫»MP" hpType="0" />
+                        <Sequence name="ÂñùMP">
+                            <ConditionLowMP name="MP<25%" percent="25" />
+                            <ActionUsePotion name="ÂñùMP" hpType="0" />
                         </Sequence>
                     </Selector>
                 </Sequence>
             </Parallel>
         </Sequence>
-        <Sequence name="◊‘”…––Œ™">
-            <ActionPickupItem name=" ∞»°ŒÔ∆∑" />
-            <Random name="ÀÊª˙––Œ™">
-                <ActionPatrol name="—≤¬ﬂ◊ﬂ∂Ø" />
-                <ActionRest name="‘≠µÿ–›œ¢" duration="5000" />
-                <ActionChat name="¡ƒÃÏ" />
-                <Sequence name="∑¥◊™ æ¿˝">
-                    <Inverter name="∑¥◊™∞≤»´«¯≈–∂œ">
-                        <ConditionInSafeArea name="≤ª‘⁄∞≤»´«¯" />
+        <Sequence name="Ëá™Áî±Ë°å‰∏∫">
+            <ActionPickupItem name="ÊãæÂèñÁâ©ÂìÅ" />
+            <Random name="ÈöèÊú∫Ë°å‰∏∫">
+                <ActionPatrol name="Â∑°ÈÄªËµ∞Âä®" />
+                <ActionRest name="ÂéüÂú∞‰ºëÊÅØ" duration="5000" />
+                <ActionChat name="ËÅäÂ§©" />
+                <Sequence name="ÂèçËΩ¨Á§∫‰æã">
+                    <Inverter name="ÂèçËΩ¨ÂÆâÂÖ®Âå∫Âà§Êñ≠">
+                        <ConditionInSafeArea name="‰∏çÂú®ÂÆâÂÖ®Âå∫" />
                     </Inverter>
-                    <ActionPatrol name="∑¥œÚ—≤¬ﬂ" />
+                    <ActionPatrol name="ÂèçÂêëÂ∑°ÈÄª" />
                 </Sequence>
             </Random>
         </Sequence>
     </Selector>
-</BehaviorTree>)BT" }
+</BehaviorTree>)" }
 };
 
 CBTDebugger::CBTDebugger(HINSTANCE hInstance)
     : m_hInstance(hInstance), m_hWnd(nullptr)
     , m_hTreeView(nullptr), m_hPropList(nullptr), m_hLogEdit(nullptr)
     , m_hStatusBar(nullptr), m_hBtnLoad(nullptr), m_hBtnStep(nullptr)
-    , m_hBtnAuto(nullptr), m_hBtnReset(nullptr), m_hBtnSave(nullptr)
-    , m_hSpeedSlider(nullptr), m_hSpeedLabel(nullptr)
+    , m_hBtnAuto(nullptr), m_hBtnReset(nullptr), m_hSpeedSlider(nullptr)
+    , m_hSpeedLabel(nullptr)
     , m_splitterPos(480), m_dragging(false), m_rightSplitterPos(300)
     , m_pRoot(nullptr), m_isAutoRunning(false), m_autoSpeed(500)
     , m_width(1200), m_height(750)
@@ -288,7 +269,7 @@ CBTDebugger::~CBTDebugger()
 
 bool CBTDebugger::Init(int nCmdShow)
 {
-    // ◊¢≤·¥∞ø⁄¿‡
+    // Ê≥®ÂÜåÁ™óÂè£Á±ª
     WNDCLASSEXW wcex = {};
     wcex.cbSize = sizeof(WNDCLASSEXW);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -301,21 +282,11 @@ bool CBTDebugger::Init(int nCmdShow)
 
     RegisterClassExW(&wcex);
 
-    // ◊¢≤·◊‘÷∆∂‘ª∞øÚ¥∞ø⁄¿‡
-    WNDCLASSEXW dlgClass = {};
-    dlgClass.cbSize = sizeof(WNDCLASSEXW);
-    dlgClass.lpfnWndProc = DlgFrameWndProc;
-    dlgClass.hInstance = m_hInstance;
-    dlgClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    dlgClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
-    dlgClass.lpszClassName = L"BTDlgFrame";
-    RegisterClassExW(&dlgClass);
-
-    // ¥¥Ω®¥∞ø⁄
+    // ÂàõÂª∫Á™óÂè£
     m_hWnd = CreateWindowExW(
         WS_EX_APPWINDOW,
         L"BTDebuggerWindow",
-        L"ª˙∆˜»À––Œ™ ˜µ˜ ‘∆˜ - ¥Ôƒ¶“˝«Ê",
+        L"Ë°å‰∏∫Ê†ëÂèØËßÜÂåñË∞ÉËØïÂô® - DM Engine",
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
         CW_USEDEFAULT, CW_USEDEFAULT,
         m_width, m_height,
@@ -335,65 +306,61 @@ bool CBTDebugger::Init(int nCmdShow)
 
 void CBTDebugger::CreateControls()
 {
-    // π§æﬂ¿∏
-    m_hBtnLoad = CreateWindowW(L"BUTTON", L"º”‘ÿXMLŒƒº˛",
+    // Â∑•ÂÖ∑Ê†è
+    m_hBtnLoad = CreateWindowW(L"BUTTON", L"Âä†ËΩΩXMLÊñá‰ª∂",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
         8, 8, 120, 28, m_hWnd, (HMENU)ID_BTN_LOAD, m_hInstance, nullptr);
 
-    m_hBtnSave = CreateWindowW(L"BUTTON", L"? ±£¥ÊXML",
+    m_hBtnStep = CreateWindowW(L"BUTTON", L"‚ñ∂| ÂçïÊ≠•ÊâßË°å",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        136, 8, 100, 28, m_hWnd, (HMENU)ID_BTN_SAVE, m_hInstance, nullptr);
+        136, 8, 100, 28, m_hWnd, (HMENU)ID_BTN_STEP, m_hInstance, nullptr);
 
-    m_hBtnStep = CreateWindowW(L"BUTTON", L"?| µ•≤Ω÷¥––",
+    m_hBtnAuto = CreateWindowW(L"BUTTON", L"‚ñ∂ Ëá™Âä®Êí≠Êîæ",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        244, 8, 100, 28, m_hWnd, (HMENU)ID_BTN_STEP, m_hInstance, nullptr);
+        244, 8, 100, 28, m_hWnd, (HMENU)ID_BTN_AUTO, m_hInstance, nullptr);
 
-    m_hBtnAuto = CreateWindowW(L"BUTTON", L"? ◊‘∂Ø≤•∑≈",
+    m_hBtnReset = CreateWindowW(L"BUTTON", L"‚Ü∫ ÈáçÁΩÆ",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        352, 8, 100, 28, m_hWnd, (HMENU)ID_BTN_AUTO, m_hInstance, nullptr);
+        352, 8, 80, 28, m_hWnd, (HMENU)ID_BTN_RESET, m_hInstance, nullptr);
 
-    m_hBtnReset = CreateWindowW(L"BUTTON", L"? ÷ÿ÷√",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        460, 8, 80, 28, m_hWnd, (HMENU)ID_BTN_RESET, m_hInstance, nullptr);
-
-    m_hSpeedLabel = CreateWindowW(L"STATIC", L"ÀŸ∂»: 500ms",
+    m_hSpeedLabel = CreateWindowW(L"STATIC", L"ÈÄüÂ∫¶: 500ms",
         WS_CHILD | WS_VISIBLE | SS_LEFT,
-        548, 12, 100, 20, m_hWnd, (HMENU)ID_SPEED_LABEL, m_hInstance, nullptr);
+        440, 12, 100, 20, m_hWnd, (HMENU)ID_SPEED_LABEL, m_hInstance, nullptr);
 
     m_hSpeedSlider = CreateWindowW(TRACKBAR_CLASSW, L"",
         WS_CHILD | WS_VISIBLE | TBS_HORZ | TBS_AUTOTICKS,
-        648, 8, 130, 28, m_hWnd, (HMENU)ID_SPEED_SLIDER, m_hInstance, nullptr);
+        540, 8, 150, 28, m_hWnd, (HMENU)ID_SPEED_SLIDER, m_hInstance, nullptr);
     SendMessage(m_hSpeedSlider, TBM_SETRANGE, TRUE, MAKELONG(100, 2000));
     SendMessage(m_hSpeedSlider, TBM_SETPOS, TRUE, 500);
     SendMessage(m_hSpeedSlider, TBM_SETTICFREQ, 200, 0);
 
-    //  ˜–Œ ”Õº
+    // Ê†ëÂΩ¢ËßÜÂõæ
     m_hTreeView = CreateWindowExW(WS_EX_CLIENTEDGE,
         WC_TREEVIEWW, L"",
-        WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS | TVS_EDITLABELS,
+        WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS,
         0, 44, m_splitterPos, 500,
         m_hWnd, (HMENU)ID_TREEVIEW, m_hInstance, nullptr);
 
-    //  Ù–‘¡–±Ì
+    // Â±ûÊÄßÂàóË°®
     m_hPropList = CreateWindowExW(WS_EX_CLIENTEDGE,
         WC_LISTVIEWW, L"",
         WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_NOSORTHEADER,
         m_splitterPos + 4, 44, 300, 300,
         m_hWnd, (HMENU)ID_PROPLIST, m_hInstance, nullptr);
 
-    // »’÷æ±‡º≠øÚ
+    // Êó•ÂøóÁºñËæëÊ°Ü
     m_hLogEdit = CreateWindowExW(WS_EX_CLIENTEDGE,
         L"EDIT", L"",
         WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL,
         m_splitterPos + 4, 348, 300, 200,
         m_hWnd, (HMENU)ID_LOGEDIT, m_hInstance, nullptr);
 
-    // ◊¥Ã¨¿∏
+    // Áä∂ÊÄÅÊ†è
     m_hStatusBar = CreateWindowW(STATUSCLASSNAMEW, L"",
         WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
         0, 0, 0, 0, m_hWnd, (HMENU)ID_STATUS_BAR, m_hInstance, nullptr);
 
-    // …Ë÷√◊÷ÃÂ
+    // ËÆæÁΩÆÂ≠ó‰Ωì
     HFONT hFont = CreateFontW(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
         DEFAULT_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
@@ -401,22 +368,22 @@ void CBTDebugger::CreateControls()
     SendMessage(m_hPropList, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(m_hLogEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-    // ≥ı ºªØ ListView ¡–
+    // ÂàùÂßãÂåñ ListView Âàó
     LVCOLUMNW lvc = {};
     lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
     lvc.fmt = LVCFMT_LEFT;
     lvc.cx = 120;
-    lvc.pszText = (LPWSTR)L" Ù–‘";
+    lvc.pszText = (LPWSTR)L"Â±ûÊÄß";
     ListView_InsertColumn(m_hPropList, 0, &lvc);
     lvc.cx = 200;
-    lvc.pszText = (LPWSTR)L"÷µ";
+    lvc.pszText = (LPWSTR)L"ÂÄº";
     ListView_InsertColumn(m_hPropList, 1, &lvc);
     ListView_SetExtendedListViewStyle(m_hPropList, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 }
 
 void CBTDebugger::LayoutControls()
 {
-    // π§æﬂ¿∏∏ﬂ∂»
+    // Â∑•ÂÖ∑Ê†èÈ´òÂ∫¶
     int toolbarH = 44;
     int statusH = 22;
 
@@ -451,9 +418,6 @@ void CBTDebugger::OnCommand(WORD id)
     case ID_BTN_LOAD:
         LoadXMLFile();
         break;
-    case ID_BTN_SAVE:
-        SaveXMLFile();
-        break;
     case ID_BTN_STEP:
         StepExecute();
         break;
@@ -467,49 +431,19 @@ void CBTDebugger::OnCommand(WORD id)
     }
 }
 
-LRESULT CBTDebugger::OnNotify(NMHDR* pnmh)
+void CBTDebugger::OnNotify(NMHDR* pnmh)
 {
-    if (pnmh->idFrom == ID_TREEVIEW)
+    if (pnmh->idFrom == ID_TREEVIEW && pnmh->code == TVN_SELCHANGEDW)
     {
-        if (pnmh->code == TVN_SELCHANGEDW)
+        NMTREEVIEWW* pnmtv = (NMTREEVIEWW*)pnmh;
+        TVITEMW item = pnmtv->itemNew;
+        if (item.lParam)
         {
-            NMTREEVIEWW* pnmtv = (NMTREEVIEWW*)pnmh;
-            TVITEMW item = pnmtv->itemNew;
-            if (item.lParam)
-            {
-                BTNode* pNode = (BTNode*)item.lParam;
-                m_selectedNodeId = pNode->id;
-                UpdatePropertyPanel();
-            }
-        }
-        else if (pnmh->code == TVN_ENDLABELEDITW)
-        {
-            NMTVDISPINFOW* pnmtv = (NMTVDISPINFOW*)pnmh;
-            if (pnmtv->item.pszText)
-            {
-                BTNode* pNode = (BTNode*)pnmtv->item.lParam;
-                if (pNode)
-                {
-                    pNode->name = pnmtv->item.pszText;
-                    UpdatePropertyPanel();
-                    AppendLogText(L"[±‡º≠] Ω⁄µ„÷ÿ√¸√˚Œ™ '" + pNode->name + L"'\r\n");
-                    return TRUE; // Ω” ‹÷ÿ√¸√˚
-                }
-            }
-            return FALSE; // æ‹æ¯÷ÿ√¸√˚
-        }
-        else if (pnmh->code == NM_RCLICK)
-        {
-            POINT pt;
-            GetCursorPos(&pt);
-            OnTreeContextMenu(pt);
+            BTNode* pNode = (BTNode*)item.lParam;
+            m_selectedNodeId = pNode->id;
+            UpdatePropertyPanel();
         }
     }
-    else if (pnmh->idFrom == ID_PROPLIST && pnmh->code == NM_DBLCLK)
-    {
-        OnPropListDoubleClick();
-    }
-    return 0;
 }
 
 void CBTDebugger::OnTimer(UINT_PTR id)
@@ -522,7 +456,7 @@ void CBTDebugger::OnTimer(UINT_PTR id)
 
 void CBTDebugger::OnPaint(HDC hdc)
 {
-    // ªÊ÷∆∑÷∏ÙÃı
+    // ÁªòÂà∂ÂàÜÈöîÊù°
     RECT rc;
     GetClientRect(m_hWnd, &rc);
     RECT splitter = { m_splitterPos, 44, m_splitterPos + 4, rc.bottom - 22 };
@@ -568,7 +502,7 @@ void CBTDebugger::LoadXMLFile()
     ofn.hwndOwner = m_hWnd;
     ofn.lpstrFile = szFile;
     ofn.nMaxFile = 260;
-    ofn.lpstrFilter = L"XML ––Œ™ ˜Œƒº˛\0*.xml\0À˘”–Œƒº˛\0*.*\0";
+    ofn.lpstrFilter = L"XML Ë°å‰∏∫Ê†ëÊñá‰ª∂\0*.xml\0ÊâÄÊúâÊñá‰ª∂\0*.*\0";
     ofn.nFilterIndex = 1;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
@@ -585,7 +519,7 @@ void CBTDebugger::LoadXMLFile()
         }
         else
         {
-            MessageBoxW(m_hWnd, L"XML Œƒº˛Ω‚Œˆ ß∞‹£°«ÎºÏ≤ÈŒƒº˛∏Ò Ω°£", L"¥ÌŒÛ", MB_ICONERROR);
+            MessageBoxW(m_hWnd, L"XML Êñá‰ª∂Ëß£ÊûêÂ§±Ë¥•ÔºÅËØ∑Ê£ÄÊü•Êñá‰ª∂Ê†ºÂºè„ÄÇ", L"ÈîôËØØ", MB_ICONERROR);
         }
     }
 }
@@ -597,13 +531,13 @@ void CBTDebugger::LoadXMLFromString(const std::string& xml)
     {
         m_pRoot = root;
         m_engine.Reset();
-        m_currentFile = L"(ƒ⁄÷√ æ¿˝)";
+        m_currentFile = L"(ÂÜÖÁΩÆÁ§∫‰æã)";
         PopulateTreeView();
         UpdateStatusBar();
     }
     else
     {
-        MessageBoxW(m_hWnd, L"XML Ω‚Œˆ ß∞‹£°", L"¥ÌŒÛ", MB_ICONERROR);
+        MessageBoxW(m_hWnd, L"XML Ëß£ÊûêÂ§±Ë¥•ÔºÅ", L"ÈîôËØØ", MB_ICONERROR);
     }
 }
 
@@ -633,7 +567,7 @@ void CBTDebugger::StepExecute()
 {
     if (!m_pRoot) return;
 
-    // ÷ÿ÷√“˝«Ê◊¥Ã¨
+    // ÈáçÁΩÆÂºïÊìéÁä∂ÊÄÅ
     m_engine.Reset();
     m_engine.ResetNodeStates(m_pRoot);
     m_engine.ExecuteFull(m_pRoot);
@@ -642,7 +576,7 @@ void CBTDebugger::StepExecute()
     UpdateLogPanel();
     UpdateStatusBar();
 
-    // ÷ÿ–¬ªÊ÷∆ ˜ ”Õº
+    // ÈáçÊñ∞ÁªòÂà∂Ê†ëËßÜÂõæ
     InvalidateRect(m_hTreeView, nullptr, TRUE);
 }
 
@@ -678,7 +612,7 @@ void CBTDebugger::UpdateNodeStateRecursive(HTREEITEM hItem)
         TreeView_SetItem(m_hTreeView, &item);
     }
 
-    // µ›πÈ¥¶¿ÌÀ˘”–◊”Ω⁄µ„
+    // ÈÄíÂΩíÂ§ÑÁêÜÊâÄÊúâÂ≠êËäÇÁÇπ
     HTREEITEM hChild = TreeView_GetChild(m_hTreeView, hItem);
     while (hChild)
     {
@@ -691,7 +625,7 @@ void CBTDebugger::StartAuto()
 {
     if (!m_pRoot) return;
     m_isAutoRunning = true;
-    SetWindowTextW(m_hBtnAuto, L"? ‘›Õ£");
+    SetWindowTextW(m_hBtnAuto, L"‚è∏ ÊöÇÂÅú");
     SetTimer(m_hWnd, ID_TIMER_AUTO, m_autoSpeed, nullptr);
     StepExecute();
 }
@@ -700,7 +634,7 @@ void CBTDebugger::StopAuto()
 {
     m_isAutoRunning = false;
     KillTimer(m_hWnd, ID_TIMER_AUTO);
-    SetWindowTextW(m_hBtnAuto, L"? ◊‘∂Ø≤•∑≈");
+    SetWindowTextW(m_hBtnAuto, L"‚ñ∂ Ëá™Âä®Êí≠Êîæ");
 }
 
 void CBTDebugger::ResetExecution()
@@ -712,569 +646,6 @@ void CBTDebugger::ResetExecution()
     ListView_DeleteAllItems(m_hPropList);
     SetLogText(L"");
     UpdateStatusBar();
-}
-
-// ============================================================================
-// ±£¥Ê XML
-// ============================================================================
-void CBTDebugger::SaveXMLFile()
-{
-    if (!m_pRoot) return;
-
-    std::wstring savePath;
-    if (m_currentFile.empty() || m_currentFile.find(L"(ƒ⁄÷√") == 0)
-    {
-        OPENFILENAMEW ofn = {};
-        wchar_t szFile[260] = {};
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = m_hWnd;
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = 260;
-        ofn.lpstrFilter = L"XML ––Œ™ ˜Œƒº˛\0*.xml\0À˘”–Œƒº˛\0*.*\0";
-        ofn.nFilterIndex = 1;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-        ofn.lpstrDefExt = L"xml";
-
-        if (!GetSaveFileNameW(&ofn)) return;
-        savePath = szFile;
-        m_currentFile = savePath;
-    }
-    else
-    {
-        savePath = m_currentFile;
-    }
-
-    std::wstring treeName = m_pRoot->name;
-    std::string xml = XMLParser::SerializeTree(m_pRoot, treeName);
-    if (xml.empty())
-    {
-        MessageBoxW(m_hWnd, L"–Ú¡–ªØ ß∞‹£°", L"¥ÌŒÛ", MB_ICONERROR);
-        return;
-    }
-
-    std::ofstream file(savePath, std::ios::binary | std::ios::trunc);
-    if (!file.is_open())
-    {
-        MessageBoxW(m_hWnd, L"Œﬁ∑®–¥»ÎŒƒº˛£°", L"¥ÌŒÛ", MB_ICONERROR);
-        return;
-    }
-    file.write(xml.c_str(), xml.size());
-    file.close();
-
-    wchar_t buf[300];
-    wsprintfW(buf, L"“—±£¥ÊµΩ: %s", savePath.c_str());
-    SetLogText(buf);
-    UpdateStatusBar();
-}
-
-// ============================================================================
-// Ω⁄µ„±‡º≠π¶ƒ‹
-// ============================================================================
-std::shared_ptr<BTNode> CBTDebugger::GetSelectedNode()
-{
-    if (m_selectedNodeId.empty() || !m_pRoot) return nullptr;
-    return FindNodeById(m_pRoot, m_selectedNodeId);
-}
-
-void CBTDebugger::OnTreeContextMenu(POINT pt)
-{
-    if (!m_pRoot) return;
-
-    // ªÒ»°”“º¸µ„ª˜Œª÷√µƒ ˜Ω⁄µ„
-    TVHITTESTINFO ht = {};
-    ht.pt = pt;
-    ScreenToClient(m_hTreeView, &ht.pt);
-    TreeView_HitTest(m_hTreeView, &ht);
-
-    if (ht.flags & TVHT_ONITEM)
-    {
-        // œ»—°÷–∏√Ω⁄µ„
-        TreeView_SelectItem(m_hTreeView, ht.hItem);
-
-        // ∏¸–¬—°÷–◊¥Ã¨
-        TVITEMW item = {};
-        item.hItem = ht.hItem;
-        item.mask = TVIF_PARAM;
-        TreeView_GetItem(m_hTreeView, &item);
-        if (item.lParam)
-        {
-            m_selectedNodeId = ((BTNode*)item.lParam)->id;
-            UpdatePropertyPanel();
-        }
-    }
-
-    // ¥¥Ω®”“º¸≤Àµ•
-    HMENU hMenu = CreatePopupMenu();
-    AppendMenuW(hMenu, MF_STRING, IDM_RENAME_NODE, L"÷ÿ√¸√˚");
-    AppendMenuW(hMenu, MF_STRING, IDM_ADD_CHILD,   L"ÃÌº”◊”Ω⁄µ„");
-    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(hMenu, MF_STRING, IDM_DELETE_NODE, L"…æ≥˝Ω⁄µ„");
-    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(hMenu, MF_STRING, IDM_MOVE_UP,     L"…œ“∆");
-    AppendMenuW(hMenu, MF_STRING, IDM_MOVE_DOWN,   L"œ¬“∆");
-    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(hMenu, MF_STRING, IDM_EDIT_PROPS,  L"±‡º≠ Ù–‘...");
-    AppendMenuW(hMenu, MF_STRING, IDM_CHANGE_TYPE, L"∏¸∏ƒ¿‡–Õ...");
-
-    // »Áπ˚√ª”–—°÷–Ω⁄µ„£¨Ω˚”√±‡º≠≤Àµ•
-    if (m_selectedNodeId.empty())
-    {
-        EnableMenuItem(hMenu, IDM_RENAME_NODE, MF_GRAYED);
-        EnableMenuItem(hMenu, IDM_ADD_CHILD,   MF_GRAYED);
-        EnableMenuItem(hMenu, IDM_DELETE_NODE, MF_GRAYED);
-        EnableMenuItem(hMenu, IDM_MOVE_UP,     MF_GRAYED);
-        EnableMenuItem(hMenu, IDM_MOVE_DOWN,   MF_GRAYED);
-    }
-
-    TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, nullptr);
-    DestroyMenu(hMenu);
-}
-
-void CBTDebugger::RenameSelectedNode()
-{
-    auto node = GetSelectedNode();
-    if (!node) return;
-
-    //  π”√ TreeView ƒ⁄÷√µƒ±‡º≠±Í«©π¶ƒ‹
-    HTREEITEM hItem = TreeView_GetSelection(m_hTreeView);
-    if (hItem)
-        TreeView_EditLabel(m_hTreeView, hItem);
-}
-
-void CBTDebugger::AddChildToSelectedNode()
-{
-    auto parent = GetSelectedNode();
-    if (!parent) return;
-
-    HWND hDlg = CreateWindowExW(WS_EX_DLGMODALFRAME, L"BTDlgFrame", L"ÃÌº”◊”Ω⁄µ„",
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
-        0, 0, 380, 180, m_hWnd, nullptr, m_hInstance, nullptr);
-    if (!hDlg) return;
-
-    int xM = 12, y = 10, w = 356, rowH = 26;
-    CreateWindowW(L"STATIC", L"Ω⁄µ„¿‡–Õ:", WS_CHILD | WS_VISIBLE,
-        xM, y, 75, 20, hDlg, nullptr, nullptr, nullptr);
-    HWND hType = CreateWindowW(L"COMBOBOX", L"",
-        WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
-        xM + 80, y, w - xM - 80, 200, hDlg, (HMENU)100, nullptr, nullptr);
-
-    const wchar_t* typeNames[] = {
-        L"Sequence (–Ú¡–)", L"Selector (—°‘Ò)", L"Parallel (≤¢––)", L"Random (ÀÊª˙)",
-        L"Probability (∏≈¬ )", L"MemSequence (º«“‰–Ú¡–)", L"MemSelector (º«“‰—°‘Ò)",
-        L"Inverter (∑¥◊™)", L"DecoratorRepeat (÷ÿ∏¥)", L"Succeeder («ø÷∆≥…π¶)", L"Failer («ø÷∆ ß∞‹)",
-        L"ConditionLowHP (µÕ—™)", L"ConditionLowMP (µÕ¿∂)", L"ConditionHasTarget (”–ƒø±Í)",
-        L"ConditionInSafeArea (∞≤»´«¯)", L"ConditionBagFull (±≥∞¸¬˙)",
-        L"ActionAttack (π•ª˜)", L"ActionMoveToTarget (“∆∂ØµΩƒø±Í)", L"ActionPatrol (—≤¬ﬂ)",
-        L"ActionUsePotion (∫»“©)", L"ActionUseSkill (ººƒ‹)", L"ActionFlee (Ã”≈‹)",
-        L"ActionChat (¡ƒÃÏ)", L"ActionRest (–›œ¢)", L"ActionPickupItem ( ∞»°)", L"ActionUseItem ( π”√µ¿æﬂ)"
-    };
-    for (auto& tn : typeNames)
-        SendMessageW(hType, CB_ADDSTRING, 0, (LPARAM)tn);
-    SendMessageW(hType, CB_SETCURSEL, 0, 0);
-
-    y += rowH + 4;
-    CreateWindowW(L"STATIC", L"Ω⁄µ„√˚≥∆:", WS_CHILD | WS_VISIBLE,
-        xM, y, 75, 20, hDlg, nullptr, nullptr, nullptr);
-    HWND hName = CreateWindowW(L"EDIT", L"–¬Ω⁄µ„",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-        xM + 80, y, w - xM - 80, 22, hDlg, nullptr, nullptr, nullptr);
-
-    y += rowH + 12;
-    CreateWindowW(L"BUTTON", L"»∑∂®", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        200, y, 80, 26, hDlg, (HMENU)IDOK, nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"»°œ˚", WS_CHILD | WS_VISIBLE,
-        285, y, 80, 26, hDlg, (HMENU)IDCANCEL, nullptr, nullptr);
-
-    RECT wr;
-    GetWindowRect(m_hWnd, &wr);
-    SetWindowPos(hDlg, nullptr, wr.left + (wr.right - wr.left - 380) / 2,
-        wr.top + (wr.bottom - wr.top - 180) / 2, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-    EnableWindow(m_hWnd, FALSE);
-    MSG msg2;
-    while (GetMessage(&msg2, nullptr, 0, 0))
-    {
-        if (msg2.message == WM_USER + 100)
-        {
-            WORD id = LOWORD(msg2.wParam);
-            if (id == IDOK)
-            {
-                int sel = (int)SendMessageW(hType, CB_GETCURSEL, 0, 0);
-                if (sel >= 0)
-                {
-                    wchar_t nameBuf[128] = {};
-                    GetWindowTextW(hName, nameBuf, 128);
-
-                    auto child = std::make_shared<BTNode>();
-                    child->name = nameBuf;
-                    child->parent = parent.get();
-                    child->depth = parent->depth + 1;
-
-                    struct TMap { int idx; BTNodeType t; ConditionType ct; ActionType at; };
-                    static const TMap map[] = {
-                        {0,BTNodeType::SEQUENCE},{1,BTNodeType::SELECTOR},{2,BTNodeType::PARALLEL},{3,BTNodeType::RANDOM},
-                        {4,BTNodeType::PROBABILITY},{5,BTNodeType::MEM_SEQUENCE},{6,BTNodeType::MEM_SELECTOR},
-                        {7,BTNodeType::INVERTER},{8,BTNodeType::DECORATOR_REPEAT},{9,BTNodeType::SUCCEEDER},{10,BTNodeType::FAILER},
-                        {11,BTNodeType::CONDITION,ConditionType::LOW_HP},{12,BTNodeType::CONDITION,ConditionType::LOW_MP},
-                        {13,BTNodeType::CONDITION,ConditionType::HAS_TARGET},{14,BTNodeType::CONDITION,ConditionType::IN_SAFE_AREA},{15,BTNodeType::CONDITION,ConditionType::BAG_FULL},
-                        {16,BTNodeType::ACTION,ConditionType::NONE,ActionType::ATTACK},{17,BTNodeType::ACTION,ConditionType::NONE,ActionType::MOVE_TO_TARGET},
-                        {18,BTNodeType::ACTION,ConditionType::NONE,ActionType::PATROL},{19,BTNodeType::ACTION,ConditionType::NONE,ActionType::USE_POTION},
-                        {20,BTNodeType::ACTION,ConditionType::NONE,ActionType::USE_SKILL},{21,BTNodeType::ACTION,ConditionType::NONE,ActionType::FLEE},
-                        {22,BTNodeType::ACTION,ConditionType::NONE,ActionType::CHAT},{23,BTNodeType::ACTION,ConditionType::NONE,ActionType::REST},
-                        {24,BTNodeType::ACTION,ConditionType::NONE,ActionType::PICKUP_ITEM},{25,BTNodeType::ACTION,ConditionType::NONE,ActionType::USE_ITEM},
-                    };
-                    for (auto& m : map) {
-                        if (m.idx == sel) { child->type = m.t; child->conditionType = m.ct; child->actionType = m.at; break; }
-                    }
-                    child->id = std::to_wstring(child->depth) + L"_" + GetTagName(child->type, child->conditionType, child->actionType) + L"_" + std::to_wstring((size_t)child.get());
-                    child->params = GetDefaultParams(child->type, child->conditionType, child->actionType);
-
-                    parent->children.push_back(child);
-                    PopulateTreeView();
-                    AppendLogText(L"[±‡º≠] “—‘⁄ '" + parent->name + L"' œ¬ÃÌº”◊”Ω⁄µ„ '" + child->name + L"'\r\n");
-                }
-                DestroyWindow(hDlg);
-                EnableWindow(m_hWnd, TRUE);
-                SetFocus(m_hWnd);
-                break;
-            }
-            else if (id == IDCANCEL)
-            {
-                DestroyWindow(hDlg);
-                EnableWindow(m_hWnd, TRUE);
-                SetFocus(m_hWnd);
-                break;
-            }
-        }
-        else if (msg2.message == WM_USER + 101)
-        {
-            DestroyWindow(hDlg);
-            EnableWindow(m_hWnd, TRUE);
-            SetFocus(m_hWnd);
-            break;
-        }
-        if (!IsWindow(hDlg)) break;
-        if (!IsDialogMessageW(hDlg, &msg2))
-        {
-            TranslateMessage(&msg2);
-            DispatchMessage(&msg2);
-        }
-    }
-}
-
-void CBTDebugger::EditNodeProperties()
-{
-    auto node = GetSelectedNode();
-    if (!node) return;
-
-    HWND hDlg = CreateWindowExW(WS_EX_DLGMODALFRAME, L"BTDlgFrame", L"",
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
-        0, 0, 400, 270, m_hWnd, nullptr, m_hInstance, nullptr);
-    if (!hDlg) return;
-
-    wchar_t title[256];
-    wsprintfW(title, L"±‡º≠ Ù–‘ - %s", node->name.c_str());
-    SetWindowTextW(hDlg, title);
-
-    int xM = 12, y = 10, w = 376;
-    CreateWindowW(L"STATIC", L"≤Œ ˝ (√ø––“ª∏ˆ, ∏Ò Ω: key=value):",
-        WS_CHILD | WS_VISIBLE, xM, y, w - xM, 16, hDlg, nullptr, nullptr, nullptr);
-
-    y += 20;
-    std::wstring params;
-    for (auto& p : node->params)
-        params += p.first + L"=" + p.second + L"\r\n";
-
-    HWND hParams = CreateWindowW(L"EDIT", params.c_str(),
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL,
-        xM, y, w - xM, 150, hDlg, nullptr, nullptr, nullptr);
-
-    y += 158;
-    CreateWindowW(L"BUTTON", L"»∑∂®", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        w - 180, y, 80, 26, hDlg, (HMENU)IDOK, nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"»°œ˚", WS_CHILD | WS_VISIBLE,
-        w - 90, y, 80, 26, hDlg, (HMENU)IDCANCEL, nullptr, nullptr);
-
-    // æ”÷–
-    RECT wr;
-    GetWindowRect(m_hWnd, &wr);
-    SetWindowPos(hDlg, nullptr, wr.left + (wr.right - wr.left - 400) / 2,
-        wr.top + (wr.bottom - wr.top - 270) / 2, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-    EnableWindow(m_hWnd, FALSE);
-    MSG msg2;
-    while (GetMessage(&msg2, nullptr, 0, 0))
-    {
-        if (msg2.message == WM_USER + 100)
-        {
-            WORD id = LOWORD(msg2.wParam);
-            if (id == IDOK)
-            {
-                int len = GetWindowTextLengthW(hParams);
-                std::wstring text(len + 1, L'\0');
-                GetWindowTextW(hParams, &text[0], len + 1);
-                text.resize(len);
-
-                node->params.clear();
-                size_t pos = 0;
-                while (pos < text.length())
-                {
-                    size_t eol = text.find(L'\n', pos);
-                    if (eol == std::wstring::npos) eol = text.length();
-                    std::wstring line = text.substr(pos, eol - pos);
-                    while (!line.empty() && line.back() == L'\r') line.pop_back();
-                    pos = eol + 1;
-                    if (line.empty()) continue;
-                    size_t eq = line.find(L'=');
-                    if (eq != std::wstring::npos)
-                        node->params[line.substr(0, eq)] = line.substr(eq + 1);
-                }
-
-                UpdatePropertyPanel();
-                AppendLogText(L"[±‡º≠] “—∏¸–¬Ω⁄µ„ '" + node->name + L"' µƒ Ù–‘\r\n");
-                DestroyWindow(hDlg);
-                EnableWindow(m_hWnd, TRUE);
-                SetFocus(m_hWnd);
-                break;
-            }
-            else if (id == IDCANCEL)
-            {
-                DestroyWindow(hDlg);
-                EnableWindow(m_hWnd, TRUE);
-                SetFocus(m_hWnd);
-                break;
-            }
-        }
-        else if (msg2.message == WM_USER + 101)
-        {
-            DestroyWindow(hDlg);
-            EnableWindow(m_hWnd, TRUE);
-            SetFocus(m_hWnd);
-            break;
-        }
-        if (!IsWindow(hDlg)) break;
-        if (!IsDialogMessageW(hDlg, &msg2))
-        {
-            TranslateMessage(&msg2);
-            DispatchMessage(&msg2);
-        }
-    }
-}
-
-void CBTDebugger::OnPropListDoubleClick()
-{
-    EditNodeProperties();
-}
-
-void CBTDebugger::ChangeNodeType()
-{
-    auto node = GetSelectedNode();
-    if (!node) return;
-
-    HWND hDlg = CreateWindowExW(WS_EX_DLGMODALFRAME, L"BTDlgFrame", L"∏¸∏ƒΩ⁄µ„¿‡–Õ",
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
-        0, 0, 380, 130, m_hWnd, nullptr, m_hInstance, nullptr);
-    if (!hDlg) return;
-
-    int xM = 12, y = 10, w = 356;
-    CreateWindowW(L"STATIC", L"—°‘Ò–¬¿‡–Õ:",
-        WS_CHILD | WS_VISIBLE, xM, y, 85, 20, hDlg, nullptr, nullptr, nullptr);
-    HWND hType = CreateWindowW(L"COMBOBOX", L"",
-        WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
-        xM + 90, y, w - xM - 90, 200, hDlg, (HMENU)100, nullptr, nullptr);
-
-    const wchar_t* typeNames[] = {
-        L"Sequence (–Ú¡–)", L"Selector (—°‘Ò)", L"Parallel (≤¢––)", L"Random (ÀÊª˙)",
-        L"Probability (∏≈¬ )", L"MemSequence (º«“‰–Ú¡–)", L"MemSelector (º«“‰—°‘Ò)",
-        L"Inverter (∑¥◊™)", L"DecoratorRepeat (÷ÿ∏¥)", L"Succeeder («ø÷∆≥…π¶)", L"Failer («ø÷∆ ß∞‹)",
-        L"ConditionLowHP (µÕ—™)", L"ConditionLowMP (µÕ¿∂)", L"ConditionHasTarget (”–ƒø±Í)",
-        L"ConditionInSafeArea (∞≤»´«¯)", L"ConditionBagFull (±≥∞¸¬˙)",
-        L"ActionAttack (π•ª˜)", L"ActionMoveToTarget (“∆∂ØµΩƒø±Í)", L"ActionPatrol (—≤¬ﬂ)",
-        L"ActionUsePotion (∫»“©)", L"ActionUseSkill (ººƒ‹)", L"ActionFlee (Ã”≈‹)",
-        L"ActionChat (¡ƒÃÏ)", L"ActionRest (–›œ¢)", L"ActionPickupItem ( ∞»°)", L"ActionUseItem ( π”√µ¿æﬂ)"
-    };
-    for (auto& tn : typeNames)
-        SendMessageW(hType, CB_ADDSTRING, 0, (LPARAM)tn);
-
-    // ∏˘æ›µ±«∞¿‡–Õ‘§—°
-    struct { BTNodeType t; ConditionType ct; ActionType at; int idx; } preMap[] = {
-        {BTNodeType::SEQUENCE, ConditionType::NONE, ActionType::NONE, 0},
-        {BTNodeType::SELECTOR, ConditionType::NONE, ActionType::NONE, 1},
-        {BTNodeType::PARALLEL, ConditionType::NONE, ActionType::NONE, 2},
-        {BTNodeType::RANDOM, ConditionType::NONE, ActionType::NONE, 3},
-        {BTNodeType::PROBABILITY, ConditionType::NONE, ActionType::NONE, 4},
-        {BTNodeType::MEM_SEQUENCE, ConditionType::NONE, ActionType::NONE, 5},
-        {BTNodeType::MEM_SELECTOR, ConditionType::NONE, ActionType::NONE, 6},
-        {BTNodeType::INVERTER, ConditionType::NONE, ActionType::NONE, 7},
-        {BTNodeType::DECORATOR_REPEAT, ConditionType::NONE, ActionType::NONE, 8},
-        {BTNodeType::SUCCEEDER, ConditionType::NONE, ActionType::NONE, 9},
-        {BTNodeType::FAILER, ConditionType::NONE, ActionType::NONE, 10},
-        {BTNodeType::CONDITION, ConditionType::LOW_HP, ActionType::NONE, 11},
-        {BTNodeType::CONDITION, ConditionType::LOW_MP, ActionType::NONE, 12},
-        {BTNodeType::CONDITION, ConditionType::HAS_TARGET, ActionType::NONE, 13},
-        {BTNodeType::CONDITION, ConditionType::IN_SAFE_AREA, ActionType::NONE, 14},
-        {BTNodeType::CONDITION, ConditionType::BAG_FULL, ActionType::NONE, 15},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::ATTACK, 16},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::MOVE_TO_TARGET, 17},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::PATROL, 18},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::USE_POTION, 19},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::USE_SKILL, 20},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::FLEE, 21},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::CHAT, 22},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::REST, 23},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::PICKUP_ITEM, 24},
-        {BTNodeType::ACTION, ConditionType::NONE, ActionType::USE_ITEM, 25},
-    };
-    int preSel = 0;
-    for (auto& m : preMap) {
-        if (node->type == m.t && node->conditionType == m.ct && node->actionType == m.at)
-        { preSel = m.idx; break; }
-    }
-    SendMessageW(hType, CB_SETCURSEL, preSel, 0);
-
-    y = 50;
-    CreateWindowW(L"BUTTON", L"»∑∂®", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-        w - 180, y, 80, 26, hDlg, (HMENU)IDOK, nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"»°œ˚", WS_CHILD | WS_VISIBLE,
-        w - 90, y, 80, 26, hDlg, (HMENU)IDCANCEL, nullptr, nullptr);
-
-    RECT wr;
-    GetWindowRect(m_hWnd, &wr);
-    SetWindowPos(hDlg, nullptr, wr.left + (wr.right - wr.left - 380) / 2,
-        wr.top + (wr.bottom - wr.top - 130) / 2, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-
-    EnableWindow(m_hWnd, FALSE);
-    MSG msg2;
-    while (GetMessage(&msg2, nullptr, 0, 0))
-    {
-        if (msg2.message == WM_USER + 100)
-        {
-            WORD id = LOWORD(msg2.wParam);
-            if (id == IDOK)
-            {
-                int sel = (int)SendMessageW(hType, CB_GETCURSEL, 0, 0);
-                if (sel >= 0)
-                {
-                    static const struct { int idx; BTNodeType t; ConditionType ct; ActionType at; } map[] = {
-                        {0,BTNodeType::SEQUENCE},{1,BTNodeType::SELECTOR},{2,BTNodeType::PARALLEL},{3,BTNodeType::RANDOM},
-                        {4,BTNodeType::PROBABILITY},{5,BTNodeType::MEM_SEQUENCE},{6,BTNodeType::MEM_SELECTOR},
-                        {7,BTNodeType::INVERTER},{8,BTNodeType::DECORATOR_REPEAT},{9,BTNodeType::SUCCEEDER},{10,BTNodeType::FAILER},
-                        {11,BTNodeType::CONDITION,ConditionType::LOW_HP},{12,BTNodeType::CONDITION,ConditionType::LOW_MP},
-                        {13,BTNodeType::CONDITION,ConditionType::HAS_TARGET},{14,BTNodeType::CONDITION,ConditionType::IN_SAFE_AREA},{15,BTNodeType::CONDITION,ConditionType::BAG_FULL},
-                        {16,BTNodeType::ACTION,ConditionType::NONE,ActionType::ATTACK},{17,BTNodeType::ACTION,ConditionType::NONE,ActionType::MOVE_TO_TARGET},
-                        {18,BTNodeType::ACTION,ConditionType::NONE,ActionType::PATROL},{19,BTNodeType::ACTION,ConditionType::NONE,ActionType::USE_POTION},
-                        {20,BTNodeType::ACTION,ConditionType::NONE,ActionType::USE_SKILL},{21,BTNodeType::ACTION,ConditionType::NONE,ActionType::FLEE},
-                        {22,BTNodeType::ACTION,ConditionType::NONE,ActionType::CHAT},{23,BTNodeType::ACTION,ConditionType::NONE,ActionType::REST},
-                        {24,BTNodeType::ACTION,ConditionType::NONE,ActionType::PICKUP_ITEM},{25,BTNodeType::ACTION,ConditionType::NONE,ActionType::USE_ITEM},
-                    };
-                    for (auto& m : map) {
-                        if (m.idx == sel) { node->type = m.t; node->conditionType = m.ct; node->actionType = m.at; break; }
-                    }
-                    node->id = std::to_wstring(node->depth) + L"_" + GetTagName(node->type, node->conditionType, node->actionType) + L"_" + std::to_wstring((size_t)node.get());
-                    // ∫œ≤¢ƒ¨»œ≤Œ ˝£®±£¡Ù”√ªß“—…Ë÷√µƒ÷µ£©
-                    auto defParams = GetDefaultParams(node->type, node->conditionType, node->actionType);
-                    for (auto& dp : defParams)
-                        if (node->params.find(dp.first) == node->params.end())
-                            node->params[dp.first] = dp.second;
-                    m_selectedNodeId = node->id;
-
-                    PopulateTreeView();
-                    // ª÷∏¥ ˜ ”Õº—°÷–◊¥Ã¨
-                    HTREEITEM hItem = TreeView_GetRoot(m_hTreeView);
-                    while (hItem)
-                    {
-                        TVITEMW tv = {}; tv.hItem = hItem; tv.mask = TVIF_PARAM;
-                        TreeView_GetItem(m_hTreeView, &tv);
-                        if ((BTNode*)tv.lParam == node.get()) { TreeView_SelectItem(m_hTreeView, hItem); break; }
-                        hItem = TreeView_GetNextItem(m_hTreeView, hItem, TVGN_NEXTVISIBLE);
-                    }
-                    UpdatePropertyPanel();
-                    AppendLogText(L"[±‡º≠] Ω⁄µ„ '" + node->name + L"' ¿‡–Õ“—∏¸∏ƒ\r\n");
-                }
-                DestroyWindow(hDlg);
-                EnableWindow(m_hWnd, TRUE);
-                SetFocus(m_hWnd);
-                break;
-            }
-            else if (id == IDCANCEL)
-            {
-                DestroyWindow(hDlg);
-                EnableWindow(m_hWnd, TRUE);
-                SetFocus(m_hWnd);
-                break;
-            }
-        }
-        else if (msg2.message == WM_USER + 101)
-        {
-            DestroyWindow(hDlg);
-            EnableWindow(m_hWnd, TRUE);
-            SetFocus(m_hWnd);
-            break;
-        }
-        if (!IsWindow(hDlg)) break;
-        if (!IsDialogMessageW(hDlg, &msg2))
-        {
-            TranslateMessage(&msg2);
-            DispatchMessage(&msg2);
-        }
-    }
-}
-
-void CBTDebugger::DeleteSelectedNode()
-{
-    auto node = GetSelectedNode();
-    if (!node || !node->parent) return; // ≤ªƒ‹…æ≥˝∏˘Ω⁄µ„
-
-    int result = MessageBoxW(m_hWnd,
-        (L"»∑∂®“™…æ≥˝Ω⁄µ„ '" + node->name + L"' º∞∆‰À˘”–◊”Ω⁄µ„¬£ø\n¥À≤Ÿ◊˜≤ªø…≥∑œ˙£°").c_str(),
-        L"…æ≥˝Ω⁄µ„", MB_YESNO | MB_ICONWARNING);
-
-    if (result != IDYES) return;
-
-    auto parent = node->parent;
-    auto& siblings = parent->children;
-    siblings.erase(std::remove_if(siblings.begin(), siblings.end(),
-        [&](std::shared_ptr<BTNode>& c) { return c == node; }), siblings.end());
-
-    m_selectedNodeId.clear();
-    PopulateTreeView();
-    UpdatePropertyPanel();
-    UpdateStatusBar();
-    AppendLogText(L"[±‡º≠] “—…æ≥˝Ω⁄µ„ '" + node->name + L"'\r\n");
-}
-
-void CBTDebugger::MoveSelectedNodeUp()
-{
-    auto node = GetSelectedNode();
-    if (!node || !node->parent) return;
-
-    auto& siblings = node->parent->children;
-    for (size_t i = 1; i < siblings.size(); i++)
-    {
-        if (siblings[i] == node)
-        {
-            std::swap(siblings[i], siblings[i - 1]);
-            PopulateTreeView();
-            break;
-        }
-    }
-}
-
-void CBTDebugger::MoveSelectedNodeDown()
-{
-    auto node = GetSelectedNode();
-    if (!node || !node->parent) return;
-
-    auto& siblings = node->parent->children;
-    for (size_t i = 0; i + 1 < siblings.size(); i++)
-    {
-        if (siblings[i] == node)
-        {
-            std::swap(siblings[i], siblings[i + 1]);
-            PopulateTreeView();
-            break;
-        }
-    }
 }
 
 void CBTDebugger::UpdatePropertyPanel()
@@ -1294,17 +665,17 @@ void CBTDebugger::UpdatePropertyPanel()
         ListView_SetItemText(m_hPropList, idx, 1, (LPWSTR)val.c_str());
     };
 
-    addRow(L"Ω⁄µ„√˚≥∆", node->name);
-    addRow(L"Ω⁄µ„¿‡–Õ", GetNodeTypeDetail(node->type, node->conditionType, node->actionType));
-    addRow(L"Ω⁄µ„∑÷¿‡", GetNodeCategory(node->type) == BTNodeCategory::COMPOSITE ? L"∏¥∫œΩ⁄µ„" :
-        GetNodeCategory(node->type) == BTNodeCategory::DECORATOR ? L"◊∞ ŒΩ⁄µ„" :
-        GetNodeCategory(node->type) == BTNodeCategory::CONDITION ? L"Ãıº˛Ω⁄µ„" : L"∂Ø◊˜Ω⁄µ„");
-    addRow(L"…Ó∂»", std::to_wstring(node->depth));
-    addRow(L"◊”Ω⁄µ„ ˝", std::to_wstring(node->children.size()));
-    addRow(L"Ω·π˚", GetResultName(node->lastResult));
-    addRow(L"÷¥––À≥–Ú", node->execOrder >= 0 ? std::to_wstring(node->execOrder) : L"Œ¥÷¥––");
+    addRow(L"ËäÇÁÇπÂêçÁß∞", node->name);
+    addRow(L"ËäÇÁÇπÁ±ªÂûã", GetNodeTypeName(node->type));
+    addRow(L"ËäÇÁÇπÂàÜÁ±ª", GetNodeCategory(node->type) == BTNodeCategory::COMPOSITE ? L"Â§çÂêàËäÇÁÇπ" :
+        GetNodeCategory(node->type) == BTNodeCategory::DECORATOR ? L"Ë£ÖÈ•∞ËäÇÁÇπ" :
+        GetNodeCategory(node->type) == BTNodeCategory::CONDITION ? L"Êù°‰ª∂ËäÇÁÇπ" : L"Âä®‰ΩúËäÇÁÇπ");
+    addRow(L"Ê∑±Â∫¶", std::to_wstring(node->depth));
+    addRow(L"Â≠êËäÇÁÇπÊï∞", std::to_wstring(node->children.size()));
+    addRow(L"ÁªìÊûú", GetResultName(node->lastResult));
+    addRow(L"ÊâßË°åÈ°∫Â∫è", node->execOrder >= 0 ? std::to_wstring(node->execOrder) : L"Êú™ÊâßË°å");
 
-    // ≤Œ ˝
+    // ÂèÇÊï∞
     for (auto& param : node->params)
     {
         addRow(param.first.c_str(), param.second);
@@ -1323,7 +694,7 @@ void CBTDebugger::UpdateLogPanel()
         wchar_t buf[256];
         wsprintfW(buf, L"%03d  ", (int)(i + 1));
 
-        // ÀıΩ¯
+        // Áº©Ëøõ
         for (int d = 0; d < log.depth; d++)
             text += L"  ";
 
@@ -1344,16 +715,16 @@ void CBTDebugger::UpdateStatusBar()
 {
     if (!m_pRoot)
     {
-        SendMessageW(m_hStatusBar, SB_SETTEXTW, 0, (LPARAM)L"æÕ–˜ - «Îº”‘ÿ––Œ™ ˜Œƒº˛");
+        SendMessageW(m_hStatusBar, SB_SETTEXTW, 0, (LPARAM)L"Â∞±Áª™ - ËØ∑Âä†ËΩΩË°å‰∏∫Ê†ëÊñá‰ª∂");
         return;
     }
 
     wchar_t buf[256];
     int totalNodes = CountNodes(m_pRoot);
     int logCount = (int)m_engine.GetLogs().size();
-    wsprintfW(buf, L"Ω⁄µ„◊‹ ˝: %d | »’÷æÃı ˝: %d | ÀŸ∂»: %dms %s",
+    wsprintfW(buf, L"ËäÇÁÇπÊÄªÊï∞: %d | Êó•ÂøóÊù°Êï∞: %d | ÈÄüÂ∫¶: %dms %s",
         totalNodes, logCount, m_autoSpeed,
-        m_isAutoRunning ? L"(◊‘∂Ø‘À––÷–)" : L"");
+        m_isAutoRunning ? L"(Ëá™Âä®ËøêË°å‰∏≠)" : L"");
     SendMessageW(m_hStatusBar, SB_SETTEXTW, 0, (LPARAM)buf);
 }
 
@@ -1393,28 +764,24 @@ LRESULT CALLBACK CBTDebugger::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
     {
     case WM_CREATE:
     {
-        // ¥¥Ω®”“º¸≤Àµ•
+        // ÂàõÂª∫Âè≥ÈîÆËèúÂçï
         HMENU hMenu = CreatePopupMenu();
-        AppendMenuW(hMenu, MF_STRING, 10001, L"º”‘ÿ’Ω ø––Œ™ ˜");
-        AppendMenuW(hMenu, MF_STRING, 10002, L"º”‘ÿ∑® ¶––Œ™ ˜");
-        AppendMenuW(hMenu, MF_STRING, 10003, L"º”‘ÿµ¿ ø––Œ™ ˜");
+        AppendMenuW(hMenu, MF_STRING, 10001, L"Âä†ËΩΩÊàòÂ£´Ë°å‰∏∫Ê†ë");
+        AppendMenuW(hMenu, MF_STRING, 10002, L"Âä†ËΩΩÊ≥ïÂ∏àË°å‰∏∫Ê†ë");
+        AppendMenuW(hMenu, MF_STRING, 10003, L"Âä†ËΩΩÈÅìÂ£´Ë°å‰∏∫Ê†ë");
         AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
-        AppendMenuW(hMenu, MF_STRING, 10004, L"¥Úø™XMLŒƒº˛...");
+        AppendMenuW(hMenu, MF_STRING, 10004, L"ÊâìÂºÄXMLÊñá‰ª∂...");
         SetPropW(hWnd, L"ContextMenu", hMenu);
         break;
     }
 
     case WM_CONTEXTMENU:
     {
-        // ≈–∂œ”“º¸¿¥‘¥£∫TreeView ”–◊‘º∫µƒ NM_RCLICK ¥¶¿Ì£¨’‚¿Ô÷ª¥¶¿Ì¥∞ø⁄ø’∞◊«¯”Úµƒ”“º¸
-        if ((HWND)wParam != pApp->m_hTreeView)
+        HMENU hMenu = (HMENU)GetPropW(hWnd, L"ContextMenu");
+        if (hMenu)
         {
-            HMENU hMenu = (HMENU)GetPropW(hWnd, L"ContextMenu");
-            if (hMenu)
-            {
-                POINT pt = { LOWORD(lParam), HIWORD(lParam) };
-                TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, nullptr);
-            }
+            POINT pt = { LOWORD(lParam), HIWORD(lParam) };
+            TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, nullptr);
         }
         break;
     }
@@ -1424,47 +791,18 @@ LRESULT CALLBACK CBTDebugger::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
         WORD id = LOWORD(wParam);
         switch (id)
         {
-        case 10001: pApp->LoadXMLFromString(g_builtInSamples.at(L"’Ω ø’Ω∂∑––Œ™ ˜")); break;
-        case 10002: pApp->LoadXMLFromString(g_builtInSamples.at(L"∑® ¶’Ω∂∑––Œ™ ˜")); break;
-        case 10003: pApp->LoadXMLFromString(g_builtInSamples.at(L"µ¿ ø’Ω∂∑––Œ™ ˜")); break;
+        case 10001: pApp->LoadXMLFromString(g_builtInSamples.at(L"ÊàòÂ£´ÊàòÊñóË°å‰∏∫Ê†ë")); break;
+        case 10002: pApp->LoadXMLFromString(g_builtInSamples.at(L"Ê≥ïÂ∏àÊàòÊñóË°å‰∏∫Ê†ë")); break;
+        case 10003: pApp->LoadXMLFromString(g_builtInSamples.at(L"ÈÅìÂ£´ÊàòÊñóË°å‰∏∫Ê†ë")); break;
         case 10004: pApp->LoadXMLFile(); break;
-        // Ω⁄µ„±‡º≠”“º¸≤Àµ•
-        case IDM_RENAME_NODE: pApp->RenameSelectedNode(); break;
-        case IDM_ADD_CHILD:   pApp->AddChildToSelectedNode(); break;
-        case IDM_DELETE_NODE: pApp->DeleteSelectedNode(); break;
-        case IDM_MOVE_UP:     pApp->MoveSelectedNodeUp(); break;
-        case IDM_MOVE_DOWN:   pApp->MoveSelectedNodeDown(); break;
-        case IDM_EDIT_PROPS:  pApp->EditNodeProperties(); break;
-        case IDM_CHANGE_TYPE: pApp->ChangeNodeType(); break;
         default: pApp->OnCommand(id); break;
         }
         break;
     }
 
     case WM_NOTIFY:
-    {
-        LRESULT result = pApp->OnNotify((NMHDR*)lParam);
-        SetWindowLongPtrW(hWnd, DWLP_MSGRESULT, result);
-        return (result != 0) ? TRUE : FALSE;
-    }
-
-    case WM_HSCROLL:
-    {
-        if ((HWND)lParam == pApp->m_hSpeedSlider)
-        {
-            pApp->m_autoSpeed = (int)SendMessage(pApp->m_hSpeedSlider, TBM_GETPOS, 0, 0);
-            wchar_t buf[32];
-            wsprintfW(buf, L"ÀŸ∂»: %dms", pApp->m_autoSpeed);
-            SetWindowTextW(pApp->m_hSpeedLabel, buf);
-            // »Áπ˚’˝‘⁄◊‘∂Ø‘À––£¨÷ÿ–¬…Ë÷√∂® ±∆˜ÀŸ¬ 
-            if (pApp->m_isAutoRunning)
-            {
-                KillTimer(hWnd, ID_TIMER_AUTO);
-                SetTimer(hWnd, ID_TIMER_AUTO, pApp->m_autoSpeed, nullptr);
-            }
-        }
+        pApp->OnNotify((NMHDR*)lParam);
         break;
-    }
 
     case WM_TIMER:
         pApp->OnTimer(wParam);
@@ -1533,11 +871,11 @@ int CBTDebugger::Run()
 }
 
 // ============================================================================
-// ≥Ã–Ú»Îø⁄
+// Á®ãÂ∫èÂÖ•Âè£
 // ============================================================================
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
 {
-    // ≥ı ºªØπ´π≤øÿº˛
+    // ÂàùÂßãÂåñÂÖ¨ÂÖ±Êéß‰ª∂
     INITCOMMONCONTROLSEX icc = {};
     icc.dwSize = sizeof(icc);
     icc.dwICC = ICC_WIN95_CLASSES | ICC_TREEVIEW_CLASSES | ICC_LISTVIEW_CLASSES | ICC_BAR_CLASSES;
@@ -1546,7 +884,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow)
     CBTDebugger app(hInstance);
     if (!app.Init(nCmdShow))
     {
-        MessageBoxW(nullptr, L"¥∞ø⁄≥ı ºªØ ß∞‹£°", L"¥ÌŒÛ", MB_ICONERROR);
+        MessageBoxW(nullptr, L"Á™óÂè£ÂàùÂßãÂåñÂ§±Ë¥•ÔºÅ", L"ÈîôËØØ", MB_ICONERROR);
         return 1;
     }
 
