@@ -598,7 +598,7 @@ VOID CHumanPlayer::OnSpecialEquipmentFunctionOn(special_equipment_func func)
 			dwTime = 0;
 		else
 			dwTime -= 2 * 60 * 1000;
-		RateLimitSystem::GetInstance()->GmSetRateLimitInterval(this, RateLimitComponent::ACT_RELIVE, dwTime);
+		SetRateLimitInterval(RateLimitComponent::ACT_RELIVE, dwTime);
 	}
 	break;
 	case SEF_CLOAK:

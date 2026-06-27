@@ -11,7 +11,6 @@
 #include <random>
 #include <unordered_set>
 #include <chrono>
-#include <MMSystem.h>
 #include <array>
 #include <atomic>
 #include <memory>
@@ -1294,8 +1293,20 @@ inline BOOL	FileExist(const char* pszPath)
 }
 
 #define MAXTIME	(DWORD(0xffffffff)) //最大时间值
+
+// 基于 std::chrono::steady_clock 获取当前毫秒时间(替代 timeGetTime)
+// 返回 DWORD,保持与原 timeGetTime 相同的语义:
+//   - 单调递增(steady_clock 保证)
+//   - 49.7 天回绕(DWORD 范围),配合 GetTimeToTime 的无符号减法自然处理
+// 这样所有原有基于 DWORD 的时间差计算逻辑无需改动,行为完全一致
+inline DWORD GetSteadyTimeMS()
+{
+	return static_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count());
+}
+
 // 计算从 t1 到 t2 经过的时间（毫秒）
-// 使用无符号减法自然处理 timeGetTime() 的 49.7 天回绕
+// 使用无符号减法自然处理 GetSteadyTimeMS()/timeGetTime() 的 49.7 天回绕
 // 只要实际时间差 < 2^31 ms（约24.8天），结果就是正确的
 inline DWORD GetTimeToTime(DWORD t1, DWORD t2)
 {
@@ -1308,7 +1319,7 @@ class CFrameTime
 public:
 	static VOID UpdateFrameTime()
 	{
-		s_dwFrameTime.store(timeGetTime(), std::memory_order_relaxed);
+		s_dwFrameTime.store(GetSteadyTimeMS(), std::memory_order_relaxed);
 	}
 	static DWORD GetFrameTime()
 	{

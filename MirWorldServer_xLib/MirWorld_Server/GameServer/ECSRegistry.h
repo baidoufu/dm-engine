@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <concurrencysal.h>
 
 // ==================================================
 //  IECSPool —— 类型擦除的组件池基类
@@ -44,9 +45,9 @@ public:
     //  外部可通过 std::lock_guard<ECSRegistry> 持有锁，
     //  内部方法递归获取同一把 recursive_mutex。
     // ==========================================
-    void lock()        const { m_mutex.lock(); }
-    void unlock()      const { m_mutex.unlock(); }
-    bool try_lock()    const { return m_mutex.try_lock(); }
+    _Acquires_lock_(this->m_mutex) void lock()     const { m_mutex.lock(); }
+    _Releases_lock_(this->m_mutex) void unlock()   const { m_mutex.unlock(); }
+    _When_(return != 0, _Acquires_lock_(this->m_mutex)) bool try_lock() const { return m_mutex.try_lock(); }
 
     ECSRegistry()
     {

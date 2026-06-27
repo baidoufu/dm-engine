@@ -148,7 +148,7 @@ unsigned WINAPI xThread::ThreadProc(LPVOID pParam)
 {
 	xThread* pThread = static_cast<xThread*>(pParam);
 	pThread->m_bTerminated.store(FALSE);
-	srand(static_cast<UINT>(reinterpret_cast<uintptr_t>(pThread->getHandle()) + timeGetTime()));
+	srand(static_cast<UINT>(reinterpret_cast<uintptr_t>(pThread->getHandle()) + GetSteadyTimeMS()));
 	BOOL bException = FALSE;
 	try
 	{

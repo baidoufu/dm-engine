@@ -741,7 +741,7 @@ VOID CGameWorld::Update()
 	break;
 	case 2: case 7:
 	{
-		CSpinBarrier barrier(1);
+		CSpinBarrier barrier(5); // 5个异步任务参与
 		SubmitAsyncTask([&barrier]() {
 			CTimeSystem::GetInstance()->Update(); // 时间定时器
 			barrier.Signal();
@@ -770,7 +770,7 @@ VOID CGameWorld::Update()
 	break;
 	case 3: case 8:
 	{
-		CSpinBarrier barrier(1);
+		CSpinBarrier barrier(4); // 4个异步任务参与
 		SubmitAsyncTask([&barrier]() {
 			CSandCity* pSandCity = CSandCity::GetInstance();
 			if (pSandCity && pSandCity->IsWarStarted())

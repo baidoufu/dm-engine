@@ -14,8 +14,6 @@
 
 #include <windows.h>
 #pragma comment( lib, "ws2_32.lib" )
-#include <mmsystem.h>
-#pragma comment( lib, "winmm.lib")
 
 #include <stdio.h>
 #include <stdlib.h>

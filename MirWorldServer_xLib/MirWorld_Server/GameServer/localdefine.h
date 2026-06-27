@@ -454,6 +454,7 @@ typedef struct tag_humandatadesc //人物数据描述
 	WORD wUnknown{};
 }HUMANDATADESC;
 
+constexpr uint64_t INV_100 = (1ULL << 32) / 100; // 2^32 / 100  用来代替“除以100”的慢操作
 #define ROUND(f) (int)(f+0.5) //四舍五入
 #define MAX(i,j) ((i)>(j)?(i):(j)) //取最大值
 

@@ -37,18 +37,19 @@ VOID CHumanPlayer::SendSpecialStatusChanged(BOOL bToAround)
 VOID CHumanPlayer::resetHushenBuff(int x, int y, UINT nTarget, WORD wMagicId)
 {
 	USERMAGIC* pMagic = GetMagic(wMagicId);
+	int hushenLevel = GetShieldState()->hushenLevel;
 	switch (wMagicId)
 	{
 	case 42: // 护身真气
 	{
-		SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenleve]);
-		SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenleve]);
+		SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenLevel]);
+		SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenLevel]);
 	}
 	break;
 	case 61: // 金刚护体
 	{
-		SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenleve]);
-		SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenleve]);
+		SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenLevel]);
+		SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenLevel]);
 	}
 	break;
 	}
@@ -207,6 +208,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				}
 				else if (hasItem1 && hasItem2)
 				{
+					BOOL boPoison = GetShieldState()->poisonToggle;
 					needitem = boPoison ? item1 : item2;
 					checkcount++;
 				}
@@ -273,7 +275,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				this->m_xAbilityShellRef.wCurHp = magicSkill.skills[index].value3 * 10;
 				this->m_xAbilityShellRef.wLevel = index;
 				this->m_xAbilityShellRef.wSkillId = wMagicId;
-				hushenleve = index;
+				GetShieldState()->hushenLevel = index;
 				SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[index]);
 				SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[index]);
 				UpdateProp(); // 更新人物数据
@@ -315,8 +317,8 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				this->m_xAbilityShellRef.wCurHp = magicSkill.skills[index].value5 * 10;
 				this->m_xAbilityShellRef.wLevel = index;
 				this->m_xAbilityShellRef.wSkillId = wMagicId;
-				hushenleve = index;
-				JingganNoDamage = magicSkill.skills[index].value6;
+				GetShieldState()->hushenLevel = index;
+				GetShieldState()->jingangNoDamage = magicSkill.skills[index].value6;
 				SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[index]);
 				SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[index]);
 				SetSystemFlag(SF_STRONGSHIELD, TRUE, btLevel, 0xffffffff);
@@ -630,8 +632,10 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		case 31: // 魔法盾
 		{
-			ShieldStateSystem::GetInstance()->SetShieldCount(this, skillData.value2 * skillData.value5);// 魔法盾抵抗次数
-			NoDamage = skillData.value3; // 魔法盾抵抗百分比
+			// 魔法盾抵抗次数
+			GetShieldState()->magShieldResCount = skillData.value2 * skillData.value5;
+			// 魔法盾抵抗百分比
+			GetShieldState()->magShieldNoDamage = skillData.value3;
 			const int pow = skillData.value1;
 			const int time = skillData.value4;
 			const DWORD dwTime = static_cast<DWORD>(pow * time);
@@ -1362,19 +1366,19 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			case SNI_GREENPOISON: // 绿毒
 				TakeMaterial(ISM_POISON, 1, 0, pMagic->pClass->wGreenPoisonCount);
-				boPoison = FALSE;
+				GetShieldState()->poisonToggle = FALSE;
 				break;
 			case SNI_REDPOISON: // 红毒
 				TakeMaterial(ISM_POISON, 2, 0, pMagic->pClass->wRedPoisonCount);
-				boPoison = TRUE;
+				GetShieldState()->poisonToggle = TRUE;
 				break;
 			case SNI_STRAWMAN: // 诅咒木偶男
 				TakeMaterial(ISM_POISON, 1, 1, pMagic->pClass->wStrawManCount);
-				boPoison = FALSE;
+				GetShieldState()->poisonToggle = FALSE;
 				break;
 			case SNI_STRAWWOMAN: // 诅咒木偶女
 				TakeMaterial(ISM_POISON, 2, 1, pMagic->pClass->wStrawWomanCount);
-				boPoison = TRUE;
+				GetShieldState()->poisonToggle = TRUE;
 				break;
 			}
 		}
@@ -1722,7 +1726,7 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 VOID CHumanPlayer::OnDamage(CAliveObject* pAttacker, int nDamage, damage_type type)
 {
 	int nDuraDamage = nDamage;
-	HushenBuffdamage += nDamage;
+	GetShieldState()->hushenBuffDamage += nDamage;
 	int dressrate = CGameWorld::GetInstance()->GetVar(EVI_DRESSDAMAGERATE);
 	int defencerate = CGameWorld::GetInstance()->GetVar(EVI_DEFENCEDAMAGERATE);
 	int jewrate = CGameWorld::GetInstance()->GetVar(EVI_JEWELRYDAMAGERATE);
@@ -1769,22 +1773,24 @@ VOID CHumanPlayer::OnDamage(CAliveObject* pAttacker, int nDamage, damage_type ty
 	{
 		//这个变量用来确定发送29
 		BOOL  ISsendBuf = FALSE;
-		if (HushenBuffdamage > 50)
+		auto* ss = GetShieldState();
+		if (ss->hushenBuffDamage > 50)
 		{
-			HushenBuffdamage -= 50;
+			ss->hushenBuffDamage -= 50;
 			ISsendBuf = TRUE;
 			this->m_xAbilityShellRef.wCurHp--;
 		}
 		if (ISsendBuf)
 		{
-			SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenleve]);
-			SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenleve]);
+			int hushenLevel = GetShieldState()->hushenLevel;
+			SendAroundMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenLevel]);
+			SendMsg(GetId(), 0x1d, this->m_xAbilityShellRef.wCurHp, this->m_xAbilityShellRef.pShell->wMaxHp, hushenbuff[hushenLevel]);
 		}
 		if (this->m_xAbilityShellRef.wCurHp == 0)
 		{
 			this->m_xAbilityShellRef.pShell = nullptr;
 			//去掉SHELL影响
-			HushenBuffdamage = 0;
+			ss->hushenBuffDamage = 0;
 			if (CAliveObject::IsStatusSet(SI_HUSHENZHENQI))
 			{
 				CAliveObject::ClrStatus(SI_HUSHENZHENQI);

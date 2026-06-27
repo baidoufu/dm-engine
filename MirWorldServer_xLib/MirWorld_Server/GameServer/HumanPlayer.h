@@ -20,10 +20,7 @@
 #include "RateLimitComponent.h"
 #include "ShieldStateComponent.h"
 #include "SpecialEquipComponent.h"
-#include "RateLimitSystem.h"
-#include "ShieldStateSystem.h"
-#include "SpecialEquipSystem.h"
-#include "PlayerTimerSystem.h"
+#include "PlayerComponentManager.h"
 
 class CClientObj;
 class CScriptPage;
@@ -271,31 +268,39 @@ public:
 	// ========== ECS 组件访问器 (统一入口) ==========
 	inline RateLimitComponent* GetRateLimit()
 	{
-		return RateLimitSystem::GetInstance()->GetRateLimit(this);
+		return PlayerComponentManager::GetInstance()->GetRateLimit(this);
 	}
 	inline ShieldStateComponent* GetShieldState()
 	{
-		return ShieldStateSystem::GetInstance()->GetShieldState(this);
+		return PlayerComponentManager::GetInstance()->GetShieldState(this);
 	}
 	inline SpecialEquipComponent* GetSpecialEquip()
 	{
-		return SpecialEquipSystem::GetInstance()->GetSpecialEquip(this);
+		return PlayerComponentManager::GetInstance()->GetSpecialEquip(this);
 	}
 	inline BOOL CheckTimer(TimerType type, DWORD intervalMs)
 	{
-		return PlayerTimerSystem::GetInstance()->CheckTimer(GetId(), type, intervalMs);
+		return PlayerComponentManager::GetInstance()->CheckPlayerTimer(GetId(), type, intervalMs);
+	}
+	inline BOOL TryRateLimit(RateLimitComponent::Action act)
+	{
+		return PlayerComponentManager::GetInstance()->TryRateLimit(this, act);
 	}
 	inline BOOL CheckTimerNoReset(TimerType type, DWORD intervalMs, int& outLastTickMs)
 	{
-		return PlayerTimerSystem::GetInstance()->CheckTimerNoReset(GetId(), type, intervalMs, outLastTickMs);
+		return PlayerComponentManager::GetInstance()->CheckPlayerTimerNoReset(GetId(), type, intervalMs, outLastTickMs);
 	}
 	inline VOID ResetTimer(TimerType type)
 	{
-		PlayerTimerSystem::GetInstance()->ResetTimer(GetId(), type);
+		PlayerComponentManager::GetInstance()->ResetPlayerTimer(GetId(), type);
 	}
 	inline VOID OffsetTimer(TimerType type, int offsetMs)
 	{
-		PlayerTimerSystem::GetInstance()->OffsetTimer(GetId(), type, offsetMs);
+		PlayerComponentManager::GetInstance()->OffsetPlayerTimer(GetId(), type, offsetMs);
+	}
+	inline VOID SetRateLimitInterval(RateLimitComponent::Action act, int ms)
+	{
+		PlayerComponentManager::GetInstance()->GmSetRateLimitInterval(this, act, ms);
 	}
 
 	BOOL Trade(CHumanPlayer* pPlayer = nullptr);
@@ -651,12 +656,10 @@ public:
 	BOOL GetHushen();
 	//获取是否开启金刚护体,子类实现
 	BOOL GetJingang();
-	//护身等级或者金刚等级
-	int hushenleve = 0;
 	//护身等级颜色或金刚等级颜色数组
 	static constexpr std::array<int, 4> hushenbuff = { 255, 254, 147, 154 };
 	//子类实现, 用于获取护身等级
-	int getHushenbuf() { return hushenbuff[hushenleve]; }
+	int getHushenbuf() { return hushenbuff[GetShieldState()->hushenLevel]; }
 	//获取魔法盾和金刚护体免伤的百分比
 	int GetNoDamage() {
 		auto* ss = GetShieldState();
@@ -796,7 +799,7 @@ public:
 	}
 	DWORD GetSpecialEquipmentFlag(special_equipment_func func)
 	{
-		return SpecialEquipSystem::GetInstance()->GetSpecialEquipFlag(this, func);
+		return PlayerComponentManager::GetInstance()->GetSpecialEquipFlag(this, func);
 	}
 	VOID ProcSpecialEquipmentFunctionOff();
 	VOID ProcSpecialEquipmentFunctionOn();
@@ -1107,8 +1110,6 @@ protected:
 	mutable std::array<char, 20> petname{};//豹子的名字
 	BOOL ISzhaohuan;//是否召唤出来
 	DWORD m_baozhiID;
-	int NoDamage = 0;//魔法盾抵抗百分比
-	int JingganNoDamage = 0;//金刚护体免伤
 	BOOL m_bRideHorse;
 	CAliveObject* m_pSeizedObject;
 	int	m_iSeizedTimes;
@@ -1141,7 +1142,6 @@ protected:
 	AchievementData m_Achievement;  // 成就数据
 
 	TASKINFO m_TaskInfo;
-	int HushenBuffdamage = 0;//这个用来存储护身或者金刚受到的伤害
 private:
 	// 任务哈希表, 用于快速查找任务ID对应的索引
 	std::unordered_map<WORD, int> m_TaskIdToIndexMap;
@@ -1153,7 +1153,6 @@ private:
 	int m_nMaterialBagPos; // CheckMaterial时, 在背包中找到的物品位置
 	int m_nRecalcHit; // 在使用 RecalcHitSpeed 函数计算被动技能增加命中值多少, 用于计算增加和减少
 	int m_nRecalcSpeed; // 在使用 RecalcHitSpeed 函数计算被动技能增加躲避值多少, 用于计算增加和减少
-	BOOL boPoison; // 道士使用施毒、诅咒的类型切换
 	DWORD m_dwZhenBaoExpMax;
 	DWORD m_dwZhenBaoStar;
 	WORD m_wYuanQi;		//当前元气值

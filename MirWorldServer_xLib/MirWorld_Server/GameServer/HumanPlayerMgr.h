@@ -32,11 +32,6 @@ public:
 	//是否是测试模式
 	BOOL IsTestMode() const { return Decrypt(m_boTest); }
 private:
-	//注册ECS组件
-	VOID RegEcs(CHumanPlayer* pPlayer);
-	//注销ECS组件
-	VOID UnregEcs(UINT id);
-private:
 	CIndexListEx<CHumanPlayer> m_HumanPlayers;
 	CNameHash m_PlayerNameHash; // 所有玩家名字集合
 	BOOL m_boTest; // 是否是测试模式

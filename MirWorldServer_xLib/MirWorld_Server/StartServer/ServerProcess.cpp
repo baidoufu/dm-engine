@@ -285,7 +285,7 @@ VOID ServerProcess::MonitorProcess()
         DWORD dwWaitMs = 3000;
         if (m_restartCount >= 3)
             dwWaitMs = 10000;
-        Sleep(dwWaitMs);
+        std::this_thread::sleep_for(std::chrono::milliseconds(dwWaitMs));
 
         m_restartCount++;
         printf("[%s] 正在执行第 %d 次自动重启...\n", m_name.c_str(), m_restartCount);
@@ -379,7 +379,7 @@ VOID ServerProcess::ReadOutput()
         else
         {
             // 没有数据, 稍微休眠一下
-            Sleep(10);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 }

@@ -388,7 +388,7 @@ BOOL xSocket::setSocketOption(int level, int optname, const VOID* optval, int op
 
 DWORD xSocket::getCurrentTime() const
 {
-	return timeGetTime();
+	return GetSteadyTimeMS();
 }
 
 DWORD xSocket::getConnectionAge() const

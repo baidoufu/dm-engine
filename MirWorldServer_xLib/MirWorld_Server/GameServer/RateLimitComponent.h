@@ -32,7 +32,7 @@ struct RateLimitComponent
         200    // ACT_EQUIP_CHANGE
     };
 
-    int intervals[ACT_COUNT];  // 各项间隔 (运行时配置, 支持 GM 动态修改)
+    int intervals[ACT_COUNT];  // 各项间隔 (运行时配置, 支持动态修改)
     int lastTimes[ACT_COUNT];  // 各项上次执行时间戳 (毫秒)
 
     RateLimitComponent()
@@ -63,7 +63,7 @@ struct RateLimitComponent
         return (nowMs - lastTimes[idx]) >= intervals[idx];
     }
 
-    // GM 动态调整间隔
+    // 动态调整间隔
     void SetInterval(Action act, int ms)
     {
         intervals[static_cast<int>(act)] = ms;

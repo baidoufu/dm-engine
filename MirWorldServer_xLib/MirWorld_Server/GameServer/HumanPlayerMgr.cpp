@@ -2,8 +2,7 @@
 #include ".\humanplayermgr.h"
 #include ".\gameworld.h"
 #include "BotManager.h"
-#include "AliveTimerSystem.h"
-#include "PlayerTimerSystem.h"
+#include "PlayerComponentManager.h"
 
 CHumanPlayerMgr::CHumanPlayerMgr(VOID)
 {
@@ -61,7 +60,7 @@ BOOL CHumanPlayerMgr::RegisterBotPlayer(CHumanPlayer* pPlayer)
 		LG2("机器人注册: 名字 [%s] 已存在\n", pszName);
 		return FALSE;
 	}
-	RegEcs(pPlayer);
+	PlayerComponentManager::GetInstance()->CreatePlayerComponents(pPlayer);
 	return m_PlayerNameHash.HAdd(pszName, (LPVOID)pPlayer);
 }
 
@@ -72,7 +71,7 @@ VOID CHumanPlayerMgr::UnregisterBotPlayer(CHumanPlayer* pPlayer)
 		return;
 	m_PlayerNameHash.HDel(pszName);
 	UINT rawId = pPlayer->GetId();
-	UnregEcs(rawId);
+	PlayerComponentManager::GetInstance()->DestroyPlayerComponents(rawId);
 }
 
 CHumanPlayer* CHumanPlayerMgr::NewPlayer()
@@ -90,7 +89,7 @@ CHumanPlayer* CHumanPlayerMgr::NewPlayer()
 	if (id == 0 || pPlayer == nullptr) return nullptr;
 	id |= (OBJ_PLAYER << 24);
 	pPlayer->SetId(id);
-	RegEcs(pPlayer);
+	PlayerComponentManager::GetInstance()->CreatePlayerComponents(pPlayer);
 	return pPlayer;
 }
 
@@ -100,19 +99,6 @@ BOOL CHumanPlayerMgr::DeletePlayer(CHumanPlayer* pPlayer)
 	UINT id = rawId & 0xffffff;
 	m_PlayerNameHash.HDel(pPlayer->GetName());
 	pPlayer->Clean();
-	UnregEcs(rawId);
+	PlayerComponentManager::GetInstance()->DestroyPlayerComponents(rawId);
 	return m_HumanPlayers.Del(id);
-}
-
-VOID CHumanPlayerMgr::RegEcs(CHumanPlayer* pPlayer)
-{
-	PlayerTimerSystem::GetInstance()->CreatePlayerTimers(pPlayer);
-}
-
-VOID CHumanPlayerMgr::UnregEcs(UINT id)
-{
-	RateLimitSystem::GetInstance()->OnPlayerLogout(id);
-	ShieldStateSystem::GetInstance()->OnPlayerLogout(id);
-	SpecialEquipSystem::GetInstance()->OnPlayerLogout(id);
-	PlayerTimerSystem::GetInstance()->OnPlayerLogout(id);
 }

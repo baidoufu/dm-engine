@@ -49,7 +49,6 @@ CHumanPlayer::CHumanPlayer(VOID) :m_pClientObj(nullptr), m_Equipments(this), m_S
 	m_bFirstLogin = FALSE;
 	petname.fill(0);
 	m_nMaterialBagPos = -1;
-	boPoison = FALSE;
 	Clean();
 }
 
@@ -4323,7 +4322,7 @@ BOOL CHumanPlayer::CanDoAction(actiontype action)
 	}
 	if (action == AT_SPECIALHIT)
 	{
-		return RateLimitSystem::GetInstance()->TryRateLimit(this, RateLimitComponent::ACT_SPECIAL_ATTACK);
+		return TryRateLimit(RateLimitComponent::ACT_SPECIAL_ATTACK);
 	}
 	return CAliveObject::CanDoAction(action);
 }

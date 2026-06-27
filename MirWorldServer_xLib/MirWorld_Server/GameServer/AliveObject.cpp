@@ -345,10 +345,9 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 		if (IsSystemFlagSeted(SF_STRONGSHIELD))
 		{
 			int nodamage = GetNoDamage();
-			double nodamagePercentage = nodamage / 100.0; // 将无伤害值除以 100, 得到百分比值
-			// 将整数类型的 nDamage 转换为浮点数类型, 执行乘法运算, 然后再转换回整数类型
-			int temp = static_cast<int>(static_cast<double>(nDamage) * nodamagePercentage);
-			nDamage -= temp;
+			int64_t temp = (int64_t)nDamage * nodamage * INV_100;
+			temp >>= 32;
+			nDamage -= (int)temp;
 		}
 	}
 	if (nDamage < 0) nDamage = 0;

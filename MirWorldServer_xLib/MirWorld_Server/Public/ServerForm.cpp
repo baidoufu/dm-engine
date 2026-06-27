@@ -407,7 +407,7 @@ int CServerForm::EnterMessageLoop()
 			while (pForm->m_bRunning)
 			{
 				pForm->OnTimer();
-				Sleep(1000);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			}
 			return 0;
 			}, this, 0, &dwTimerThreadId);
@@ -477,7 +477,7 @@ int CServerForm::EnterMessageLoop()
 				}
 			}
 		}
-		Sleep(10);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	// 等待定时器线程结束
 	if (hTimerThread)

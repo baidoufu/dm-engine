@@ -14,6 +14,7 @@
 // C 运行时头文件
 #include <stdio.h>
 #include <string>
+#include <thread>
 #include <vector>
 #include <process.h>
 #include <conio.h>

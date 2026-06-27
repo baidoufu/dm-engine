@@ -21,7 +21,7 @@ __inline VOID PrintError(LPSTR linedesc, LPSTR filename, int lineno, DWORD errnu
 		"     %s\n\n‘≠“Ú: %s\n", filename, lineno, linedesc, lpBuffer);
 #ifndef _WINDOWS
 	WriteFile(GetStdHandle(STD_ERROR_HANDLE), errbuf.data(), (int)strlen(errbuf.data()), &numread, FALSE);
-	Sleep(3000);
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 #else
 	GetModuleFileName(nullptr, modulename.data(), MAX_PATH);
 	MessageBox(nullptr, errbuf.data(), modulename.data(),

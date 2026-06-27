@@ -21,7 +21,7 @@ CBaseServer::CBaseServer(VOID) :m_xQTempClient(1024)
 	m_dwDisconnectTimes = 0;
 	m_dwPreConnections = 0;
 	m_xIocpServer.setEventListener(this);
-	srand(timeGetTime());
+	srand(GetSteadyTimeMS());
 	this->m_szBanIpFile.fill(0);
 	this->m_szTrustIpFile.fill(0);
 }
@@ -77,7 +77,7 @@ BOOL CBaseServer::Start(CSettingFile& sf) //读取Config.ini
 		{
 			if (!InitServer(sf))
 				bRet = FALSE;
-			m_dwLoopStartTime = timeGetTime();
+			m_dwLoopStartTime = GetSteadyTimeMS();
 			StartIoThread(); // 先启动IO独立线程
 			if (!xThread::Start(this))
 				bRet = FALSE;
@@ -156,7 +156,7 @@ VOID CBaseServer::Execute(LPVOID lpParam)
 		++m_nLoopCount;
 		// 避免空转
 		if (!m_xIocpServer.hasPendingEvents() && m_IoToMainQueue.getcount() == 0)
-			Sleep(1);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 }
 
@@ -386,7 +386,7 @@ VOID CBaseServer::StartIoThread()
 				if (m_xIocpServer.hasPendingEvents())
 					SwitchToThread();
 				else
-					Sleep(1);
+					std::this_thread::sleep_for(std::chrono::milliseconds(1));
 				ProcConnectionEvent();
 				// 注意：SC/DB客户端的Update()由主线程在UpdateSCServer()/UpdateDBServer()中调用
 				// 不在IO线程中调用，避免与主线程的竞态条件

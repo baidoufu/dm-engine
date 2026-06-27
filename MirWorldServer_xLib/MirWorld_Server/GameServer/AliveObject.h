@@ -1,6 +1,6 @@
 #pragma once
 #include "mapobject.h"
-#include "AliveTimerSystem.h"
+#include "AliveComponentsManager.h"
 #include <memory>
 #include <unordered_map>
 #include <array>
@@ -181,14 +181,14 @@ public:
 	virtual BYTE GetRunSpeed() { return m_btRunSpeed; }
 	VOID SetRunSpeed(BYTE btSpeed) { m_btRunSpeed = btSpeed; }
 
-	// ========== ECS 定时器访问器 ==========
+	// ========== ECS 组件访问器 (统一入口) ==========
 	inline BOOL CheckTimer(TimerType type, DWORD intervalMs)
 	{
-		return AliveTimerSystem::GetInstance()->CheckTimer(GetId(), type, intervalMs);
+		return AliveComponentsManager::GetInstance()->CheckAliveTimer(GetId(), type, intervalMs);
 	}
 	inline VOID ResetTimer(TimerType type)
 	{
-		AliveTimerSystem::GetInstance()->ResetTimer(GetId(), type);
+		AliveComponentsManager::GetInstance()->ResetAliveTimer(GetId(), type);
 	}
 
 	WORD GetDeInvisibleLevel() { return m_wDeInvisibleLevel; }
@@ -271,9 +271,10 @@ public:
 			if (IsStatusSet(SI_BUBBLEDEFENCEUP))
 			{
 				int nodamage = GetNoDamage();
-				double nodamagePercentage = nodamage / 100.0; // 将免伤值除以 100, 得到百分比值
-				int temp = static_cast<int>(static_cast<double>(nDamage) * nodamagePercentage);
-				nDamage -= temp;
+				// 将免伤值除以 100, 得到百分比值
+				int64_t temp = (int64_t)nDamage * nodamage * INV_100;
+				temp >>= 32;
+				nDamage -= (int)temp;
 				int tempd = SecondResMag_count();
 				if (tempd == 0)
 				{
@@ -294,10 +295,9 @@ public:
 			if (IsStatusSet(SI_BUBBLEDEFENCEUP))
 			{
 				int nodamage = GetNoDamage();
-				double nodamagePercentage = nodamage / 100.0; // 将无伤害值除以 100, 得到百分比值
-				//将整数类型的 nDamage 转换为浮点数类型, 执行乘法运算, 然后再转换回整数类型
-				int temp = static_cast<int>(static_cast<double>(nDamage) * nodamagePercentage);
-				nDamage -= temp;
+				int64_t temp = (int64_t)nDamage * nodamage * INV_100;
+				temp >>= 32;
+				nDamage -= (int)temp;
 				int tempd = SecondResMag_count();
 				if (tempd == 0)
 				{

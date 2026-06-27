@@ -11,8 +11,6 @@
 #pragma comment( lib, "ws2_32.lib" )
 #include <windows.h>
 #include <process.h>
-#include <mmsystem.h>
-#pragma comment( lib, "winmm.lib")
 #include <Mswsock.h>
 #pragma comment( lib, "mswsock.lib" )
 

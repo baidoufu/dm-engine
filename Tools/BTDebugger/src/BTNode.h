@@ -5,7 +5,7 @@
 #include <memory>
 #include <map>
 
-// è¡Œä¸ºæ ‘èŠ‚ç‚¹ç±»å‹
+// ĞĞÎªÊ÷½ÚµãÀàĞÍ
 enum class BTNodeType
 {
     SEQUENCE, SELECTOR, PARALLEL, RANDOM, PROBABILITY,
@@ -15,19 +15,19 @@ enum class BTNodeType
     CONDITION, ACTION
 };
 
-// èŠ‚ç‚¹åˆ†ç±»
+// ½Úµã·ÖÀà
 enum class BTNodeCategory
 {
     COMPOSITE, DECORATOR, CONDITION, ACTION
 };
 
-// æ‰§è¡Œç»“æœ
+// Ö´ĞĞ½á¹û
 enum class BTResult
 {
     SUCCESS, FAILURE, RUNNING, IDLE
 };
 
-// æ¡ä»¶å­ç±»å‹
+// Ìõ¼ş×ÓÀàĞÍ
 enum class ConditionType
 {
     NONE, LOW_HP, LOW_MP, HAS_TARGET, IN_SAFE_AREA, BAG_FULL,
@@ -36,7 +36,7 @@ enum class ConditionType
     HP_RANGE, TIME_OF_DAY
 };
 
-// åŠ¨ä½œå­ç±»å‹
+// ¶¯×÷×ÓÀàĞÍ
 enum class ActionType
 {
     NONE, USE_POTION, USE_ITEM, CHANGE_ATTACK_MODE, ATTACK,
@@ -45,7 +45,7 @@ enum class ActionType
     DROP_ITEM, EQUIP_ITEM, SUMMON_PET, FOLLOW, GROUP, MINE
 };
 
-// è¡Œä¸ºæ ‘èŠ‚ç‚¹
+// ĞĞÎªÊ÷½Úµã
 struct BTNode
 {
     std::wstring id;
@@ -59,13 +59,13 @@ struct BTNode
     int depth = 0;
     bool collapsed = false;
 
-    // æ‰§è¡ŒçŠ¶æ€
+    // Ö´ĞĞ×´Ì¬
     BTResult lastResult = BTResult::IDLE;
     bool isActive = false;
     int execOrder = -1;
 };
 
-// æ‰§è¡Œæ—¥å¿—æ¡ç›®
+// Ö´ĞĞÈÕÖ¾ÌõÄ¿
 struct LogEntry
 {
     std::wstring nodeId;
@@ -75,7 +75,7 @@ struct LogEntry
     BTNodeType type;
 };
 
-// æ‰§è¡Œä¸Šä¸‹æ–‡ï¼ˆæ¨¡æ‹Ÿæ¸¸æˆçŠ¶æ€ï¼‰
+// Ö´ĞĞÉÏÏÂÎÄ£¨Ä£ÄâÓÎÏ·×´Ì¬£©
 struct ExecutionContext
 {
     int hpPercent = 80;
@@ -90,7 +90,7 @@ struct ExecutionContext
     int monsterCount = 2;
 };
 
-// èŠ‚ç‚¹ç±»å‹é¢œè‰² (GBRæ ¼å¼)
+// ½ÚµãÀàĞÍÑÕÉ« (GBR¸ñÊ½)
 inline COLORREF GetNodeColor(BTNodeType type)
 {
     switch (type)
@@ -102,18 +102,18 @@ inline COLORREF GetNodeColor(BTNodeType type)
     case BTNodeType::PROBABILITY:
     case BTNodeType::MEM_SEQUENCE:
     case BTNodeType::MEM_SELECTOR:
-        return RGB(0x00, 0xAA, 0xFF);   // å¤åˆèŠ‚ç‚¹ - é‡‘è‰²
+        return RGB(0x00, 0xAA, 0xFF);   // ¸´ºÏ½Úµã - ½ğÉ«
     case BTNodeType::INVERTER:
     case BTNodeType::DECORATOR_REPEAT:
     case BTNodeType::DECORATOR_TIMEOUT:
     case BTNodeType::DECORATOR_COOLDOWN:
     case BTNodeType::SUCCEEDER:
     case BTNodeType::FAILER:
-        return RGB(0xFF, 0x66, 0xCC);   // è£…é¥°èŠ‚ç‚¹ - ç´«è‰²
+        return RGB(0xFF, 0x66, 0xCC);   // ×°ÊÎ½Úµã - ×ÏÉ«
     case BTNodeType::CONDITION:
-        return RGB(0xFF, 0xCC, 0x00);   // æ¡ä»¶èŠ‚ç‚¹ - é’è‰²
+        return RGB(0xFF, 0xCC, 0x00);   // Ìõ¼ş½Úµã - ÇàÉ«
     case BTNodeType::ACTION:
-        return RGB(0x44, 0x88, 0xFF);   // åŠ¨ä½œèŠ‚ç‚¹ - æ©™è‰²
+        return RGB(0x44, 0x88, 0xFF);   // ¶¯×÷½Úµã - ³ÈÉ«
     }
     return RGB(0x88, 0x88, 0x88);
 }
@@ -161,38 +161,79 @@ inline const wchar_t* GetNodeTypeName(BTNodeType type)
 {
     switch (type)
     {
-    case BTNodeType::SEQUENCE: return L"åºåˆ—(Sequence)";
-    case BTNodeType::SELECTOR: return L"é€‰æ‹©(Selector)";
-    case BTNodeType::PARALLEL: return L"å¹¶è¡Œ(Parallel)";
-    case BTNodeType::RANDOM: return L"éšæœº(Random)";
-    case BTNodeType::PROBABILITY: return L"æ¦‚ç‡(Probability)";
-    case BTNodeType::MEM_SEQUENCE: return L"è®°å¿†åºåˆ—(MemSeq)";
-    case BTNodeType::MEM_SELECTOR: return L"è®°å¿†é€‰æ‹©(MemSel)";
-    case BTNodeType::INVERTER: return L"åè½¬(Inverter)";
-    case BTNodeType::DECORATOR_REPEAT: return L"é‡å¤(Repeat)";
-    case BTNodeType::DECORATOR_TIMEOUT: return L"è¶…æ—¶(Timeout)";
-    case BTNodeType::DECORATOR_COOLDOWN: return L"å†·å´(Cooldown)";
-    case BTNodeType::SUCCEEDER: return L"å¼ºåˆ¶æˆåŠŸ";
-    case BTNodeType::FAILER: return L"å¼ºåˆ¶å¤±è´¥";
-    case BTNodeType::CONDITION: return L"æ¡ä»¶(Condition)";
-    case BTNodeType::ACTION: return L"åŠ¨ä½œ(Action)";
+    case BTNodeType::SEQUENCE: return L"ĞòÁĞ(Sequence)";
+    case BTNodeType::SELECTOR: return L"Ñ¡Ôñ(Selector)";
+    case BTNodeType::PARALLEL: return L"²¢ĞĞ(Parallel)";
+    case BTNodeType::RANDOM: return L"Ëæ»ú(Random)";
+    case BTNodeType::PROBABILITY: return L"¸ÅÂÊ(Probability)";
+    case BTNodeType::MEM_SEQUENCE: return L"¼ÇÒäĞòÁĞ(MemSeq)";
+    case BTNodeType::MEM_SELECTOR: return L"¼ÇÒäÑ¡Ôñ(MemSel)";
+    case BTNodeType::INVERTER: return L"·´×ª(Inverter)";
+    case BTNodeType::DECORATOR_REPEAT: return L"ÖØ¸´(Repeat)";
+    case BTNodeType::DECORATOR_TIMEOUT: return L"³¬Ê±(Timeout)";
+    case BTNodeType::DECORATOR_COOLDOWN: return L"ÀäÈ´(Cooldown)";
+    case BTNodeType::SUCCEEDER: return L"Ç¿ÖÆ³É¹¦";
+    case BTNodeType::FAILER: return L"Ç¿ÖÆÊ§°Ü";
+    case BTNodeType::CONDITION: return L"Ìõ¼ş(Condition)";
+    case BTNodeType::ACTION: return L"¶¯×÷(Action)";
     }
-    return L"æœªçŸ¥";
+    return L"Î´Öª";
+}
+
+// ÏÔÊ¾¾ßÌå×ÓÀàĞÍÃû³Æ£¨Èç "Ìõ¼ş - µÍÑª(LowHP)"£©
+inline std::wstring GetNodeTypeDetail(BTNodeType type, ConditionType ct, ActionType at)
+{
+    switch (type)
+    {
+    case BTNodeType::CONDITION:
+        switch (ct)
+        {
+        case ConditionType::LOW_HP: return L"Ìõ¼ş - µÍÑª(LowHP)";
+        case ConditionType::LOW_MP: return L"Ìõ¼ş - µÍÀ¶(LowMP)";
+        case ConditionType::HAS_TARGET: return L"Ìõ¼ş - ÓĞÄ¿±ê(HasTarget)";
+        case ConditionType::IN_SAFE_AREA: return L"Ìõ¼ş - °²È«Çø(InSafeArea)";
+        case ConditionType::BAG_FULL: return L"Ìõ¼ş - ±³°üÂú(BagFull)";
+        case ConditionType::HAS_ITEM: return L"Ìõ¼ş - ³ÖÓĞÎïÆ·(HasItem)";
+        case ConditionType::SKILL_READY: return L"Ìõ¼ş - ¼¼ÄÜ¾ÍĞ÷(SkillReady)";
+        case ConditionType::IS_DEAD: return L"Ìõ¼ş - ÒÑËÀÍö(IsDead)";
+        case ConditionType::TARGET_DISTANCE: return L"Ìõ¼ş - Ä¿±ê¾àÀë(TargetDistance)";
+        case ConditionType::MONSTER_COUNT: return L"Ìõ¼ş - ¹ÖÎïÊıÁ¿(MonsterCount)";
+        default: return L"Ìõ¼ş(Condition)";
+        }
+    case BTNodeType::ACTION:
+        switch (at)
+        {
+        case ActionType::USE_POTION: return L"¶¯×÷ - ºÈÒ©(UsePotion)";
+        case ActionType::USE_ITEM: return L"¶¯×÷ - Ê¹ÓÃµÀ¾ß(UseItem)";
+        case ActionType::CHANGE_ATTACK_MODE: return L"¶¯×÷ - ÇĞ»»¹¥»÷Ä£Ê½(ChangeAttackMode)";
+        case ActionType::ATTACK: return L"¶¯×÷ - ¹¥»÷(Attack)";
+        case ActionType::MOVE_TO_TARGET: return L"¶¯×÷ - ÒÆÖÁÄ¿±ê(MoveToTarget)";
+        case ActionType::PATROL: return L"¶¯×÷ - Ñ²Âß(Patrol)";
+        case ActionType::PICKUP_ITEM: return L"¶¯×÷ - Ê°È¡ÎïÆ·(PickupItem)";
+        case ActionType::FLEE: return L"¶¯×÷ - ÌÓÅÜ(Flee)";
+        case ActionType::REST: return L"¶¯×÷ - ĞİÏ¢(Rest)";
+        case ActionType::CHAT: return L"¶¯×÷ - ÁÄÌì(Chat)";
+        case ActionType::USE_SKILL: return L"¶¯×÷ - Ê¹ÓÃ¼¼ÄÜ(UseSkill)";
+        default: return L"¶¯×÷(Action)";
+        }
+    default:
+        return GetNodeTypeName(type);
+    }
 }
 
 inline const wchar_t* GetResultName(BTResult r)
 {
     switch (r)
     {
-    case BTResult::SUCCESS: return L"SUCCESS";
-    case BTResult::FAILURE: return L"FAILURE";
-    case BTResult::RUNNING: return L"RUNNING";
-    case BTResult::IDLE: return L"IDLE";
+    case BTResult::SUCCESS: return L"³É¹¦";
+    case BTResult::FAILURE: return L"Ê§°Ü";
+    case BTResult::RUNNING: return L"Ö´ĞĞ";
+    case BTResult::IDLE: return L"¿ÕÏĞ";
     }
     return L"";
 }
 
-// ä»æ ‡ç­¾åè§£æèŠ‚ç‚¹ç±»å‹
+// ´Ó±êÇ©Ãû½âÎö½ÚµãÀàĞÍ
 inline BTNodeType ParseNodeType(const std::wstring& tagName)
 {
     if (tagName == L"Sequence") return BTNodeType::SEQUENCE;
@@ -259,4 +300,111 @@ inline ActionType ParseActionType(const std::wstring& tagName)
     if (tagName == L"ActionGroup") return ActionType::GROUP;
     if (tagName == L"ActionMine") return ActionType::MINE;
     return ActionType::NONE;
+}
+
+// »ñÈ¡½ÚµãÀàĞÍµÄÄ¬ÈÏ²ÎÊı
+inline std::map<std::wstring, std::wstring> GetDefaultParams(BTNodeType type, ConditionType ct, ActionType at)
+{
+    std::map<std::wstring, std::wstring> p;
+    switch (type)
+    {
+    case BTNodeType::PROBABILITY:       p[L"chance"] = L"50"; break;
+    case BTNodeType::DECORATOR_REPEAT:  p[L"count"] = L"3"; break;
+    case BTNodeType::DECORATOR_TIMEOUT: p[L"timeout"] = L"5000"; break;
+    case BTNodeType::DECORATOR_COOLDOWN: p[L"cooldown"] = L"3000"; break;
+    case BTNodeType::CONDITION:
+        switch (ct)
+        {
+        case ConditionType::LOW_HP:           p[L"percent"] = L"50"; break;
+        case ConditionType::LOW_MP:           p[L"percent"] = L"50"; break;
+        case ConditionType::TARGET_DISTANCE:  p[L"min"] = L"0"; p[L"max"] = L"10"; break;
+        case ConditionType::MONSTER_COUNT:    p[L"count"] = L"1"; break;
+        case ConditionType::HP_RANGE:         p[L"min"] = L"0"; p[L"max"] = L"100"; break;
+        default: break;
+        }
+        break;
+    case BTNodeType::ACTION:
+        switch (at)
+        {
+        case ActionType::USE_POTION:     p[L"hpType"] = L"1"; break;
+        case ActionType::USE_ITEM:       p[L"itemName"] = L"»Ø³Ç¾í"; break;
+        case ActionType::CHANGE_ATTACK_MODE: p[L"attackMode"] = L"1"; break;
+        case ActionType::REST:           p[L"duration"] = L"5000"; break;
+        case ActionType::USE_SKILL:      p[L"magicId"] = L"0"; break;
+        case ActionType::SAY:            p[L"message"] = L"Hello"; break;
+        case ActionType::DELAY:          p[L"duration"] = L"1000"; break;
+        case ActionType::SPELL_CAST:     p[L"magicId"] = L"0"; break;
+        case ActionType::DROP_ITEM:      p[L"itemName"] = L"ÎïÆ·"; break;
+        case ActionType::EQUIP_ITEM:     p[L"itemName"] = L"×°±¸"; break;
+        case ActionType::SUMMON_PET:     p[L"petType"] = L"0"; break;
+        default: break;
+        }
+        break;
+    default: break;
+    }
+    return p;
+}
+
+// ·´Ïò£º´Ó½ÚµãÀàĞÍ/Ìõ¼şÀàĞÍ/¶¯×÷ÀàĞÍ»ñÈ¡ XML ±êÇ©Ãû
+inline std::wstring GetTagName(BTNodeType type, ConditionType ctype, ActionType atype)
+{
+    switch (type)
+    {
+    case BTNodeType::SEQUENCE: return L"Sequence";
+    case BTNodeType::SELECTOR: return L"Selector";
+    case BTNodeType::PARALLEL: return L"Parallel";
+    case BTNodeType::RANDOM: return L"Random";
+    case BTNodeType::PROBABILITY: return L"Probability";
+    case BTNodeType::MEM_SEQUENCE: return L"MemSequence";
+    case BTNodeType::MEM_SELECTOR: return L"MemSelector";
+    case BTNodeType::INVERTER: return L"Inverter";
+    case BTNodeType::DECORATOR_REPEAT: return L"DecoratorRepeat";
+    case BTNodeType::DECORATOR_TIMEOUT: return L"DecoratorTimeout";
+    case BTNodeType::DECORATOR_COOLDOWN: return L"DecoratorCooldown";
+    case BTNodeType::SUCCEEDER: return L"Succeeder";
+    case BTNodeType::FAILER: return L"Failer";
+    case BTNodeType::CONDITION:
+        switch (ctype)
+        {
+        case ConditionType::LOW_HP: return L"ConditionLowHP";
+        case ConditionType::LOW_MP: return L"ConditionLowMP";
+        case ConditionType::HAS_TARGET: return L"ConditionHasTarget";
+        case ConditionType::IN_SAFE_AREA: return L"ConditionInSafeArea";
+        case ConditionType::BAG_FULL: return L"ConditionBagFull";
+        case ConditionType::HAS_ITEM: return L"ConditionHasItem";
+        case ConditionType::SKILL_READY: return L"ConditionSkillReady";
+        case ConditionType::IS_DEAD: return L"ConditionIsDead";
+        case ConditionType::TARGET_DISTANCE: return L"ConditionTargetDistance";
+        case ConditionType::MONSTER_COUNT: return L"ConditionMonsterCount";
+        default: return L"Condition";
+        }
+    case BTNodeType::ACTION:
+        switch (atype)
+        {
+        case ActionType::USE_POTION: return L"ActionUsePotion";
+        case ActionType::USE_ITEM: return L"ActionUseItem";
+        case ActionType::CHANGE_ATTACK_MODE: return L"ActionChangeAttackMode";
+        case ActionType::ATTACK: return L"ActionAttack";
+        case ActionType::MOVE_TO_TARGET: return L"ActionMoveToTarget";
+        case ActionType::PATROL: return L"ActionPatrol";
+        case ActionType::PICKUP_ITEM: return L"ActionPickupItem";
+        case ActionType::FLEE: return L"ActionFlee";
+        case ActionType::REST: return L"ActionRest";
+        case ActionType::CHAT: return L"ActionChat";
+        case ActionType::USE_SKILL: return L"ActionUseSkill";
+        case ActionType::SAY: return L"ActionSay";
+        case ActionType::RECALL: return L"ActionRecall";
+        case ActionType::DELAY: return L"ActionDelay";
+        case ActionType::ATTACK_DIR: return L"ActionAttackDir";
+        case ActionType::SPELL_CAST: return L"ActionSpellCast";
+        case ActionType::DROP_ITEM: return L"ActionDropItem";
+        case ActionType::EQUIP_ITEM: return L"ActionEquipItem";
+        case ActionType::SUMMON_PET: return L"ActionSummonPet";
+        case ActionType::FOLLOW: return L"ActionFollow";
+        case ActionType::GROUP: return L"ActionGroup";
+        case ActionType::MINE: return L"ActionMine";
+        default: return L"Action";
+        }
+    }
+    return L"Action";
 }

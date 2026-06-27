@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "CrashHandler.h"
+#include <atomic>
 #include <psapi.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -12,6 +13,11 @@ std::string CrashHandler::m_dumpPath = "..\\异常\\";
 const char* (*CrashHandler::m_additionalInfoCallback)() = nullptr;
 CrashHandler::PreCrashSaveCallback CrashHandler::m_preCrashSaveCallback = nullptr;
 bool CrashHandler::m_initialized = false;
+std::string CrashHandler::m_rtcMessage;
+
+// RTC 错误处理重入保护标志
+// 防止在生成 dump 过程中再次触发 RTC 错误导致无限递归
+static std::atomic<bool> g_rtcHandling{false};
 
 // 线程安全的时间字符串构建
 static VOID BuildTimeStr(char* buf, size_t bufSize)
@@ -111,6 +117,11 @@ static VOID SafePrintExceptionInfo(HANDLE hFile, EXCEPTION_POINTERS* pExceptionI
 		case EXCEPTION_INT_DIVIDE_BY_ZERO: desc = "整数除零"; break;
 		case EXCEPTION_INT_OVERFLOW: desc = "整数溢出"; break;
 		case EXCEPTION_STACK_OVERFLOW: desc = "栈溢出"; break;
+		// 自定义异常码（由 CrashHandler 内部各 Handler 触发）
+		case 0xE0000001: desc = "CRT无效参数"; break;
+		case 0xE0000002: desc = "纯虚函数调用"; break;
+		case 0xE0000003: desc = "abort()调用"; break;
+		case 0xE0000004: desc = "运行时检查失败(RTC)"; break;
 		default: desc = "未知异常"; break;
 	}
 	LogLineFormat(hFile, "异常描述: %s", desc);
@@ -297,6 +308,13 @@ VOID CrashHandler::CreateMiniDump(EXCEPTION_POINTERS* pExceptionInfo)
 			LogLine(hLogFile, "");
 			// 安全打印异常信息
 			SafePrintExceptionInfo(hLogFile, pExceptionInfo);
+			// RTC 错误的详细信息（仅当异常码为 0xE0000004 时输出）
+			if (pExceptionInfo->ExceptionRecord->ExceptionCode == 0xE0000004 && !m_rtcMessage.empty())
+			{
+				LogLine(hLogFile, "========== RTC 详细信息 ==========");
+				LogLine(hLogFile, m_rtcMessage.c_str());
+				LogLine(hLogFile, "");
+			}
 			// 安全打印调用栈
 			__try
 			{
@@ -409,6 +427,52 @@ static VOID AbortHandler(int signal)
 	RaiseException(0xE0000003, EXCEPTION_NONCONTINUABLE, 0, nullptr);
 }
 
+#ifdef _DEBUG
+// ============================================================================
+// RTC (Run-Time Check) 错误拦截
+// ============================================================================
+// RTC 错误（如 ESP 不匹配、栈损坏、变量未初始化等）在 Debug 构建下通过
+// _CrtDbgReport 报告，默认会弹出对话框。此 Hook 在报告时拦截 RTC 错误，
+// 转而调用 CrashHandler::HandleRtcFailure 生成崩溃报告（dump + 日志），
+// 避免 RTC 错误现场丢失。
+//
+// RTC 错误消息特征：以 "Run-Time Check Failure" 开头，例如：
+//   "Run-Time Check Failure #0 - The value of ESP was not properly saved..."
+//   "Run-Time Check Failure #2 - Stack around the variable 'xxx' was corrupted."
+//   "Run-Time Check Failure #3 - The variable 'xxx' is being used without..."
+//   "Run-Time Check Failure #4 - Stack pointer corruption."
+// ============================================================================
+static int __cdecl RtcReportHook(int reportType, char* message, int* returnValue)
+{
+	// 只处理包含 "Run-Time Check Failure" 的报告（RTC 错误特征字符串）
+	if (message == nullptr || strstr(message, "Run-Time Check Failure") == nullptr)
+	{
+		return FALSE; // 非 RTC 错误，交给默认处理流程
+	}
+
+	// 防止重入：生成 dump 过程中可能再次触发 RTC 错误
+	if (g_rtcHandling.exchange(true))
+	{
+		// 已在处理中，直接吞掉避免无限递归
+		*returnValue = 0;
+		return TRUE;
+	}
+
+	printf("\n========== RTC 错误捕获 ==========\n");
+	printf("检测到运行时检查失败, 正在生成崩溃报告...\n");
+	printf("RTC 消息: %s\n", message);
+
+	// 调用 CrashHandler 处理：捕获当前上下文 + 生成 dump + 终止进程
+	// 注意：此时仍在触发 RTC 错误的线程上下文中，RtlCaptureContext 能
+	//       捕获到错乱但真实的寄存器状态（ESP/EIP），供事后分析
+	CrashHandler::HandleRtcFailure(message);
+
+	// 不会到达这里，HandleRtcFailure 会调用 TerminateProcess
+	*returnValue = 0;
+	return TRUE;
+}
+#endif // _DEBUG
+
 VOID CrashHandler::Initialize()
 {
 	if (m_initialized) return;
@@ -434,6 +498,14 @@ VOID CrashHandler::Initialize()
 	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 
+#ifdef _DEBUG
+	// 7. 拦截 RTC (Run-Time Check) 错误，让 RTC 错误也走崩溃报告流程
+	// RTC 错误（如 ESP 不匹配 #0、栈损坏 #2、变量未初始化 #3 等）默认
+	// 弹窗且不生成 dump，导致错误现场丢失。通过 Report Hook 拦截后
+	// 转而调用 HandleRtcFailure 生成 dump，保留寄存器和线程上下文
+	_CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, RtcReportHook);
+#endif
+
 	m_initialized = true;
 }
 
@@ -455,4 +527,58 @@ VOID CrashHandler::SetAdditionalInfoCallback(const char* (*callback)())
 VOID CrashHandler::SetPreCrashSaveCallback(PreCrashSaveCallback callback)
 {
 	m_preCrashSaveCallback = callback;
+}
+
+VOID CrashHandler::HandleRtcFailure(const char* rtcMessage)
+{
+	// 保存 RTC 消息，供 CreateMiniDump 写入日志
+	m_rtcMessage = (rtcMessage != nullptr) ? rtcMessage : "";
+
+	// 捕获当前线程上下文
+	// 此时仍在触发 RTC 错误的线程中，RtlCaptureContext 能捕获到
+	// 错乱但真实的寄存器状态（ESP/EIP），供事后分析
+	CONTEXT ctx;
+	RtlCaptureContext(&ctx);
+
+	// 构造异常记录（自定义异常码 0xE0000004 = RTC 错误）
+	EXCEPTION_RECORD er = {};
+	er.ExceptionCode = 0xE0000004;
+	er.ExceptionFlags = EXCEPTION_NONCONTINUABLE;
+#ifdef _WIN64
+	er.ExceptionAddress = (PVOID)ctx.Rip;
+#else
+	er.ExceptionAddress = (PVOID)ctx.Eip;
+#endif
+
+	EXCEPTION_POINTERS ep;
+	ep.ExceptionRecord = &er;
+	ep.ContextRecord = &ctx;
+
+	printf("\n========== 程序崩溃 (RTC 错误) ==========\n");
+	printf("捕获到运行时检查失败, 正在生成崩溃报告...\n");
+
+	// 先尝试保存数据（行会、沙城、玩家等）
+	if (m_preCrashSaveCallback)
+	{
+		printf("正在尝试保存数据...");
+		__try
+		{
+			m_preCrashSaveCallback();
+			printf("数据保存完成.");
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			printf("数据保存过程中发生二次异常, 已跳过.");
+		}
+	}
+
+	// 生成 MiniDump 和详细日志
+	CreateMiniDump(&ep);
+
+	printf("崩溃报告已生成, 程序即将退出.\n");
+	printf("========================================\n\n");
+
+	// 强制终止进程，避免继续执行导致更严重的损坏
+	// 使用 TerminateProcess 而非 exit()，避免触发 atexit/全局析构导致二次崩溃
+	TerminateProcess(GetCurrentProcess(), 0xE0000004);
 }

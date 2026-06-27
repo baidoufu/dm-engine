@@ -332,22 +332,22 @@ VOID CServer::OnTerminated(BOOL bExcepted)
 
 	// 统一等待阶段：循环Update处理所有响应，最多等待10秒
 	PRINT(STRING_GREEN, "等待数据库确认所有保存操作...\n");
-	DWORD dwWaitStart = timeGetTime(); // 使用系统时间而非帧时间（主线程已停止更新帧时间）
-	while (timeGetTime() - dwWaitStart < 10000)
+	DWORD dwWaitStart = GetSteadyTimeMS(); // 使用系统时间而非帧时间（主线程已停止更新帧时间）
+	while (GetSteadyTimeMS() - dwWaitStart < 10000)
 	{
 		dbConn.Update();
-		Sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 	for (auto* p : players)
 	{
 		PRINT(STRING_GREEN, "%s 角色信息已经保存到数据库\n", p->GetName());
 	}
 	// 最终刷新：确保所有发送缓冲区数据已发出
-	DWORD dwFinalStart = timeGetTime();
-	while (timeGetTime() - dwFinalStart < 2000)
+	DWORD dwFinalStart = GetSteadyTimeMS();
+	while (GetSteadyTimeMS() - dwFinalStart < 2000)
 	{
 		dbConn.Update();
-		Sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 	PRINT(SUCCESS_GREEN, "数据已备份完毕, 共保存 %d 个角色.\n", nSavedCount);
 }

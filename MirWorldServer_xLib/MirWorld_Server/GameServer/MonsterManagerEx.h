@@ -30,11 +30,6 @@ public:
 	CMonsterEx* GetCurrentActiveMonster() { return m_pActiveMonster; }
 	VOID SetCurrentActiveMonster(CMonsterEx* pMonster) { m_pActiveMonster = pMonster; }
 private:
-	//注册ECS组件
-	VOID RegEcs(CMonsterEx* pMon);
-	//注销ECS组件
-	VOID UnregEcs(UINT id);
-private:
 	CMonsterEx* m_pActiveMonster;
 	CMonsterEx* newObject();
 	VOID deleteObject(CMonsterEx* pObject);
