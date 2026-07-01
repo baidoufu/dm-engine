@@ -7,6 +7,76 @@
 #include <algorithm>
 #include <new>
 
+// ==================================================
+//  LockedComponentRef<T> —— 持锁的组件引用包装
+//
+//  用途: 消除 GetFromPool 快速路径的 TOCTOU 竞态。
+//  构造时获取池级 SRLock，析构时释放，保证引用有效期内
+//  组件不会被并发 remove/emplace 破坏。
+//
+//  用法:
+//    auto ref = GetFromPool(m_pool, e);
+//    if (ref) { ref->DoSomething(); }  // 锁持有期间安全
+//    // ref 析构时自动释放锁
+//
+//  注意: 仅支持移动，不支持拷贝。
+// ==================================================
+template<typename T>
+class LockedComponentRef
+{
+public:
+	LockedComponentRef() noexcept : m_lock(nullptr), m_ptr(nullptr) {}
+
+	LockedComponentRef(SRWLOCK& lock, T* ptr) noexcept
+		: m_lock(&lock), m_ptr(ptr)
+	{
+		if (m_ptr)
+			AcquireSRWLockShared(m_lock);
+	}
+
+	~LockedComponentRef()
+	{
+		if (m_ptr && m_lock)
+			ReleaseSRWLockShared(m_lock);
+	}
+
+	// 仅移动
+	LockedComponentRef(LockedComponentRef&& other) noexcept
+		: m_lock(other.m_lock), m_ptr(other.m_ptr)
+	{
+		other.m_ptr = nullptr;  // 转移锁所有权
+	}
+
+	LockedComponentRef& operator=(LockedComponentRef&& other) noexcept
+	{
+		if (this != &other)
+		{
+			if (m_ptr && m_lock)
+				ReleaseSRWLockShared(m_lock);
+			m_lock = other.m_lock;
+			m_ptr  = other.m_ptr;
+			other.m_ptr = nullptr;
+		}
+		return *this;
+	}
+
+	LockedComponentRef(const LockedComponentRef&) = delete;
+	LockedComponentRef& operator=(const LockedComponentRef&) = delete;
+
+	T* operator->() noexcept       { return m_ptr; }
+	T& operator*()  noexcept       { return *m_ptr; }
+	const T* operator->() const noexcept { return m_ptr; }
+	const T& operator*()  const noexcept { return *m_ptr; }
+
+	explicit operator bool() const noexcept { return m_ptr != nullptr; }
+	T* get() noexcept { return m_ptr; }
+	const T* get() const noexcept { return m_ptr; }
+
+private:
+	SRWLOCK* m_lock;
+	T*       m_ptr;
+};
+
 /**
  *  ComponentPool<T> —— 单组件类型的稀疏集存储
  *
@@ -50,14 +120,20 @@ public:
 	size_t capacity() const noexcept { SRLock lock(m_mutex); return dense_.capacity(); }
 	bool   empty()    const noexcept { SRLock lock(m_mutex); return count_ == 0; }
 
+	// ---- 锁访问 (供 LockedComponentRef 等外部同步设施使用) ----
+	SRWLOCK& mutex() const { return m_mutex; }
+
 	// ---- 迭代器 (遍历稠密组件数组) ----
+	//  警告: 这些方法返回原始指针，调用者必须在持有 m_mutex 或全局锁期间使用。
+	//  在锁外使用可能导致 UAF (emplace realloc) 或脏读 (swap-with-last)。
+	//  推荐: 使用 ECSView (需全局锁) 或 LockedComponentRef 包装。
 	iterator       begin()       noexcept { return dense_.data(); }
 	const_iterator begin() const noexcept { return dense_.data(); }
 	iterator       end()         noexcept { return dense_.data() + count_; }
 	const_iterator end()   const noexcept { return dense_.data() + count_; }
 
 	// ---- 原始数据访问 ----
-	//  注意: 这些方法返回原始指针，调用者必须在锁持有期间使用
+	//  警告: 返回原始指针，调用者必须在锁持有期间使用 (同上)。
 	T*       data()     noexcept { return dense_.data(); }
 	const T* data() const noexcept { return dense_.data(); }
 	const entity_t* entities() const noexcept { return entity_.data(); }

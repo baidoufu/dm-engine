@@ -857,9 +857,6 @@
     <ClInclude Include="ECSRegistry.h">
       <Filter>库包相关\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="ECSSystem.h">
-      <Filter>库包相关\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="ECSView.h">
       <Filter>库包相关\ECS</Filter>
     </ClInclude>
@@ -952,21 +949,6 @@
     </ClInclude>
     <ClInclude Include="BotBehaviorDecorator.h">
       <Filter>机器人</Filter>
-    </ClInclude>
-    <ClInclude Include="StatusComponent.h">
-      <Filter>ECS管理\组件公共</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerSystem.h">
-      <Filter>ECS管理\组件公共</Filter>
-    </ClInclude>
-    <ClInclude Include="StatusSystem.h">
-      <Filter>ECS管理\组件公共</Filter>
-    </ClInclude>
-    <ClInclude Include="PotionRecoverSystem.h">
-      <Filter>ECS管理\组件公共</Filter>
-    </ClInclude>
-    <ClInclude Include="PotionRecoverComponent.h">
-      <Filter>ECS管理\组件公共</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

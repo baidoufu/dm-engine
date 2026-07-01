@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#include <intrin.h>
 #include <vector>
 #include "aliveobject.h"
 #include "vmap.h"
@@ -84,6 +83,10 @@ VOID CAliveObject::Clean()
 	SetNoDead(FALSE);
 	SetNoDamage(FALSE);
 	SetSuperHit(FALSE);
+	m_AddHpTimer.Savetime();
+	m_AddMpTimer.Savetime();
+	SetAddHp(0, 0);
+	SetAddMp(0, 0);
 	//m_dwSystemFlag = 0;
 	SetOwner(nullptr);
 	SetHitter(nullptr);
@@ -182,8 +185,7 @@ VOID CAliveObject::Stop()
 	if (m_ActionType != AT_STAND)
 	{
 		SendAroundMsg(GetId(), SM_STOP, 0, 0, 0);
-		if (CanRecvMsg())
-			SendMsg(GetId(), SM_STOP, 0, 0, 0);
+		SendMsg(GetId(), SM_STOP, 0, 0, 0);
 	}
 }
 
@@ -586,8 +588,7 @@ BOOL CAliveObject::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 //42名字改变
 VOID CAliveObject::SendChangeName()
 {
-	if (CanRecvMsg())
-		SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, GetFenghaoType23(), (LPVOID)GetViewName());
+	SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, GetFenghaoType23(), (LPVOID)GetViewName());
 	if (CSandCity::GetInstance()->IsWarStarted())
 	{
 		if (m_pMap == nullptr)return;
@@ -636,17 +637,134 @@ BOOL CAliveObject::CanDoAction(actiontype action)
 
 VOID CAliveObject::Update()
 {
-	CAliveObject* pHitter = GetHitter(); // 攻击自己的对象
-	if (pHitter != nullptr)
+	//分帧更新
+	const DWORD dwUpdateKey = GetUpdateKey();
+	DWORD dwkey = (dwUpdateKey % 2);
+	switch (dwkey)
 	{
-		if (pHitter->IsDeath())
-			SetHitter(nullptr);
-		else if (pHitter->GetOwner() == this)
-			SetHitter(nullptr);
-		else if (!m_refObjHitter.IsValid())
-			SetHitter(nullptr);
-		else if (pHitter->GetMap() != m_pMap)
-			SetHitter(nullptr);
+	case 0: // 系统标志、状态标志时间计算
+	{
+		BOOL fStatusChanged = FALSE;
+		for (int i = 0; i < 32; i++)
+		{
+			if (m_Status.IsTimeOut(i)) // 状态的时间计算
+			{
+				DWORD dwParam = m_Status.GetParam(i);
+				if (m_Status.ClrStatus(i))
+				{
+					OnStatusClr(i, dwParam);
+					fStatusChanged = TRUE;
+				}
+			}
+			if (m_SystemFlag.IsTimeOut(i))//系统标识时间计算
+			{
+				DWORD dwParam = m_SystemFlag.GetParam(i);
+				m_SystemFlag.ClrStatus(i);
+				OnSystemFlagCleared(i, dwParam);
+			}
+		}
+		if (fStatusChanged) SendStatusChanged(); // 发送状态改变
+
+		CAliveObject* pHitter = GetHitter(); // 攻击自己的对象
+		if (pHitter != nullptr)
+		{
+			if (pHitter->IsDeath())
+				SetHitter(nullptr);
+			else if (pHitter->GetOwner() == this)
+				SetHitter(nullptr);
+			else if (!m_refObjHitter.IsValid())
+				SetHitter(nullptr);
+			else if (pHitter->GetMap() != m_pMap)
+				SetHitter(nullptr);
+		}
+	}
+	break;
+	case 1: // 生命值、魔法值更新
+	{
+		if (!IsDeath())
+		{
+			BOOL bSendHpChanged = FALSE;
+			BOOL bSendMpChanged = FALSE;
+			int nHp = 0;
+			if (GetAutoRecoverHptime() > 0 && CanRecover()) // 自动恢复血量
+			{
+				nHp = GetAutoRecoverHp();
+				if (GetPropValue(PI_CURHP) < GetPropValue(PI_MAXHP) || nHp < 0)
+				{
+					const DWORD dwHpInterval = GetAutoRecoverHptime();
+					const BOOL bExpired = CheckTimer(TimerType::TMR_HP_RECOVER, dwHpInterval);
+					if (bExpired)
+					{
+						if (nHp != 0)
+						{
+							if (nHp > 0)
+								AddPropValue(PI_CURHP, nHp);
+							else
+								DecPropValue(PI_CURHP, -nHp);
+							bSendHpChanged = TRUE;
+							ResetTimer(TimerType::TMR_HP_RECOVER);
+						}
+					}
+				}
+			}
+			if (GetAutoRecoverMptime() > 0 && CanRecover()) // 自动恢复蓝量
+			{
+				int nMp = GetAutoRecoverMp();
+				if (GetPropValue(PI_CURMP) < GetPropValue(PI_MAXMP) || nMp < 0)
+				{
+					const DWORD dwMpInterval = GetAutoRecoverMptime();
+					const BOOL bExpired = CheckTimer(TimerType::TMR_MP_RECOVER, dwMpInterval);
+					if (bExpired)
+					{
+						if (nMp != 0)
+						{
+							if (nMp > 0)
+								AddPropValue(PI_CURMP, nMp);
+							else
+								DecPropValue(PI_CURMP, -nMp);
+							bSendMpChanged = TRUE;
+							ResetTimer(TimerType::TMR_MP_RECOVER);
+						}
+					}
+				}
+			}
+			if (m_AddHpTimer.IsTimeOut(500)) // 吃药增加HP
+			{
+				if (m_dwAddHp > 0)
+				{
+					if (GetPropValue(PI_CURHP) < GetPropValue(PI_MAXHP))
+					{
+						bSendHpChanged = TRUE;
+						nHp = m_dwAddHp > m_dwAddHpSpeed ? m_dwAddHpSpeed : m_dwAddHp;
+						AddPropValue(PI_CURHP, nHp);
+						m_dwAddHp -= nHp;
+					}
+					else
+						m_dwAddHp = 0;
+				}
+				m_AddHpTimer.Savetime();
+			}
+			if (m_AddMpTimer.IsTimeOut(500)) // 吃药增加MP
+			{
+				if (m_dwAddMp > 0)
+				{
+					if (GetPropValue(PI_CURMP) < GetPropValue(PI_MAXMP))
+					{
+						bSendMpChanged = TRUE;
+						DWORD dwAddMp = m_dwAddMp > m_dwAddMpSpeed ? m_dwAddMpSpeed : m_dwAddMp;
+						AddPropValue(PI_CURMP, dwAddMp);
+						m_dwAddMp -= dwAddMp;
+					}
+					else
+						m_dwAddMp = 0;
+				}
+				m_AddMpTimer.Savetime();
+			}
+			if (bSendHpChanged)SendHpMpChanged(-nHp); // 发53封包
+			if (bSendMpChanged)SendHpMpChanged();
+		}
+	}
+	break;
 	}
 
 	if (m_ActionType != AT_STAND && m_dwActionCompleteTime != 0xffffffff)
@@ -1225,8 +1343,7 @@ VOID CAliveObject::ToDeath(DWORD dwKiller)
 		m_bDead = TRUE;
 		DWORD dwArray[2] = { GetFeather(), GetStatus() };
 		SendAroundMsg(GetId(), SM_NOWDEATH, getX(), getY(), GetDirection(), (LPVOID)dwArray, sizeof(dwArray));
-		if (CanRecvMsg())
-			SendMsg(GetId(), SM_NOWDEATH, getX(), getY(), GetDirection(), (LPVOID)dwArray, sizeof(dwArray));
+		SendMsg(GetId(), SM_NOWDEATH, getX(), getY(), GetDirection(), (LPVOID)dwArray, sizeof(dwArray));
 		OnDeath(dwKiller);
 	}
 }
@@ -1594,12 +1711,9 @@ BOOL CAliveObject::FlyTo(CLogicMap* pMap, int x, int y, BOOL bShowEffect)
 	CLogicMap* pOldMap = m_pMap;
 	if (!pOldMap->RemoveObject(this))//如果删除对象失败
 		return FALSE;
-	BOOL bSendMsg = CanRecvMsg();//能否接收信息
-	if (bSendMsg)
-	{
-		SendMsg(0, SM_CLEAROBJECTS, 0, 0, 0);
-		SendMsg(GetId(), SM_CHANGEMAP, x, y, 0, (LPVOID)pMap->GetName());
-	}
+
+	SendMsg(0, SM_CLEAROBJECTS, 0, 0, 0);
+	SendMsg(GetId(), SM_CHANGEMAP, x, y, 0, (LPVOID)pMap->GetName());
 
 	int ox = getX();
 	int oy = getY();
@@ -1612,7 +1726,7 @@ BOOL CAliveObject::FlyTo(CLogicMap* pMap, int x, int y, BOOL bShowEffect)
 		return FALSE;
 	}
 	SetAction(AT_FLY, GetDirection(), x, y, 200);
-	if (bSendMsg)
+	if (CanRecvMsg())
 	{
 		if (bShowEffect)
 		{
@@ -1639,8 +1753,7 @@ VOID CAliveObject::SendStatusChanged() //改变状态
 	WORD w1 = dwFlag & 0xffff;
 	WORD w2 = (dwFlag & 0xffff0000) >> 16;
 	SendAroundMsg(GetId(), 0x291, w1, w2, wSpeed);
-	if (CanRecvMsg())
-		SendMsg(GetId(), 0x291, w1, w2, wSpeed);
+	SendMsg(GetId(), 0x291, w1, w2, wSpeed);
 }
 
 BOOL CAliveObject::Damage(DWORD dwHitter, int value)

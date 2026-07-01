@@ -268,7 +268,6 @@
     <ClInclude Include="ECS.h" />
     <ClInclude Include="ECSComponentPool.h" />
     <ClInclude Include="ECSDefines.h" />
-    <ClInclude Include="ECSSystem.h" />
     <ClInclude Include="FenghaoComponent.h" />
     <ClInclude Include="MarketComponent.h" />
     <ClInclude Include="MiscStateComponent.h" />
@@ -283,18 +282,13 @@
     <ClInclude Include="ShieldStateComponent.h" />
     <ClInclude Include="SocialComponent.h" />
     <ClInclude Include="SpecialEquipComponent.h" />
-    <ClInclude Include="StatusComponent.h" />
     <ClInclude Include="StaminaComponent.h" />
-    <ClInclude Include="PotionRecoverComponent.h" />
-    <ClInclude Include="PotionRecoverSystem.h" />
-    <ClInclude Include="StatusSystem.h" />
     <ClInclude Include="TaskComponent.h" />
     <ClInclude Include="TimerComponent.h" />
     <ClInclude Include="ECSView.h" />
     <ClInclude Include="ECSWorld.h" />
     <ClInclude Include="AliveComponentsManager.h" />
     <ClInclude Include="PlayerComponentManager.h" />
-    <ClInclude Include="TimerSystem.h" />
     <ClInclude Include="MonsterComponentManager.h" />
     <ClInclude Include="NpcComponentManager.h" />
     <ClInclude Include="gsClientMsgTable.h" />

@@ -23,6 +23,11 @@
 class CHumanPlayer;
 /// <summary>
 /// 独立管理 CHumanPlayer 使用的组件
+///
+/// 线程安全:
+///   GetXxx 方法返回 T* 裸指针, 池级 SRLock 在返回时释放。
+///   调用者必须在持有全局 SRLock 或确保实体不被并发销毁的前提下使用。
+///   推荐: 对于跨线程访问, 使用 LockedComponentRef<T> 包装 (见 ECSComponentPool.h)。
 /// </summary>
 class PlayerComponentManager : public xSingletonClass<PlayerComponentManager>
 {
@@ -31,7 +36,7 @@ public:
 	~PlayerComponentManager() = default;
 
 	// 初始化池指针缓存 (必须在所有组件类型注册后、首帧 Update 前调用一次)
-	// 之后所有 GetXxx 方法走池级锁, 不再获取全局 m_mutex
+	// 线程安全: 应在单线程启动阶段调用, 或调用者持有全局 SWLock。
 	VOID InitPoolCache();
 
 	VOID CreatePlayerComponents(CHumanPlayer* pPlayer);
@@ -88,10 +93,23 @@ private:
 	ComponentPool<RecalcCacheComponent>*  m_recalcCachePool = nullptr;
 	ComponentPool<UpgradeItemComponent>*  m_upgradeItemPool = nullptr;
 
-	// 辅助: 从 entity 获取组件 (无全局锁, 直接走池级 SRLock)
+	// 辅助: 从 entity 获取组件 (池级 SRLock, 无全局锁)
+	// 注意: 返回 T* 后锁释放, 指针仅在调用者持有外部锁（全局 SRLock）或
+	//        确保实体不被并发销毁的前提下有效。
+	// 跨线程安全访问请用 WithComponentLocked 模式。
 	template<typename T>
 	T* GetFromPool(ComponentPool<T>* pool, entity_t e)
 	{
 		return pool ? pool->get(e) : nullptr;
+	}
+
+	// 持锁访问: 在整个 lambda 执行期间持有池级 SRLock, 消除 TOCTOU。
+	template<typename T, typename Func>
+	decltype(auto) WithComponentLocked(ComponentPool<T>* pool, entity_t e, Func&& func)
+	{
+		if (!pool) return func(static_cast<T*>(nullptr));
+		SRLock lock(pool->mutex());
+		T* ptr = pool->get_nolock(e);
+		return func(ptr);
 	}
 };

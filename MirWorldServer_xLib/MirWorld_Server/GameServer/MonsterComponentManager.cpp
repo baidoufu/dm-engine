@@ -3,6 +3,10 @@
 #include "AliveComponentsManager.h"
 #include "MonsterEx.h"
 
+// 池缓存一次性初始化 (线程安全)
+static std::once_flag s_monsterPoolCacheInitFlag;
+
+// ========== 初始化池指针缓存 ==========
 VOID MonsterComponentManager::InitPoolCache()
 {
 	auto& world = ECSWorld::GetInstance()->GetWorld();
@@ -34,7 +38,6 @@ VOID MonsterComponentManager::CreateMonsterComponents(CMonsterEx* pObj)
 			st.wCurMp = 0;
 		}
 
-		// TimerComponent 已由 CreateAliveComponents 创建
 		if (!world.has<TimerComponent>(e))
 		{
 			auto& mt = world.emplace<TimerComponent>(e);
@@ -45,7 +48,7 @@ VOID MonsterComponentManager::CreateMonsterComponents(CMonsterEx* pObj)
 
 	if (!m_bPoolCacheInited)
 	{
-		InitPoolCache();
+		std::call_once(s_monsterPoolCacheInitFlag, [this]() { InitPoolCache(); });
 		m_bPoolCacheInited = TRUE;
 	}
 }
@@ -72,6 +75,9 @@ VOID MonsterComponentManager::EnsurePetComponent(CMonsterEx* pObj)
 		world.emplace<PetComponent>(e);
 }
 
+// ========== 怪物专属定时器 ==========
+// 与 AliveComponentsManager::CheckAliveTimer 模式一致
+// 双层锁: SRLock 快速路径 + SWLock 冷路径
 BOOL MonsterComponentManager::CheckMonsterTimer(entity_t e, TimerType type, DWORD intervalMs)
 {
 	const int idx = TimerTypeToIdx(type);
@@ -80,17 +86,15 @@ BOOL MonsterComponentManager::CheckMonsterTimer(entity_t e, TimerType type, DWOR
 	auto& world = ECSWorld::GetInstance()->GetWorld();
 	{
 		SRLock lock(world.m_mutex);
-		auto* tc = world.get<TimerComponent>(e);
+		auto* tc = world.get_nolock<TimerComponent>(e);
 		if (!tc) return FALSE;
-		if (InterlockedAnd((volatile LONG*)&tc->firedMask, ~(1u << idx)) & (1u << idx))
-			return TRUE;
 		int now = CFrameTime::GetFrameTime();
 		if (GetTimeToTime(tc->lastTickMs[idx], now) < (int)intervalMs)
 			return FALSE;
 	}
 	{
 		SWLock lock(world.m_mutex);
-		auto* tc = world.get<TimerComponent>(e);
+		auto* tc = world.get_nolock<TimerComponent>(e);
 		if (!tc) return FALSE;
 		int now = CFrameTime::GetFrameTime();
 		if (GetTimeToTime(tc->lastTickMs[idx], now) >= (int)intervalMs)
@@ -110,7 +114,7 @@ VOID MonsterComponentManager::ResetMonsterTimer(entity_t e, TimerType type)
 	auto& world = ECSWorld::GetInstance()->GetWorld();
 	SWLock lock(world.m_mutex);
 
-	auto* tc = world.get<TimerComponent>(e);
+	auto* tc = world.get_nolock<TimerComponent>(e);
 	if (tc) tc->lastTickMs[idx] = CFrameTime::GetFrameTime();
 }
 

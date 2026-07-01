@@ -21,7 +21,7 @@ public:
 	// 宠物组件延迟创建（首次设置主人时调用，幂等）
 	VOID EnsurePetComponent(CMonsterEx* pObj);
 
-	// 怪物专属定时器（通过统一定时器组件 TimerComponent 管理）
+	// 怪物专属定时器（管理 TimerComponent 怪物槽位）
 	BOOL  CheckMonsterTimer(entity_t e, TimerType type, DWORD intervalMs);
 	VOID  ResetMonsterTimer(entity_t e, TimerType type);
 

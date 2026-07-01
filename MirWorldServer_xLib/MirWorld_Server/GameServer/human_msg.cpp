@@ -106,7 +106,6 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		}
 		else
 			info.hp = 0;
-		info.dwFlag[1] = GetPkValue();
 		length = EncodeMsg((char*)packet.getfreebuf(), 0, DM_PUTCHARDBINFO, 0, 0, 0, &info, sizeof(info));
 		packet.addsize(length);
 	}

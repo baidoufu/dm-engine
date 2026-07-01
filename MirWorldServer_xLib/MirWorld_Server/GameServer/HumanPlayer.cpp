@@ -489,6 +489,7 @@ BOOL CHumanPlayer::GetDBInfo(CHARDBINFO& info)
 	info.y = m_wY;
 	info.mapid = m_Mapid;
 	info.dir = m_Direction;
+	info.dwFlag[1] = GetPkValue(); // PK值
 	return TRUE;
 }
 
@@ -1525,6 +1526,94 @@ VOID CHumanPlayer::Update()
 	{
 	case 0:
 	{
+		if (_justPk())// 检测PK
+		{
+			if (CheckTimer(TimerType::TMR_JUST_PK, CGameWorld::GetInstance()->GetVar(EVI_GRAYNAMETIME) * 1000))
+			{
+				_justPk() = FALSE;
+				SendChangeName();
+			}
+		}
+		if (_pkValue() > 0) // PK值大于0
+		{
+			if (CheckTimer(TimerType::TMR_PK_POINT, CGameWorld::GetInstance()->GetVar(EVI_ONEPKPOINTTIME) * 1000))
+			{
+				BYTE btColor = GetNameColor(this);
+				_pkValue()--;
+				ResetTimer(TimerType::TMR_PK_POINT);
+				if (btColor != GetNameColor(this))
+					SendChangeName();
+			}
+		}
+		// 6分钟检查
+		if (m_Humandesc.dbinfo.wLevel >= 7 && CheckTimer(TimerType::TMR_STAMINA, 6 * 60 * 1000))
+		{
+			auto* sc = PlayerComponentManager::GetInstance()->GetStamina(this);
+			if (sc)
+			{
+				int expFactor = (m_pMap != nullptr) ? (int)ceilf(m_pMap->GetExpFactor()) : 1;
+				if (expFactor > 1)
+					sc->wStamina += expFactor;
+				else
+					sc->wStamina++;
+				if (sc->wStamina <= sc->wMaxStamina)
+				{
+					SendJingLiZhi(sc->wStamina);
+					UpdateProp();
+				}
+				else
+					sc->wStamina = sc->wMaxStamina;
+			}
+			ResetTimer(TimerType::TMR_STAMINA);
+		}
+		// 30分钟保存数据 —— 按playerId错开存档时间
+		// 偏移 = (playerId % 30) * 10 秒，分成 30 个时间片，避免所有玩家同时冲击DB
+		// 每次保存后撤回偏移，保证后续间隔统一为固定30分钟
+		DWORD dwSaveInterval = CGameWorld::GetInstance()->GetVar(EVI_CHARINFOBACKUPTIME) * 60 * 1000;
+		DWORD dwSaveOffset = (GetId() % 30) * 10 * 1000;
+		if (CheckTimer(TimerType::TMR_DB_SAVE, dwSaveInterval + dwSaveOffset))
+		{
+			if (CGameWorld::GetInstance()->CanSaveToDB())
+			{
+				CGameWorld::GetInstance()->UpdateDBUpdateTimer();
+				ResetTimer(TimerType::TMR_DB_SAVE);
+				// 对应原 m_DBTimer.SetSavedTime(m_DBTimer.GetSavedTime() - dwSaveOffset)
+				OffsetTimer(TimerType::TMR_DB_SAVE, dwSaveOffset);
+				UpdateToDB();
+			}
+		}
+		// 1秒检查
+		if (CheckTimer(TimerType::TMR_GAME_TIME, 1000))
+		{
+			ResetTimer(TimerType::TMR_GAME_TIME);
+			if (m_Humandesc.dbinfo.nGameTime > -1) // 时长区-游戏时间计算
+			{
+				if (m_Humandesc.dbinfo.nGameTime != 0)
+				{
+					m_Humandesc.dbinfo.nGameTime--;
+					if (m_Humandesc.dbinfo.nGameTime == 0)
+						CSystemScript::GetInstance()->Execute(GetScriptTarget(), "游戏时长.TimeOver", FALSE);
+				}
+			}
+			
+			if (_isYuanQiFull() == FALSE && _yuanQi() < 2000)
+			{
+				_yuanQi()++;
+				SendMsg(GetId(), 0x9611, _yuanQi(), 2000, 0);
+				if (_yuanQi() >= 2000)
+					_isYuanQiFull() = TRUE;
+			}
+		}
+		// 60秒检查
+		if (CheckTimer(TimerType::TMR_FENGHAO, 60*1000))
+		{
+			ResetTimer(TimerType::TMR_FENGHAO);
+			CheckFengHaoTimeOut();
+		}
+	}
+	break;
+	case 1:
+	{
 		if (this->IsSpecialEquipmentFunctionOn(SEF_CLOAK))// 检测隐身
 		{
 			if (!IsStatusSet(SI_CLOAK))
@@ -1532,6 +1621,11 @@ VOID CHumanPlayer::Update()
 				if (CanDoAction(AT_ATTACK))
 					SetStatus(SI_CLOAK, 0, 0xffffffff);
 			}
+		}
+		if (m_pAddToGuildRequester != nullptr) // 请求加入行会人
+		{
+			if (CheckTimer(TimerType::TMR_ADD_TO_GUILD, 60 * 1000))
+				ReplyAddToGuildRequest(FALSE);
 		}
 		// 检测烈火剑法、雷霆剑
 		if (m_pTimeOutDeActiveMagic != nullptr && (m_pTimeOutDeActiveMagic->dwFlag & USERMAGICFLAG_ACTIVED))
@@ -1551,10 +1645,6 @@ VOID CHumanPlayer::Update()
 				}
 			}
 		}
-	}
-	break;
-	case 1:
-	{
 		if (m_pMap) // 检测进入地图
 		{
 			DWORD dwParam = 0;
@@ -1867,7 +1957,6 @@ VOID CHumanPlayer::UpdateToDB()
 		}
 		else
 			info.hp = 0;
-		info.dwFlag[1] = GetPkValue();
 		pObj->SendPutDbInfo(GetId(), m_pClientObj->GetKey(), info);
 	}
 	if (IsSystemFlagSeted(SF_COMMUNITYLOADED))

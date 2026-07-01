@@ -8,8 +8,7 @@
  *
  *  职责:
  *    1. 持有唯一的 ECSRegistry, 供所有 System 共享访问。
- *    2. 维护 ownerId → entity_t 双向映射表, 实现「一个游戏对象 = 一个 ECS 实体」。
- *    3. 提供 GetOwnerId(entity_t) 反向查找, 供 ECS System 桥接回调 OOP 对象。
+ *    2. 维护 ownerId → entity_t 映射表, 实现「一个游戏对象 = 一个 ECS 实体」。
  *
  *  线程安全:
  *    本类方法自身不加锁。m_entityMap 与 m_world 的实体状态共用同一把锁
@@ -57,7 +56,6 @@ public:
 		if (e == INVALID_ENTITY)
 			return INVALID_ENTITY;
 		m_entityMap[ownerId] = e;
-		m_entityToOwner[e] = ownerId;  // 反向映射: System 回调 OOP 对象时使用
 		return e;
 	}
 
@@ -83,10 +81,8 @@ public:
 		auto it = m_entityMap.find(ownerId);
 		if (it == m_entityMap.end())
 			return;
-		entity_t e = it->second;
-		if (m_world.valid(e))
-			m_world.destroy(e);
-		m_entityToOwner.erase(e);
+		if (m_world.valid(it->second))
+			m_world.destroy(it->second);
 		m_entityMap.erase(it);
 	}
 
@@ -99,20 +95,7 @@ public:
 		return m_entityMap.find(ownerId) != m_entityMap.end();
 	}
 
-	/**
-	 *  反向查找: entity_t → ownerId
-	 *  供 ECS System 使用, 通过实体句柄找到对应的游戏对象 ID。
-	 *  不存在时返回 0。
-	 *  锁要求: 调用者必须持 m_world.m_mutex 共享锁 (SRLock) 或独占锁 (SWLock)
-	 */
-	UINT GetOwnerId(entity_t e)
-	{
-		auto it = m_entityToOwner.find(e);
-		return (it != m_entityToOwner.end()) ? it->second : 0;
-	}
-
 private:
 	ECSRegistry m_world;
-	std::unordered_map<UINT, entity_t> m_entityMap;      // ownerId → entity_t
-	std::unordered_map<entity_t, UINT> m_entityToOwner;  // entity_t → ownerId (反向, 供 System 桥接)
+	std::unordered_map<UINT, entity_t> m_entityMap;
 };

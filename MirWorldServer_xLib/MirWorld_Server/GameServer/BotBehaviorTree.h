@@ -130,10 +130,10 @@ public:
 
 private:
 	// 解析XML节点，递归构建行为树
-	CBTNode* ParseNode(class TiXmlElement* pElement);
+	std::unique_ptr<CBTNode> ParseNode(class TiXmlElement* pElement);
 
 	// 根据类型名称创建节点
-	CBTNode* CreateNodeByTypeName(const char* pszType);
+	std::unique_ptr<CBTNode> CreateNodeByTypeName(const char* pszType);
 
 	std::unique_ptr<CBTNode> m_rootNode;  // 根节点
 	std::string m_szName;                 // 行为树名称

@@ -21,8 +21,6 @@
 #include "BossTJ.h"
 #include "PlayerComponentManager.h"
 #include "AliveComponentsManager.h"
-#include "ECSSystem.h"
-#include "TimerSystem.h"
 #include "TimeAchieve.h"
 #include "GameStage.h"
 #include "guildex.h"
@@ -40,8 +38,6 @@
 #include "sandcity.h"
 #include "scriptnpc.h"
 #include "timesystem.h"
-#include "StatusSystem.h"
-#include "PotionRecoverSystem.h"
 #include "systemscript.h"
 #include "topmanager.h"
 #include ".\specialequipmentmanager.h"
@@ -604,12 +600,6 @@ BOOL CGameWorld::Init()
 	CBotManager::GetInstance()->CreateBotsFromConfig(".\\Data\\Bot\\BotConfig.csv");
 
 	InitThreadPool(); // 初始化工作线程池
-
-	// 注册 ECS 系统
-	SystemRunner::GetInstance()->Register(std::make_unique<TimerSystem>());
-	SystemRunner::GetInstance()->Register(std::make_unique<StatusSystem>());
-	SystemRunner::GetInstance()->Register(std::make_unique<PotionRecoverSystem>());
-
 	return TRUE;
 }
 
@@ -733,13 +723,6 @@ VOID CGameWorld::Update()
 {
 	//分帧更新
 	DWORD dwkey = (m_dwUpdateKey % 10);
-	// 统一定时器批量预计算 (单次 ecs_view<TimerComponent> 扫描全部 23 槽)
-	AliveComponentsManager::GetInstance()->BatchPrecomputeTimers(CFrameTime::GetFrameTime());
-	// 状态过期批量预计算 (ecs_view<StatusComponent> 扫描, 预填 statusExpiredMask)
-	AliveComponentsManager::GetInstance()->BatchPrecomputeStatusExpire(CFrameTime::GetFrameTime());
-	// ECS System 批量处理 (替代 per-entity 虚函数调用, SoA 缓存友好)
-	SystemRunner::GetInstance()->ExecuteAll(CFrameTime::GetFrameTime());
-
 	switch (dwkey)
 	{
 	case 0: case 4:

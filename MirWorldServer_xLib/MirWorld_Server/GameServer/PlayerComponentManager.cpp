@@ -2,11 +2,18 @@
 #include "PlayerComponentManager.h"
 #include "HumanPlayer.h"
 #include "AliveComponentsManager.h"
+#include "GameWorld.h"
 
+// 池缓存一次性初始化 (线程安全)
+static std::once_flag s_poolCacheInitFlag;
+
+// ========== 初始化池指针缓存 ==========
+// 在所有组件类型注册后调用一次 (CreatePlayerComponents 首次调用时自动触发)
+// 使用 std::call_once 保证多线程下仅执行一次。
 VOID PlayerComponentManager::InitPoolCache()
 {
 	auto& world = ECSWorld::GetInstance()->GetWorld();
-	SWLock lock(world.m_mutex);
+	SWLock lock(world.m_mutex); // 确保 pools_ vector 稳定时获取所有指针
 
 	m_rateLimitPool    = world.get_pool<RateLimitComponent>();
 	m_shieldStatePool  = world.get_pool<ShieldStateComponent>();
@@ -46,15 +53,12 @@ VOID PlayerComponentManager::CreatePlayerComponents(CHumanPlayer* pPlayer)
 		// 缓存 ECS 实体句柄到 OOP 对象, 后续热路径绕过 map 查找
 		pPlayer->SetECSEntity(e);
 
-		// TimerComponent 已由 CreateAliveComponents 创建
-		if (!world.has<TimerComponent>(e))
-		{
-			int now = CFrameTime::GetFrameTime();
-			auto& pt = world.emplace<TimerComponent>(e);
-			pt.lastTickMs.fill(now);
-			pt.ownerId = id;
-		}
+		if (world.has<RateLimitComponent>(e)) return;
 
+		int now = CFrameTime::GetFrameTime();
+
+		auto& pt = world.emplace<TimerComponent>(e);
+		pt.lastTickMs.fill(now);
 		// 添加相关组件
 		world.emplace<RateLimitComponent>(e);
 		world.emplace<ShieldStateComponent>(e);
@@ -75,13 +79,8 @@ VOID PlayerComponentManager::CreatePlayerComponents(CHumanPlayer* pPlayer)
 		world.emplace<UpgradeItemComponent>(e);
 	}
 
-	// 首次创建时缓存所有池指针 (后续 GetXxx 不再需要全局锁)
-	static bool s_poolCacheInited = false;
-	if (!s_poolCacheInited)
-	{
-		InitPoolCache();
-		s_poolCacheInited = true;
-	}
+	// 线程安全的一次性池缓存初始化
+	std::call_once(s_poolCacheInitFlag, [this]() { InitPoolCache(); });
 }
 
 VOID PlayerComponentManager::DestroyPlayerComponents(UINT ownerId)
@@ -98,18 +97,17 @@ BOOL PlayerComponentManager::CheckPlayerTimer(entity_t e, TimerType type, DWORD 
 	if (idx < 0 || e == INVALID_ENTITY) return FALSE;
 
 	auto& world = ECSWorld::GetInstance()->GetWorld();
-	// 路径 0 (超快路径): 批量预计算已置位 firedMask → 零锁返回
+
+	// 共享锁读取: 检查定时器是否到期
 	{
 		SRLock lock(world.m_mutex);
 		auto* tc = world.get_nolock<TimerComponent>(e);
 		if (!tc) return FALSE;
-		if (InterlockedAnd((volatile LONG*)&tc->firedMask, ~(1u << idx)) & (1u << idx))
-			return TRUE;
 		int now = CFrameTime::GetFrameTime();
 		if (GetTimeToTime(tc->lastTickMs[idx], now) < (int)intervalMs)
 			return FALSE;
 	}
-	// 冷路径: 独占锁写入
+	// 到期: 升级为独占锁写入新时间戳
 	{
 		SWLock lock(world.m_mutex);
 		auto* tc = world.get_nolock<TimerComponent>(e);
@@ -179,7 +177,7 @@ RateLimitComponent* PlayerComponentManager::GetRateLimit(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_rateLimitPool, e);
+	return GetFromPool(m_rateLimitPool, e);  // 池级 SRLock, 无全局锁
 }
 
 BOOL PlayerComponentManager::TryRateLimit(CHumanPlayer* pPlayer, RateLimitComponent::Action act)
@@ -202,14 +200,14 @@ ShieldStateComponent* PlayerComponentManager::GetShieldState(CHumanPlayer* pPlay
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_shieldStatePool, e);
+	return GetFromPool(m_shieldStatePool, e);  // 池级 SRLock, 无全局锁
 }
 
 SpecialEquipComponent* PlayerComponentManager::GetSpecialEquip(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_specialEquipPool, e);
+	return GetFromPool(m_specialEquipPool, e);  // 池级 SRLock, 无全局锁
 }
 
 DWORD PlayerComponentManager::GetSpecialEquipFlag(CHumanPlayer* pPlayer, int func)
@@ -222,96 +220,96 @@ StaminaComponent* PlayerComponentManager::GetStamina(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_staminaPool, e);
+	return GetFromPool(m_staminaPool, e);  // 池级 SRLock, 无全局锁
 }
 
 TaskComponent* PlayerComponentManager::GetTask(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_taskPool, e);
+	return GetFromPool(m_taskPool, e);  // 池级 SRLock, 无全局锁
 }
 
 FenghaoComponent* PlayerComponentManager::GetFenghao(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_fenghaoPool, e);
+	return GetFromPool(m_fenghaoPool, e);  // 池级 SRLock, 无全局锁
 }
 
 AchievementComponent* PlayerComponentManager::GetAchievement(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_achievementPool, e);
+	return GetFromPool(m_achievementPool, e);  // 池级 SRLock, 无全局锁
 }
 
 SocialComponent* PlayerComponentManager::GetSocial(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_socialPool, e);
+	return GetFromPool(m_socialPool, e);  // 池级 SRLock, 无全局锁
 }
 
 ChatComponent* PlayerComponentManager::GetChat(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_chatPool, e);
+	return GetFromPool(m_chatPool, e);  // 池级 SRLock, 无全局锁
 }
 
 PkComponent* PlayerComponentManager::GetPk(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_pkPool, e);
+	return GetFromPool(m_pkPool, e);  // 池级 SRLock, 无全局锁
 }
 
 MarketComponent* PlayerComponentManager::GetMarket(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_marketPool, e);
+	return GetFromPool(m_marketPool, e);  // 池级 SRLock, 无全局锁
 }
 
 TitleComponent* PlayerComponentManager::GetTitle(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_titlePool, e);
+	return GetFromPool(m_titlePool, e);  // 池级 SRLock, 无全局锁
 }
 
 ScriptVarComponent* PlayerComponentManager::GetScriptVar(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_scriptVarPool, e);
+	return GetFromPool(m_scriptVarPool, e);  // 池级 SRLock, 无全局锁
 }
 
 MiscStateComponent* PlayerComponentManager::GetMiscState(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_miscStatePool, e);
+	return GetFromPool(m_miscStatePool, e);  // 池级 SRLock, 无全局锁
 }
 
 ZhenBaoComponent* PlayerComponentManager::GetZhenBao(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_zhenBaoPool, e);
+	return GetFromPool(m_zhenBaoPool, e);  // 池级 SRLock, 无全局锁
 }
 
 RecalcCacheComponent* PlayerComponentManager::GetRecalcCache(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_recalcCachePool, e);
+	return GetFromPool(m_recalcCachePool, e);  // 池级 SRLock, 无全局锁
 }
 
 UpgradeItemComponent* PlayerComponentManager::GetUpgradeItem(CHumanPlayer* pPlayer)
 {
 	entity_t e = pPlayer->GetECSEntity();
 	if (e == INVALID_ENTITY) return nullptr;
-	return GetFromPool(m_upgradeItemPool, e);
+	return GetFromPool(m_upgradeItemPool, e);  // 池级 SRLock, 无全局锁
 }

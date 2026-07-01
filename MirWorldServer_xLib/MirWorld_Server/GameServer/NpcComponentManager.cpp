@@ -3,6 +3,9 @@
 #include "AliveComponentsManager.h"
 #include "ScriptNpc.h"
 
+// 池缓存一次性初始化 (线程安全)
+static std::once_flag s_npcPoolCacheInitFlag;
+
 // ========== 初始化池指针缓存 ==========
 VOID NpcComponentManager::InitPoolCache()
 {
@@ -20,7 +23,7 @@ VOID NpcComponentManager::CreateNpcComponents(CScriptNpc* pObj)
 	UINT id = pObj->GetId();
 	if (id == 0) return;
 
-	// 先创建公共活体组件（含实体创建 + AliveTimerComponent + AliveImmunityComponent）
+	// 先创建公共活体组件（含实体创建 + TimerComponent + AliveImmunityComponent）
 	AliveComponentsManager::GetInstance()->CreateAliveComponents(pObj);
 
 	// 再创建 NPC 专属组件
@@ -53,7 +56,7 @@ VOID NpcComponentManager::CreateNpcComponents(CScriptNpc* pObj)
 
 	if (!m_bPoolCacheInited)
 	{
-		InitPoolCache();
+		std::call_once(s_npcPoolCacheInitFlag, [this]() { InitPoolCache(); });
 		m_bPoolCacheInited = TRUE;
 	}
 }
@@ -83,7 +86,7 @@ VOID NpcComponentManager::EnsureMerchantComponent(CScriptNpc* pObj)
 
 	if (!m_bPoolCacheInited)
 	{
-		InitPoolCache();
+		std::call_once(s_npcPoolCacheInitFlag, [this]() { InitPoolCache(); });
 		m_bPoolCacheInited = TRUE;
 	}
 }

@@ -177,24 +177,8 @@ public:
 		return const_cast<ECSRegistry*>(this)->get<T>(e);
 	}
 
-	template<typename T>
-	bool has(entity_t e) const noexcept
-	{
-		const auto* p = get_pool<T>();
-		return p && p->has(e);
-	}
+	// ---- 无锁快速路径 (调用者必须持全局锁, 跳过池级锁避免冗余开销) ----
 
-	template<typename T>
-	void remove(entity_t e) noexcept
-	{
-		auto* p = get_pool<T>();
-		if (p) p->remove(e);
-	}
-
-	// ---- nolock 变体: 绕过池级 SRWLOCK ————————————————
-	//  调用者必须已持全局共享锁/独占锁 (SRLock/SWLock on m_mutex),
-	//  适用于 System 遍历 + 外部已持锁场景, 消除双重锁开销。
-	// --------------------------------------------------
 	template<typename T>
 	T* get_nolock(entity_t e) noexcept
 	{
@@ -215,6 +199,20 @@ public:
 		return p && p->has_nolock(e);
 	}
 
+	template<typename T>
+	bool has(entity_t e) const noexcept
+	{
+		const auto* p = get_pool<T>();
+		return p && p->has(e);
+	}
+
+	template<typename T>
+	void remove(entity_t e) noexcept
+	{
+		auto* p = get_pool<T>();
+		if (p) p->remove(e);
+	}
+
 	// ==========================================
 	//  池访问 (供 View 构造使用)
 	//  锁要求:
@@ -223,6 +221,7 @@ public:
 	//  注意: ensure_pool 可能触发 pools_ vector realloc, 若其他线程无锁读取 pools_
 	//        会导致悬空指针。ECSView 构造时通过 get_pool 获取池指针, 必须持锁。
 	// ==========================================
+
 	template<typename T>
 	ComponentPool<T>& ensure_pool()
 	{
