@@ -19,12 +19,8 @@
 
 CScriptNpc::CScriptNpc(VOID)
 {
-	m_szName[0] = 0;
-	m_pSellGoodsList = nullptr;
-	m_iSellListCount = 0;
+	m_szName.fill(0);
 	Clean();
-	m_fBuyPercent = 1.0f;
-	m_fSellPercent = 0.5f;
 }
 
 CScriptNpc::~CScriptNpc(VOID)
@@ -34,52 +30,55 @@ CScriptNpc::~CScriptNpc(VOID)
 VOID CScriptNpc::Clean()
 {
 	CAliveObject::Clean();
-	if (m_pSellGoodsList)
+	auto* mc = GetNpcMerchant();
+	if (mc && mc->pSellGoodsList)
 	{
 		NpcGoodsList* pNext = nullptr;
-		while (m_pSellGoodsList)
+		while (mc->pSellGoodsList)
 		{
-			pNext = m_pSellGoodsList->pNext;
+			pNext = mc->pSellGoodsList->pNext;
 
 			NpcGoodsItemList* pNextItem = nullptr;
-			while (m_pSellGoodsList->pItemList)
+			while (mc->pSellGoodsList->pItemList)
 			{
-				pNextItem = m_pSellGoodsList->pItemList->pNext;
+				pNextItem = mc->pSellGoodsList->pItemList->pNext;
 
-				CNpcManager::GetInstance()->FreeGoodsItemList(m_pSellGoodsList->pItemList);
-				m_pSellGoodsList->pItemList = pNextItem;
+				CNpcManager::GetInstance()->FreeGoodsItemList(mc->pSellGoodsList->pItemList);
+				mc->pSellGoodsList->pItemList = pNextItem;
 			}
 
-			CNpcManager::GetInstance()->FreeGoodsList(m_pSellGoodsList);
-			m_pSellGoodsList = pNext;
+			CNpcManager::GetInstance()->FreeGoodsList(mc->pSellGoodsList);
+			mc->pSellGoodsList = pNext;
 		}
-		m_pSellGoodsList = nullptr;
+		mc->pSellGoodsList = nullptr;
 	}
 }
 
-BOOL CScriptNpc::Init(UINT dbid, const char* pszName, int view, int x, int y, DWORD mapid, CScriptObject* pScriptObject/* CScriptPage * pPage*/)
+BOOL CScriptNpc::Init(UINT dbid, const char* pszName, int view, int x, int y, DWORD mapid, CScriptObject* pScriptObject)
 {
-	m_pSellGoodsList = nullptr;
+	auto* st = GetNpcState();
+	auto* mc = GetNpcMerchant();
+	mc->pSellGoodsList = nullptr;
 	m_pScriptObject = pScriptObject;
 	setXY(x, y);
 	SetMapId(mapid);
 	SetDirection((e_direction)(5 + Getrand(3)));
-	m_nView = view;
-	m_StoreId = dbid | 0x70000000;
+	if (st) st->nView = view;
+	if (st) st->StoreId = dbid | 0x70000000;
 	if (*pszName == '*')
 	{
 		pszName++;
-		m_fSandCityMerchant = TRUE;
+		if (st) st->fSandCityMerchant = TRUE;
 	}
 	else
-		m_fSandCityMerchant = FALSE;
+		if (st) st->fSandCityMerchant = FALSE;
 	o_strncpy(m_szName.data(), pszName, 31);
 	o_strncpy(m_szLongName.data(), m_szName.data(), 31);
-	m_fChanged = FALSE;
+	mc->fChanged = FALSE;
 	Goods* pGoodList = nullptr;
 	if (m_pScriptObject && m_pScriptObject->getGoodsList() && m_pScriptObject->getGoodsList()->getList())
 	{
-		pGoodList = m_pScriptObject->getGoodsList()->getList();//pPage->GetGoodsList();
+		pGoodList = m_pScriptObject->getGoodsList()->getList();
 	}
 	if (pGoodList != nullptr)
 	{
@@ -88,8 +87,8 @@ BOOL CScriptNpc::Init(UINT dbid, const char* pszName, int view, int x, int y, DW
 		LoadItems();
 	}
 	m_tmrUpdateItem.Savetime();
-	m_dwTimeOut = 0;
-	m_bIsNpc = TRUE;
+	mc->dwTimeOut = 0;
+	if (st) st->bIsNpc = TRUE;
 	return TRUE;
 }
 
@@ -103,11 +102,12 @@ BOOL CScriptNpc::InitGoods(tagGoods* pGoodsList)
 
 	for (p = pGoodsList; p != nullptr; p = p->pNext)
 	{
-		if (m_pSellGoodsList == nullptr)
+		auto* mc = GetNpcMerchant();
+		if (mc->pSellGoodsList == nullptr)
 		{
-			m_pSellGoodsList = CNpcManager::GetInstance()->AllocGoodsList();
-			assert(m_pSellGoodsList != nullptr);
-			pGoodsListTail = m_pSellGoodsList;
+			mc->pSellGoodsList = CNpcManager::GetInstance()->AllocGoodsList();
+			assert(mc->pSellGoodsList != nullptr);
+			pGoodsListTail = mc->pSellGoodsList;
 		}
 		else
 		{
@@ -128,7 +128,7 @@ BOOL CScriptNpc::InitGoods(tagGoods* pGoodsList)
 			if (pItemClass == nullptr)
 				continue;
 
-			pGoodsListTail->dwTemplatePrice = ROUND(m_fBuyPercent * pItemClass->nPrice);
+			pGoodsListTail->dwTemplatePrice = ROUND(mc->fBuyPercent * pItemClass->nPrice);
 		}
 	}
 	return TRUE;
@@ -136,7 +136,8 @@ BOOL CScriptNpc::InitGoods(tagGoods* pGoodsList)
 
 VOID CScriptNpc::QueryTalk(CHumanPlayer* pPlayer)
 {
-	if (!m_bTalk) return;
+	auto* st = GetNpcState();
+	if (!st || !st->bTalk) return;
 	QuerySelectLink(pPlayer, nullptr);
 }
 
@@ -255,7 +256,8 @@ NpcGoodsList* CScriptNpc::FindGoodsList(const char* pszName)
 {
 	NpcGoodsList* pList = nullptr;
 	int namelen = (int)strlen(pszName);
-	for (pList = m_pSellGoodsList; pList != nullptr; pList = pList->pNext)
+	auto* mc = GetNpcMerchant();
+	for (pList = mc->pSellGoodsList; pList != nullptr; pList = pList->pNext)
 	{
 		if (strcmp(pList->szTemplate.data(), pszName) == 0)
 			return pList;
@@ -268,7 +270,8 @@ NpcGoodsList* CScriptNpc::FindGoodsList(ITEM& item)
 	NpcGoodsList* pList = nullptr;
 	std::array<char, 30> szName{};
 	o_strncpy(szName.data(), item.baseitem.szName, 14);
-	for (pList = m_pSellGoodsList; pList != nullptr; pList = pList->pNext)
+	auto* mc = GetNpcMerchant();
+	for (pList = mc->pSellGoodsList; pList != nullptr; pList = pList->pNext)
 	{
 		if (strcmp(szName.data(), pList->szTemplate.data()) == 0)
 			return pList;
@@ -278,6 +281,7 @@ NpcGoodsList* CScriptNpc::FindGoodsList(ITEM& item)
 
 BOOL CScriptNpc::AddItem(ITEM& item)
 {
+	auto* mc = GetNpcMerchant();
 	NpcGoodsItemList* pItemList = CNpcManager::GetInstance()->AllocGoodsItemList();
 	if (pItemList == nullptr)return FALSE;
 	pItemList->item = item;
@@ -297,13 +301,13 @@ BOOL CScriptNpc::AddItem(ITEM& item)
 #ifdef	_DEBUG
 		PRINT(SUCCESS_GREEN, "szTemplate的名字:%s\n", pList->szTemplate);
 #endif
-		pList->dwTemplatePrice = ROUND(m_fBuyPercent * item.baseitem.nPrice);
+		pList->dwTemplatePrice = ROUND(mc->fBuyPercent * item.baseitem.nPrice);
 		pList->refreshtime = 10;
 		pList->defaultcount = 1; // 1表示不是NPC本身卖的物品 0表示是买的时候创建的.
 		pList->dwLastRefreshTime = pItemList->dwPutTime;
-		if (this->m_pSellGoodsList)
-			pList->pNext = this->m_pSellGoodsList;
-		this->m_pSellGoodsList = pList;
+		if (mc->pSellGoodsList)
+			pList->pNext = mc->pSellGoodsList;
+		mc->pSellGoodsList = pList;
 	}
 	if (pList->pItemList == nullptr)
 		pList->pItemList = pItemList;
@@ -321,7 +325,8 @@ VOID CScriptNpc::SendGoodsList(CHumanPlayer* pPlayer)
 	std::array<char, 4096> szBuffer{};
 	char* p = szBuffer.data();
 	int count = 0;
-	for (NpcGoodsList* pList = m_pSellGoodsList; pList != nullptr; pList = pList->pNext)
+	auto* mc = GetNpcMerchant();
+	for (NpcGoodsList* pList = mc->pSellGoodsList; pList != nullptr; pList = pList->pNext)
 	{
 		if (pList->dwTemplatePrice > 100000 || pList->dwTemplatePrice == 0)
 			continue;
@@ -339,7 +344,7 @@ VOID CScriptNpc::SendGoodsList(CHumanPlayer* pPlayer)
 bool CScriptNpc::containschar(const std::string& str)
 {
 	for (char c : str) {
-		if (c == '�')
+		if (c == '€')
 			return true; // 找到非标准字符, 返回true  
 	}
 	return false; // 未找到非标准字符, 返回false  
@@ -348,12 +353,13 @@ bool CScriptNpc::containschar(const std::string& str)
 VOID CScriptNpc::Update()
 {
 	DWORD dwCurTime = CFrameTime::GetFrameTime();
-	if (m_tmrUpdateItem.IsTimeOut(m_dwTimeOut))
+	auto* mc = GetNpcMerchant();
+	if (m_tmrUpdateItem.IsTimeOut(mc->dwTimeOut))
 	{
-		if (m_dwTimeOut == 0)m_dwTimeOut = Getrand(9000) + 1000;
+		if (mc->dwTimeOut == 0) mc->dwTimeOut = Getrand(9000) + 1000;
 		m_tmrUpdateItem.Savetime();
 
-		NpcGoodsList* pList = m_pSellGoodsList;
+		NpcGoodsList* pList = mc->pSellGoodsList;
 		while (pList)
 		{
 			if (pList->defaultcount > 1)
@@ -379,7 +385,7 @@ VOID CScriptNpc::Update()
 								pItemNode->pNext = pList->pItemList;
 								pList->pItemList = pItemNode;
 								pList->currentcount++;
-								if (!m_fChanged)m_fChanged = TRUE;
+								if (!mc->fChanged) mc->fChanged = TRUE;
 							}
 						}
 					}
@@ -387,7 +393,7 @@ VOID CScriptNpc::Update()
 			}
 			pList = pList->pNext;
 		}
-		if (m_fChanged)
+		if (mc->fChanged)
 			SaveItems();
 	}
 	CAliveObject::Update();
@@ -417,7 +423,7 @@ DWORD CScriptNpc::GetItemSellPrice(ITEM& item)
 		else
 			n10 = n10 + ROUND((n10 * 2.0 * item.wCurDura) / item.wMaxDura);
 		if (n10 > 0)
-			return static_cast<DWORD>(m_fSellPercent * n10);
+			return static_cast<DWORD>(GetSellPercent() * n10);
 		else
 			return 0;
 	}
@@ -431,7 +437,7 @@ DWORD CScriptNpc::GetItemSellPrice(ITEM& item)
 		else
 			n10 = n10 + ROUND((n10 * 1.3 * item.wCurDura) / item.wMaxDura);
 		if (n10 > 0)
-			return static_cast<DWORD>(m_fSellPercent * n10);
+			return static_cast<DWORD>(GetSellPercent() * n10);
 		else
 			return 0;
 	}
@@ -469,10 +475,10 @@ DWORD CScriptNpc::GetItemSellPrice(ITEM& item)
 		}
 		else
 			n10 = n10 + ROUND((n10 * 1.3 * item.wCurDura) / item.wMaxDura);
-		return static_cast<DWORD>(m_fSellPercent * n10);
+		return static_cast<DWORD>(GetSellPercent() * n10);
 	}
 	else
-		return static_cast<DWORD>(ROUND(m_fSellPercent * item.baseitem.nPrice)); //	使用标准的物品价格计算公式~
+		return static_cast<DWORD>(ROUND(GetSellPercent() * item.baseitem.nPrice)); //	使用标准的物品价格计算公式~
 }
 
 DWORD CScriptNpc::GetItemBuyPrice(ITEM& item)
@@ -483,7 +489,7 @@ DWORD CScriptNpc::GetItemBuyPrice(ITEM& item)
 	if (pList)
 		return ROUND(pList->dwTemplatePrice);
 	else
-		return ROUND(m_fBuyPercent * item.baseitem.nPrice);
+		return ROUND(GetBuyPercent() * item.baseitem.nPrice);
 }
 
 DWORD CScriptNpc::GetItemRepairPrice(CHumanPlayer* pPlayer, ITEM& item)
@@ -569,7 +575,8 @@ BOOL CScriptNpc::SellItem(CHumanPlayer* pPlayer, ITEM& item)
 			{
 				CItemManager::GetInstance()->UpdateItemOwner(0, bitem.dwMakeIndex, IDF_NPC, 0);
 				pPlayer->AddGold(dwPrice, FALSE);
-				m_fChanged = TRUE;
+				auto* mc = GetNpcMerchant();
+				mc->fChanged = TRUE;
 				return TRUE;
 			}
 			else
@@ -765,7 +772,8 @@ BOOL CScriptNpc::BuyItem(CHumanPlayer* pPlayer, const char* pszName, DWORD dwMak
 						}
 						pPlayer->SendMsg(GetId(), 0x28c, 0, 0, 0, nullptr, 0);
 					}
-					m_fChanged = TRUE;
+					auto* mc = GetNpcMerchant();
+					mc->fChanged = TRUE;
 					return TRUE;
 				}
 			}
@@ -776,14 +784,15 @@ BOOL CScriptNpc::BuyItem(CHumanPlayer* pPlayer, const char* pszName, DWORD dwMak
 
 VOID CScriptNpc::DeleteNpcGoodsList(NpcGoodsList* pList)
 {
+	auto* mc = GetNpcMerchant();
 	NpcGoodsList* pList1 = nullptr;
-	if (pList == m_pSellGoodsList)
+	if (pList == mc->pSellGoodsList)
 	{
-		m_pSellGoodsList = pList->pNext;
+		mc->pSellGoodsList = pList->pNext;
 		CNpcManager::GetInstance()->FreeGoodsList(pList);
 		return;
 	}
-	for (pList1 = m_pSellGoodsList; pList1 != nullptr; pList1 = pList1->pNext)
+	for (pList1 = mc->pSellGoodsList; pList1 != nullptr; pList1 = pList1->pNext)
 	{
 		if (pList1->pNext == pList)
 		{
@@ -818,9 +827,10 @@ VOID CScriptNpc::DeleteNpcGoodsItemList(NpcGoodsList* pList, NpcGoodsItemList* p
 
 VOID CScriptNpc::SaveItems()
 {
-	if (!m_fChanged)return;
+	auto* mc = GetNpcMerchant();
+	if (!mc->fChanged) return;
 	char szFilename[1024];
-	sprintf(szFilename, ".\\Data\\Market_Save\\Market_%08x.dat", m_StoreId);
+	sprintf(szFilename, ".\\Data\\Market_Save\\Market_%08x.dat", GetStoreId());
 	FILE* fp = fopen(szFilename, "wb");
 	if (fp == nullptr)
 	{
@@ -828,7 +838,7 @@ VOID CScriptNpc::SaveItems()
 		return;
 	}
 	xPacketPool::ScopedPacket packet(65536);
-	NpcGoodsList* pList = this->m_pSellGoodsList;
+	NpcGoodsList* pList = mc->pSellGoodsList;
 	while (pList)
 	{
 		if (pList->defaultcount != 0)
@@ -850,7 +860,7 @@ VOID CScriptNpc::SaveItems()
 	if (packet->getsize() > 0)
 		fwrite((LPVOID)packet->getbuf(), packet->getsize(), 1, fp);
 	fclose(fp);
-	m_fChanged = FALSE;
+	mc->fChanged = FALSE;
 }
 
 static ITEM	items_t[100];

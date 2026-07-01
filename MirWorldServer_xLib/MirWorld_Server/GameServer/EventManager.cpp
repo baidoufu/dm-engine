@@ -56,8 +56,7 @@ VOID CEventManager::UpdateDeleteObject()
 {
 	const UINT MAX_PROCESS_PER_TICK = 100;
 	UINT processed = 0;
-	// 使用thread_local复用，避免每帧堆分配
-	thread_local std::vector<CVisibleEvent*> pendingObjects;
+	static std::vector<CVisibleEvent*> pendingObjects;
 	pendingObjects.clear();
 	if ((int)pendingObjects.capacity() < MAX_PROCESS_PER_TICK)
 		pendingObjects.reserve(MAX_PROCESS_PER_TICK);

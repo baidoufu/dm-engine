@@ -106,7 +106,8 @@ VOID CSCDoor::Repair()
 		if (this->GetViewmsg(szMsg.data(), length))
 			SendAroundMsg(szMsg.data(), length);
 	}
-	CMonsterEx::m_wCurHp = GetPropValue(PI_MAXHP);
+	auto* st = GetMonsterState();
+	if (st) st->wCurHp = static_cast<WORD>(GetPropValue(PI_MAXHP));
 	ChangeOpenState();
 	SendHpMpChanged();
 }

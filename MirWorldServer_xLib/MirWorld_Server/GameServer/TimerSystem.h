@@ -1,154 +1,236 @@
 #pragma once
 
-#include "ECS.h"
+#include "ECSSystem.h"
 #include "TimerComponent.h"
-#include <unordered_map>
-#include <array>
-#include <mutex>
+#include "ECSView.h"
+#include "PlayerComponentManager.h"
+#include "HumanPlayer.h"
+#include "SystemScript.h"
 
 /**
- *  TimerSystem — 共享定时器工具类 (非单例)
+ *  TimerSystem —— 统一定时器消费 ECS System (单次 ecs_view<TimerComponent> 扫描)
  *
- *  职责: 管理一组 TimerComponent 实体的 CRUD + 到期检查。
- *  PlayerTimerSystem / AliveTimerSystem 各自持有一个 TimerSystem 实例。
+ *  替代 OOP Update() 中的全部定时器 CheckTimer 消费逻辑:
  *
- *  模板参数 TimerCount: 该 TimerSystem 管理的定时器种类数量 (编译期确定, 零开销)
+ *  活体通用 (所有实体: 玩家+怪物+NPC):
+ *    bit 18  TMR_HP_RECOVER  (默认3秒)  HP 自动恢复
+ *    bit 19  TMR_MP_RECOVER  (默认3秒)  MP 自动恢复
+ *
+ *  玩家专属 (仅 CHumanPlayer):
+ *    bit 0   TMR_DB_SAVE   — per-player 偏移量动态变化
+ *    bit 1   TMR_STAMINA     (6分钟)    精力值自增
+ *    bit 2   TMR_GAME_TIME   (1秒)      时长区倒计时 + 元气自增
+ *    bit 4   TMR_JUST_PK     (配置)     灰名到期清除
+ *    bit 5   TMR_PK_POINT    (配置)     PK值衰减
+ *    bit 6   TMR_FENGHAO     (60秒)     封号过期检测
+ *    bit 8   TMR_ADD_TO_GUILD (60秒)    行会请求超时
+ *
+ *  不处理:
+ *    TMR_ACTION    — 间隔高度动态, 不适合批量
+ *    TMR_CHAT_*    — per-channel 间隔不同
+ *    TMR_HORSE     — 逻辑分散在多处, 暂保留 OOP 路径
+ *    TMR_IDLE/BODY/BETRAY — 怪物专属, 间隔动态, 暂保留 OOP 路径
+ *
+ *  执行时机: BatchPrecomputeTimers 之后 (firedMask 已就绪)
+ *  线程安全: 主线程串行执行 (UpdatePlayers 之前)
  */
-template<size_t TimerCount>
-class TimerSystem
+class TimerSystem : public ECSSystem
 {
 public:
-	// 索引映射: TimerType → 本地数组下标
-	using IdxFunc = int(*)(TimerType);
+	const char* Name() const override { return "TimerSystem"; }
+	int Priority() const override { return 10; }
 
-	TimerSystem(ECSRegistry& world, IdxFunc toIdx)
-		: m_world(world)
-		, m_toIdx(toIdx)
+	size_t Execute(int frameTime) override
 	{
-	}
+		auto& world = ECSWorld::GetInstance()->GetWorld();
+		CGameWorld* pGameWorld = CGameWorld::GetInstance();
+		if (!pGameWorld) return 0;
 
-	// ========== 实体管理 ==========
+		size_t processed = 0;
 
-	entity_t GetOrCreateTimerEntity(UINT ownerId, TimerType type)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		return GetOrCreateTimerEntityUnsafe(ownerId, type);
-	}
+		// 一次性读取全局配置
+		DWORD justPkInterval = pGameWorld->GetVar(EVI_GRAYNAMETIME) * 1000;
+		DWORD pkPointInterval = pGameWorld->GetVar(EVI_ONEPKPOINTTIME) * 1000;
 
-	entity_t GetTimerEntity(UINT ownerId, TimerType type) const
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		return GetTimerEntityUnsafe(ownerId, type);
-	}
+		SRLock lock(world.m_mutex);
 
-	// ========== 定时器操作 ==========
+		ecs_view<TimerComponent>(world).each([&](TimerComponent& tc) {
+			uint32_t mask = tc.firedMask;
+			if (!mask) return;
 
-	// 检查定时器是否到期，到期自动前推 lastTickMs (避免累积漂移)
-	BOOL CheckTimer(UINT ownerId, TimerType type, DWORD intervalMs)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		entity_t e = GetOrCreateTimerEntityUnsafe(ownerId, type);
-		auto* tc = m_world.get<TimerComponent>(e);
-		if (!tc) return FALSE;
-		return tc->CheckAndAdvance(intervalMs, CFrameTime::GetFrameTime());
-	}
+			CAliveObject* pAlive = pGameWorld->GetAliveObjectById(tc.ownerId);
+			if (!pAlive || pAlive->IsDeath()) return;
 
-	// 仅检查到期 (不自动重置)，用于需要查询剩余时间的场景
-	BOOL CheckTimerNoReset(UINT ownerId, TimerType type, DWORD intervalMs, int& outLastTickMs)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		entity_t e = GetOrCreateTimerEntityUnsafe(ownerId, type);
-		auto* tc = m_world.get<TimerComponent>(e);
-		if (!tc) { outLastTickMs = 0; return FALSE; }
+			// ==========================================
+			//  活体通用: HP/MP 恢复 (bit 18, 19)
+			//  作用于全部实体: 玩家+怪物+NPC
+			// ==========================================
 
-		outLastTickMs = tc->lastTickMs;
-		int now = CFrameTime::GetFrameTime();
-		return GetTimeToTime(tc->lastTickMs, now) >= intervalMs;
-	}
-
-	// 重置定时器
-	VOID ResetTimer(UINT ownerId, TimerType type)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		entity_t e = GetOrCreateTimerEntityUnsafe(ownerId, type);
-		auto* tc = m_world.get<TimerComponent>(e);
-		if (tc)
-			tc->lastTickMs = CFrameTime::GetFrameTime();
-	}
-
-	// 设置定时器已保存时间偏移 (用于错开保存等场景)
-	VOID OffsetTimer(UINT ownerId, TimerType type, int offsetMs)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		entity_t e = GetTimerEntityUnsafe(ownerId, type);
-		if (!m_world.valid(e)) return;
-		auto* tc = m_world.get<TimerComponent>(e);
-		if (tc)
-			tc->lastTickMs -= offsetMs;
-	}
-
-	// 获取定时器上次 tick 时间
-	int GetTimerLastTick(UINT ownerId, TimerType type)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		entity_t e = GetOrCreateTimerEntityUnsafe(ownerId, type);
-		auto* tc = m_world.get<TimerComponent>(e);
-		return tc ? tc->lastTickMs : 0;
-	}
-
-	// ========== 生命周期 ==========
-
-	// 清理指定 owner 的所有定时器实体
-	VOID Cleanup(UINT ownerId)
-	{
-		std::lock_guard<ECSRegistry> lock(m_world);
-		auto it = m_entities.find(ownerId);
-		if (it != m_entities.end())
-		{
-			for (entity_t e : it->second)
+			// TMR_HP_RECOVER = 18
+			if (mask & (1u << 18))
 			{
-				if (m_world.valid(e))
-					m_world.destroy(e);
+				tc.firedMask &= ~(1u << 18);
+				if (pAlive->CanRecover())
+				{
+					int nHp = pAlive->GetAutoRecoverHp();
+					if (nHp != 0)
+					{
+						if (pAlive->GetAutoRecoverHptime() > 0 &&
+							(pAlive->GetPropValue(PI_CURHP) < pAlive->GetPropValue(PI_MAXHP) || nHp < 0))
+						{
+							if (nHp > 0)
+								pAlive->AddPropValue(PI_CURHP, nHp);
+							else
+								pAlive->DecPropValue(PI_CURHP, -nHp);
+							pAlive->SendHpMpChanged(-nHp);
+						}
+					}
+				}
+				processed++;
 			}
-			m_entities.erase(it);
-		}
+
+			// TMR_MP_RECOVER = 19
+			if (mask & (1u << 19))
+			{
+				tc.firedMask &= ~(1u << 19);
+				if (pAlive->CanRecover())
+				{
+					int nMp = pAlive->GetAutoRecoverMp();
+					if (nMp != 0)
+					{
+						if (pAlive->GetAutoRecoverMptime() > 0 &&
+							(pAlive->GetPropValue(PI_CURMP) < pAlive->GetPropValue(PI_MAXMP) || nMp < 0))
+						{
+							if (nMp > 0)
+								pAlive->AddPropValue(PI_CURMP, nMp);
+							else
+								pAlive->DecPropValue(PI_CURMP, -nMp);
+							pAlive->SendHpMpChanged();
+						}
+					}
+				}
+				processed++;
+			}
+
+			// ==========================================
+			//  玩家专属定时器 (bit 1,2,4,5,6,8)
+			//  仅作用于 CHumanPlayer
+			// ==========================================
+			CHumanPlayer* pPlayer = dynamic_cast<CHumanPlayer*>(pAlive);
+			if (!pPlayer) return;  // 非玩家实体, 跳过玩家专属定时器
+
+			// TMR_DB_SAVE (0): DB 存档, 动态间隔 (配置基础 + per-player 错峰偏移)
+			if (mask & (1u << 0))
+			{
+				tc.firedMask &= ~(1u << 0);
+				if (pGameWorld->CanSaveToDB())
+				{
+					pGameWorld->UpdateDBUpdateTimer();
+					DWORD dwSaveOffset = (pPlayer->GetId() % 30) * 10 * 1000;
+					tc.lastTickMs[0] -= (int)dwSaveOffset;
+					pPlayer->UpdateToDB();
+				}
+				processed++;
+			}
+
+			// TMR_STAMINA (1): 精力值自增, 6分钟
+			if (mask & (1u << 1))
+			{
+				tc.firedMask &= ~(1u << 1);
+				if (pPlayer->GetPropValue(PI_LEVEL) >= 7)
+				{
+					auto* sc = PlayerComponentManager::GetInstance()->GetStamina(pPlayer);
+					if (sc)
+					{
+						CLogicMap* pMap = pPlayer->GetMap();
+						int expFactor = (pMap != nullptr) ? (int)ceilf(pMap->GetExpFactor()) : 1;
+						if (expFactor > 1)
+							sc->wStamina += expFactor;
+						else
+							sc->wStamina++;
+						if (sc->wStamina <= sc->wMaxStamina)
+						{
+							pPlayer->SendJingLiZhi(sc->wStamina);
+							pPlayer->UpdateProp();
+						}
+						else
+							sc->wStamina = sc->wMaxStamina;
+					}
+				}
+				processed++;
+			}
+
+			// TMR_GAME_TIME (2): 时长区倒计时 + 元气自增, 1秒
+			if (mask & (1u << 2))
+			{
+				tc.firedMask &= ~(1u << 2);
+				int nGameTime = pPlayer->GetGameTIme();
+				if (nGameTime > -1)
+				{
+					if (nGameTime > 0)
+					{
+						pPlayer->DecGameTime(1);
+						if (pPlayer->GetGameTIme() == 0)
+							CSystemScript::GetInstance()->Execute(pPlayer->GetScriptTarget(), "游戏时长.TimeOver", FALSE);
+					}
+				}
+				auto* zb = pPlayer->GetZhenBaoComp();
+				if (zb && !zb->IsYuanQiFull && zb->YuanQi < 2000)
+				{
+					zb->YuanQi++;
+					pPlayer->SendMsg(pPlayer->GetId(), 0x9611, zb->YuanQi, 2000, 0);
+					if (zb->YuanQi >= 2000)
+						zb->IsYuanQiFull = TRUE;
+				}
+				processed++;
+			}
+
+			// TMR_JUST_PK (4): 灰名到期清除
+			if (mask & (1u << 4))
+			{
+				tc.firedMask &= ~(1u << 4);
+				auto* pk = pPlayer->GetPkComp();
+				if (pk && pk->JustPk)
+				{
+					pk->JustPk = FALSE;
+					pPlayer->SendChangeName();
+				}
+				processed++;
+			}
+
+			// TMR_PK_POINT (5): PK值衰减
+			if (mask & (1u << 5))
+			{
+				tc.firedMask &= ~(1u << 5);
+				auto* pk = pPlayer->GetPkComp();
+				if (pk && pk->PkValue > 0)
+				{
+					BYTE btColor = pPlayer->GetNameColor(pPlayer);
+					pk->PkValue--;
+					if (btColor != pPlayer->GetNameColor(pPlayer))
+						pPlayer->SendChangeName();
+				}
+				processed++;
+			}
+
+			// TMR_FENGHAO (6): 封号过期检测, 60秒
+			if (mask & (1u << 6))
+			{
+				tc.firedMask &= ~(1u << 6);
+				pPlayer->CheckFengHaoTimeOut();
+				processed++;
+			}
+
+			// TMR_ADD_TO_GUILD (8): 行会请求超时, 60秒
+			if (mask & (1u << 8))
+			{
+				tc.firedMask &= ~(1u << 8);
+				if (pPlayer->GetAddToGuildRequester() != nullptr)
+					pPlayer->ReplyAddToGuildRequest(FALSE);
+				processed++;
+			}
+			});
+
+		return processed;
 	}
-
-
-
-private:
-	// 无锁内部版本 — 调用方必须已持有 m_world 锁
-	entity_t GetOrCreateTimerEntityUnsafe(UINT ownerId, TimerType type)
-	{
-		const int idx = m_toIdx(type);
-		if (idx < 0 || (size_t)idx >= TimerCount) return INVALID_ENTITY;
-
-		auto& arr = m_entities[ownerId];
-
-		if (!m_world.valid(arr[idx]))
-		{
-			entity_t e = m_world.create();
-			auto& tc = m_world.emplace<TimerComponent>(e);
-			tc.typeId     = type;
-			tc.intervalMs = 0;
-			tc.lastTickMs = CFrameTime::GetFrameTime();
-			tc.ownerId    = ownerId;
-			arr[idx] = e;
-		}
-		return arr[idx];
-	}
-
-	entity_t GetTimerEntityUnsafe(UINT ownerId, TimerType type) const
-	{
-		auto it = m_entities.find(ownerId);
-		if (it == m_entities.end()) return INVALID_ENTITY;
-
-		const int idx = m_toIdx(type);
-		if (idx < 0 || (size_t)idx >= TimerCount) return INVALID_ENTITY;
-		return it->second[idx];
-	}
-
-	ECSRegistry&  m_world;
-	IdxFunc       m_toIdx;
-	std::unordered_map<UINT, std::array<entity_t, TimerCount>> m_entities;
 };

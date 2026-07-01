@@ -8,6 +8,7 @@ CMapObject::CMapObject(VOID)
 	m_pMap = nullptr;
 	m_Mapid = 0;
 	m_Id = 0;
+	m_ecsEntity = INVALID_ENTITY;
 	m_wX = 0, m_wY = 0;
 	m_wInvisibleLevel = 0;
 	m_dwRefenceCount = 0;

@@ -58,6 +58,6 @@ private:
 	std::string m_strErrorMsg;
 	xListHost<MAGICCLASS> m_xMagicClassList;
 	CNameHash m_MagicClassHash;
-	std::array<MAGICCLASS*, 512> m_pMagicArray{};
-	std::unordered_map<WORD, Magic> magics;
+	std::array<MAGICCLASS*, 128> m_pMagicArray{};
+	SmallFlatMap<WORD, Magic, 128> magics; // Õ»´æ´¢Ìæ´ú unordered_map
 };

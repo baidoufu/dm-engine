@@ -88,9 +88,9 @@ VOID CHumanPlayer::SendTimeWeatherChanged()
 	SendMsg(m_pMap->GetWeather().dwBGColor, SM_SETGAMEDATETIME, wTime, wWeather, wFlag, &dwWeatherColor, sizeof(DWORD));
 }
 
-static thread_local std::array<DBITEM, 100> items_t2{};
-static thread_local std::array<ITEM, 100> items_t1{};
-static thread_local std::array<BAGITEMPOS, 100> itemspos_t1{};
+static thread_local std::array<DBITEM, 100> s_dbPacketDst{};
+static thread_local std::array<ITEM, 100> s_dbPacketItems{};
+static thread_local std::array<BAGITEMPOS, 100> s_dbPacketPos{};
 VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 {
 	CHARDBINFO info;
@@ -126,7 +126,8 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		int	count = 0;
 		while (pMagic)
 		{
-			array[count++] = pMagic->magic;
+			if (count < 255)
+				array[count++] = pMagic->magic;
 			pMagic = pMagic->pNext;
 		}
 		if (count > 0)
@@ -136,113 +137,113 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		}
 	}
 	// 任务信息
-	length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATETASKINFO, 0, 0, 0, (LPVOID)&m_TaskInfo, sizeof(m_TaskInfo));
+	length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATETASKINFO, 0, 0, 0, (LPVOID)&_taskInfo(), sizeof(_taskInfo()));
 	packet.addsize(length);
 	// 时长封号信息
-	length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEFENGHAO, 0, 0, 0, (LPVOID)&m_FenghaoInfo, sizeof(m_FenghaoInfo));
+	length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEFENGHAO, 0, 0, 0, (LPVOID)&_fenghaoInfo(), sizeof(_fenghaoInfo()));
 	packet.addsize(length);
 	// 背包数据
 	int count = 0;
-	count = m_ItemBox.GetItems(items_t1.data(), 100);
+	count = m_ItemBox.GetItems(s_dbPacketItems.data(), 100);
 	int updatecount = 0;
 	int uposcount = 0;
 	for (int i = 0; i < count; i++)
 	{
-		if (items_t1[i].dwMakeIndex & 0x80000000)
+		if (s_dbPacketItems[i].dwMakeIndex & 0x80000000)
 		{
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
-			items_t2[updatecount].item = items_t1[i];
-			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = static_cast<WORD>(items_t1[i].dwParam[2]);
+			if (CItemManager::GetInstance()->ItemLimited(s_dbPacketItems[i], IL_NOUPDATETODB))continue;
+			s_dbPacketDst[updatecount].item = s_dbPacketItems[i];
+			s_dbPacketDst[updatecount].btFlag = 0;
+			s_dbPacketDst[updatecount].pos = static_cast<WORD>(s_dbPacketItems[i].dwParam[2]);
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = static_cast<BYTE>(items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = static_cast<BYTE>(s_dbPacketItems[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
-				items_t2[updatecount].item = items_t1[i];
-				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = static_cast<WORD>(items_t1[i].dwParam[2]);
+				s_dbPacketDst[updatecount].item = s_dbPacketItems[i];
+				s_dbPacketDst[updatecount].btFlag = btFlag;
+				s_dbPacketDst[updatecount].pos = static_cast<WORD>(s_dbPacketItems[i].dwParam[2]);
 				updatecount++;
 			}
 			else
 			{
-				itemspos_t1[uposcount].ItemId = items_t1[i].dwMakeIndex;
-				itemspos_t1[uposcount].wPos = static_cast<WORD>(items_t1[i].dwParam[2]);
+				s_dbPacketPos[uposcount].ItemId = s_dbPacketItems[i].dwMakeIndex;
+				s_dbPacketPos[uposcount].wPos = static_cast<WORD>(s_dbPacketItems[i].dwParam[2]);
 				uposcount++;
 			}
 		}
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BAG, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BAG, 0, (LPVOID)s_dbPacketDst.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 背包的其他物品的位置要更新
 	if (uposcount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), 0, DM_UPDATEITEMPOSEX, uposcount, IDF_BAG, 0, (LPVOID)itemspos_t1.data(), sizeof(BAGITEMPOS) * uposcount);
+		length = EncodeMsg((char*)packet.getfreebuf(), 0, DM_UPDATEITEMPOSEX, uposcount, IDF_BAG, 0, (LPVOID)s_dbPacketPos.data(), sizeof(BAGITEMPOS) * uposcount);
 		packet.addsize(length);
 	}
 	// 仓库物品数据
-	count = m_ItemBank.GetItems(items_t1.data(), 100);
+	count = m_ItemBank.GetItems(s_dbPacketItems.data(), 100);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
-		if (items_t1[i].dwMakeIndex & 0x80000000)
+		if (s_dbPacketItems[i].dwMakeIndex & 0x80000000)
 		{
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
-			items_t2[updatecount].item = items_t1[i];
-			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = i;
+			if (CItemManager::GetInstance()->ItemLimited(s_dbPacketItems[i], IL_NOUPDATETODB))continue;
+			s_dbPacketDst[updatecount].item = s_dbPacketItems[i];
+			s_dbPacketDst[updatecount].btFlag = 0;
+			s_dbPacketDst[updatecount].pos = i;
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = (items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = (s_dbPacketItems[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
-				items_t2[updatecount].item = items_t1[i];
-				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = i;
+				s_dbPacketDst[updatecount].item = s_dbPacketItems[i];
+				s_dbPacketDst[updatecount].btFlag = btFlag;
+				s_dbPacketDst[updatecount].pos = i;
 				updatecount++;
 			}
 		}
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BANK, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_BANK, 0, (LPVOID)s_dbPacketDst.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 宠物背包数据
-	count = m_ItemPetBag.GetItems(items_t1.data(), 100);
+	count = m_ItemPetBag.GetItems(s_dbPacketItems.data(), 100);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
-		if (items_t1[i].dwMakeIndex & 0x80000000)
+		if (s_dbPacketItems[i].dwMakeIndex & 0x80000000)
 		{
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
-			items_t2[updatecount].item = items_t1[i];
-			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = i;
+			if (CItemManager::GetInstance()->ItemLimited(s_dbPacketItems[i], IL_NOUPDATETODB))continue;
+			s_dbPacketDst[updatecount].item = s_dbPacketItems[i];
+			s_dbPacketDst[updatecount].btFlag = 0;
+			s_dbPacketDst[updatecount].pos = i;
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = (items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = (s_dbPacketItems[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
-				items_t2[updatecount].item = items_t1[i];
-				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = i;
+				s_dbPacketDst[updatecount].item = s_dbPacketItems[i];
+				s_dbPacketDst[updatecount].btFlag = btFlag;
+				s_dbPacketDst[updatecount].pos = i;
 				updatecount++;
 			}
 		}
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_PETBANK, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_PETBANK, 0, (LPVOID)s_dbPacketDst.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 装备数据
@@ -256,9 +257,9 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 			if (pEquipment->dwMakeIndex & 0x80000000)
 			{
 				if (CItemManager::GetInstance()->ItemLimited(*pEquipment, IL_NOUPDATETODB))continue;
-				items_t2[updatecount].item = *pEquipment;
-				items_t2[updatecount].btFlag = 0;
-				items_t2[updatecount].pos = i;
+				s_dbPacketDst[updatecount].item = *pEquipment;
+				s_dbPacketDst[updatecount].btFlag = 0;
+				s_dbPacketDst[updatecount].pos = i;
 				updatecount++;
 			}
 			else
@@ -266,9 +267,9 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 				BYTE btFlag = (pEquipment->baseitem.wFeature & 0x00f0);
 				if (btFlag != 0)
 				{
-					items_t2[updatecount].item = *pEquipment;
-					items_t2[updatecount].btFlag = btFlag;
-					items_t2[updatecount].pos = i;
+					s_dbPacketDst[updatecount].item = *pEquipment;
+					s_dbPacketDst[updatecount].btFlag = btFlag;
+					s_dbPacketDst[updatecount].pos = i;
 					updatecount++;
 				}
 			}
@@ -276,18 +277,18 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	}
 	if (updatecount > 0)
 	{
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_EQUIPMENT, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_EQUIPMENT, 0, (LPVOID)s_dbPacketDst.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 	// 存储升级临时武器的物品
-	if ((this->m_UpgradeItem.dwMakeIndex & 0x80000000) && !CItemManager::GetInstance()->ItemLimited(this->m_UpgradeItem, IL_NOUPDATETODB))
+	if ((this->GetUpgradeItemComp()->Item.dwMakeIndex & 0x80000000) && !CItemManager::GetInstance()->ItemLimited(this->GetUpgradeItemComp()->Item, IL_NOUPDATETODB))
 	{
 		updatecount = 0;
-		items_t2[updatecount].item = m_UpgradeItem;
-		items_t2[updatecount].btFlag = 0;
-		items_t2[updatecount].pos = 0;
+		s_dbPacketDst[updatecount].item = GetUpgradeItemComp()->Item;
+		s_dbPacketDst[updatecount].btFlag = 0;
+		s_dbPacketDst[updatecount].pos = 0;
 		updatecount++;
-		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_UPGRADE, 0, (LPVOID)items_t2.data(), sizeof(DBITEM) * updatecount);
+		length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEITEMS, updatecount, IDF_UPGRADE, 0, (LPVOID)s_dbPacketDst.data(), sizeof(DBITEM) * updatecount);
 		packet.addsize(length);
 	}
 }

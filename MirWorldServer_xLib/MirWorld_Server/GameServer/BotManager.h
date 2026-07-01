@@ -41,6 +41,15 @@ public:
 	// 清理所有机器人
 	VOID Cleanup();
 
+	// ========================================================================
+	// GM命令 - 运行时查询所有Bot状态
+	// ========================================================================
+
+	// 列出所有机器人摘要信息（名称/状态/HP%/地图/坐标/目标）
+	VOID DumpAllBots(class CHumanPlayer* pCaller);
+	// 单个机器人详细信息（BT名/节点命中/在线时长/think间隔/快照）
+	VOID DumpBotInfo(class CHumanPlayer* pCaller, const char* pszName);
+
 private:
 	// 解析配置文件中的单个机器人段落
 	BOOL ParseBotSection(char* pszBotDesc, BOT_CREATE_DESC& desc);

@@ -72,7 +72,8 @@ VOID CPalaceWall::Repair()//ÖØÐÂÐÞ¸´
 			SendAroundMsg(szMsg.data(), length);
 	}
 	SetAroundBlock();
-	CMonsterEx::m_wCurHp = GetPropValue(PI_MAXHP);
+	auto* st = GetMonsterState();
+	if (st) st->wCurHp = static_cast<WORD>(GetPropValue(PI_MAXHP));
 	SendHpMpChanged();
 }
 

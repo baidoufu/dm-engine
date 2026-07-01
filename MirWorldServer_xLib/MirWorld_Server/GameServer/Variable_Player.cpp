@@ -162,7 +162,7 @@ DEFINE_SCRIPT_VAR(LOGINLONG) {
 
 DEFINE_SCRIPT_VAR(NOWTIMESTAMP) {
 	if (pPlayer == nullptr)return FALSE;
-	result.SetValue(pPlayer->GetTimeStamp());
+	result.SetValue(GetUnixTimeSec());
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(GOLD) {

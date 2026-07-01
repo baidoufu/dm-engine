@@ -362,6 +362,7 @@ VOID CClientObj::SendAddItem(ITEM& item)
 static HandlerTable g_handlerTable;
 VOID CClientObj::ProcClientMsg(PMIRMSG pMsg, int datasize)
 {
+	if (datasize < 0) return; // 防止短包导致整数下溢和堆越界读
 	if (!m_pPlayer) return;
 	HandlerTable::MsgHandler handler = g_handlerTable.GetHandler(pMsg->wCmd);
 	if (handler != nullptr)

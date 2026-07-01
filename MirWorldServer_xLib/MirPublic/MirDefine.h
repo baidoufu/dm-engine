@@ -1,6 +1,6 @@
 #pragma	once
 #include "windows.h"
-#include "time.h"
+#include <chrono>
 ///////////////////////////////////////账号消息//////////////////////////////////////////////
 
 // 注册账号
@@ -778,9 +778,9 @@ typedef struct tagITEM
 	// 更新喂养宠物时间
 	VOID SetPetTime()
 	{
-		time_t t;
-		time(&t);
-		DWORD dwT2 = static_cast<DWORD>(t);
+		// 使用 system_clock 获取 Unix 秒时间戳(替代 time()), 用于持久化
+		DWORD dwT2 = static_cast<DWORD>(std::chrono::duration_cast<std::chrono::seconds>(
+			std::chrono::system_clock::now().time_since_epoch()).count());
 		*reinterpret_cast<DWORD*>(&baseitem.wAc) = dwT2; // 直接写4字节
 	}
 	// 判断物品是否绑定

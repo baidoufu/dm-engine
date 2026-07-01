@@ -240,7 +240,11 @@ VOID CClientObj::HandleTakeOffItem(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleUseItem(PMIRMSG pMsg, int datasize)
 {
-	if (!m_pPlayer->CanUseItem()) return;
+	if (!m_pPlayer->CanUseItem())
+	{
+		m_pPlayer->SendEatFail();
+		return;
+	}
 	m_pPlayer->UseItem(pMsg->dwFlag, static_cast<DWORD>(MAKELONG(pMsg->wParam[0], pMsg->wParam[1])));
 }
 
@@ -646,8 +650,9 @@ VOID CClientObj::HandleFengHao(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 {
-	if (_stricmp(pMsg->data, "GameTimeMgr") == 0)
+	switch (str_hash(pMsg->data))  // 注意：是运行时哈希
 	{
+	case "GameTimeMgr"_hash: {
 		GameTimeMgr* pGameTimeMgr = (GameTimeMgr*)pMsg->data;
 		switch (pGameTimeMgr->btCode)
 		{
@@ -669,9 +674,9 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		}
 		break;
 		}
+		break;
 	}
-	else if (_stricmp(pMsg->data, "guildmgr") == 0)
-	{
+	case "guildmgr"_hash: {
 		Guildmgr* pGuildmgr = (Guildmgr*)pMsg->data;
 		switch (pGuildmgr->btCode)
 		{
@@ -839,9 +844,9 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		}
 		break;
 		}
+		break;
 	}
-	else if (_stricmp(pMsg->data, "expback2020") == 0)
-	{
+	case "expback2020"_hash: {
 		ExpBack* pExpBack = (ExpBack*)pMsg->data;
 		switch (pExpBack->btCode)
 		{
@@ -856,9 +861,9 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		}
 		break;
 		}
+		break;
 	}
-	else if (_stricmp(pMsg->data, "ActivityScore2014") == 0)
-	{
+	case "ActivityScore2014"_hash: {
 		ActivityScore2014* pActivityScore2014 = (ActivityScore2014*)pMsg->data;
 		switch (pActivityScore2014->btCode)
 		{
@@ -871,9 +876,9 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		}
 		break;
 		}
+		break;
 	}
-	else if (_stricmp(pMsg->data, "CheckPlayerMapJump") == 0)
-	{
+	case "CheckPlayerMapJump"_hash: {
 		MapJump* pMapJump = (MapJump*)pMsg->data;
 		switch (pMapJump->btCode)
 		{
@@ -888,18 +893,19 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		}
 		break;
 		}
+		break;
 	}
-	else if (_stricmp(pMsg->data, "LianYu18") == 0)
-	{
+	case "LianYu18"_hash: {
 		BossTJ* pBossTJ = (BossTJ*)pMsg->data;
 		if (pBossTJ->btCode == 2 && pBossTJ->nNum == 1)
 			CBossTJ::GetInstance()->SendBoss(m_pPlayer, pBossTJ->sName);
+		break;
 	}
-	else if (_stricmp(pMsg->data, "chatglog2023") == 0)
-	{
+	case "chatglog2023"_hash: {
 
+		break;
 	}
-	else
+	default:
 	{
 		char szPage[64];
 		snprintf(szPage, sizeof(szPage), "自定义界面.%s", pMsg->data);
@@ -978,6 +984,7 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 			}
 		}
 		CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), szPage);
+	}
 	}
 }
 
@@ -1264,7 +1271,7 @@ VOID CClientObj::HandleSay(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleClientTime(PMIRMSG pMsg, int datasize)
 {
-	SendMsg(m_pPlayer->GetTimeStamp(), 0x9600, 0, 0, 0);
+	SendMsg(GetUnixTimeSec(), 0x9600, 0, 0, 0);
 }
 
 VOID CClientObj::HandlePetPickup(PMIRMSG pMsg, int datasize)

@@ -29,22 +29,32 @@ inline entity_t   make_entity(entity_idx idx, entity_gen gen) { return (static_c
 struct NullComponent {};
 
 /**
- *  按组件类型的唯一 ID 生成器 (编译期确定, 通过静态局部变量实现)
+ *  按组件类型的唯一 ID 生成器 (运行期确定, 通过静态局部变量实现)
+ *
+ *  注意 (跨 DLL 风险):
+ *    component_type_counter() 使用函数内 static 变量, 每个 DLL/EXE 模块有独立副本。
+ *    若 ECS 跨模块边界使用 (如 GameServer.exe + 插件 DLL), 同一类型 T 在不同模块
+ *    会得到不同的 type_id, 导致 ECSRegistry::pools_ 索引错乱 → 类型擦除池损坏。
+ *
+ *  当前约束:
+ *    ECS 仅限单模块内使用 (GameServer.exe 内部), 不跨 DLL 边界。
+ *    若未来需跨模块, 应改用显式注册的 type_id 方案 (如全局注册表 + 名字映射),
+ *    或确保所有组件类型在单一公共头文件中定义并由主模块统一实例化 type_id。
  */
 namespace ecs_detail {
-    inline uint32_t& component_type_counter() {
-        static uint32_t counter = 0;
-        return counter;
-    }
+	inline uint32_t& component_type_counter() {
+		static uint32_t counter = 0;
+		return counter;
+	}
 
-    template<typename T>
-    inline uint32_t component_type_id() {
-        static const uint32_t id = component_type_counter()++;
-        return id;
-    }
+	template<typename T>
+	inline uint32_t component_type_id() {
+		static const uint32_t id = component_type_counter()++;
+		return id;
+	}
 }
 
 template<typename T>
 inline uint32_t get_component_type_id() {
-    return ecs_detail::component_type_id<std::decay_t<T>>();
+	return ecs_detail::component_type_id<std::decay_t<T>>();
 }

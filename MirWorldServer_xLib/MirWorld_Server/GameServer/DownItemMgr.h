@@ -26,6 +26,8 @@ public:
 	VOID UpdateDeletedObject();
 	//获取掉落物品数量
 	int	getCount() { return m_xDownItemList.getCount(); }
+	//根据ID获取掉落物品(O(1)查询)
+	CDownItemObject* GetDownItemById(UINT id) { return m_xDownItemList.getObject(id & 0xffffff); }
 	//更新掉落物品
 	VOID UpdateDownItem();
 protected:

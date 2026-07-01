@@ -281,7 +281,7 @@ VOID CMagicManager::LoadMaigcskill(const char* pszMagicFile)
 					}
 					magic.skills.push_back(skill);
 				}
-				magics.emplace(magic.id, magic);
+				magics[magic.id] = magic;
 			}
 		}
 	}

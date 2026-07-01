@@ -341,7 +341,7 @@ BOOL CHumanPlayer::DoUpgradeWeapon()
 		return FALSE;
 	}
 
-	if (m_UpgradeItem.dwMakeIndex != 0)
+	if (GetUpgradeItemComp()->Item.dwMakeIndex != 0)
 	{
 		SaySystem(getstrings(SD_ONEWEAPONISUPGRADING));
 		return FALSE;
@@ -350,8 +350,8 @@ BOOL CHumanPlayer::DoUpgradeWeapon()
 #ifdef _DEBUG
 	SaySystem("武器升级次数: %u 次", pWeapon->baseitem.btUpgradeTimes);
 #endif
-	static thread_local std::array<ITEM, 100> dwMatrial{};
-	DWORD dwMatrialCount = 0;
+	static thread_local std::array<ITEM, 100> s_arrMaterial{};
+	DWORD arrMaterialCount = 0;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -366,26 +366,32 @@ BOOL CHumanPlayer::DoUpgradeWeapon()
 				p->baseitem.btStdMode == ISM_BRACELET0 ||
 				p->baseitem.btStdMode == ISM_BRACELET1))
 			{
-				dwMatrial[dwMatrialCount++] = *p;
-				wDc1 += p->baseitem.btMinAtk;
-				wDc2 += p->baseitem.btMaxAtk;
-				wMc1 += p->baseitem.btMinMagAtk;
-				wMc2 += p->baseitem.btMaxMagAtk;
-				wSc1 += p->baseitem.btMinSouAtk;
-				wSc2 += p->baseitem.btMaxSouAtk;
-				if (p->baseitem.btStdMode == ISM_NECKLACE1 || p->baseitem.btStdMode == ISM_BRACELET0)
+				if (arrMaterialCount < 100)
 				{
-					wHitrate += p->baseitem.btMaxDef;
+					s_arrMaterial[arrMaterialCount++] = *p;
+					wDc1 += p->baseitem.btMinAtk;
+					wDc2 += p->baseitem.btMaxAtk;
+					wMc1 += p->baseitem.btMinMagAtk;
+					wMc2 += p->baseitem.btMaxMagAtk;
+					wSc1 += p->baseitem.btMinSouAtk;
+					wSc2 += p->baseitem.btMaxSouAtk;
+					if (p->baseitem.btStdMode == ISM_NECKLACE1 || p->baseitem.btStdMode == ISM_BRACELET0)
+					{
+						wHitrate += p->baseitem.btMaxDef;
+					}
 				}
 			}
 			else if (p->baseitem.btStdMode == ISM_MINE && strncmp(p->baseitem.szName, CGameWorld::GetInstance()->GetName(ENI_UPGRADEMINESTONE), p->baseitem.btNameLength) == 0 /* p->baseitem.btShape == CGameWorld::GetInstance()->GetVar( EVI_SHAPE_BLACKSTONE )*/)		//	黑铁矿
 			{
-				dwMatrial[dwMatrialCount++] = *p;
-				dwDura += p->wCurDura > p->wMaxDura ? (p->wCurDura - p->wMaxDura) * 2 : 1;
+				if (arrMaterialCount < 100)
+				{
+					s_arrMaterial[arrMaterialCount++] = *p;
+					dwDura += p->wCurDura > p->wMaxDura ? (p->wCurDura - p->wMaxDura) * 2 : 1;
+				}
 			}
 		}
 	}
-	if (dwMatrialCount == 0)
+	if (arrMaterialCount == 0)
 	{
 		SaySystem(getstrings(SD_WEAPONUPGRADENOENOUGHMATRIAL));
 		return FALSE;
@@ -441,31 +447,31 @@ BOOL CHumanPlayer::DoUpgradeWeapon()
 	pWeapon->dwParam[0] = mask.dwValue;
 	pWeapon->baseitem.bNeedIdentify = 1;
 	//	如果是临时物品, 就等更新物品的时候更新到数据库,否则, 更新到数据库
-	if (!m_Equipments.UnEquipItem(_U_WEAPON, m_UpgradeItem))
+	if (!m_Equipments.UnEquipItem(_U_WEAPON, GetUpgradeItemComp()->Item))
 	{
 		pWeapon->dwParam[0] = 0;
 		pWeapon->baseitem.bNeedIdentify = 0;
 		return FALSE;
 	}
 
-	if (!CItemManager::GetInstance()->UpgradeItem(m_UpgradeItem))
+	if (!CItemManager::GetInstance()->UpgradeItem(GetUpgradeItemComp()->Item))
 	{
 		pWeapon->dwParam[0] = 0;
 		pWeapon->baseitem.bNeedIdentify = 0;
-		m_Equipments.EquipItem(_U_WEAPON, m_UpgradeItem, m_UpgradeItem, TRUE);
+		m_Equipments.EquipItem(_U_WEAPON, GetUpgradeItemComp()->Item, GetUpgradeItemComp()->Item, TRUE);
 		return FALSE;
 	}
 
-	for (DWORD i = 0; i < dwMatrialCount; i++)
+	for (DWORD i = 0; i < arrMaterialCount; i++)
 	{
-		if (dwMatrial[i].dwMakeIndex != 0)
+		if (s_arrMaterial[i].dwMakeIndex != 0)
 		{
-			DeleteBagItem(&dwMatrial[i]);
-			SendTakeBagItem(&dwMatrial[i]);
-			CItemManager::GetInstance()->DeleteItem(dwMatrial[i].dwMakeIndex);
+			DeleteBagItem(&s_arrMaterial[i]);
+			SendTakeBagItem(&s_arrMaterial[i]);
+			CItemManager::GetInstance()->DeleteItem(s_arrMaterial[i].dwMakeIndex);
 		}
 	}
-	SendTakeBagItem(&m_UpgradeItem);
+	SendTakeBagItem(&GetUpgradeItemComp()->Item);
 	return TRUE;
 }
 
@@ -831,16 +837,16 @@ BOOL CHumanPlayer::DoMine(int dir, int x, int y)
 	//	如果可以挖矿, 那么就显示矿渣, 并且判断是否得到矿石
 	if (pMap->IsFlagSeted(MF_MINE, dwParam))
 	{
-		m_dwMineCounter++;
+		_mineCounter()++;
 		UpdateMineEffect();
-		if ((m_dwMineCounter % (4)) == 0)
+		if ((_mineCounter() % (4)) == 0)
 		{
 			if (m_pClientObj) m_pClientObj->PostMsg("#+DIG!", 6);
 		}
-		if (m_dwMineCounter >= (dwParam / 2 + Getrand(dwParam + 1)))
+		if (_mineCounter() >= (dwParam / 2 + Getrand(dwParam + 1)))
 		{
 			pMap->GotMineItem(this);
-			m_dwMineCounter = 0;
+			_mineCounter() = 0;
 		}
 	}
 	else
@@ -1082,14 +1088,14 @@ VOID CHumanPlayer::OnDamageTarget(CAliveObject* pTarget, int nDamage, damage_typ
 
 BOOL CHumanPlayer::TakeUpgradeWeapon()
 {
-	if (m_UpgradeItem.dwMakeIndex == 0)
+	if (GetUpgradeItemComp()->Item.dwMakeIndex == 0)
 	{
 		SaySystem(getstrings(SD_NOUPGRADEWEAPON));
 		return FALSE;
 	}
-	if (AddBagItem(m_UpgradeItem, FALSE, TRUE))
+	if (AddBagItem(GetUpgradeItemComp()->Item, FALSE, TRUE))
 	{
-		memset(&m_UpgradeItem, 0, sizeof(ITEM));
+		memset(&GetUpgradeItemComp()->Item, 0, sizeof(ITEM));
 	}
 	return TRUE;
 }
@@ -1137,7 +1143,7 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 	szItemName[14] = 0;
 	if (_stricmp(szItemName, "豹魔石") == 0)
 		m_baozhiID = dwItemIndex;
-	ITEMCLASS* pClass = CItemManager::GetInstance()->GetItemClassByName(szItemName);
+	ITEMCLASS* pClass = pItemClass; // 复用已查询的pItemClass, 避免双重查询不一致
 	if (pClass && pClass->wPageId != 0)
 	{
 		const char* pszPage = CItemManager::GetInstance()->GetStringFromPool(pClass->wPageId);
@@ -1145,12 +1151,14 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 		{
 			DWORD saveindex = pItem->dwMakeIndex;
 			pItem->dwParam[3] = UR_NORESULT;
-				CSystemScript::GetInstance()->Execute(this->GetScriptTarget(), pszPage, FALSE);
+			CSystemScript::GetInstance()->Execute(this->GetScriptTarget(), pszPage, FALSE);
 			// 如果当前使用的物品已经被清空
 			if (pItem->dwParam[3] == UR_DELETED)
 			{
+				ITEM itemSnapshot = *m_pUsingItem;
 				DeleteBagItem(m_pUsingItem);
 				CItemManager::GetInstance()->DeleteItem(saveindex);
+				SendTakeBagItem(&itemSnapshot);
 				SendEatOk();
 			}
 			else
@@ -1205,7 +1213,7 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 			}
 		}
 		break;
-		case 2:	//	随机
+		case 2:	//	随机卷
 		{
 			if (m_pMap == nullptr || m_pMap->IsFlagSeted(MF_NORANDOMMOVE))
 			{
@@ -1216,7 +1224,7 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 				AddProcess(EP_RANDOMTELEPORT, 0, 0, 0, 0, 100, 0, nullptr);
 		}
 		break;
-		case 3:	//	回城
+		case 3:	//	回城卷
 		{
 			if (m_pMap == nullptr || m_pMap->IsFlagSeted(MF_NOHOME))
 			{
@@ -1236,11 +1244,12 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 				BYTE& b1 = pWeapon->baseitem.Ac1;
 				BYTE& b2 = pWeapon->baseitem.Mac1;
 				BOOL bChanged = FALSE;
-				if (b1 >= 9 || b2 >= 9) 
-				{
-					SaySystemAttrib(CC_RED, getstrings(SD_YOURWEAPONGOTFAIL));
-					break;
-				}
+				if (b1 >= 9 || b2 >= 9)
+			{
+				SaySystemAttrib(CC_RED, getstrings(SD_YOURWEAPONGOTFAIL));
+				bSuccess = FALSE; // 已达上限不应消耗物品
+				break;
+			}
 				int nRand = Getrand(100);
 				if (nRand < 8) //诅咒计算
 				{
@@ -1346,6 +1355,9 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 			case 208: //魔力强效神水
 				AddProcess(EP_SPECIALPOTION, 5, pItem->baseitem.Mac1, nTime, 0, nTime, 2, nullptr, TRUE);
 			break;
+			default: // 未知类型不消耗物品
+				bSuccess = FALSE;
+				break;
 			}
 		}
 		break;
@@ -1374,12 +1386,18 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 			SendHpMpChanged(-pItem->baseitem.btMinDef);
 		}
 		else if (pItem->baseitem.btShape == 5)
-		{ 
+		{
 			if (pItem->baseitem.wImageIndex == 751 && pItem->baseitem.wMc > 0) // 强化技能灵丹
 			{
 				USERMAGIC* pMagic = GetMagic(dwPackIndex); // dwPackIndex这是技能序号
 				if (pMagic && this->TrainMagic(pMagic, pItem->baseitem.wMc))
 					SaySystem("%s 技能在强化技能灵丹作用下增加了%d点经验!", pMagic->pClass->szName, pItem->baseitem.wMc);
+				else
+					bSuccess = FALSE; // 技能无效或训练失败不消耗物品
+			}
+			else
+			{
+				bSuccess = FALSE; // 非强化灵丹或配置异常不消耗物品
 			}
 		}
 		else if (pItem->baseitem.btShape == 200)
@@ -1396,15 +1414,15 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 					}
 					//每次加btMinDef点,总共加wDc秒
 					AddProcess(EP_RECOVERHP, pItem->baseitem.btMinDef, 0, 0, 0, 1000, pItem->baseitem.wDc);
-					SendMsg(GetId(), 510, 1, 1, 1);
-					pItem->wCurDura--;
-					if (pItem->wCurDura == 0)
-						bSuccess = TRUE;
-					else
-					{
-						bSuccess = FALSE;
-						bUpdateItem = TRUE;
-					}
+				SendMsg(GetId(), 510, 1, 1, 1);
+				pItem->wCurDura--;
+				if (pItem->wCurDura == 0)
+					bSuccess = TRUE;
+				else
+				{
+					bSuccess = FALSE;
+					bUpdateItem = TRUE;
+				}
 				}
 			}
 			//深海灵礁
@@ -1419,15 +1437,15 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 					}
 					//每次加btMinMagDef点,总共加wMac秒
 					AddProcess(EP_RECOVERMP, pItem->baseitem.btMinMagDef, 0, 0, 0, 1000, pItem->baseitem.wDc);
-					SendMsg(GetId(), 510, 1, 1, 2);
-					pItem->wCurDura--;
-					if (pItem->wCurDura == 0)
-						bSuccess = TRUE;
-					else
-					{
-						bSuccess = FALSE;
-						bUpdateItem = TRUE;
-					}
+				SendMsg(GetId(), 510, 1, 1, 2);
+				pItem->wCurDura--;
+				if (pItem->wCurDura == 0)
+					bSuccess = TRUE;
+				else
+				{
+					bSuccess = FALSE;
+					bUpdateItem = TRUE;
+				}
 				}
 			}
 		}
@@ -1565,18 +1583,22 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 	}
 	if (bSuccess)
 	{
+		ITEM itemSnapshot = *m_pUsingItem;
 		DeleteBagItem(m_pUsingItem);
 		CItemManager::GetInstance()->DeleteItem(dwItemIndex);
+		SendTakeBagItem(&itemSnapshot);
 		SendEatOk();
+		pItem = nullptr; // 防止UAF, DeleteBagItem已释放pItem内存
 	}
 	else
 		SendEatFail();
-	if (bUpdateItem)
-	{ 
+	if (bUpdateItem && pItem != nullptr) // 增加判空, 防止bSuccess时UAF
+	{
 		SendUpdateItem(*pItem); // 更新物品
 		CItemManager::GetInstance()->AddItemModifyFlag(*pItem, ITEMMODIFY_DURACHANGED);
 	}
 	m_pUsingItem = nullptr;
+	m_pPackItem = nullptr; // 清理关联物品指针, 防止悬挂
 }
 
 BOOL CHumanPlayer::DoTrainHorse(int dir, int x, int y)
@@ -1653,17 +1675,17 @@ ITEM* CHumanPlayer::GetEquipment(const char* pszName, int& posout)
 }
 
 #include "humanplayermgr.h"
-BOOL CHumanPlayer::AddTeacherCredit(UINT nCount)const
+BOOL CHumanPlayer::AddTeacherCredit(UINT nCount)
 {
-	if (this->m_sMaster[0] == 0)return FALSE;
-	CHumanPlayer* pMaster = CHumanPlayerMgr::GetInstance()->FindbyName(m_sMaster.data());
+	if (this->_master()[0] == 0)return FALSE;
+	CHumanPlayer* pMaster = CHumanPlayerMgr::GetInstance()->FindbyName(_master().data());
 	if (pMaster)
 		return pMaster->GiveCredit(nCount);
 	else
 	{
 		CDBClientObj* pObj = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 		if (pObj)
-			pObj->SendAddCredit(m_sMaster.data(), nCount);
+			pObj->SendAddCredit(_master().data(), nCount);
 	}
 	return TRUE;
 }
@@ -1754,19 +1776,19 @@ BOOL CHumanPlayer::CutBody(UINT nMonsterId, WORD x, WORD y, WORD dir)
 	if (!pMonster->IsDeath() || pMonster->IsSystemFlagSeted(SF_BONE))return FALSE;
 	if (x != pMonster->getX() || y != pMonster->getY())return FALSE;
 
-	if (nMonsterId != this->m_nCutMonsterId)
+	if (nMonsterId != this->_cutMonsterId())
 	{
-		this->m_nCutMonsterId = nMonsterId;
-		this->m_nCutTimes = 1;
+		this->_cutMonsterId() = nMonsterId;
+		this->_cutTimes() = 1;
 	}
 	else
-		this->m_nCutTimes++;
+		this->_cutTimes()++;
 
 	UINT nReachTimes = pMonster->GetPropValue(PI_LEVEL) / 5 + 2;
-	if (this->m_nCutTimes >= nReachTimes)
+	if (this->_cutTimes() >= nReachTimes)
 	{
-		this->m_nCutMonsterId = 0;
-		this->m_nCutTimes = 0;
+		this->_cutMonsterId() = 0;
+		this->_cutTimes() = 0;
 		pMonster->OnCuted(this);
 	}
 	return TRUE;
@@ -1801,7 +1823,7 @@ BOOL CHumanPlayer::CheckMaterial(BYTE stdMode, BYTE shape, BYTE special, int nCo
 		{
 			if (CItemManager::GetInstance()->CheckDura(*pItem, nCount))
 			{
-				m_nMaterialBagPos = i;
+				_materialBagPos() = i;
 				return TRUE;
 			}
 		}
@@ -1836,9 +1858,9 @@ VOID CHumanPlayer::TakeMaterial(BYTE stdMode, BYTE shape, BYTE special, int nCou
 	}
 	if (bOk)
 		DamageMaterialDura(pos, nCount);
-	else if (m_nMaterialBagPos >= 0) // 检查是否是从背包中使用材料
+	else if (_materialBagPos() >= 0) // 检查是否是从背包中使用材料
 	{
-		ITEM* pItem = m_ItemBox.GetItem(m_nMaterialBagPos);
+		ITEM* pItem = m_ItemBox.GetItem(_materialBagPos());
 		if (pItem && pItem->baseitem.btStdMode == stdMode && pItem->baseitem.btShape == shape &&
 			pItem->baseitem.btSpecialpower == special)
 		{
@@ -1850,18 +1872,18 @@ VOID CHumanPlayer::TakeMaterial(BYTE stdMode, BYTE shape, BYTE special, int nCou
 			}
 			if (pItem->dwParam[3] == UR_UPDATED)
 				SendUpdateItem(*pItem);
-			m_nMaterialBagPos = -1; // 重置位置标记
+			_materialBagPos() = -1; // 重置位置标记
 		}
 	}
 }
 
-VOID CHumanPlayer::GetPrivateShopView(PRIVATESHOPHEADER& header)const
+VOID CHumanPlayer::GetPrivateShopView(PRIVATESHOPHEADER& header)
 {
-	o_strncpy(header.szName, m_szPrivateShopName.data(), 50);
-	header.dw1 = this->m_wPrivateShopSign;
-	header.w1 = this->m_wPrivateShopStyle;
+	o_strncpy(header.szName, _shopName().data(), 50);
+	header.dw1 = this->_shopSign();
+	header.w1 = this->_shopStyle();
 	header.w2 = 0;
-	header.btFlag = static_cast<BYTE>(this->m_wPrivateShopFlags);
+	header.btFlag = static_cast<BYTE>(this->_shopFlags());
 }
 
 VOID CHumanPlayer::SendStartPrivateShop()
@@ -1919,127 +1941,127 @@ VOID CHumanPlayer::SetBagItemPos(BAGITEMPOS* pPosArray, int count)
 	}
 }
 
-static thread_local std::array<ITEM, 100> items_t1{};
+static thread_local std::array<ITEM, 100> s_dbSyncItems{};
 WORD CHumanPlayer::GetBagItemPos(DWORD dwMakeIndex)
 {
 	int count = 0;
-	count = m_ItemBox.GetItems(items_t1.data(), 100);
+	count = m_ItemBox.GetItems(s_dbSyncItems.data(), 100);
 	ITEM* pItem = nullptr;
 	for(int i = 0;i < count;i ++ )
 	{
-		if(items_t1[i].dwMakeIndex == dwMakeIndex )
+		if(s_dbSyncItems[i].dwMakeIndex == dwMakeIndex )
 		{
-			pItem = m_ItemBox.FindItem(items_t1[i].dwMakeIndex);
+			pItem = m_ItemBox.FindItem(s_dbSyncItems[i].dwMakeIndex);
 			return static_cast<WORD>(pItem->dwParam[2]);
 		}
 	}
 	return 0;
 }
 
-static thread_local std::array<DBITEM, 100> items_t2{};
-static thread_local std::array<BAGITEMPOS, 100> itemspos_t1{};
+static thread_local std::array<DBITEM, 100> s_dbSyncDst{};
+static thread_local std::array<BAGITEMPOS, 100> s_dbSyncPos{};
 VOID CHumanPlayer::UpdateItemsToDB()
 {
 	int count = 0;
-	count = m_ItemBox.GetItems(items_t1.data(), 100);
+	count = m_ItemBox.GetItems(s_dbSyncItems.data(), 100);
 	int updatecount = 0;
 	int uposcount = 0;
 	for (int i = 0; i < count; i++)
 	{
-		if (items_t1[i].dwMakeIndex & 0x80000000)
+		if (s_dbSyncItems[i].dwMakeIndex & 0x80000000)
 		{
-			CItemManager::GetInstance()->DeleteItem(items_t1[i].dwMakeIndex);
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_TRACEDITEM))
+			CItemManager::GetInstance()->DeleteItem(s_dbSyncItems[i].dwMakeIndex);
+			if (CItemManager::GetInstance()->ItemLimited(s_dbSyncItems[i], IL_NOUPDATETODB))continue;
+			if (CItemManager::GetInstance()->ItemLimited(s_dbSyncItems[i], IL_TRACEDITEM))
 			{
-				DropItem(items_t1[i]);
+				DropItem(s_dbSyncItems[i]);
 				continue;
 			}
-			items_t2[updatecount].item = items_t1[i];
-			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = static_cast<WORD>(items_t1[i].dwParam[2]);
+			s_dbSyncDst[updatecount].item = s_dbSyncItems[i];
+			s_dbSyncDst[updatecount].btFlag = 0;
+			s_dbSyncDst[updatecount].pos = static_cast<WORD>(s_dbSyncItems[i].dwParam[2]);
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = static_cast<BYTE>(items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = static_cast<BYTE>(s_dbSyncItems[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
-				items_t2[updatecount].item = items_t1[i];
-				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = static_cast<WORD>(items_t1[i].dwParam[2]);
+				s_dbSyncDst[updatecount].item = s_dbSyncItems[i];
+				s_dbSyncDst[updatecount].btFlag = btFlag;
+				s_dbSyncDst[updatecount].pos = static_cast<WORD>(s_dbSyncItems[i].dwParam[2]);
 				updatecount++;
 			}
 			else
 			{
-				itemspos_t1[uposcount].ItemId = items_t1[i].dwMakeIndex;
-				itemspos_t1[uposcount].wPos = static_cast<WORD>(items_t1[i].dwParam[2]);
+				s_dbSyncPos[uposcount].ItemId = s_dbSyncItems[i].dwMakeIndex;
+				s_dbSyncPos[uposcount].wPos = static_cast<WORD>(s_dbSyncItems[i].dwParam[2]);
 				uposcount++;
 			}
 		}
 	}
 	if (updatecount > 0)
-		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_BAG, items_t2.data(), updatecount);
+		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_BAG, s_dbSyncDst.data(), updatecount);
 
 	//背包的其他物品的位置要更新～
 	if (uposcount > 0)
-		CItemManager::GetInstance()->UpdateItemPos(IDF_BAG, itemspos_t1.data(), uposcount);
+		CItemManager::GetInstance()->UpdateItemPos(IDF_BAG, s_dbSyncPos.data(), uposcount);
 	//仓库数据
-	count = m_ItemBank.GetItems(items_t1.data(), 100);
+	count = m_ItemBank.GetItems(s_dbSyncItems.data(), 100);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
-		if (items_t1[i].dwMakeIndex & 0x80000000)
+		if (s_dbSyncItems[i].dwMakeIndex & 0x80000000)
 		{
-			CItemManager::GetInstance()->DeleteItem(items_t1[i].dwMakeIndex);
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
-			items_t2[updatecount].item = items_t1[i];
-			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = i;
+			CItemManager::GetInstance()->DeleteItem(s_dbSyncItems[i].dwMakeIndex);
+			if (CItemManager::GetInstance()->ItemLimited(s_dbSyncItems[i], IL_NOUPDATETODB))continue;
+			s_dbSyncDst[updatecount].item = s_dbSyncItems[i];
+			s_dbSyncDst[updatecount].btFlag = 0;
+			s_dbSyncDst[updatecount].pos = i;
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = (items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = (s_dbSyncItems[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
-				items_t2[updatecount].item = items_t1[i];
-				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = i;
+				s_dbSyncDst[updatecount].item = s_dbSyncItems[i];
+				s_dbSyncDst[updatecount].btFlag = btFlag;
+				s_dbSyncDst[updatecount].pos = i;
 				updatecount++;
 			}
 		}
 	}
 	if (updatecount > 0)
-		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_BANK, items_t2.data(), updatecount);
+		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_BANK, s_dbSyncDst.data(), updatecount);
 	//	宠物背包
-	count = m_ItemPetBag.GetItems(items_t1.data(), 100);
+	count = m_ItemPetBag.GetItems(s_dbSyncItems.data(), 100);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
-		if (items_t1[i].dwMakeIndex & 0x80000000)
+		if (s_dbSyncItems[i].dwMakeIndex & 0x80000000)
 		{
-			CItemManager::GetInstance()->DeleteItem(items_t1[i].dwMakeIndex);
-			if (CItemManager::GetInstance()->ItemLimited(items_t1[i], IL_NOUPDATETODB))continue;
-			items_t2[updatecount].item = items_t1[i];
-			items_t2[updatecount].btFlag = 0;
-			items_t2[updatecount].pos = i;
+			CItemManager::GetInstance()->DeleteItem(s_dbSyncItems[i].dwMakeIndex);
+			if (CItemManager::GetInstance()->ItemLimited(s_dbSyncItems[i], IL_NOUPDATETODB))continue;
+			s_dbSyncDst[updatecount].item = s_dbSyncItems[i];
+			s_dbSyncDst[updatecount].btFlag = 0;
+			s_dbSyncDst[updatecount].pos = i;
 			updatecount++;
 		}
 		else
 		{
-			BYTE btFlag = (items_t1[i].baseitem.wFeature & 0x00f0);
+			BYTE btFlag = (s_dbSyncItems[i].baseitem.wFeature & 0x00f0);
 			if (btFlag != 0)
 			{
-				items_t2[updatecount].item = items_t1[i];
-				items_t2[updatecount].btFlag = btFlag;
-				items_t2[updatecount].pos = i;
+				s_dbSyncDst[updatecount].item = s_dbSyncItems[i];
+				s_dbSyncDst[updatecount].btFlag = btFlag;
+				s_dbSyncDst[updatecount].pos = i;
 				updatecount++;
 			}
 		}
 	}
 	if (updatecount > 0)
-		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_PETBANK, items_t2.data(), updatecount);
+		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_PETBANK, s_dbSyncDst.data(), updatecount);
 	//穿戴装备数据
 	ITEM* pEquipment = nullptr;
 	updatecount = 0;
@@ -2052,9 +2074,9 @@ VOID CHumanPlayer::UpdateItemsToDB()
 			{
 				CItemManager::GetInstance()->DeleteItem(pEquipment->dwMakeIndex);
 				if (CItemManager::GetInstance()->ItemLimited(*pEquipment, IL_NOUPDATETODB))continue;
-				items_t2[updatecount].item = *pEquipment;
-				items_t2[updatecount].btFlag = 0;
-				items_t2[updatecount].pos = i;
+				s_dbSyncDst[updatecount].item = *pEquipment;
+				s_dbSyncDst[updatecount].btFlag = 0;
+				s_dbSyncDst[updatecount].pos = i;
 				updatecount++;
 			}
 			else
@@ -2062,26 +2084,26 @@ VOID CHumanPlayer::UpdateItemsToDB()
 				BYTE btFlag = (pEquipment->baseitem.wFeature & 0x00f0);
 				if (btFlag != 0)
 				{
-					items_t2[updatecount].item = *pEquipment;
-					items_t2[updatecount].btFlag = btFlag;
-					items_t2[updatecount].pos = i;
+					s_dbSyncDst[updatecount].item = *pEquipment;
+					s_dbSyncDst[updatecount].btFlag = btFlag;
+					s_dbSyncDst[updatecount].pos = i;
 					updatecount++;
 				}
 			}
 		}
 	}
 	if (updatecount > 0)
-		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_EQUIPMENT, items_t2.data(), updatecount);
+		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_EQUIPMENT, s_dbSyncDst.data(), updatecount);
 	//	存储升级临时武器的物品
-	if ((this->m_UpgradeItem.dwMakeIndex & 0x80000000) &&
-		!CItemManager::GetInstance()->ItemLimited(this->m_UpgradeItem, IL_NOUPDATETODB))
+	if ((this->GetUpgradeItemComp()->Item.dwMakeIndex & 0x80000000) &&
+		!CItemManager::GetInstance()->ItemLimited(this->GetUpgradeItemComp()->Item, IL_NOUPDATETODB))
 	{
 		updatecount = 0;
-		items_t2[updatecount].item = m_UpgradeItem;
-		items_t2[updatecount].btFlag = 0;
-		items_t2[updatecount].pos = 0;
+		s_dbSyncDst[updatecount].item = GetUpgradeItemComp()->Item;
+		s_dbSyncDst[updatecount].btFlag = 0;
+		s_dbSyncDst[updatecount].pos = 0;
 		updatecount++;
-		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_UPGRADE, items_t2.data(), updatecount);
+		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_UPGRADE, s_dbSyncDst.data(), updatecount);
 	}
 }
 

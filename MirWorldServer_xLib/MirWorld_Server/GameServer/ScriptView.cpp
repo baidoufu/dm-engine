@@ -18,15 +18,15 @@ CScriptView::~CScriptView(VOID)
 	m_xScriptPacket.destroy();
 }
 
-static std::array<char, 65536> g_szTempBuffer{};
+static std::array<char, 65536> s_szTempBuffer{};
 BOOL CScriptView::AppendWordsEx(const char* pszWords, ...)
 {
 	va_list	vl;
 	va_start(vl, pszWords);
-	vsnprintf(g_szTempBuffer.data(), g_szTempBuffer.size(), pszWords, vl);
+	vsnprintf(s_szTempBuffer.data(), s_szTempBuffer.size(), pszWords, vl);
 	va_end(vl);
-	g_szTempBuffer[g_szTempBuffer.size() - 1] = 0;
-	return AppendWords(g_szTempBuffer.data());
+	s_szTempBuffer[s_szTempBuffer.size() - 1] = 0;
+	return AppendWords(s_szTempBuffer.data());
 }
 
 CScriptPageView::CScriptPageView(CScriptShell* pShell) : CScriptView(pShell)

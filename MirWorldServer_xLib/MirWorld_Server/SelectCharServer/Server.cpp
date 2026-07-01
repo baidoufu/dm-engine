@@ -43,9 +43,9 @@ VOID CServer::Update()
 	}
 	const DWORD dwUpdateKey = GetUpdateKey();
 	if ((dwUpdateKey & 1) == 0)
-		UpdateSCServer(); // 偶数帧：处理服务中心消息
-	else
 		UpdateDBServer(); // 奇数帧：处理数据中心消息
+	else
+		UpdateSCServer(); // 偶数帧：处理服务中心消息
 	// 定期清理过期的登录条目（每100帧执行一次）
 	static DWORD s_cleanupCounter = 0;
 	if (++s_cleanupCounter >= 100)

@@ -357,6 +357,7 @@ static int GetMsgFromString(std::string_view sv, char* pMsgBuffer)
 	char* pMsg = pMsgBuffer;
 	std::array<char, 1024> szBinBuffer{};
 	int binPtr = 0;
+	const int binCap = static_cast<int>(szBinBuffer.size()); // 缓冲区容量上限, 用于边界校验防溢出
 
 	// 使用 string_view 按 '|' 分割，不修改原始字符串
 	std::array<std::string_view, 200> tokens{};
@@ -393,6 +394,7 @@ static int GetMsgFromString(std::string_view sv, char* pMsgBuffer)
 
 	for (int i = 5; i < nParam; i++)
 	{
+		if (binPtr >= binCap) break; // 缓冲区已满, 终止写入防溢出
 		auto token = tokens[i];
 		if (token.size() >= 2 && token[1] == ':')
 		{
@@ -401,20 +403,31 @@ static int GetMsgFromString(std::string_view sv, char* pMsgBuffer)
 			switch (typeChar)
 			{
 			case 'w': case 'W':
+				if (binPtr + 2 > binCap) { binPtr = binCap; break; } // 越界则标记满并跳出
 				*reinterpret_cast<WORD*>(szBinBuffer.data() + binPtr) = static_cast<WORD>(svToInt(value));
 				binPtr += 2;
 				break;
 			case 'D': case 'd':
+				if (binPtr + 4 > binCap) { binPtr = binCap; break; }
 				*reinterpret_cast<DWORD*>(szBinBuffer.data() + binPtr) = static_cast<DWORD>(svToInt(value));
 				binPtr += 4;
 				break;
 			case 'B': case 'b':
+				if (binPtr + 1 > binCap) { binPtr = binCap; break; }
 				*reinterpret_cast<BYTE*>(szBinBuffer.data() + binPtr) = static_cast<BYTE>(svToInt(value));
 				binPtr += 1;
 				break;
 			case 's': case 'S':
-				memcpy(szBinBuffer.data() + binPtr, value.data(), value.size());
-				binPtr += static_cast<int>(value.size());
+				{
+					// 字符串写入: 超长则截断到剩余容量, 避免栈缓冲区溢出
+					int n = static_cast<int>(value.size());
+					if (n > binCap - binPtr) n = binCap - binPtr;
+					if (n > 0)
+					{
+						memcpy(szBinBuffer.data() + binPtr, value.data(), n);
+						binPtr += n;
+					}
+				}
 				break;
 			default:
 				break;
@@ -422,12 +435,20 @@ static int GetMsgFromString(std::string_view sv, char* pMsgBuffer)
 			continue;
 		}
 		// 无类型前缀，直接作为字符串
-		memcpy(szBinBuffer.data() + binPtr, token.data(), token.size());
-		binPtr += static_cast<int>(token.size());
+		{
+			int n = static_cast<int>(token.size());
+			if (n > binCap - binPtr) n = binCap - binPtr;
+			if (n > 0)
+			{
+				memcpy(szBinBuffer.data() + binPtr, token.data(), n);
+				binPtr += n;
+			}
+		}
 	}
 	if (binPtr > 0)
 	{
-		*(szBinBuffer.data() + binPtr) = 0;
+		if (binPtr < binCap)
+			*(szBinBuffer.data() + binPtr) = 0; // 仅在有空位时写结尾 0, 防越界
 		pMsg += _CodeGameCode(reinterpret_cast<BYTE*>(szBinBuffer.data()), binPtr, reinterpret_cast<BYTE*>(pMsg));
 	}
 	*pMsg++ = '!';

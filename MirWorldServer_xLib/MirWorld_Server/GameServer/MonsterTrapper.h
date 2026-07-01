@@ -70,9 +70,14 @@ public:
 	DWORD GetTrappedCount()const { return m_dwMonsterCount; }
 	// 增加捕获的怪物数量
 	VOID AddTrappedCount() { m_dwMonsterCount++; }
+	// 标记延迟销毁（解决 SRLock→SWLock 死锁）
+	VOID SetPendingDestroy() { m_bPendingDestroy = TRUE; }
+	// 检查是否需要延迟销毁
+	BOOL IsPendingDestroy()const { return m_bPendingDestroy; }
 private:
 	DWORD m_dwMonsterCount; // 捕获的怪物数量
 	BOOL m_bFailed; // 是否失败
+	BOOL m_bPendingDestroy; // 延迟销毁标志
 	int	m_nDamage; // 伤害值
 	DWORD m_dwLastTime; // 持续时间
 	DWORD m_dwOwnerInstanceKey; // 所有者实例键值

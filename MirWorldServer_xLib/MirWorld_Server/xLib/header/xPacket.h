@@ -180,6 +180,8 @@ public:
 	static xPacket* Alloc(int size = DEFAULT_PACKET_SIZE);
 	static xPacket* Alloc(char* pbuf, int size = DEFAULT_PACKET_SIZE);
 	static VOID Free(xPacket* pkt);
+	// 必须在可能退出的工作线程(如DB查询线程)退出前调用
+	static VOID DrainThreadLocal();
 	// RAII 包装类
 	class ScopedPacket
 	{

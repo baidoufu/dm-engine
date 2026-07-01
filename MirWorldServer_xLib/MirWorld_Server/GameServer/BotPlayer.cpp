@@ -17,6 +17,7 @@ CBotPlayer::CBotPlayer(VOID) : CHumanPlayer()
 	m_pBehaviorTree = nullptr;
 	m_bRunning = FALSE;
 	m_bPaused = FALSE;
+	m_dwDeathTime = 0;
 	m_dwThinkInterval = 500;    // 默认500ms思考一次
 	m_dwIdleChance = 5;         // 5%概率发呆
 	m_dwChatChance = 2;         // 2%概率聊天
@@ -157,9 +158,8 @@ VOID CBotPlayer::Update()
 	if (!m_bRunning || m_bPaused)
 		return;
 
-	// 帧级预计算：刷新时间戳和目标缓存（无论是否跑 BT，为状态判定提供最新数据）
+	// 帧级预计算：刷新帧时间缓存（轻量操作，每次Update都做）
 	m_pContext->SetFrameTime(dwNow);
-	m_pContext->PrecomputeTarget();
 
 	// 自适应思考间隔：战斗中400ms / 巡逻1000ms / 安全区3000ms / 死亡跳过
 	DWORD dwBaseInterval = ComputeThinkInterval();
@@ -168,6 +168,9 @@ VOID CBotPlayer::Update()
 	if (!m_tmrThinkInterval.IsTimeOut(dwActualInterval))
 		return;
 	m_tmrThinkInterval.Savetime();
+
+	// 预计算目标
+	m_pContext->PrecomputeTarget();
 	// 随机发呆（模拟真人行为）
 	/*if (CBotHumanBehavior::ShouldIdle(m_dwIdleChance))
 		return;*/
@@ -195,8 +198,12 @@ BOOL CBotPlayer::CanRecvMsg()
 // ============================================================================
 DWORD CBotPlayer::ComputeThinkInterval()
 {
-	if (IsDeath() || !m_pContext)
+	if (!m_pContext)
 		return 0;
+
+	// 死亡时返回较小间隔，使行为树死亡复活序列可继续执行（非0）
+	if (IsDeath())
+		return 1000;
 
 	BOOL bInSafeArea = InSafeArea();
 	CAliveObject* pTarget = m_pContext->GetCachedTarget();
@@ -218,9 +225,32 @@ VOID CBotPlayer::OnDeath(DWORD dwKiller)
 	CAliveObject* pKiller = CGameWorld::GetInstance()->GetAliveObjectById(dwKiller);
 	// 先执行玩家基础死亡处理
 	CHumanPlayer::OnDeath(dwKiller);
-	// 停止机器人
-	m_bRunning = FALSE;
-	LG2("机器人: 死亡 [%s] 击杀者[%s]\n", GetName(), pKiller->GetName());
+	// 记录死亡时间戳（供CBTActionRevive判断复活延迟）
+	m_dwDeathTime = CFrameTime::GetFrameTime();
+	// 注意：不停止机器人(m_bRunning保持TRUE)，以便行为树死亡复活序列可继续执行
+	// 死亡状态由 IsDeath() 跟踪，复活由行为树 CBTActionRevive 节点处理
+	LG2("机器人: 死亡 [%s] 击杀者[%s]\n", GetName(), pKiller ? pKiller->GetName() : "未知");
+}
+
+// ============================================================================
+// 受伤时锁定攻击者
+// ============================================================================
+VOID CBotPlayer::OnDamage(CAliveObject* pAttacker, int nDamage, damage_type type)
+{
+	CHumanPlayer::OnDamage(pAttacker, nDamage, type);
+	if (pAttacker && !IsDeath())
+	{
+		if (IsProperTarget(pAttacker) && (GetTarget() == nullptr || Getrand(3) == 0))
+			SetTarget(pAttacker);
+	}
+}
+
+// 获取死亡后已流逝的毫秒数
+DWORD CBotPlayer::GetDeathElapsed() const
+{
+	if (m_dwDeathTime == 0)
+		return 0xFFFFFFFF;  // 未记录死亡时间，返回极大值表示无需等待
+	return CFrameTime::GetFrameTime() - m_dwDeathTime;
 }
 
 // ============================================================================
@@ -346,9 +376,9 @@ int CBotPlayer::FindPathBFS(int targetX, int targetY)
 	if (!pMap)
 		return -1;
 
-	const int SEARCH_RADIUS = 16;
-	const int GRID_SIZE = SEARCH_RADIUS * 2 + 1;
-	const int MAX_NODES = 2048;
+	constexpr int SEARCH_RADIUS = 16;
+	constexpr int GRID_SIZE = SEARCH_RADIUS * 2 + 1;
+	constexpr int MAX_NODES = 2048;
 
 	struct BfsNode
 	{
@@ -358,7 +388,7 @@ int CBotPlayer::FindPathBFS(int targetX, int targetY)
 	};
 
 	thread_local BfsNode s_queue[MAX_NODES];
-	thread_local bool s_visited[33 * 33];
+	thread_local bool s_visited[GRID_SIZE * GRID_SIZE];
 	memset(s_visited, 0, sizeof(s_visited));
 
 	int head = 0, tail = 0;
@@ -395,6 +425,7 @@ int CBotPlayer::FindPathBFS(int targetX, int targetY)
 
 		for (int d = 0; d < 8; d++)
 		{
+			if (tail >= MAX_NODES) break; // 越界守卫: 队列已满, 停止扩展避免s_queue越界
 			int nx = cur.x + G_DIROFS[d].x;
 			int ny = cur.y + G_DIROFS[d].y;
 
@@ -504,7 +535,7 @@ VOID CBotPlayer::SimulateChangeAttackMode(e_humanattackmode attackMode)
 }
 
 // ============================================================================
-// 攻击当前目标（通过CBotContext获取目标）
+// 普通攻击当前目标（通过CBotContext获取目标）
 // ============================================================================
 BOOL CBotPlayer::SimulateAttackTarget()
 {
@@ -521,38 +552,15 @@ BOOL CBotPlayer::SimulateAttackTarget()
 	if (CBotHumanBehavior::ShouldHesitate(10))
 		return FALSE;
 
-	const BYTE btPro = GetPro();
 	int dir = CBotHumanBehavior::GetDirection8(
 		pTarget->getX(), pTarget->getY(),
 		getX(), getY());
 
 	BOOL IsMove = FALSE;
 	if (dist <= 1)  // 近距离
-	{
-		if (btPro == PRO_WARRIOR)
-		{
-			WORD wSkill = m_pContext->FindBestAttackSkill(dist);
-			if (wSkill == 0 || !SpecialHit(dir, wSkill))
-				SimulateAttack(dir);
-		}
-		else
-			SimulateAttack(dir);
-	}
-	else if (dist <= 8) // 中距离
-	{
-		if (btPro == PRO_MAGICIAN || btPro == PRO_TAOSHI)
-		{
-			WORD wSkill = m_pContext->FindBestAttackSkill(dist);
-			BOOL IsOK = SpellCast(pTarget->getX(), pTarget->getY(), pTarget->GetId(), wSkill);
-			if (wSkill == 0 || !IsOK)
-				IsMove = TRUE;
-		}
-		else
-			IsMove = TRUE;
-	}
+		SimulateAttack(dir);
 	else
 		IsMove = TRUE;
-
 	if (IsMove)
 	{
 		if (dist > 5)
@@ -639,6 +647,61 @@ VOID CBotPlayer::SimulateRest(DWORD dwDuration)
 }
 
 // ============================================================================
+// 复活（死亡后复活，恢复HP/MP，可选回城）
+//   1.清除死亡状态 2.恢复HP/MP 3.重置机器人运行标志 4.刷新客户端视野
+// ============================================================================
+BOOL CBotPlayer::SimulateRevive(int nHpPercent, BOOL bTeleportHome)
+{
+	// 仅在死亡状态下复活（幂等保护）
+	if (!IsDeath())
+		return TRUE;
+
+	if (nHpPercent < 1)  nHpPercent = 1;
+	if (nHpPercent > 100) nHpPercent = 100;
+
+	// 清除死亡状态
+	SetDeath(FALSE);
+
+	// 恢复HP/MP（按百分比恢复HP，MP恢复满）
+	int iMaxHp = GetPropValue(PI_MAXHP);
+	int iMaxMp = GetPropValue(PI_MAXMP);
+	int iTargetHp = iMaxHp * nHpPercent / 100;
+	int iCurHp = GetPropValue(PI_CURHP);
+	int iCurMp = GetPropValue(PI_CURMP);
+	if (iTargetHp > iCurHp)
+		AddPropValue(PI_CURHP, iTargetHp - iCurHp);
+	if (iMaxMp > iCurMp)
+		AddPropValue(PI_CURMP, iMaxMp - iCurMp);
+
+	// 重置机器人运行状态（OnDeath曾停止机器人，复活后需恢复）
+	m_bRunning = TRUE;
+	m_bPaused = FALSE;
+
+	// 刷新客户端显示：HP/MP
+	SendHpMpChanged();
+
+	// 刷新客户端视野（让周围玩家看到复活后的对象）
+	if (bTeleportHome)
+	{
+		// 回城复活：FlyTo会自然刷新新旧地图所有客户端视野
+		Home();
+	}
+	else
+	{
+		// 原地复活：参照CSCDoor::Repair，先移除死亡视野再重新显示活的对象
+		std::array<char, 1024> szMsg = {};
+		int length = 0;
+		if (GetOutViewmsg(szMsg.data(), length))
+			SendAroundMsg(szMsg.data(), length);
+		if (GetViewmsg(szMsg.data(), length))
+			SendAroundMsg(szMsg.data(), length);
+	}
+
+	LG2("机器人: 复活 [%s] HP=%d%% 回城=%d\n", GetName(), nHpPercent, bTeleportHome);
+	return TRUE;
+}
+
+// ============================================================================
 // 使用药水（通过CBotContext查找）
 // ============================================================================
 BOOL CBotPlayer::SimulateUsePotion(BOOL bHP)
@@ -708,19 +771,6 @@ BOOL CBotPlayer::SimulateUseSkill(WORD wMagicId)
 			return TRUE;
 		}
 		return FALSE;
-	}
-
-	// 自动选择最佳技能
-	WORD wBestSkill = m_pContext->FindBestAttackSkill(5);
-	if (wBestSkill == 0)
-		return FALSE;
-
-	CAliveObject* pTarget = m_pContext->GetCachedTarget();
-	if (pTarget)
-	{
-		SpellCast(pTarget->getX(), pTarget->getY(),
-			pTarget->GetId(), wBestSkill);
-		return TRUE;
 	}
 	return FALSE;
 }

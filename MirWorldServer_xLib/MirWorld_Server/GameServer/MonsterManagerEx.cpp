@@ -98,8 +98,7 @@ VOID CMonsterManagerEx::UpdateDeleteMonster()
 {
 	const UINT MAX_PROCESS_PER_TICK = 100;
 	UINT processed = 0;
-	// 使用thread_local复用，避免每帧堆分配
-	thread_local std::vector<CMonsterEx*> pendingObjects;
+	static std::vector<CMonsterEx*> pendingObjects;
 	pendingObjects.clear();
 	if ((int)pendingObjects.capacity() < MAX_PROCESS_PER_TICK)
 		pendingObjects.reserve(MAX_PROCESS_PER_TICK);

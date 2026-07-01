@@ -14,6 +14,7 @@
 #include <array>
 #include <atomic>
 #include <memory>
+#include <initializer_list>
 #include <vector>
 #include <unordered_map>
 #include <stack>
@@ -670,6 +671,178 @@ inline VOID GenerateRandomNumbers(int min, int max, int count, int* result)
 }
 
 
+/**
+ *  固定容量平坦映射表
+ *
+ *  设计目标:
+ *    - 小容量场景(N≤256)下替代 std::unordered_map
+ *    - 纯栈存储, 零堆分配, 连续内存 → 缓存友好
+ *    - 线性搜索在小N下优于 hash 链表指针跳转
+ *    - 接口兼容 unordered_map 子集: find/end/clear/operator[]/erase
+ *    - 支持 initializer_list 构造, 可直接用于 static const 初始化
+ *
+ *  模板参数:
+ *    Key     — 键类型 (需支持 == 比较)
+ *    Value   — 值类型 (需支持默认构造)
+ *    MaxSize — 最大容量 (编译期常量)
+ *
+ *  注意事项 (与 std::map / std::unordered_map 的重要差异):
+ *    1. 不保证元素顺序 — 插入顺序不被保留, erase() 会交换末尾元素到被删位置
+ *    2. erase(it) 会使「指向最后一个元素」的迭代器失效 (swap-with-last)
+ *    3. 容量溢出 (m_size >= MaxSize) 在任何构建模式下均会调用 std::abort()
+ *    4. 原始存储 (alignas + placement new) 避免了对全部 MaxSize 个元素执行默认构造
+ */
+template<typename Key, typename Value, size_t MaxSize>
+class SmallFlatMap
+{
+public:
+	using key_type = Key;
+	using mapped_type = Value;
+	using value_type = std::pair<Key, Value>;
+	using iterator = value_type*;
+	using const_iterator = const value_type*;
+
+	SmallFlatMap() = default;
+
+	// 拷贝构造: 逐元素 placement new 拷贝 (处理非平凡类型如 std::string)
+	SmallFlatMap(const SmallFlatMap& other) : m_size(other.m_size)
+	{
+		for (size_t i = 0; i < m_size; ++i)
+			::new (_data() + i) value_type(other._data()[i]);
+	}
+
+	// 移动构造: 逐元素 placement new move, 源置空
+	SmallFlatMap(SmallFlatMap&& other) noexcept : m_size(other.m_size)
+	{
+		for (size_t i = 0; i < m_size; ++i)
+			::new (_data() + i) value_type(std::move(other._data()[i]));
+		other.m_size = 0;
+	}
+
+	// 拷贝赋值
+	SmallFlatMap& operator=(const SmallFlatMap& other)
+	{
+		if (this != &other)
+		{
+			clear();
+			for (size_t i = 0; i < other.m_size; ++i)
+				::new (_data() + i) value_type(other._data()[i]);
+			m_size = other.m_size;
+		}
+		return *this;
+	}
+
+	// 移动赋值
+	SmallFlatMap& operator=(SmallFlatMap&& other) noexcept
+	{
+		if (this != &other)
+		{
+			clear();
+			for (size_t i = 0; i < other.m_size; ++i)
+				::new (_data() + i) value_type(std::move(other._data()[i]));
+			m_size = other.m_size;
+			other.m_size = 0;
+		}
+		return *this;
+	}
+
+	SmallFlatMap(std::initializer_list<value_type> il)
+	{
+		if (il.size() > MaxSize)
+		{
+			_ASSERT_EXPR(false, L"SmallFlatMap initializer_list overflow! Increase MaxSize.");
+			std::abort();
+		}
+		for (auto& p : il)
+		{
+			::new (_data() + m_size) value_type(Key(p.first), Value(p.second));
+			++m_size;
+		}
+	}
+
+	~SmallFlatMap()
+	{
+		clear();
+	}
+
+	void clear() noexcept
+	{
+		for (size_t i = 0; i < m_size; ++i)
+			_data()[i].~value_type();
+		m_size = 0;
+	}
+
+	Value& operator[](const Key& key)
+	{
+		for (size_t i = 0; i < m_size; ++i)
+			if (_data()[i].first == key)
+				return _data()[i].second;
+		// 容量已满: 任何构建模式下都终止, 避免 sentinel 被意外修改导致全局污染
+		if (m_size >= MaxSize)
+		{
+			_ASSERT_EXPR(false, L"SmallFlatMap overflow! Increase MaxSize.");
+			std::abort();
+		}
+		::new (_data() + m_size) value_type(key, Value{});
+		return _data()[m_size++].second;
+	}
+
+	iterator find(const Key& key)
+	{
+		for (size_t i = 0; i < m_size; ++i)
+			if (_data()[i].first == key)
+				return _data() + i;
+		return end();
+	}
+
+	const_iterator find(const Key& key) const
+	{
+		for (size_t i = 0; i < m_size; ++i)
+			if (_data()[i].first == key)
+				return _data() + i;
+		return end();
+	}
+
+	iterator end() noexcept { return _data() + m_size; }
+	const_iterator end() const noexcept { return _data() + m_size; }
+	iterator begin() noexcept { return _data(); }
+	const_iterator begin() const noexcept { return _data(); }
+
+	// swap-with-last: O(1) 删除, 但不保持插入顺序, 且会使指向最后一个元素的迭代器失效
+	void erase(iterator it) noexcept
+	{
+		if (it < begin() || it >= end())  // 防御: 越界迭代器无操作
+			return;
+		it->~value_type();
+		if (it != _data() + m_size - 1)  // 不是最后一个元素才需要搬迁
+		{
+			// 在 it 位置原地 move-construct 最后一个元素, 然后析构最后一个元素
+			::new (it) value_type(std::move(_data()[m_size - 1]));
+			_data()[m_size - 1].~value_type();
+		}
+		--m_size;
+	}
+
+	void erase(const Key& key)
+	{
+		auto it = find(key);
+		if (it != end()) erase(it);
+	}
+
+	size_t size() const noexcept { return m_size; }
+	bool empty() const noexcept { return m_size == 0; }
+
+private:
+	value_type* _data() { return reinterpret_cast<value_type*>(m_storage); }
+	const value_type* _data() const { return reinterpret_cast<const value_type*>(m_storage); }
+
+	// 原始字节存储, 避免 std::array 对所有 MaxSize 个元素执行默认构造
+	// (当 Value 为 std::string 等非平凡类型时, 可节省大量不必要的构造/析构开销)
+	alignas(value_type) unsigned char m_storage[MaxSize * sizeof(value_type)]{};
+	size_t m_size = 0;
+};
+
+
 template <int MAXCOUNT>
 class CIntHash
 {
@@ -701,10 +874,10 @@ public:
 			return nullptr;
 		return &it->second;
 	}
-	CIntHash() { m_map.reserve(MAXCOUNT); }
+	CIntHash() = default;
 	~CIntHash() { }
 private:
-	std::unordered_map<int, int> m_map;
+	SmallFlatMap<int, int, MAXCOUNT> m_map; // 栈存储替代 unordered_map
 };
 
 
@@ -1294,15 +1467,38 @@ inline BOOL	FileExist(const char* pszPath)
 
 #define MAXTIME	(DWORD(0xffffffff)) //最大时间值
 
-// 基于 std::chrono::steady_clock 获取当前毫秒时间(替代 timeGetTime)
+// 获取当前毫秒时间(替代 timeGetTime)
 // 返回 DWORD,保持与原 timeGetTime 相同的语义:
 //   - 单调递增(steady_clock 保证)
 //   - 49.7 天回绕(DWORD 范围),配合 GetTimeToTime 的无符号减法自然处理
-// 这样所有原有基于 DWORD 的时间差计算逻辑无需改动,行为完全一致
 inline DWORD GetSteadyTimeMS()
 {
 	return static_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::steady_clock::now().time_since_epoch()).count());
+}
+
+// 获取当前毫秒时间(64位, 永不回绕)
+// 用于需要绝对无回绕的超时计算场景(如线程等待), 替代 GetTickCount64()
+inline uint64_t GetSteadyTimeMS64()
+{
+	return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count());
+}
+
+// 获取 Unix 时间戳(秒)
+// 替代 time(nullptr)/time(&t), 用于持久化/展示/跨服时间戳
+// 返回 DWORD 保持与原 (DWORD)time(nullptr) 相同语义(2038 年前有效)
+inline DWORD GetUnixTimeSec()
+{
+	return static_cast<DWORD>(std::chrono::duration_cast<std::chrono::seconds>(
+		std::chrono::system_clock::now().time_since_epoch()).count());
+}
+
+// 获取 Unix 时间戳(64位秒, 永不回绕)
+inline uint64_t GetUnixTimeSec64()
+{
+	return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(
+		std::chrono::system_clock::now().time_since_epoch()).count());
 }
 
 // 计算从 t1 到 t2 经过的时间（毫秒）
@@ -2469,49 +2665,54 @@ T ceil_div(T a, T b)
 }
 
 
-//原子计数 + 自旋等待(自旋可避免内核态切换开销)
-//注意：Arrive() 无超时机制，若某个参与者未调用 Signal()，调用者将永久阻塞。
-//请确保所有参与者必定会调用 Signal()，且在 Arrive() 之前已启动。
-//推荐使用 Arrive(dwTimeoutMs) 带超时版本，避免因工作线程异常导致主线程永久卡死。
+/// <summary>
+/// 原子计数 + 自旋等待(自旋可避免内核态切换开销)
+///		非常适合：帧同步、实时主循环、低延迟线程汇合
+///		不适合：
+///			反复 cycle 的 barrier（会踩 Reset 的坑）
+///			长时间等待（>1ms 建议 futex / condition_variable）
+/// </summary>
 class CSpinBarrier
 {
 public:
 	CSpinBarrier(int count) : m_remaining(count) {}
-	// 无超时等待（仅用于确认所有参与者必定会Signal的场景）
-	VOID Arrive()
-	{
-		int spins = 0;
-		while (m_remaining.load(std::memory_order_acquire) > 0) {
-			if (++spins > 64)
-			{
-				std::this_thread::yield();
-				spins = 0;
-			}
-		}
-	}
 	// 带超时等待：返回 TRUE 表示所有参与者已完成，FALSE 表示超时
 	// 超时后调用者可执行降级逻辑（日志+断言），避免整个主循环卡死
-	BOOL Arrive(DWORD dwTimeoutMs)
+	BOOL Arrive(DWORD dwTimeoutMs = 0)
 	{
-		auto startTime = std::chrono::steady_clock::now();
+		const auto start = std::chrono::steady_clock::now();
+		const auto timeout = std::chrono::milliseconds(dwTimeoutMs);
 		int spins = 0;
-		while (m_remaining.load(std::memory_order_acquire) > 0) {
-			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::steady_clock::now() - startTime).count();
-			if (elapsed >= (long long)dwTimeoutMs)
+		while (m_remaining.load(std::memory_order_acquire) > 0)
+		{
+			// 超时检查放最前
+			if (dwTimeoutMs != 0 && std::chrono::steady_clock::now() - start >= timeout)
 				return FALSE;
-			if (++spins > 64)
+			if (spins < 16)  // 第一阶段：轻量 pause
+			{
+				_mm_pause(); // 提示 CPU 这是自旋等待，降低功耗/竞争
+				_mm_pause(); // 双倍 pause，现代 CPU 推荐
+			}
+			else if (spins < 32)  // 第二阶段：单 pause
+			{
+				_mm_pause();
+			}
+			else  // 第三阶段：让出 CPU
 			{
 				std::this_thread::yield();
 				spins = 0;
+				continue;
 			}
+			spins++;
 		}
 		return TRUE;
 	}
 	VOID Signal()
 	{
-		m_remaining.fetch_sub(1, std::memory_order_release);
+		int prev = m_remaining.fetch_sub(1, std::memory_order_release);
+		assert(prev > 0);
 	}
+	// 只能在所有Arrive完成之后调用
 	VOID Reset(int count)
 	{
 		m_remaining.store(count, std::memory_order_release);
@@ -2547,3 +2748,22 @@ public:
 private:
 	SRWLOCK& m_lock;
 };
+
+
+// 字符串 hash
+constexpr uint32_t str_hash(const char* str) noexcept
+{
+	uint32_t hash = 5381;
+	while (*str)
+	{
+		hash = ((hash << 5) + hash) + static_cast<uint32_t>(*str);
+		++str;
+	}
+	return hash;
+}
+
+// 用户自定义字面量，让 "xxx"_hash 成为编译期常量
+constexpr uint32_t operator""_hash(const char* str, size_t) noexcept
+{
+	return str_hash(str);
+}

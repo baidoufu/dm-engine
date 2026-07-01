@@ -822,7 +822,7 @@ BOOL CItemManager::UpgradeItem(ITEM& item, const char* pszUpgradeString)
 		}
 		// ÊôÐÔÐÞ¸ÄÆ÷Ó³Éä±í
 		using ItemModifier = std::function<void(ITEM*, int opr, int val)>;
-		static const std::unordered_map<std::string, ItemModifier> modifiers =
+		static const SmallFlatMap<std::string, ItemModifier, 32> modifiers =
 		{
 			{"stdmode", [](ITEM* p, int o, int v) { p->baseitem.btStdMode   = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.btStdMode - v : p->baseitem.btStdMode + v); }},
 			{"shape",   [](ITEM* p, int o, int v) { p->baseitem.btShape     = (BYTE)(o == 0 ? v : o == 1 ? p->baseitem.btShape - v : p->baseitem.btShape + v); }},

@@ -122,6 +122,12 @@
     <Filter Include="ECS管理\组件管理">
       <UniqueIdentifier>{fc748b2c-5357-452c-83b9-6d4ad0809b6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="功能处理\怪物\组件">
+      <UniqueIdentifier>{4c59b258-a915-4462-815f-5403d31234c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能处理\NPC\组件">
+      <UniqueIdentifier>{5dd0804e-60dc-4563-8108-e0ce1aec4026}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\public.rc">
@@ -492,8 +498,23 @@
     <ClCompile Include="MonsterComponentManager.cpp">
       <Filter>ECS管理\组件管理</Filter>
     </ClCompile>
+    <ClCompile Include="NpcComponentManager.cpp">
+      <Filter>ECS管理\组件管理</Filter>
+    </ClCompile>
     <ClCompile Include="PlayerComponentManager.cpp">
       <Filter>ECS管理\组件管理</Filter>
+    </ClCompile>
+    <ClCompile Include="BotBehaviorAction.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotBehaviorComposite.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotBehaviorCondition.cpp">
+      <Filter>机器人</Filter>
+    </ClCompile>
+    <ClCompile Include="BotBehaviorDecorator.cpp">
+      <Filter>机器人</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -836,6 +857,9 @@
     <ClInclude Include="ECSRegistry.h">
       <Filter>库包相关\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="ECSSystem.h">
+      <Filter>库包相关\ECS</Filter>
+    </ClInclude>
     <ClInclude Include="ECSView.h">
       <Filter>库包相关\ECS</Filter>
     </ClInclude>
@@ -846,6 +870,9 @@
       <Filter>功能处理\玩家\组件</Filter>
     </ClInclude>
     <ClInclude Include="SpecialEquipComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="StaminaComponent.h">
       <Filter>功能处理\玩家\组件</Filter>
     </ClInclude>
     <ClInclude Include="TimerComponent.h">
@@ -862,6 +889,84 @@
     </ClInclude>
     <ClInclude Include="PlayerComponentManager.h">
       <Filter>ECS管理\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="AchievementComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="FenghaoComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="MarketComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscStateComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="PkComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptVarComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="SocialComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="RecalcCacheComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="ZhenBaoComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="UpgradeItemComponent.h">
+      <Filter>功能处理\玩家\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="MonsterStateComponent.h">
+      <Filter>功能处理\怪物\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="PetComponent.h">
+      <Filter>功能处理\怪物\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="NpcComponentManager.h">
+      <Filter>ECS管理\组件管理</Filter>
+    </ClInclude>
+    <ClInclude Include="NpcStateComponent.h">
+      <Filter>功能处理\NPC\组件</Filter>
+    </ClInclude>
+    <ClInclude Include="BotBehaviorAction.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotBehaviorComposite.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotBehaviorCondition.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="BotBehaviorDecorator.h">
+      <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusComponent.h">
+      <Filter>ECS管理\组件公共</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerSystem.h">
+      <Filter>ECS管理\组件公共</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusSystem.h">
+      <Filter>ECS管理\组件公共</Filter>
+    </ClInclude>
+    <ClInclude Include="PotionRecoverSystem.h">
+      <Filter>ECS管理\组件公共</Filter>
+    </ClInclude>
+    <ClInclude Include="PotionRecoverComponent.h">
+      <Filter>ECS管理\组件公共</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

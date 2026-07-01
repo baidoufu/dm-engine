@@ -66,25 +66,25 @@ public:
 	// 线程安全的只读查询：自动加 shared_lock
 	CMapCellInfo* GetMapCellInfoShared(UINT x, UINT y)
 	{
-		std::shared_lock lock(m_MapMutex);
+		SRLock lock(m_MapMutex);
 		return GetMapCellInfo(x, y);
 	}
 	// 线程安全的写查询：自动加 unique_lock（可能分配新 CellInfo）
 	CMapCellInfo* GetMapCellInfoExclusive(UINT x, UINT y)
 	{
-		std::unique_lock lock(m_MapMutex);
+		SWLock lock(m_MapMutex);
 		return GetMapCellInfo_Safe(x, y);
 	}
 	// 线程安全的区域标记查询
 	BOOL IsCellFlagSet(UINT x, UINT y, WORD wFlag)
 	{
-		std::shared_lock lock(m_MapMutex);
+		SRLock lock(m_MapMutex);
 		CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 		return pInfo && (pInfo->wFlag & wFlag);
 	}
 	BOOL IsCellEventFlagSet(UINT x, UINT y, WORD wFlag)
 	{
-		std::shared_lock lock(m_MapMutex);
+		SRLock lock(m_MapMutex);
 		CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 		return pInfo && (pInfo->wEventFlag & wFlag);
 	}
@@ -112,7 +112,7 @@ public:
 	//在指定位置上是否有某类物体
 	BOOL IsObjAtPosition(int x, int y, e_object_type type)
 	{
-		std::shared_lock lock(m_MapMutex);
+		SRLock lock(m_MapMutex);
 		CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 		if (pInfo == nullptr) return FALSE;
 		if (pInfo)
@@ -245,7 +245,7 @@ public:
 		DWORD dwParam2 = 0, DWORD dwParam3 = 0, DWORD dwParam4 = 0,
 		DWORD dwDelay = 0, int repeattimes = 0, const char* pszString = nullptr);
 private:
-	mutable std::shared_mutex m_MapMutex; // 读写保护锁
+	mutable SRWLOCK m_MapMutex = SRWLOCK_INIT; // 读写保护锁
 	FLOAT m_fExpFactor;
 	BOOL AddObjectToPos(int x, int y, CMapObject* pObject);
 	BOOL RemoveObjectFromPos(int x, int y, CMapObject* pObject);
@@ -258,7 +258,7 @@ private:
 	}
 private:
 	xStatus	m_Flag;
-	std::unordered_map<int, std::vector<std::string>> m_flagExtraParams;
+	SmallFlatMap<int, std::vector<std::string>, 32> m_flagExtraParams; // 栈存储替代 unordered_map
 	int	m_nIndex;
 	DWORD* m_pLockLayer;
 	int m_iMaxBlockElements;

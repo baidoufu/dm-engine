@@ -1,4 +1,5 @@
 #include "../header/xthread.h"
+#include "../header/xPacket.h"
 #include <array>
 
 xThread::xThread(VOID) : m_dwThreadID(0), m_hThread(INVALID_HANDLE_VALUE),
@@ -28,10 +29,10 @@ DWORD xThread::WaitFor(DWORD dwMilliseconds)
 	{
 		HANDLE hThread = m_hThread;
 		std::array<HANDLE, 1> handles = { hThread };
-		ULONGLONG ullStartTime = GetTickCount64();
+		uint64_t ullStartTime = GetSteadyTimeMS64();
 		for (;;)
 		{
-			ULONGLONG ullElapsed = GetTickCount64() - ullStartTime;
+			uint64_t ullElapsed = GetSteadyTimeMS64() - ullStartTime;
 			DWORD dwRemaining = (dwMilliseconds == INFINITE) ? INFINITE :
 				(ullElapsed >= dwMilliseconds) ? 0 : static_cast<DWORD>(dwMilliseconds - ullElapsed);
 			DWORD result = MsgWaitForMultipleObjects(1, handles.data(), FALSE, dwRemaining, QS_ALLINPUT);
@@ -57,7 +58,7 @@ DWORD xThread::WaitFor(DWORD dwMilliseconds)
 					}
 				}
 				// ¼ì²éÊÇ·ñ³¬Ê±
-				if (dwMilliseconds != INFINITE && (GetTickCount64() - ullStartTime) >= dwMilliseconds)
+				if (dwMilliseconds != INFINITE && (GetSteadyTimeMS64() - ullStartTime) >= dwMilliseconds)
 				{
 					return WAIT_TIMEOUT;
 				}
@@ -166,5 +167,6 @@ unsigned WINAPI xThread::ThreadProc(LPVOID pParam)
 	pThread->OnTerminated(bException);
 	pThread->m_dwThreadID = 0;
 	pThread->m_bTerminated = TRUE;
+	xPacketPool::DrainThreadLocal();
 	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "vmap.h"
 #include "flageventlistener.h"
+#include "ECSDefines.h"
 #include <array>
 #include <memory>
 
@@ -47,6 +48,10 @@ public:
 	UINT GetId() const { return m_Id; }
 	VOID SetId(UINT Id) { m_Id = Id; }
 
+	// ECS 实体句柄缓存 (避免每帧通过 unordered_map 查找)
+	entity_t GetECSEntity() const { return m_ecsEntity; }
+	VOID SetECSEntity(entity_t e) { m_ecsEntity = e; }
+
 	CLogicMap* GetMap() { return m_pMap; }
 	virtual VOID OnSetPos(WORD oldx, WORD oldy, WORD newx, WORD newy) {}
 	WORD GetInvisibleLevel()const { return m_wInvisibleLevel; }
@@ -84,5 +89,6 @@ protected:
 	WORD m_wX, m_wY;
 	UINT m_Mapid;
 	UINT m_Id;
+	entity_t m_ecsEntity = INVALID_ENTITY;  // ECS 实体句柄缓存
 	std::array<std::unique_ptr<xListHost<CMapObject>::xListNode>, LNI_MAX> m_DLinkNodes;
 };

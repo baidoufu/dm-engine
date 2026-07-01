@@ -52,8 +52,7 @@ public:
 	DWORD FindPotionInBag(BOOL bHP);
 	DWORD FindItemInBag(const char* pszName);
 
-	// 技能查询
-	WORD FindBestAttackSkill(int nTargetDistance);
+	// 技能是否准备好
 	BOOL IsSkillReady(WORD wSkillId);
 
 	// 距离/方向计算

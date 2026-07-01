@@ -109,14 +109,6 @@ public:
 	VOID SaySystem(const char* pszMsg, ...);
 	VOID SaySystem10(const char* pszMsg, ...);
 	VOID SaySystemAttrib(DWORD dwAttrib, const char* pszMsg, ...);
-	// 获取当前时间戳
-	DWORD GetTimeStamp()
-	{
-		time_t t;
-		time(&t);
-		DWORD dwT2 = static_cast<DWORD>(t);
-		return dwT2;
-	}
 
 	virtual VOID OnChangeMap(CLogicMap* pFromMap, UINT nFromX, UINT nFromY, CLogicMap* pToMap, UINT nToX, UINT nToY) {}
 	virtual VOID OnLeaveMap(CLogicMap* pMap);
@@ -184,11 +176,11 @@ public:
 	// ========== ECS 组件访问器 (统一入口) ==========
 	inline BOOL CheckTimer(TimerType type, DWORD intervalMs)
 	{
-		return AliveComponentsManager::GetInstance()->CheckAliveTimer(GetId(), type, intervalMs);
+		return AliveComponentsManager::GetInstance()->CheckAliveTimer(GetECSEntity(), type, intervalMs);
 	}
 	inline VOID ResetTimer(TimerType type)
 	{
-		AliveComponentsManager::GetInstance()->ResetAliveTimer(GetId(), type);
+		AliveComponentsManager::GetInstance()->ResetAliveTimer(GetECSEntity(), type);
 	}
 
 	WORD GetDeInvisibleLevel() { return m_wDeInvisibleLevel; }
@@ -414,19 +406,35 @@ public:
 		{
 		case SI_PALSY:
 		{
-			if (!m_status26Timer.IsTimeOut(m_dwStatus26)) return FALSE;
+			if (!AliveComponentsManager::GetInstance()->CheckStatusImmunity(GetECSEntity(), SI_PALSY)) return FALSE;
 		}
 		break;
 		}
 		if (m_Status.IsSeted(index))
 		{
 			m_Status.AddTime(index, dwLastTime);
+			// 同步 ECS: 更新定时器数据
+			if (auto* sc = GetStatusComp())
+			{
+				sc->lastTickMs[index] = CFrameTime::GetFrameTime();
+				sc->durationMs[index] = dwLastTime;
+				if (dwLastTime != 0)
+					sc->activeSlotMask |= (1ull << index);
+			}
 			SendStatusChanged();
 			return TRUE;
 		}
 		else if (m_Status.SetStatus(index, dwParam, dwLastTime))
 		{
 			OnStatusSet(index, dwParam);
+			// 同步 ECS: 置位 + 记录定时器
+			if (auto* sc = GetStatusComp())
+			{
+				sc->lastTickMs[index] = CFrameTime::GetFrameTime();
+				sc->durationMs[index] = dwLastTime;
+				if (dwLastTime != 0)
+					sc->activeSlotMask |= (1ull << index);
+			}
 			SendStatusChanged();
 			return TRUE;
 		}
@@ -451,6 +459,23 @@ public:
 	}
 	BOOL IsStatusSet(int index) { return m_Status.IsSeted(index); }
 	BOOL ClrStatus(int index)
+	{
+		DWORD dwParam = m_Status.GetParam(index);
+		if (m_Status.ClrStatus(index))
+		{
+			OnStatusClr(index, dwParam);
+			// 同步 ECS: 清除过期标记 (已由 System 调用, 此处为直接清除路径)
+			if (auto* sc = GetStatusComp())
+			{
+				sc->durationMs[index] = 0;
+				sc->activeSlotMask &= ~(1ull << index);
+			}
+			SendStatusChanged();
+			return TRUE;
+		}
+		return FALSE;
+	}
+	BOOL ClrStatusFromECS(int index)
 	{
 		DWORD dwParam = m_Status.GetParam(index);
 		if (m_Status.ClrStatus(index))
@@ -491,25 +516,32 @@ public:
 	VOID SetSuperHit(BOOL bSuperHit) { m_bSuperHit = bSuperHit; }
 	BOOL IsSuperHit()const { return m_bSuperHit; }
 
-	DWORD GetHpRecoverTick()const { return m_dwHpRecoverTick; }
-	VOID SetHpRecoverTick(DWORD dwTick) { m_dwHpRecoverTick = dwTick; }
-
-	DWORD GetMpRecoverTick()const { return m_dwMpRecoverTick; }
-	VOID SetMpRecoverTick(DWORD dwTick) { m_dwMpRecoverTick = dwTick; }
-
+	// 吃药恢复 (写入 ECS PotionRecoverComponent, 由 PotionRecoverSystem 消费)
 	VOID SetAddHp(DWORD dwAddValue, DWORD dwSpeed)
 	{
-		m_dwAddHp += dwAddValue;
-		if (m_dwAddHp > (DWORD)GetPropValue(PI_MAXHP))
-			m_dwAddHp = (DWORD)GetPropValue(PI_MAXHP);
-		m_dwAddHpSpeed = dwSpeed;
+		entity_t e = GetECSEntity();
+		if (e == INVALID_ENTITY) return;
+		auto& world = ECSWorld::GetInstance()->GetWorld();
+		SRLock lock(world.m_mutex);
+		auto* pc = world.get_nolock<PotionRecoverComponent>(e);
+		if (!pc) return;
+		pc->addHp += dwAddValue;
+		if (pc->addHp > (DWORD)GetPropValue(PI_MAXHP))
+			pc->addHp = (DWORD)GetPropValue(PI_MAXHP);
+		pc->addHpSpeed = dwSpeed;
 	}
 	VOID SetAddMp(DWORD dwAddValue, DWORD dwSpeed)
 	{
-		m_dwAddMp += dwAddValue;
-		if (m_dwAddMp > (DWORD)GetPropValue(PI_MAXMP))
-			m_dwAddMp = (DWORD)GetPropValue(PI_MAXMP);
-		m_dwAddMpSpeed = dwSpeed;
+		entity_t e = GetECSEntity();
+		if (e == INVALID_ENTITY) return;
+		auto& world = ECSWorld::GetInstance()->GetWorld();
+		SRLock lock(world.m_mutex);
+		auto* pc = world.get_nolock<PotionRecoverComponent>(e);
+		if (!pc) return;
+		pc->addMp += dwAddValue;
+		if (pc->addMp > (DWORD)GetPropValue(PI_MAXMP))
+			pc->addMp = (DWORD)GetPropValue(PI_MAXMP);
+		pc->addMpSpeed = dwSpeed;
 	}
 	VOID OnSetPos(WORD oldx, WORD oldy, WORD newx, WORD newy);
 	virtual BOOL IsProperFriend(CAliveObject* pObject) { return TRUE; }
@@ -545,14 +577,36 @@ public:
 				OnSystemFlagCleared(index, dwParamT);
 			}
 			m_SystemFlag.SetStatus(index, dwParam, dwTimeOut);
+			// 同步 ECS StatusComponent
+			if (auto* sc = GetStatusComp())
+			{
+				int ci = SystemFlagSlotToCompIdx(index);
+				sc->lastTickMs[ci] = CFrameTime::GetFrameTime();
+				sc->durationMs[ci] = dwTimeOut;
+				if (dwTimeOut != 0xFFFFFFFF && dwTimeOut != 0)
+					sc->activeSlotMask |= (1ull << ci);
+			}
 			OnSystemFlagSeted(index, dwParam);
 		}
 		else
 		{
 			DWORD dwParamT = m_SystemFlag.GetParam(index);
 			m_SystemFlag.ClrStatus(index);
+			// 同步 ECS StatusComponent
+			if (auto* sc = GetStatusComp())
+			{
+				int ci = SystemFlagSlotToCompIdx(index);
+				sc->durationMs[ci] = 0;
+				sc->activeSlotMask &= ~(1ull << ci);
+			}
 			OnSystemFlagCleared(index, dwParamT);
 		}
+	}
+	VOID ClearSystemFlagFromECS(int index)
+	{
+		DWORD dwParamT = m_SystemFlag.GetParam(index);
+		m_SystemFlag.ClrStatus(index);
+		OnSystemFlagCleared(index, dwParamT);
 	}
 	virtual VOID OnSystemFlagSeted(int index, DWORD dwParam = 0) {}
 	virtual VOID OnSystemFlagCleared(int index, DWORD dwParam = 0) {}
@@ -583,16 +637,6 @@ protected:
 	{
 		if (IsStatusSet(SI_CLOAK)) ClrStatus(SI_CLOAK);
 	}
-	DWORD m_dwAddHp; // 增加生命值数量
-	DWORD m_dwAddHpSpeed; // 增加生命值速度
-	CServerTimer m_AddHpTimer; // 加生命值定时器
-
-	DWORD m_dwAddMp; // 增加魔法值数量
-	DWORD m_dwAddMpSpeed; // 增加魔法值速度
-	CServerTimer m_AddMpTimer; // 加魔法值定时器
-
-	DWORD m_dwHpRecoverTick; // 恢复生命值间隔时间
-	DWORD m_dwMpRecoverTick; // 恢复魔法值间隔时间
 
 	CServerTimer m_CustomTimer; // 自定义使用定时器
 
@@ -679,58 +723,23 @@ public:
 	//判断中技能延时是否到时间
 	BOOL IsSkillTime(int wMagicId) const
 	{
-		switch (wMagicId)
-		{
-		case 6:
-			if (m_skill6Timer.IsTimeOut(m_dwSkill6)) return TRUE;
-		break;
-		case 45:
-			if (m_skill45Timer.IsTimeOut(m_dwSkill45)) return TRUE;
-		break;
-		}
-		return FALSE;
+		return AliveComponentsManager::GetInstance()->CheckImmunityTimer(GetECSEntity(), wMagicId);
 	}
 	//设置多少时间内不中技能伤害
 	VOID SetSkillTime(int wMagicId, DWORD nTime)
 	{
-		switch (wMagicId)
-		{
-		case 6:
-		{
-			m_dwSkill6 = nTime;
-			m_skill6Timer.Savetime();
-		}
-		break;
-		case 45:
-		{
-			m_dwSkill45 = nTime;
-			m_skill45Timer.Savetime();
-		}
-		break;
-		default:
-			break;
-		}
+		AliveComponentsManager::GetInstance()->SetImmunityTimer(GetECSEntity(), wMagicId, nTime);
 	}
 	//设置缩少时间内不中状态
 	VOID SetStatusTime(int index, DWORD nTime)
 	{
-		switch (index)
-		{
-		case SI_PALSY:
-		{
-			m_dwStatus26 = nTime;
-			m_status26Timer.Savetime();
-		}
-		break;
-		default:
-			break;
-		}
+		AliveComponentsManager::GetInstance()->SetStatusImmunity(GetECSEntity(), index, nTime);
 	}
-private:
-	CServerTimer m_skill6Timer; // 不中施毒术计时器
-	DWORD m_dwSkill6; // 不中施毒术时间
-	CServerTimer m_skill45Timer; // 不中诅咒术计时器
-	DWORD m_dwSkill45; // 不中诅咒术时间
-	CServerTimer m_status26Timer; // 不中麻痹状态计时器
-	DWORD m_dwStatus26; // 不中麻痹状态时间
+	// ECS StatusComponent 访问 (热路径: 同步状态数据)
+	StatusComponent* GetStatusComp()
+	{
+		entity_t e = GetECSEntity();
+		if (e == INVALID_ENTITY) return nullptr;
+		return ECSWorld::GetInstance()->GetWorld().get<StatusComponent>(e);
+	}
 };

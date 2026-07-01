@@ -111,6 +111,10 @@
     <ClCompile Include="AutoScriptManager.cpp" />
     <ClCompile Include="BlueFireEvent.cpp" />
     <ClCompile Include="BossTJ.cpp" />
+    <ClCompile Include="BotBehaviorAction.cpp" />
+    <ClCompile Include="BotBehaviorComposite.cpp" />
+    <ClCompile Include="BotBehaviorCondition.cpp" />
+    <ClCompile Include="BotBehaviorDecorator.cpp" />
     <ClCompile Include="BotBehaviorTree.cpp" />
     <ClCompile Include="BotContext.cpp" />
     <ClCompile Include="BotDatabase.cpp" />
@@ -120,6 +124,7 @@
     <ClCompile Include="AliveComponentsManager.cpp" />
     <ClCompile Include="PlayerComponentManager.cpp" />
     <ClCompile Include="MonsterComponentManager.cpp" />
+    <ClCompile Include="NpcComponentManager.cpp" />
     <ClCompile Include="Human_Achieve.cpp" />
     <ClCompile Include="gsClientMsgHandler.cpp" />
     <ClCompile Include="TimeAchieve.cpp" />
@@ -242,11 +247,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\res\resource.h" />
+    <ClInclude Include="AchievementComponent.h" />
     <ClInclude Include="AiObjectEx.h" />
     <ClInclude Include="AliveObject.h" />
     <ClInclude Include="AutoScriptManager.h" />
     <ClInclude Include="BlueFireEvent.h" />
     <ClInclude Include="BossTJ.h" />
+    <ClInclude Include="BotBehaviorAction.h" />
+    <ClInclude Include="BotBehaviorComposite.h" />
+    <ClInclude Include="BotBehaviorCondition.h" />
+    <ClInclude Include="BotBehaviorDecorator.h" />
     <ClInclude Include="BotBehaviorTree.h" />
     <ClInclude Include="BotContext.h" />
     <ClInclude Include="BotDatabase.h" />
@@ -254,19 +264,39 @@
     <ClInclude Include="BotManager.h" />
     <ClInclude Include="BotPlayer.h" />
     <ClInclude Include="BundleManager.h" />
+    <ClInclude Include="ChatComponent.h" />
     <ClInclude Include="ECS.h" />
     <ClInclude Include="ECSComponentPool.h" />
     <ClInclude Include="ECSDefines.h" />
+    <ClInclude Include="ECSSystem.h" />
+    <ClInclude Include="FenghaoComponent.h" />
+    <ClInclude Include="MarketComponent.h" />
+    <ClInclude Include="MiscStateComponent.h" />
+    <ClInclude Include="MonsterStateComponent.h" />
+    <ClInclude Include="NpcStateComponent.h" />
+    <ClInclude Include="PetComponent.h" />
+    <ClInclude Include="PkComponent.h" />
     <ClInclude Include="RateLimitComponent.h" />
     <ClInclude Include="ECSRegistry.h" />
+    <ClInclude Include="RecalcCacheComponent.h" />
+    <ClInclude Include="ScriptVarComponent.h" />
     <ClInclude Include="ShieldStateComponent.h" />
+    <ClInclude Include="SocialComponent.h" />
     <ClInclude Include="SpecialEquipComponent.h" />
+    <ClInclude Include="StatusComponent.h" />
+    <ClInclude Include="StaminaComponent.h" />
+    <ClInclude Include="PotionRecoverComponent.h" />
+    <ClInclude Include="PotionRecoverSystem.h" />
+    <ClInclude Include="StatusSystem.h" />
+    <ClInclude Include="TaskComponent.h" />
     <ClInclude Include="TimerComponent.h" />
     <ClInclude Include="ECSView.h" />
     <ClInclude Include="ECSWorld.h" />
     <ClInclude Include="AliveComponentsManager.h" />
     <ClInclude Include="PlayerComponentManager.h" />
+    <ClInclude Include="TimerSystem.h" />
     <ClInclude Include="MonsterComponentManager.h" />
+    <ClInclude Include="NpcComponentManager.h" />
     <ClInclude Include="gsClientMsgTable.h" />
     <ClInclude Include="TimeAchieve.h" />
     <ClInclude Include="ChangeMapEvent.h" />
@@ -354,14 +384,17 @@
     <ClInclude Include="TimeSystem.h" />
     <ClInclude Include="tinystr.h" />
     <ClInclude Include="tinyxml.h" />
+    <ClInclude Include="TitleComponent.h" />
     <ClInclude Include="TitleManager.h" />
     <ClInclude Include="TopManager.h" />
     <ClInclude Include="TriggerEvent.h" />
+    <ClInclude Include="UpgradeItemComponent.h" />
     <ClInclude Include="VisibleEvent.h" />
     <ClInclude Include="vMap.h" />
     <ClInclude Include="VMProtectHelper.h" />
     <ClInclude Include="WeatherSystem.h" />
     <ClInclude Include="xSimpleSocket.h" />
+    <ClInclude Include="ZhenBaoComponent.h" />
     <ClInclude Include="ZombiHoleEvent.h" />
   </ItemGroup>
   <ItemGroup>

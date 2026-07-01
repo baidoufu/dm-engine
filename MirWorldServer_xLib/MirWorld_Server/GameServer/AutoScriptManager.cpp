@@ -4,18 +4,28 @@
 #include "SystemScript.h"
 #include "HumanPlayerMgr.h"
 #include "humanplayer.h"
+#include "PlayerComponentManager.h"
 #include <array>
+
+// 脚本目标玩家专用ID (避免与真实玩家/机器人冲突)
+static constexpr UINT SCRIPT_TARGET_ID = 0x7FFFFFFF;
 
 CAutoScriptManager::CAutoScriptManager(VOID)
 {
 	m_pTimeScript = nullptr;
 	CTimeSystem::GetInstance()->RegisterTimeEvent(this);
 	m_pScriptTarget = std::make_unique<CHumanPlayer>();
+	// [ECS] 为脚本目标玩家创建ECS组件, 防止脚本中ECS访问崩溃
+	m_pScriptTarget->SetId(SCRIPT_TARGET_ID);
+	PlayerComponentManager::GetInstance()->CreatePlayerComponents(m_pScriptTarget.get());
 }
 
 CAutoScriptManager::~CAutoScriptManager(VOID)
 {
 	CTimeSystem::GetInstance()->UnRegisterTimeEvent(this);
+	// [ECS] 销毁脚本目标玩家的ECS组件
+	if (m_pScriptTarget)
+		PlayerComponentManager::GetInstance()->DestroyPlayerComponents(m_pScriptTarget->GetId());
 	Destroy();
 }
 

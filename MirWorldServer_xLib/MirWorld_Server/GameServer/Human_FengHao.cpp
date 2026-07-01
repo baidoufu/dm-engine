@@ -7,22 +7,22 @@ VOID CHumanPlayer::SendFengHaoGrowInfo()
 	xPacketPool::ScopedPacket packet3;
 	xPacketPool::ScopedPacket packet5;
 
-	int nCount = m_FenghaoInfo.GetCount();
+	int nCount = _fenghaoInfo().GetCount();
 	packet3->push(&nCount, 4);
 	packet5->push(&nCount, 4);
 
-	DWORD dwNow = (DWORD)time(nullptr);
+	DWORD dwNow = GetUnixTimeSec();
 	CFengHaoGrowManager* pMgr = CFengHaoGrowManager::GetInstance();
 
 	for (int i = 1; i < MAX_FENGHAO; ++i)
 	{
-		if (m_FenghaoInfo.mFengHaoRow[i].boActivation)
+		if (_fenghaoInfo().mFengHaoRow[i].boActivation)
 		{
 			packet3->push(&i, 4);
 			FengHaoGrowItem* pConfig = pMgr->GetItem(i);
-			if (pConfig && pConfig->btLastDay > 0 && m_FenghaoInfo.mFengHaoRow[i].dwLastDate > 0)
+			if (pConfig && pConfig->btLastDay > 0 && _fenghaoInfo().mFengHaoRow[i].dwLastDate > 0)
 			{
-				int nLastDate = m_FenghaoInfo.mFengHaoRow[i].dwLastDate - dwNow;
+				int nLastDate = _fenghaoInfo().mFengHaoRow[i].dwLastDate - dwNow;
 				if (nLastDate > 0)
 				{
 					nLastDate = (int)(nLastDate / 3600);
@@ -36,13 +36,13 @@ VOID CHumanPlayer::SendFengHaoGrowInfo()
 		}
 	}
 	packet3->push((LPVOID)packet5->getbuf(), packet5->getsize());
-	int nType1 = (int)m_FenghaoInfo.btType1;
+	int nType1 = (int)_fenghaoInfo().btType1;
 	packet3->push(&nType1, 4);
 	int nTypeVal = 0;
-	if (m_FenghaoInfo.btType2 > 0)
-		nTypeVal = (int)m_FenghaoInfo.btType2;
+	if (_fenghaoInfo().btType2 > 0)
+		nTypeVal = (int)_fenghaoInfo().btType2;
 	else
-		nTypeVal = (int)m_FenghaoInfo.btType3;
+		nTypeVal = (int)_fenghaoInfo().btType3;
 	packet3->push(&nTypeVal, 4);
 	SendMsg(GetId(), 0x9b0, 0, 0, 0, (LPVOID)packet3->getbuf(), packet3->getsize());
 }
@@ -59,53 +59,53 @@ VOID CHumanPlayer::SendFengHaoEquip(int nCount)
 	{
 		if (pConfig->btType == 1)
 		{
-			btOldType23 = m_FenghaoInfo.btType2;
+			btOldType23 = _fenghaoInfo().btType2;
 			// 特殊封号、节日封号只能同时展示一个
-			if (m_FenghaoInfo.btType2 == 0)
+			if (_fenghaoInfo().btType2 == 0)
 			{
-				m_FenghaoInfo.btType3 = 0; // 互斥处理
-				m_FenghaoInfo.btType2 = (BYTE)nCount;
+				_fenghaoInfo().btType3 = 0; // 互斥处理
+				_fenghaoInfo().btType2 = (BYTE)nCount;
 				SendMsg(GetId(), 0x9b0, 1, nCount, 0);
 			}
 			else
 			{
 				// 当前激活的封号就是本ID，则卸下当前封号
-				if (m_FenghaoInfo.btType2 == (BYTE)nCount)
+				if (_fenghaoInfo().btType2 == (BYTE)nCount)
 				{
-					m_FenghaoInfo.btType2 = 0;
+					_fenghaoInfo().btType2 = 0;
 					SendMsg(GetId(), 0x9b0, 1, 0, 0); // 卸下
 					boEquip = FALSE;
 				}
 				else
 				{
 					// 替换当前封号
-					m_FenghaoInfo.btType3 = 0;
-					m_FenghaoInfo.btType2 = (BYTE)nCount;
+					_fenghaoInfo().btType3 = 0;
+					_fenghaoInfo().btType2 = (BYTE)nCount;
 					SendMsg(GetId(), 0x9b0, 1, nCount, 0);
 				}
 			}
 		}
 		else if (pConfig->btType == 2)
 		{
-			btOldType23 = m_FenghaoInfo.btType3;
-			if (m_FenghaoInfo.btType3 == 0)
+			btOldType23 = _fenghaoInfo().btType3;
+			if (_fenghaoInfo().btType3 == 0)
 			{
-				m_FenghaoInfo.btType2 = 0; // 互斥处理
-				m_FenghaoInfo.btType3 = (BYTE)nCount;
+				_fenghaoInfo().btType2 = 0; // 互斥处理
+				_fenghaoInfo().btType3 = (BYTE)nCount;
 				SendMsg(GetId(), 0x9b0, 1, nCount, 0);
 			}
 			else
 			{
-				if (m_FenghaoInfo.btType3 == (BYTE)nCount)
+				if (_fenghaoInfo().btType3 == (BYTE)nCount)
 				{
-					m_FenghaoInfo.btType3 = 0;
+					_fenghaoInfo().btType3 = 0;
 					SendMsg(GetId(), 0x9b0, 1, 0, 0);
 					boEquip = FALSE;
 				}
 				else
 				{
-					m_FenghaoInfo.btType2 = 0;
-					m_FenghaoInfo.btType3 = (BYTE)nCount;
+					_fenghaoInfo().btType2 = 0;
+					_fenghaoInfo().btType3 = (BYTE)nCount;
 					SendMsg(GetId(), 0x9b0, 1, nCount, 0);
 				}
 			}
@@ -113,17 +113,17 @@ VOID CHumanPlayer::SendFengHaoEquip(int nCount)
 	}
 	else
 	{
-		btOldType1 = m_FenghaoInfo.btType1;
+		btOldType1 = _fenghaoInfo().btType1;
 		// 普通封号处理
-		if (m_FenghaoInfo.btType1 == (BYTE)nCount)
+		if (_fenghaoInfo().btType1 == (BYTE)nCount)
 		{
-			m_FenghaoInfo.btType1 = 0;
+			_fenghaoInfo().btType1 = 0;
 			SendMsg(GetId(), 0x9b0, 1, 0, 0);
 			boEquip = FALSE;
 		}
 		else
 		{
-			m_FenghaoInfo.btType1 = (BYTE)nCount;
+			_fenghaoInfo().btType1 = (BYTE)nCount;
 			SendMsg(GetId(), 0x9b0, 1, nCount, 0);
 		}
 	}
@@ -279,19 +279,19 @@ VOID CHumanPlayer::RecalcFengHaoProp(BYTE index, BOOL boOperate, BOOL boProp)
 
 VOID CHumanPlayer::OnFengHaoInfo(FenghaoInfo* pInfo)
 {
-	m_FenghaoInfo = *pInfo;
+	_fenghaoInfo() = *pInfo;
 	BOOL bChanged = FALSE;
-	if (m_FenghaoInfo.btType1 > 0) 
+	if (_fenghaoInfo().btType1 > 0) 
 	{ 
-		RecalcFengHaoProp(m_FenghaoInfo.btType1, TRUE, FALSE); bChanged = TRUE; 
+		RecalcFengHaoProp(_fenghaoInfo().btType1, TRUE, FALSE); bChanged = TRUE; 
 	}
-	if (m_FenghaoInfo.btType2 > 0) 
+	if (_fenghaoInfo().btType2 > 0) 
 	{ 
-		RecalcFengHaoProp(m_FenghaoInfo.btType2, TRUE, FALSE); bChanged = TRUE; 
+		RecalcFengHaoProp(_fenghaoInfo().btType2, TRUE, FALSE); bChanged = TRUE; 
 	}
-	if (m_FenghaoInfo.btType3 > 0) 
+	if (_fenghaoInfo().btType3 > 0) 
 	{ 
-		RecalcFengHaoProp(m_FenghaoInfo.btType3, TRUE, FALSE); bChanged = TRUE; 
+		RecalcFengHaoProp(_fenghaoInfo().btType3, TRUE, FALSE); bChanged = TRUE; 
 	}
 	if (bChanged)
 	{
@@ -303,11 +303,11 @@ VOID CHumanPlayer::OnFengHaoInfo(FenghaoInfo* pInfo)
 VOID CHumanPlayer::CheckFengHaoTimeOut()
 {
 	CFengHaoGrowManager* pMgr = CFengHaoGrowManager::GetInstance();
-	DWORD dwNow = (DWORD)time(nullptr);
+	DWORD dwNow = GetUnixTimeSec();
 	for (int i = 1; i < MAX_FENGHAO; ++i)
 	{
 		FengHaoGrowItem* pConfig = pMgr->GetItem(i);
-		FengHaoRow pFengHaoRow = m_FenghaoInfo.mFengHaoRow[i];
+		FengHaoRow pFengHaoRow = _fenghaoInfo().mFengHaoRow[i];
 		if (pConfig && pConfig->btLastDay != 0 && pFengHaoRow.boActivation) //只处理有时间限制的封号
 		{
 			if (pFengHaoRow.dwLastDate <= dwNow)
@@ -323,5 +323,5 @@ VOID CHumanPlayer::UpdateFengHaoToDB()
 {
 	CDBClientObj* pObj = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 	if (pObj)
-		pObj->UpdateFengHaoInfo(GetDBId(), &m_FenghaoInfo);
+		pObj->UpdateFengHaoInfo(GetDBId(), &_fenghaoInfo());
 }

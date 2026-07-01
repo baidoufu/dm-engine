@@ -38,9 +38,6 @@ CHumanPlayer::CHumanPlayer(VOID) :m_pClientObj(nullptr), m_Equipments(this), m_S
 	m_ItemBox.Create(BIGBAG_SLOT); // 玩家背包大小
 	m_ItemBank.Create(100); // 玩家仓库大小
 	m_ItemPetBag.Create(10); // 豹子背包大小
-	m_iHuoli = 0;
-	m_nRecalcHit = 0;
-	m_nRecalcSpeed = 0;
 	m_pMagic = nullptr;
 	m_pHorse = 0;
 	m_bRideHorse = FALSE;
@@ -48,7 +45,6 @@ CHumanPlayer::CHumanPlayer(VOID) :m_pClientObj(nullptr), m_Equipments(this), m_S
 	m_bEnterMap = FALSE;
 	m_bFirstLogin = FALSE;
 	petname.fill(0);
-	m_nMaterialBagPos = -1;
 	Clean();
 }
 
@@ -58,7 +54,11 @@ CHumanPlayer::~CHumanPlayer(VOID)
 
 VOID CHumanPlayer::Clean()
 {
-	memset(&m_TaskInfo, 0, sizeof(m_TaskInfo));
+	// TaskComponent 清理 (构造期间组件未创建则跳过)
+	{
+		auto* tc = GetTaskComp();
+		if (tc) { memset(&tc->TaskInfo, 0, sizeof(tc->TaskInfo)); tc->TaskIdToIndexMap.clear(); }
+	}
 	memset(&m_xAbilityShellRef, 0, sizeof(m_xAbilityShellRef));
 	ClearParam();
 	this->m_ScriptTarget.Clean();
@@ -77,65 +77,91 @@ VOID CHumanPlayer::Clean()
 	m_pGroupObject = nullptr;
 	m_dwStartPointIndex = 0;
 	m_bFirstEnterMap = TRUE;
-	m_szCurrentTitle.fill(0);
-	m_iCurrentTitleIndex = 0;
-	for (auto& param : m_sParam) param.fill(0);
-	m_vParam.fill(0);
+	// TitleComponent/ScriptVarComponent 清理
+	{
+		auto* ttc = GetTitleComp();
+		if (ttc) { ttc->CurrentTitle.fill(0); ttc->CurrentTitleIndex = 0; }
+		auto* svc = GetScriptVarComp();
+		if (svc) { for (auto& p : svc->StringParams) p.fill(0); svc->ValueParams.fill(0); }
+	}
 	m_ItemBox.Clean();
 	m_ItemBank.Clean();
 	m_ItemPetBag.Clean();
 	m_pAutoMagic.fill(nullptr);
 	m_iAutoMagicCount = 0;
-	m_fExpFactor = 1.0f;
+	// ExpFactor默认1.0f, Clean时重置
+	{ auto* ms = GetMiscStateComp(); if (ms) ms->ExpFactor = 1.0f; }
 	m_pExpMagic = nullptr;
-	m_szCurWisperTarget[0] = 0;
-	memset(m_bChatChannelDisabled.data(), 0, sizeof(m_bChatChannelDisabled));
+	// ChatComponent 清理
+	{
+		auto* cc = GetChatComp();
+		if (cc) { cc->CurWisperTarget[0] = 0; memset(cc->DisabledChannels.data(), 0, sizeof(cc->DisabledChannels)); }
+	}
 	SetGuild(nullptr);
 	m_szGuildTitle.fill(0);
 	m_iGuildTitleLevel = 0;
 	m_pAddToGuildRequester = nullptr;
 	m_pHorse = nullptr;
 	m_bRideHorse = FALSE;
-	m_dwPkValue = 0;
-	m_bJustPk = FALSE;
+	// PkComponent 清理
+	{
+		auto* pkc = GetPkComp();
+		if (pkc) { pkc->PkValue = 0; pkc->JustPk = FALSE; }
+	}
 	m_pSeizedObject = nullptr;
 	m_iSeizedTimes = 0;
 	m_szGuildTitle.fill(0);
 
-	m_iPrivateShopItemCount = 0;
+	// MarketComponent 清理
+	{
+		auto* mc = GetMarketComp();
+		if (mc) { mc->ItemCount = 0; mc->ShopName.fill(0); mc->ShopStyle = 0; mc->ShopFlags = 0; mc->ShopSign = 0; }
+	}
 	SetCurPrivateShopView(nullptr);
-	m_sMaster[0] = 0;
-	m_sWife[0] = 0;
-	for (auto& student : m_sStudents) student.fill(0);
-	for (auto& friendName : m_sFriends) friendName.fill(0);
-	memset(&m_FenghaoInfo, 0, sizeof(m_FenghaoInfo));
-	InitAchievement(CTimeAchieve::GetInstance()->GetAchieveCount());
+	// SocialComponent 清理
+	{
+		auto* sc = GetSocialComp();
+		if (sc)
+		{
+			sc->Master[0] = 0; sc->Wife[0] = 0;
+			for (auto& s : sc->Students) s.fill(0);
+			for (auto& f : sc->Friends) f.fill(0);
+		}
+	}
+	// FenghaoComponent 清理
+	{
+		auto* fc = GetFenghaoComp();
+		if (fc) memset(&fc->Info, 0, sizeof(fc->Info));
+	}
 
 	m_bRefuseAddFriend = FALSE;
 	m_pTimeOutDeActiveMagic = nullptr;
-
-	m_dwMineCounter = 0;
-	
-	memset(&m_UpgradeItem, 0, sizeof(m_UpgradeItem));
+	// MiscStateComponent 清理
+	{
+		auto* msc = GetMiscStateComp();
+		if (msc) msc->MineCounter = 0;
+	}
+	// UpgradeItem 清理
+	{ auto* uc = GetUpgradeItemComp(); if (uc) memset(&uc->Item, 0, sizeof(uc->Item)); }
 
 	m_bHorseRest = FALSE;
 	m_pUsingItem = nullptr;
 	m_pPackItem = nullptr;
 	m_pPutItem = nullptr;
-	m_nCutMonsterId = 0;
-	m_wPrivateShopStyle = 0;
-	m_wPrivateShopFlags = 0;
-	m_wPrivateShopSign = 0;
-	m_btChatColor = 1;
+	// ChatColor 重置
+	{
+		auto* cc = GetChatComp();
+		if (cc) cc->ChatColor = 1;
+	}
 	m_pPet = nullptr;
 	m_dwPetKey = 0;
 	m_wPetSkill = 0;
-	m_dwZhenBaoExpMax = 0;
-	m_dwZhenBaoStar = 0;
-	m_wYuanQi = 0;
-	m_bYuanQi = FALSE;
-	m_wStamina = 0;
-	m_wMaxStamina = 2000;
+	m_baozhiID = 0;
+	// ZhenBaoComponent 清理
+	{
+		auto* zb = GetZhenBaoComp();
+		if (zb) { zb->ZhenBaoExpMax = 0; zb->ZhenBaoStar = 0; zb->YuanQi = 0; zb->IsYuanQiFull = FALSE; }
+	}
 }
 
 BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
@@ -241,15 +267,14 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 	m_ItemBox.SetCountLimit(iBagCount);
 	this->m_ItemBank.SetCountLimit(CGameWorld::GetInstance()->GetVar(EVI_STOREAGESIZE));
 	m_Equipments.Clean();
-	m_iHuoli = 0;
 	m_nVisibleObjectFlag = 0;
-	AddVisibleObjectType(OBJ_NPC); // 设置是否可见的
-	AddVisibleObjectType(OBJ_PLAYER);
-	AddVisibleObjectType(OBJ_MONSTER);
-	AddVisibleObjectType(OBJ_DOWNITEM);
-	AddVisibleObjectType(OBJ_VISIBLEEVENT);
-	AddVisibleObjectType(OBJ_PET);
-
+	//添加玩家可以看到的对象类型
+	for (int i = 0; i < OBJ_MAX; i++)
+	{
+		e_object_type objTye = (e_object_type)i;
+		if (objTye == OBJ_EVENT) continue;
+		AddVisibleObjectType(objTye);
+	}
 	SendMsg(GetId(), 0x9591, 256, 7, 3, "2, 0, 9, 0"); // 发送时长版本号
 	SendClientfunction();
 	SendMsg(0, 0x949, 1, 100, 0);
@@ -285,10 +310,19 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 	ChangeChatChannel(CCH_NORMAL);
 	SaySystemAttrib( CC_GREEN, "更改频道 CTRL+S 查看频道信息 @ccinfo" );
 	ResetTimer(TimerType::TMR_PK);
-	m_dwPkValue = m_Humandesc.dbinfo.dwFlag[1];
+	// PkComponent/MiscStateComponent 初始化
+	{
+		auto* pkc = GetPkComp();
+		if (pkc) pkc->PkValue = m_Humandesc.dbinfo.dwFlag[1];
+	}
 	UpdateViewName();
 	SendFengHaoData();
-	m_LoginTime = CSystemTime();
+	{
+		auto* msc = GetMiscStateComp();
+		if (msc) msc->LoginTime = CSystemTime();
+	}
+	// 确保成就数据在ECS组件创建后完成初始化
+	InitAchievement(CTimeAchieve::GetInstance()->GetAchieveCount());
 	return TRUE;
 }
 
@@ -907,8 +941,13 @@ VOID CHumanPlayer::UpdateProp()
 	prop.btMaxBodyWeight = GetPropValue(PI_MAXBODYWEIGHT);
 	prop.btMaxHandWeight = GetPropValue(PI_MAXHANDWEIGHT);
 
-	prop.wStamina = m_wStamina;
-	prop.wMaxStamina = m_wMaxStamina;
+	prop.wStamina = 0;
+	prop.wMaxStamina = 0;
+	if (auto* sc = PlayerComponentManager::GetInstance()->GetStamina(this))
+	{
+		prop.wStamina = sc->wStamina;
+		prop.wMaxStamina = sc->wMaxStamina;
+	}
 	prop.wPersonalCode = m_Humandesc.dbinfo.wPersonCode;
 
 	WORD w1 = m_Humandesc.dbinfo.btClass; // 职业
@@ -922,7 +961,9 @@ VOID CHumanPlayer::UpdateSubProp()
 	WORD w2 = GetPropValue(PI_POISONESCAPE) << 8 | GetPropValue(PI_POISONRECOVER); // 中毒躲避/10 | 中毒恢复
 	WORD w3 = GetPropValue(PI_HPRECOVER) << 8 | GetPropValue(PI_MPRECOVER); // 生命恢复 | 魔法恢复
 	HUMANSUPROP suprop;
-	suprop.wHuoli = m_iHuoli;
+	suprop.wHuoli = 0;
+	if (auto* sc = PlayerComponentManager::GetInstance()->GetStamina(this))
+		suprop.wHuoli = (WORD)sc->iHuoli;
 	suprop.wHuoliMax = 600;
 	suprop.bColor = 1;
 	suprop.dwForgePoint = m_Humandesc.dbinfo.dwForgePoint;
@@ -1036,22 +1077,18 @@ int CHumanPlayer::GetEquipments(EQUIPMENT* pEquipments)
 	return count;
 }
 
-int CHumanPlayer::GetVarValue(const char* pszVar) const
+int CHumanPlayer::GetVarValue(const char* pszVar)
 {
-	if (_stricmp(pszVar, "job") == 0)
-		return m_Humandesc.dbinfo.btClass;
-	if (_stricmp(pszVar, "sex") == 0)
-		return m_Humandesc.dbinfo.btSex;
-	if (_stricmp(pszVar, "gold") == 0)
-		return m_Humandesc.dbinfo.dwGold;
-	if (_stricmp(pszVar, "yuanbao") == 0)
-		return m_Humandesc.dbinfo.dwYuanbao;
-	if (_stricmp(pszVar, "level") == 0)
-		return m_Humandesc.dbinfo.wLevel;
-	if (_stricmp(pszVar, "pkpoint") == 0)
-		return m_dwPkValue;
-	if (_stricmp(pszVar, "credit") == 0)
-		return (m_Humandesc.dbinfo.dwFlag[0] & 0xffff);
+	switch (str_hash(pszVar))  // 注意：是运行时哈希
+	{
+	case "job"_hash: return m_Humandesc.dbinfo.btClass;
+	case "sex"_hash: return m_Humandesc.dbinfo.btSex;
+	case "gold"_hash: return m_Humandesc.dbinfo.dwGold;
+	case "yuanbao"_hash: return m_Humandesc.dbinfo.dwYuanbao;
+	case "level"_hash: return m_Humandesc.dbinfo.wLevel;
+	case "pkpoint"_hash: return _pkValue();
+	case "credit"_hash: return (m_Humandesc.dbinfo.dwFlag[0] & 0xffff);
+	}
 	return -1;
 }
 
@@ -1488,90 +1525,6 @@ VOID CHumanPlayer::Update()
 	{
 	case 0:
 	{
-		if (m_bJustPk)// 检测PK
-		{
-			if (CheckTimer(TimerType::TMR_JUST_PK, CGameWorld::GetInstance()->GetVar(EVI_GRAYNAMETIME) * 1000))
-			{
-				m_bJustPk = FALSE;
-				SendChangeName();
-			}
-		}
-		if (m_dwPkValue > 0) // PK值大于0
-		{
-			if (CheckTimer(TimerType::TMR_PK_POINT, CGameWorld::GetInstance()->GetVar(EVI_ONEPKPOINTTIME) * 1000))
-			{
-				BYTE btColor = GetNameColor(this);
-				m_dwPkValue--;
-				ResetTimer(TimerType::TMR_PK_POINT);
-				if (btColor != GetNameColor(this))
-					SendChangeName();
-			}
-		}
-		// 6分钟检查
-		if (m_Humandesc.dbinfo.wLevel >= 7 && CheckTimer(TimerType::TMR_STAMINA, 6 * 60 * 1000))
-		{
-			int expFactor = (m_pMap != nullptr) ? (int)ceilf(m_pMap->GetExpFactor()) : 1;
-			if (expFactor > 1)
-				m_wStamina += expFactor;
-			else
-				m_wStamina++;
-			if (m_wStamina <= m_wMaxStamina)
-			{
-				SendJingLiZhi(m_wStamina);
-				UpdateProp();
-			}
-			else
-				m_wStamina = m_wMaxStamina;
-			ResetTimer(TimerType::TMR_STAMINA);
-		}
-		// 30分钟保存数据 —— 按playerId错开存档时间
-		// 偏移 = (playerId % 30) * 10 秒，分成 30 个时间片，避免所有玩家同时冲击DB
-		// 每次保存后撤回偏移，保证后续间隔统一为固定30分钟
-		DWORD dwSaveInterval = CGameWorld::GetInstance()->GetVar(EVI_CHARINFOBACKUPTIME) * 60 * 1000;
-		DWORD dwSaveOffset = (GetId() % 30) * 10 * 1000;
-		if (CheckTimer(TimerType::TMR_DB_SAVE, dwSaveInterval + dwSaveOffset))
-		{
-			if (CGameWorld::GetInstance()->CanSaveToDB())
-			{
-				CGameWorld::GetInstance()->UpdateDBUpdateTimer();
-				ResetTimer(TimerType::TMR_DB_SAVE);
-				// 对应原 m_DBTimer.SetSavedTime(m_DBTimer.GetSavedTime() - dwSaveOffset)
-				OffsetTimer(TimerType::TMR_DB_SAVE, dwSaveOffset);
-				UpdateToDB();
-			}
-		}
-		// 1秒检查
-		if (CheckTimer(TimerType::TMR_GAME_TIME, 1000))
-		{
-			ResetTimer(TimerType::TMR_GAME_TIME);
-			if (m_Humandesc.dbinfo.nGameTime > -1) // 时长区-游戏时间计算
-			{
-				if (m_Humandesc.dbinfo.nGameTime != 0)
-				{
-					m_Humandesc.dbinfo.nGameTime--;
-					if (m_Humandesc.dbinfo.nGameTime == 0)
-						CSystemScript::GetInstance()->Execute(GetScriptTarget(), "游戏时长.TimeOver", FALSE);
-				}
-			}
-			
-			if (m_bYuanQi == FALSE && m_wYuanQi < 2000)
-			{
-				m_wYuanQi++;
-				SendMsg(GetId(), 0x9611, m_wYuanQi, 2000, 0);
-				if (m_wYuanQi >= 2000)
-					m_bYuanQi = TRUE;
-			}
-		}
-		// 60秒检查
-		if (CheckTimer(TimerType::TMR_FENGHAO, 60*1000))
-		{
-			ResetTimer(TimerType::TMR_FENGHAO);
-			CheckFengHaoTimeOut();
-		}
-	}
-	break;
-	case 1:
-	{
 		if (this->IsSpecialEquipmentFunctionOn(SEF_CLOAK))// 检测隐身
 		{
 			if (!IsStatusSet(SI_CLOAK))
@@ -1579,11 +1532,6 @@ VOID CHumanPlayer::Update()
 				if (CanDoAction(AT_ATTACK))
 					SetStatus(SI_CLOAK, 0, 0xffffffff);
 			}
-		}
-		if (m_pAddToGuildRequester != nullptr) // 请求加入行会人
-		{
-			if (CheckTimer(TimerType::TMR_ADD_TO_GUILD, 60 * 1000))
-				ReplyAddToGuildRequest(FALSE);
 		}
 		// 检测烈火剑法、雷霆剑
 		if (m_pTimeOutDeActiveMagic != nullptr && (m_pTimeOutDeActiveMagic->dwFlag & USERMAGICFLAG_ACTIVED))
@@ -1603,6 +1551,10 @@ VOID CHumanPlayer::Update()
 				}
 			}
 		}
+	}
+	break;
+	case 1:
+	{
 		if (m_pMap) // 检测进入地图
 		{
 			DWORD dwParam = 0;
@@ -1698,8 +1650,16 @@ VOID CHumanPlayer::WinExp(DWORD dwExp, BOOL bNoBonus, DWORD dwId)
 				AddProcess(EP_GODBLESS, dwId, 8);
 			}
 		}
-		dwExp = ROUND(factor * dwExp) + dwAddExp;
-		dwExp = ROUND(GetExpFactor() * dwExp);
+		// 安全经验放大: 用 double 计算避免 float 精度丢失, clamp 到 DWORD 范围防止 float->int 溢出 UB
+		// 原 ROUND 宏 (int)(f+0.5) 在高端玩法下 factor*dwExp 超 INT_MAX 时为未定义行为
+		auto safeRoundMul = [](double fMul, DWORD dwBase) -> DWORD {
+			double r = fMul * static_cast<double>(dwBase);
+			if (r < 0.0) return 0;
+			if (r > static_cast<double>(0xFFFFFFFFu)) return 0xFFFFFFFFu;
+			return static_cast<DWORD>(r + 0.5);
+		};
+		dwExp = safeRoundMul(static_cast<double>(factor), dwExp) + dwAddExp;
+		dwExp = safeRoundMul(static_cast<double>(GetExpFactor()), dwExp);
 	}
 	m_Humandesc.dbinfo.dwCurExp += dwExp;
 
@@ -2057,11 +2017,11 @@ BOOL CHumanPlayer::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
 	BOOL bRet = CAliveObject::GetViewmsg(pszMsg, length, pViewer);
 	if (!bRet) return FALSE;
-	if (m_szCurrentTitle[0] != 0)
+	if (_currentTitle()[0] != 0)
 	{
-		WORD wFlag = 8 | ((m_iCurrentTitleIndex + 1) << 8);
+		WORD wFlag = 8 | ((_currentTitleIndex() + 1) << 8);
 		char szTempBuffer[1024];
-		int tempSize = EncodeMsg(szTempBuffer, GetId(), 0x532c, wFlag, 0, 0, (LPVOID)m_szCurrentTitle.data());
+		int tempSize = EncodeMsg(szTempBuffer, GetId(), 0x532c, wFlag, 0, 0, (LPVOID)_currentTitle().data());
 		memcpy(pszMsg + length, szTempBuffer, tempSize);
 		length += tempSize;
 	}
@@ -2103,7 +2063,7 @@ BOOL CHumanPlayer::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 	if (GetActionType() == AT_PRIVATESHOP)
 	{
 		PRIVATESHOPHEADER psheader;
-		o_strncpy(psheader.szName, m_szPrivateShopName.data(), 51);
+		o_strncpy(psheader.szName, _shopName().data(), 51);
 		char szTempBuffer[1024];
 		int tempSize = EncodeMsg(szTempBuffer, GetId(), 0xfca0, getX(), getY(), (WORD)GetDirection(),
 			&psheader, sizeof(psheader));
@@ -2508,11 +2468,11 @@ BOOL CHumanPlayer::RandomTeleport(int nMapId)
 VOID CHumanPlayer::CheckAndUpgradeTitle()
 {
 	int iTitleIndex = 0;
-	if (CTitleManager::GetInstance()->GetTitle(this, m_szCurrentTitle.data(), iTitleIndex))
+	if (CTitleManager::GetInstance()->GetTitle(this, _currentTitle().data(), iTitleIndex))
 	{
-		if ((iTitleIndex + 1) != m_iCurrentTitleIndex)
+		if ((iTitleIndex + 1) != _currentTitleIndex())
 		{
-			m_iCurrentTitleIndex = iTitleIndex + 1;
+			_currentTitleIndex() = iTitleIndex + 1;
 			SendTitleChanged();
 		}
 	}
@@ -2520,11 +2480,11 @@ VOID CHumanPlayer::CheckAndUpgradeTitle()
 
 VOID CHumanPlayer::SendTitleChanged()
 {
-	if (m_szCurrentTitle[0] != 0)
+	if (_currentTitle()[0] != 0)
 	{
-		WORD wFlag = 8 | ((m_iCurrentTitleIndex + 1) << 8);
-		SendAroundMsg(GetId(), 0x532c, wFlag, 0, 0, (LPVOID)m_szCurrentTitle.data());
-		SendMsg(GetId(), 0x532c, wFlag, 0, 0, (LPVOID)m_szCurrentTitle.data());
+		WORD wFlag = 8 | ((_currentTitleIndex() + 1) << 8);
+		SendAroundMsg(GetId(), 0x532c, wFlag, 0, 0, (LPVOID)_currentTitle().data());
+		SendMsg(GetId(), 0x532c, wFlag, 0, 0, (LPVOID)_currentTitle().data());
 	}
 }
 
@@ -2694,9 +2654,9 @@ BOOL CHumanPlayer::TakeBankItem(DWORD dwMakeIndex)
 
 VOID CHumanPlayer::SendBank(DWORD dwNpcId)
 {
-	static thread_local std::array<ITEMCLIENT, 100> items{};
-	int count = m_ItemBank.GetClientItems(items.data(), 100);
-	SendMsg(dwNpcId, 0x2c0, 0, 0, count, (LPVOID)items.data(), sizeof(ITEMCLIENT) * count);
+	static thread_local std::array<ITEMCLIENT, 100> s_items{};
+	int count = m_ItemBank.GetClientItems(s_items.data(), 100);
+	SendMsg(dwNpcId, 0x2c0, 0, 0, count, (LPVOID)s_items.data(), sizeof(ITEMCLIENT) * count);
 }
 
 VOID CHumanPlayer::OnAddMagic(USERMAGIC* pMagic)
@@ -2773,10 +2733,10 @@ VOID CHumanPlayer::OnMagicLevelup(USERMAGIC* pMagic)
 VOID CHumanPlayer::RecalcHitSpeed()
 {
 	if (!m_pMagic) return;
-	DecProp(PI_HITRATE, m_nRecalcHit);// 先把增加的命中减掉
-	//DecProp(PI_ESCAPE, m_nRecalcSpeed);// 先把增加的躲避减掉
-	m_nRecalcHit = 0;
-	//m_nRecalcSpeed = 0;
+	DecProp(PI_HITRATE, _recalcHit());// 先把增加的命中减掉
+	//DecProp(PI_ESCAPE, _recalcSpeed());// 先把增加的躲避减掉
+	_recalcHit() = 0;
+	//_recalcSpeed() = 0;
 	USERMAGIC* pMagic = m_pMagic;
 	while (pMagic)
 	{
@@ -2787,7 +2747,7 @@ VOID CHumanPlayer::RecalcHitSpeed()
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value3;
 			AddProp(PI_HITRATE, nValue);//增加命中
-			m_nRecalcHit += nValue;
+			_recalcHit() += nValue;
 		}
 		break;
 		case 4: // 精神战法
@@ -2795,7 +2755,7 @@ VOID CHumanPlayer::RecalcHitSpeed()
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value3;
 			AddProp(PI_HITRATE, nValue);//增加命中
-			m_nRecalcHit += nValue;
+			_recalcHit() += nValue;
 		}
 		break;
 		case 7: // 攻杀剑法
@@ -2804,7 +2764,7 @@ VOID CHumanPlayer::RecalcHitSpeed()
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value3;
 			AddProp(PI_HITRATE, nValue);//增加命中
-			m_nRecalcHit += nValue;
+			_recalcHit() += nValue;
 		}
 		break;
 		case 40: // 残影刀法
@@ -2812,7 +2772,7 @@ VOID CHumanPlayer::RecalcHitSpeed()
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value3;
 			AddProp(PI_HITRATE, nValue);//增加命中
-			m_nRecalcHit += nValue;
+			_recalcHit() += nValue;
 		}
 		break;
 		case 41: // 血影刀法
@@ -2820,7 +2780,7 @@ VOID CHumanPlayer::RecalcHitSpeed()
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value2;
 			AddProp(PI_HITRATE, nValue);//增加命中
-			m_nRecalcHit += nValue;
+			_recalcHit() += nValue;
 		}
 		break;
 		case 74: // 擒龙手
@@ -2828,7 +2788,7 @@ VOID CHumanPlayer::RecalcHitSpeed()
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value1;
 			AddProp(PI_HITRATE, nValue);//增加命中
-			m_nRecalcHit += nValue;
+			_recalcHit() += nValue;
 		}
 		break;
 		}
@@ -2887,7 +2847,7 @@ VOID CHumanPlayer::ChangeAttackMode(int mode)
 
 VOID CHumanPlayer::ChangeChatChannel(e_chatchannel channel)
 {
-	int itemp = (int)m_ChatChannel;
+	int itemp = (int)_chatChannel();
 	if (channel == CCH_MAX)
 		itemp++;
 	else
@@ -2897,20 +2857,20 @@ VOID CHumanPlayer::ChangeChatChannel(e_chatchannel channel)
 		if (!IsGameMaster()) itemp++;
 	}
 	if (itemp >= CCH_MAX) itemp = 0;
-	m_ChatChannel = (e_chatchannel)itemp;
-	if (m_ChatChannel == CCH_WISPER)
+	_chatChannel() = (e_chatchannel)itemp;
+	if (_chatChannel() == CCH_WISPER)
 	{
-		if (g_pChatChannelDesc[m_ChatChannel])
+		if (g_pChatChannelDesc[_chatChannel()])
 		{
-			SaySystemAttrib(CC_GREEN, "[%s聊天频道 当前密谈对象 %s]", g_pChatChannelDesc[m_ChatChannel], m_szCurWisperTarget[0] == 0 ? "空" : m_szCurWisperTarget.data());
-			if (m_szCurWisperTarget[0] == 0)
+			SaySystemAttrib(CC_GREEN, "[%s聊天频道 当前密谈对象 %s]", g_pChatChannelDesc[_chatChannel()], _wisperTarget()[0] == 0 ? "空" : _wisperTarget().data());
+			if (_wisperTarget()[0] == 0)
 				SaySystemAttrib(CC_GREEN, "[在密谈频道成功使用 /角色名 密谈一次后, 该角色即被设置成密谈对象]");
 		}
 		else
-			SaySystemAttrib(CC_GREEN, "[%s聊天频道 已关闭]", g_pChatChannelDesc[m_ChatChannel]);
+			SaySystemAttrib(CC_GREEN, "[%s聊天频道 已关闭]", g_pChatChannelDesc[_chatChannel()]);
 	}
 	else
-		SaySystemAttrib(CC_GREEN, "[%s聊天频道%s]", g_pChatChannelDesc[m_ChatChannel], g_pChatChannelDesc[m_ChatChannel] ? "" : " 已关闭");
+		SaySystemAttrib(CC_GREEN, "[%s聊天频道%s]", g_pChatChannelDesc[_chatChannel()], g_pChatChannelDesc[_chatChannel()] ? "" : " 已关闭");
 }
 
 VOID CHumanPlayer::DisableChannel(e_chatchannel channel)
@@ -2921,7 +2881,7 @@ VOID CHumanPlayer::DisableChannel(e_chatchannel channel)
 		SaySystemAttrib(CC_GREEN, "%s 频道已经被关闭", g_pChatChannelDesc[channel]);
 	else
 	{
-		m_bChatChannelDisabled[channel] = TRUE;
+		_chatDisabled()[channel] = TRUE;
 		SaySystemAttrib(CC_GREEN, "%s 频道被关闭", g_pChatChannelDesc[channel]);
 	}
 }
@@ -2934,16 +2894,16 @@ VOID CHumanPlayer::EnableChannel(e_chatchannel channel)
 		SaySystemAttrib(CC_GREEN, "%s 频道没有被关闭", g_pChatChannelDesc[channel]);
 	else
 	{
-		m_bChatChannelDisabled[channel] = FALSE;
+		_chatDisabled()[channel] = FALSE;
 		SaySystemAttrib(CC_GREEN, "%s 频道被开通", g_pChatChannelDesc[channel]);
 	}
 }
 
-BOOL CHumanPlayer::IsChannelDisabled(e_chatchannel channel)const
+BOOL CHumanPlayer::IsChannelDisabled(e_chatchannel channel)
 {
 	if (channel >= CCH_MAX || channel < 0) channel = GetChatChannel();
 	if (channel < 0 || channel >= CCH_MAX) return FALSE;
-	return m_bChatChannelDisabled[channel];
+	return _chatDisabled()[channel];
 }
 
 BOOL CHumanPlayer::IsGameMaster()
@@ -2977,7 +2937,7 @@ VOID CHumanPlayer::ChannelSay(e_chatchannel channel, const char* pszParam, const
 		char szText[512];
 		snprintf(szText, sizeof(szText), "%s: %s", GetName(), szBuff);
 		DWORD dwParam1 = IsSystemFlagSeted(SF_FONTCHANGED) ? GetSystemFlagParam(SF_FONTCHANGED) : 0;
-		dwParam1 = (dwParam1 << 8) | m_btChatColor;
+		dwParam1 = (dwParam1 << 8) | _chatColor();
 		for (VISIBLE_OBJECT* pVo = obj.first(); pVo != nullptr; pVo = obj.next())
 		{
 			if (pVo->pObject == nullptr || pVo->pObject->GetType() != OBJ_PLAYER)
@@ -2993,7 +2953,7 @@ VOID CHumanPlayer::ChannelSay(e_chatchannel channel, const char* pszParam, const
 	case CCH_WISPER:
 	{
 		char* pszName = (char*)pszParam;
-		if (pszName == nullptr)pszName = this->m_szCurWisperTarget.data();
+		if (pszName == nullptr)pszName = this->_wisperTarget().data();
 		if (pszName[0] == 0)
 		{
 			SaySystem("当前密谈对象为空, 无法密谈!");
@@ -3093,7 +3053,7 @@ BOOL CHumanPlayer::ChannelHear(e_chatchannel channel, DWORD dwParam, const char*
 {
 	if (channel < 0 || channel >= CCH_MAX) channel = GetChatChannel();
 	if (channel < 0 || channel >= CCH_MAX) return FALSE;
-	if (m_bChatChannelDisabled[channel])return FALSE; // 被关闭的频道听不到东西
+	if (_chatDisabled()[channel])return FALSE; // 被关闭的频道听不到东西
 	char szBuff[248];
 	va_list	vl;
 	va_start(vl, pszWords);
@@ -3145,14 +3105,14 @@ BOOL CHumanPlayer::IsProperFriend(CAliveObject* pObject)
 			return (m_pGuild != nullptr && m_pGuild == ((CHumanPlayer*)pObject)->GetGuild());
 		break;
 		case HAM_COUPLE:
-			return (m_sWife[0] != 0 && strcmp(m_sWife.data(), pObject->GetName()) == 0);
+			return (_wife()[0] != 0 && strcmp(_wife().data(), pObject->GetName()) == 0);
 		break;
 		case HAM_CRIME:
 			return (!((CHumanPlayer*)pObject)->NoLawProtect());
 		break;
 		case HAM_MASTER:
 		{
-			if (m_sMaster[0] != 0 && strcmp(m_sMaster.data(), pObject->GetName()) == 0)
+			if (_master()[0] != 0 && strcmp(_master().data(), pObject->GetName()) == 0)
 				return TRUE;
 			if (GetStudentCount() > 0 && IsMyStudent(pObject->GetName()) == 0)
 				return TRUE;
@@ -3210,7 +3170,7 @@ BOOL CHumanPlayer::IsProperTarget(CAliveObject* pObject)
 	break;
 	case HAM_MASTER: // 师徒
 	{
-		if (m_sMaster[0] != 0 && strcmp(m_sMaster.data(), pObject->GetName()) == 0)
+		if (_master()[0] != 0 && strcmp(_master().data(), pObject->GetName()) == 0)
 			return FALSE;
 		if (GetStudentCount() > 0 && IsMyStudent(pObject->GetName()) == 0)
 			return FALSE;
@@ -3218,7 +3178,7 @@ BOOL CHumanPlayer::IsProperTarget(CAliveObject* pObject)
 	break;
 	case HAM_COUPLE: // 夫妻
 	{
-		if (m_sWife[0] != 0 && strcmp(m_sWife.data(), pObject->GetName()) == 0)
+		if (_wife()[0] != 0 && strcmp(_wife().data(), pObject->GetName()) == 0)
 			return FALSE;
 	}
 	break;
@@ -3264,11 +3224,11 @@ int	CHumanPlayer::GetGuildFrontPage(char* pszBuffer, int buffersize)
 	return 0;
 }
 
-BOOL CHumanPlayer::IsMyFriend(CHumanPlayer* pPlayer)const
+BOOL CHumanPlayer::IsMyFriend(CHumanPlayer* pPlayer)
 {
 	if (pPlayer == nullptr)return FALSE;
 	char* pName = (char*)pPlayer->GetName();
-	for (const auto& friendName : m_sFriends)
+	for (const auto& friendName : _friends())
 	{
 		if (friendName[0] == 0)continue;
 		if (strcmp(friendName.data(), pName) == 0)return TRUE;
@@ -3276,10 +3236,10 @@ BOOL CHumanPlayer::IsMyFriend(CHumanPlayer* pPlayer)const
 	return FALSE;
 }
 
-BOOL CHumanPlayer::IsMyFriend(const char* pszName)const
+BOOL CHumanPlayer::IsMyFriend(const char* pszName)
 {
 	if (pszName == nullptr)return FALSE;
-	for (const auto& friendName : m_sFriends)
+	for (const auto& friendName : _friends())
 	{
 		if (friendName[0] == 0)continue;
 		if (strcmp(friendName.data(), pszName) == 0)return TRUE;
@@ -3483,7 +3443,8 @@ BOOL CHumanPlayer::RideHorse()
 BOOL CHumanPlayer::NoLawProtect()
 {
 	if (this->IsStatusSet(SI_ITEMTRACED))return TRUE;
-	if (m_bJustPk || GetPkValue() >= CGameWorld::GetInstance()->GetVar(EVI_REDPKPOINT))
+	PkComponent* pk = GetPkComp();
+	if (pk && (pk->JustPk || pk->PkValue >= CGameWorld::GetInstance()->GetVar(EVI_REDPKPOINT)))
 		return TRUE;
 	return FALSE;
 }
@@ -3501,11 +3462,11 @@ VOID CHumanPlayer::CheckPk(CAliveObject* pTarget)
 	//如果目标不是玩家或者受保护
 	if (pTarget->GetType() != OBJ_PLAYER || ((CHumanPlayer*)pTarget)->NoLawProtect())
 		return;
-	if (m_bJustPk)
+	if (_justPk())
 		ResetTimer(TimerType::TMR_JUST_PK);
 	else if (GetPkValue() < CGameWorld::GetInstance()->GetVar(EVI_REDPKPOINT))
 	{
-		m_bJustPk = TRUE;
+		_justPk() = TRUE;
 		ResetTimer(TimerType::TMR_JUST_PK);
 		SendChangeName();
 	}
@@ -3572,7 +3533,7 @@ BYTE CHumanPlayer::GetNameColor(CMapObject* pViewer)
 		return (BYTE)m_SystemFlag.GetParam(SF_SPECIALNAMECOLOR);
 	if (GetPkValue() >= CGameWorld::GetInstance()->GetVar(EVI_REDPKPOINT))
 		return NCOLOR_RED;
-	if (m_bJustPk)
+	if (_justPk())
 		return NCOLOR_GRAY;
 	if (GetPkValue() >= CGameWorld::GetInstance()->GetVar(EVI_YELLOWPKPOINT))
 		return NCOLOR_YELLOW;
@@ -3582,15 +3543,15 @@ BYTE CHumanPlayer::GetNameColor(CMapObject* pViewer)
 VOID CHumanPlayer::AddPkPoint(DWORD btPoint)
 {
 	BYTE btColor = GetNameColor(this);
-	this->m_dwPkValue += btPoint;
+	this->_pkValue() += btPoint;
 	if (GetPkValue() >= CGameWorld::GetInstance()->GetVar(EVI_REDPKPOINT))
 	{
-		if (m_bJustPk)
-			m_bJustPk = FALSE;
+		if (_justPk())
+			_justPk() = FALSE;
 	}
-	else if (!m_bJustPk)
-		m_bJustPk = TRUE;
-	if (m_bJustPk)
+	else if (!_justPk())
+		_justPk() = TRUE;
+	if (_justPk())
 		ResetTimer(TimerType::TMR_JUST_PK);
 	BYTE btColor2 = GetNameColor(this);
 	if (btColor != btColor2)
@@ -3600,10 +3561,10 @@ VOID CHumanPlayer::AddPkPoint(DWORD btPoint)
 VOID CHumanPlayer::DecPkPoint(DWORD btPoint)
 {
 	BYTE btColor = GetNameColor(this);
-	if (this->m_dwPkValue < btPoint)
-		this->m_dwPkValue = 0;
+	if (this->_pkValue() < btPoint)
+		this->_pkValue() = 0;
 	else
-		this->m_dwPkValue -= btPoint;
+		this->_pkValue() -= btPoint;
 	BYTE btColor2 = GetNameColor(this);
 	if (btColor != btColor2)
 		SendChangeName();
@@ -3936,28 +3897,28 @@ VOID CHumanPlayer::UpdateViewName()
 		nUsed = strlen(m_szLongName.data());
 		nRemain = (nUsed < m_szLongName.size() - 1) ? (m_szLongName.size() - 1 - nUsed) : 0;
 	}
-	if (m_sMaster[0] != 0 && nRemain > 0) //	师徒 
+	if (_master()[0] != 0 && nRemain > 0) //	师徒 
 	{
-		snprintf(szTemp, sizeof(szTemp), "\\(%s的徒弟)", m_sMaster.data());
+		snprintf(szTemp, sizeof(szTemp), "\\(%s的徒弟)", _master().data());
 		strncat(m_szLongName.data(), szTemp, nRemain);
 		nUsed = strlen(m_szLongName.data());
 		nRemain = (nUsed < m_szLongName.size() - 1) ? (m_szLongName.size() - 1 - nUsed) : 0;
 	}
-	if (m_sWife[0] != 0 && nRemain > 0) //	夫妻
+	if (_wife()[0] != 0 && nRemain > 0) //	夫妻
 	{
 		if (m_Humandesc.dbinfo.btSex == 0)
-			snprintf(szTemp, sizeof(szTemp), "\\(%s的丈夫)", m_sWife.data());
+			snprintf(szTemp, sizeof(szTemp), "\\(%s的丈夫)", _wife().data());
 		else
-			snprintf(szTemp, sizeof(szTemp), "\\(%s的妻子)", m_sWife.data());
+			snprintf(szTemp, sizeof(szTemp), "\\(%s的妻子)", _wife().data());
 		strncat(m_szLongName.data(), szTemp, nRemain);
 		nUsed = strlen(m_szLongName.data());
 		nRemain = (nUsed < m_szLongName.size() - 1) ? (m_szLongName.size() - 1 - nUsed) : 0;
 	}
 	//时长封号系统
 	CFengHaoGrowManager* pMgr = CFengHaoGrowManager::GetInstance();
-	if (m_FenghaoInfo.btType1 > 0 && nRemain > 0) // 普通封号
+	if (_fenghaoInfo().btType1 > 0 && nRemain > 0) // 普通封号
 	{
-		FengHaoGrowItem* pConfig = pMgr->GetItem(m_FenghaoInfo.btType1);
+		FengHaoGrowItem* pConfig = pMgr->GetItem(_fenghaoInfo().btType1);
 		if (pConfig)
 		{
 			snprintf(szTemp, sizeof(szTemp), "\\%s$%u", pConfig->szName.data(), pConfig->btColorId);
@@ -3976,8 +3937,8 @@ const char* CHumanPlayer::GetScriptVarValue(const char* pszName)
 	{
 		if (var.nType == 0)
 		{
-			snprintf(m_szTempScriptVarValue.data(), m_szTempScriptVarValue.size(), "%u", var.nValue);
-			return m_szTempScriptVarValue.data();
+			snprintf(_tempScriptVar().data(), _tempScriptVar().size(), "%u", var.nValue);
+			return _tempScriptVar().data();
 		}
 		else
 			return var.pszValue;
@@ -4145,22 +4106,22 @@ BOOL CHumanPlayer::SetPrivateShop(int iCount, PRIVATESHOPQUERY* pQuery)
 {
 	if (GetActionType() != AT_PRIVATESHOP && !CanDoAction(AT_PRIVATESHOP))return FALSE;
 	if (iCount > 10)return FALSE;
-	o_strncpy(m_szPrivateShopName.data(), pQuery->szName, 52);
-	m_iPrivateShopItemCount = 0;
+	o_strncpy(_shopName().data(), pQuery->szName, 52);
+	_shopItemCount() = 0;
 	for (int i = 0; i < iCount; i++)
 	{
-		m_PrivateShopCache[m_iPrivateShopItemCount].pItem = m_ItemBox.FindItem(pQuery->items[i].dwMakeIndex);
-		if (m_PrivateShopCache[m_iPrivateShopItemCount].pItem == nullptr)continue;
-		if (CItemManager::GetInstance()->ItemLimited(*m_PrivateShopCache[m_iPrivateShopItemCount].pItem, IL_NOPRIVATESHOP))
+		_shopCache()[_shopItemCount()].pItem = m_ItemBox.FindItem(pQuery->items[i].dwMakeIndex);
+		if (_shopCache()[_shopItemCount()].pItem == nullptr)continue;
+		if (CItemManager::GetInstance()->ItemLimited(*_shopCache()[_shopItemCount()].pItem, IL_NOPRIVATESHOP))
 		{
 			SaySystem("摊位中有不能出售的物品!");
 			return FALSE;
 		}
-		m_PrivateShopCache[m_iPrivateShopItemCount].dwPrice = pQuery->items[i].dwPrice;
-		m_PrivateShopCache[m_iPrivateShopItemCount].pricetype = (money_type)(pQuery->items[i].wPriceType & 1);
-		m_iPrivateShopItemCount++;
+		_shopCache()[_shopItemCount()].dwPrice = pQuery->items[i].dwPrice;
+		_shopCache()[_shopItemCount()].pricetype = (money_type)(pQuery->items[i].wPriceType & 1);
+		_shopItemCount()++;
 	}
-	if (m_iPrivateShopItemCount == 0)return FALSE;
+	if (_shopItemCount() == 0)return FALSE;
 	int olddir = (int)GetDirection();
 	int newdir = olddir;
 	if ((newdir & 1) == 0)
@@ -4192,18 +4153,18 @@ BOOL CHumanPlayer::SendPrivateShopPage(CHumanPlayer* pQueryer, WORD wFlag)
 	if (this->m_ActionType != AT_PRIVATESHOP)return FALSE;
 	PRIVATESHOPSHOW	psshow;
 	this->GetPrivateShopView(psshow.header);
-	psshow.header.wCount = static_cast<WORD>(m_iPrivateShopItemCount);
+	psshow.header.wCount = static_cast<WORD>(_shopItemCount());
 	psshow.header.w2 = static_cast<BYTE>(wFlag);
 	if (wFlag == 1)
 		pQueryer->SetCurPrivateShopView(this);
-	o_strncpy(psshow.header.szName, m_szPrivateShopName.data(), 51);
+	o_strncpy(psshow.header.szName, _shopName().data(), 51);
 	int ptr = 0;
-	for (int i = 0; i < m_iPrivateShopItemCount; i++)
+	for (int i = 0; i < _shopItemCount(); i++)
 	{
-		if (m_PrivateShopCache[i].pItem == nullptr)continue;
-		psshow.items[ptr] = *(ITEMCLIENT*)m_PrivateShopCache[i].pItem;
-		psshow.items[ptr].baseitem.btPriceType = static_cast<BYTE>(m_PrivateShopCache[i].pricetype);
-		psshow.items[ptr].baseitem.nPrice = m_PrivateShopCache[i].dwPrice;
+		if (_shopCache()[i].pItem == nullptr)continue;
+		psshow.items[ptr] = *(ITEMCLIENT*)_shopCache()[i].pItem;
+		psshow.items[ptr].baseitem.btPriceType = static_cast<BYTE>(_shopCache()[i].pricetype);
+		psshow.items[ptr].baseitem.nPrice = _shopCache()[i].dwPrice;
 		ptr++;
 	}
 	psshow.header.wCount = (WORD)ptr;
@@ -4213,7 +4174,7 @@ BOOL CHumanPlayer::SendPrivateShopPage(CHumanPlayer* pQueryer, WORD wFlag)
 	return TRUE;
 }
 
-static thread_local std::array<char, 65536> g_szCodedMsgBuffer{};
+static thread_local std::array<char, 65536> s_szCodedMsgBuffer{};
 VOID CHumanPlayer::UpdatePrivateShopToAround()
 {
 	std::array<DWORD, 2> dwParam = { 0, 0 };
@@ -4222,24 +4183,24 @@ VOID CHumanPlayer::UpdatePrivateShopToAround()
 	if (m_xVisibleObjectList.getCount() == 0) return;
 
 	PRIVATESHOPSHOW	psshow;
-	psshow.header.wCount = static_cast<WORD>(m_iPrivateShopItemCount);
+	psshow.header.wCount = static_cast<WORD>(_shopItemCount());
 	psshow.header.w2 = 2;
-	o_strncpy(psshow.header.szName, m_szPrivateShopName.data(), 51);
+	o_strncpy(psshow.header.szName, _shopName().data(), 51);
 
 	int ptr = 0;
-	for (int i = 0; i < m_iPrivateShopItemCount; i++)
+	for (int i = 0; i < _shopItemCount(); i++)
 	{
-		if (m_PrivateShopCache[i].pItem == nullptr)continue;
-		psshow.items[ptr] = *(ITEMCLIENT*)m_PrivateShopCache[i].pItem;
-		psshow.items[ptr].baseitem.btPriceType = static_cast<BYTE>(m_PrivateShopCache[i].pricetype);
-		psshow.items[ptr].baseitem.nPrice = m_PrivateShopCache[i].dwPrice;
+		if (_shopCache()[i].pItem == nullptr)continue;
+		psshow.items[ptr] = *(ITEMCLIENT*)_shopCache()[i].pItem;
+		psshow.items[ptr].baseitem.btPriceType = static_cast<BYTE>(_shopCache()[i].pricetype);
+		psshow.items[ptr].baseitem.nPrice = _shopCache()[i].dwPrice;
 		ptr++;
 	}
 	psshow.header.wCount = (WORD)ptr;
 
 	if (ptr == 0) return;
 
-	int size = EncodeMsg(g_szCodedMsgBuffer.data(), GetId(), 0xfca0, getX(), getY(), (WORD)GetDirection(),
+	int size = EncodeMsg(s_szCodedMsgBuffer.data(), GetId(), 0xfca0, getX(), getY(), (WORD)GetDirection(),
 		&psshow, sizeof(PRIVATESHOPHEADER) + sizeof(ITEMCLIENT) * ptr);
 
 	xListHost<VISIBLE_OBJECT>::xListNode* pNode = m_xVisibleObjectList.getHead();
@@ -4247,7 +4208,7 @@ VOID CHumanPlayer::UpdatePrivateShopToAround()
 	{
 		CMapObject* pObject = pNode->getObject()->pObject;
 		if (pObject && pObject->GetType() == OBJ_PLAYER && ((CHumanPlayer*)pObject)->GetCurPrivateShopView() == this)
-			pObject->OnAroundMsg(this, g_szCodedMsgBuffer.data(), size);
+			pObject->OnAroundMsg(this, s_szCodedMsgBuffer.data(), size);
 		pNode = pNode->getNext();
 	}
 }
@@ -4261,38 +4222,38 @@ BOOL CHumanPlayer::BuyPrivateShopItem(CHumanPlayer* pBuyer, DWORD dwItemId, cons
 		return FALSE;
 	}
 
-	for (int i = 0; i < m_iPrivateShopItemCount; i++)
+	for (int i = 0; i < _shopItemCount(); i++)
 	{
-		if (m_PrivateShopCache[i].pItem)
+		if (_shopCache()[i].pItem)
 		{
-			if (m_PrivateShopCache[i].pItem->dwMakeIndex == dwItemId)
+			if (_shopCache()[i].pItem->dwMakeIndex == dwItemId)
 			{
-				DWORD dwMoney = pBuyer->GetMoney(m_PrivateShopCache[i].pricetype);
-				if (dwMoney < m_PrivateShopCache[i].dwPrice)
+				DWORD dwMoney = pBuyer->GetMoney(_shopCache()[i].pricetype);
+				if (dwMoney < _shopCache()[i].dwPrice)
 				{
 					pBuyer->SaySystem("没有足够的金钱来购买此物品!");
 					return FALSE;
 				}
-				if (!TestAddMoney(m_PrivateShopCache[i].pricetype, m_PrivateShopCache[i].dwPrice))
+				if (!TestAddMoney(_shopCache()[i].pricetype, _shopCache()[i].dwPrice))
 				{
 					char szName[20];
-					o_strncpy(szName, m_PrivateShopCache[i].pItem->baseitem.szName, 16);
+					o_strncpy(szName, _shopCache()[i].pItem->baseitem.szName, 16);
 					SaySystem("%s要购买您的%s物品, 但是你已经无法再携带更多的钱了.",
 						pBuyer->GetName(), szName);
 					pBuyer->SaySystem("卖家不能再携带更多的钱了!");
 					return FALSE;
 				}
-				if (pBuyer->AddBagItem(*m_PrivateShopCache[i].pItem, FALSE, TRUE))
+				if (pBuyer->AddBagItem(*_shopCache()[i].pItem, FALSE, TRUE))
 				{
-					pBuyer->CostMoney(m_PrivateShopCache[i].pricetype, m_PrivateShopCache[i].dwPrice);
-					AddMoney(m_PrivateShopCache[i].pricetype, m_PrivateShopCache[i].dwPrice);
-					m_iPrivateShopItemCount--;
-					ITEM item = *m_PrivateShopCache[i].pItem;
-					if (m_iPrivateShopItemCount > 0)
+					pBuyer->CostMoney(_shopCache()[i].pricetype, _shopCache()[i].dwPrice);
+					AddMoney(_shopCache()[i].pricetype, _shopCache()[i].dwPrice);
+					_shopItemCount()--;
+					ITEM item = *_shopCache()[i].pItem;
+					if (_shopItemCount() > 0)
 					{
-						for (int j = i; j < m_iPrivateShopItemCount; j++)
+						for (int j = i; j < _shopItemCount(); j++)
 						{
-							m_PrivateShopCache[j] = m_PrivateShopCache[j + 1];
+							_shopCache()[j] = _shopCache()[j + 1];
 						}
 					}
 					m_ItemBox.RemoveItem(dwItemId);
@@ -4374,18 +4335,18 @@ VOID CHumanPlayer::SendZhenBao(DWORD dwZhenBaoExp, DWORD dwZhenBaoExpMax, DWORD 
 	packet->push((LPVOID)&dwZhenBaoExp, 8);
 	SendMsg(GetId(), 0x9af, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 
-	if (dwZhenBaoExpMax != -1 && dwZhenBaoExpMax != m_dwZhenBaoExpMax)
+	if (dwZhenBaoExpMax != -1 && dwZhenBaoExpMax != _zhenBaoExpMax())
 	{
-		m_dwZhenBaoExpMax = dwZhenBaoExpMax;
+		_zhenBaoExpMax() = dwZhenBaoExpMax;
 		packet->clear();
 		packet->push("ZhenBaoExpMax");
 		packet->push(1);
 		packet->push((LPVOID)&dwZhenBaoExpMax, 8);
 		SendMsg(GetId(), 0x9af, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 	}
-	if (dwZhenBaoStar != -1 && dwZhenBaoStar != m_dwZhenBaoStar)
+	if (dwZhenBaoStar != -1 && dwZhenBaoStar != _zhenBaoStar())
 	{
-		m_dwZhenBaoStar = dwZhenBaoStar;
+		_zhenBaoStar() = dwZhenBaoStar;
 		packet->clear();
 		packet->push("ZhenBaoStar");
 		packet->push(1);
@@ -4396,12 +4357,19 @@ VOID CHumanPlayer::SendZhenBao(DWORD dwZhenBaoExp, DWORD dwZhenBaoExpMax, DWORD 
 
 VOID CHumanPlayer::SendJingLiZhi(DWORD wStamina)
 {
-	m_wStamina = static_cast<WORD>(wStamina);
+	if (auto* sc = PlayerComponentManager::GetInstance()->GetStamina(this))
+		sc->wStamina = static_cast<uint16_t>(wStamina);
 	xPacketPool::ScopedPacket packet;
 	packet->push("jinglizhi");
 	packet->push(1);
 	packet->push((LPVOID)&wStamina, 8);
 	SendMsg(GetId(), 0x9af, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
+}
+
+VOID CHumanPlayer::SetHuoLi(int h)
+{
+	if (auto* sc = PlayerComponentManager::GetInstance()->GetStamina(this))
+		sc->iHuoli = h;
 }
 
 VOID CHumanPlayer::SaveVars()

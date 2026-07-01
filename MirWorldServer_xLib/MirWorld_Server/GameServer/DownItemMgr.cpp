@@ -19,13 +19,19 @@ CDownItemMgr::~CDownItemMgr(VOID)
 CDownItemObject* CDownItemMgr::newObject()
 {
 	CDownItemObject* p = m_xDownItemPool.newObject();
-	if (p == nullptr)return p;
+	if (p == nullptr)
+	{
+		PRINT(ERROR_RED, "掉落物品对象池耗尽! 当前活跃物品数：%d\n", m_xDownItemList.getCount());
+		return nullptr;
+	}
 	UINT id = m_xDownItemList.addObject(p);
 	if (id == 0)
 	{
+		PRINT(ERROR_RED, "掉落物品列表已满! 当前数量：%d/400000\n", m_xDownItemList.getCount());
 		m_xDownItemPool.deleteObject(p);
 		return nullptr;
 	}
+	id |= (OBJ_DOWNITEM << 24);
 	p->SetId(id);
 	return p;
 }
@@ -34,7 +40,7 @@ VOID CDownItemMgr::deleteObject(CDownItemObject* p)
 {
 	UINT id = p->GetId();
 	p->Clean();
-	m_xDownItemList.delObject(id);
+	m_xDownItemList.delObject(id & 0xffffff);
 	m_xDownItemPool.deleteObject(p);
 }
 
@@ -218,8 +224,7 @@ VOID CDownItemMgr::UpdateDeletedObject()
 {
 	const UINT MAX_PROCESS_PER_TICK = 100;
 	UINT processed = 0;
-	// 使用thread_local复用，避免每帧堆分配
-	thread_local std::vector<CDownItemObject*> pendingObjects;
+	static std::vector<CDownItemObject*> pendingObjects;
 	pendingObjects.clear();
 	if ((int)pendingObjects.capacity() < MAX_PROCESS_PER_TICK)
 		pendingObjects.reserve(MAX_PROCESS_PER_TICK);

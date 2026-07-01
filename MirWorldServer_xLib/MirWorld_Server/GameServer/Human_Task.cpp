@@ -5,12 +5,12 @@
 
 VOID CHumanPlayer::OnTaskInfo(TASKINFO* pInfo)
 {
-	this->m_TaskInfo = *pInfo;
-	m_TaskIdToIndexMap.clear();
+	this->_taskInfo() = *pInfo;
+	_taskIdMap().clear();
 	for (int i = 0; i < MAX_TASK; i++)
 	{
-		if (m_TaskInfo.tasks[i].wTaskId > 0)
-			m_TaskIdToIndexMap[m_TaskInfo.tasks[i].wTaskId] = i;
+		if (_taskInfo().tasks[i].wTaskId > 0)
+			_taskIdMap()[_taskInfo().tasks[i].wTaskId] = i;
 	}
 	SendTaskInfo();
 }
@@ -22,36 +22,36 @@ BOOL CHumanPlayer::AddTask(WORD wTaskId)
 	int freepos = -1;
 	for (int i = 0; i < MAX_TASK; i++)
 	{
-		if (this->m_TaskInfo.tasks[i].wTaskId == 0 && freepos < 0)freepos = i;
+		if (this->_taskInfo().tasks[i].wTaskId == 0 && freepos < 0)freepos = i;
 	}
 	if (freepos < 0)return FALSE;
 
 	// 初始化任务
-	m_TaskInfo.tasks[freepos].wTaskId = wTaskId;
-	m_TaskInfo.tasks[freepos].wStep = 1;
-	memset(m_TaskInfo.tasks[freepos].vParam, 0, sizeof(m_TaskInfo.tasks[freepos].vParam));
-	memset(m_TaskInfo.tasks[freepos].sParam, 0, sizeof(m_TaskInfo.tasks[freepos].sParam));
-	m_TaskIdToIndexMap[wTaskId] = freepos;
+	_taskInfo().tasks[freepos].wTaskId = wTaskId;
+	_taskInfo().tasks[freepos].wStep = 1;
+	memset(_taskInfo().tasks[freepos].vParam, 0, sizeof(_taskInfo().tasks[freepos].vParam));
+	memset(_taskInfo().tasks[freepos].sParam, 0, sizeof(_taskInfo().tasks[freepos].sParam));
+	_taskIdMap()[wTaskId] = freepos;
 	SendTaskInfo();
 	return TRUE;
 }
 
 BOOL CHumanPlayer::DeleteTask(WORD wTaskId, BOOL bCompleteTask)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end()) return FALSE;
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end()) return FALSE;
 
 	int i = it->second;
-	this->m_TaskInfo.tasks[i].wTaskId = 0;
-	this->m_TaskInfo.tasks[i].wStep = 0;
+	this->_taskInfo().tasks[i].wTaskId = 0;
+	this->_taskInfo().tasks[i].wStep = 0;
 	RebuildTaskIdIndexMap(i);
 
 	BYTE m = CTaskManager::GetInstance()->GetTaskType(wTaskId);//任务类型
 	SendMsg(wTaskId, 0x9596, 0, 0, MAKEWORD(2, m));
 	if (bCompleteTask)
 	{
-		m_TaskInfo.dwTotalTaskCount++; //已完成任务数+1
-		m_TaskInfo.dwAchievement++; //积分+1
+		_taskInfo().dwTotalTaskCount++; //已完成任务数+1
+		_taskInfo().dwAchievement++; //积分+1
 	}
 	SendTaskInfo();
 	return TRUE;
@@ -59,10 +59,10 @@ BOOL CHumanPlayer::DeleteTask(WORD wTaskId, BOOL bCompleteTask)
 
 BOOL CHumanPlayer::UpdateTask(WORD wTaskId, WORD dwTaskStep)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end()) return FALSE;
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end()) return FALSE;
 
-	m_TaskInfo.tasks[it->second].wStep = dwTaskStep;
+	_taskInfo().tasks[it->second].wStep = dwTaskStep;
 	SendTaskInfo();
 	return TRUE;
 }
@@ -73,81 +73,81 @@ BOOL CHumanPlayer::HasTask(WORD wTaskId)
 	{
 		for (int i = 0; i < MAX_TASK; i++)
 		{
-			if (m_TaskInfo.tasks[i].wTaskId > 0)
+			if (_taskInfo().tasks[i].wTaskId > 0)
 				return TRUE;
 		}
 		return FALSE;
 	}
-	return m_TaskIdToIndexMap.find(wTaskId) != m_TaskIdToIndexMap.end();
+	return _taskIdMap().find(wTaskId) != _taskIdMap().end();
 }
 
 UINT CHumanPlayer::GetTaskStep(WORD wTaskId)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end())
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end())
 		return 0;
-	return m_TaskInfo.tasks[it->second].wStep;
+	return _taskInfo().tasks[it->second].wStep;
 }
 
 VOID CHumanPlayer::SetTaskValue(WORD wTaskId, BYTE btNum, DWORD dwData)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end()) return;
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end()) return;
 	if (btNum > 9) return;
 
-	m_TaskInfo.tasks[it->second].vParam[btNum] = dwData;
+	_taskInfo().tasks[it->second].vParam[btNum] = dwData;
 	SendTaskInfo();
 }
 
 int CHumanPlayer::GetTaskValue(WORD wTaskId, BYTE btNum)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end()) return 0;
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end()) return 0;
 	if (btNum > 9) return 0;
 
-	return m_TaskInfo.tasks[it->second].vParam[btNum];
+	return _taskInfo().tasks[it->second].vParam[btNum];
 }
 
 VOID CHumanPlayer::SetTaskString(WORD wTaskId, BYTE btNum, const char* szpData)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end()) return;
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end()) return;
 	if (btNum > 9) return;
 
-	o_strncpy(m_TaskInfo.tasks[it->second].sParam[btNum], szpData, 32);
+	o_strncpy(_taskInfo().tasks[it->second].sParam[btNum], szpData, 32);
 	SendTaskInfo();
 }
 
 const char* CHumanPlayer::GetTaskString(WORD wTaskId, BYTE btNum)
 {
-	auto it = m_TaskIdToIndexMap.find(wTaskId);
-	if (it == m_TaskIdToIndexMap.end()) return "";
+	auto it = _taskIdMap().find(wTaskId);
+	if (it == _taskIdMap().end()) return "";
 	if (btNum > 9) return "";
 
-	return m_TaskInfo.tasks[it->second].sParam[btNum];
+	return _taskInfo().tasks[it->second].sParam[btNum];
 }
 
 VOID CHumanPlayer::SendTaskInfo()
 {
 	char szTempBuffer[4096]{};
 	//最大任务数、已完成任务数、跑环任务(当前第X环)、积分
-	sprintf(szTempBuffer, "<TaskInfo MaxTaskCount=%u TotalTaskCount=%u LoopNum=0 Achievement=%u/>", MAX_TASK, m_TaskInfo.dwTotalTaskCount, m_TaskInfo.dwAchievement);
+	sprintf(szTempBuffer, "<TaskInfo MaxTaskCount=%u TotalTaskCount=%u LoopNum=0 Achievement=%u/>", MAX_TASK, _taskInfo().dwTotalTaskCount, _taskInfo().dwAchievement);
 	SendMsg(0, 0x9596, 0, 0, 0, (LPVOID)szTempBuffer); // 发送任务概要信息
 
 	CTaskManager* pTaskMgr = CTaskManager::GetInstance();
 	for (int i = 0; i < MAX_TASK; i++)
 	{
-		WORD wTaskId = m_TaskInfo.tasks[i].wTaskId;
+		WORD wTaskId = _taskInfo().tasks[i].wTaskId;
 		if (wTaskId == 0) continue; // 如果Id等于0, 表示没有接这个任务
-		WORD dwStep = m_TaskInfo.tasks[i].wStep;
+		WORD dwStep = _taskInfo().tasks[i].wStep;
 		if (wTaskId > 0 && dwStep > 0)
 		{
 			TASK_DEFINE* pDefine = pTaskMgr->GetTaskDefine(wTaskId);
 			if (pDefine == nullptr || dwStep > pDefine->nStepCount)
 			{
-				m_TaskInfo.tasks[i].wStep = 0;
-				m_TaskInfo.tasks[i].wTaskId = 0;
-				m_TaskIdToIndexMap.erase(wTaskId);
+				_taskInfo().tasks[i].wStep = 0;
+				_taskInfo().tasks[i].wTaskId = 0;
+				_taskIdMap().erase(wTaskId);
 				continue;
 			}
 
@@ -166,9 +166,9 @@ VOID CHumanPlayer::SendTaskInfo()
 			else
 				szStepaim[0] = '\0';
 			// 使用玩家特定的任务参数进行解析
-			ParseTaskParams(szTitle, szFinalTitle, 128, &m_TaskInfo.tasks[i]);
-			ParseTaskParams(szTaskDesc, szFinalDesc, 2048, &m_TaskInfo.tasks[i]);
-			ParseTaskParams(szStepaim, szFinalAim, 256, &m_TaskInfo.tasks[i]);
+			ParseTaskParams(szTitle, szFinalTitle, 128, &_taskInfo().tasks[i]);
+			ParseTaskParams(szTaskDesc, szFinalDesc, 2048, &_taskInfo().tasks[i]);
+			ParseTaskParams(szStepaim, szFinalAim, 256, &_taskInfo().tasks[i]);
 
 			if (szFinalAim[0] != '\0')
 				sprintf(szTempBuffer, "<Task title=%s>%s</Task><aim>%s</aim>", szFinalTitle, szFinalDesc, szFinalAim);
@@ -185,30 +185,30 @@ VOID CHumanPlayer::UpdateTaskToDB()
 {
 	CDBClientObj* pObj = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 	if (pObj)
-		pObj->UpdateTaskInfo(GetDBId(), &this->m_TaskInfo);
+		pObj->UpdateTaskInfo(GetDBId(), &this->_taskInfo());
 }
 
 VOID CHumanPlayer::RebuildTaskIdIndexMap(int startIndex)
 {
-	m_TaskIdToIndexMap.clear();
+	_taskIdMap().clear();
 	// 将 startIndex 之后的有效任务向前移动, 填补删除的空缺
 	int ptr = startIndex;
 	for (int j = startIndex + 1; j < MAX_TASK; j++)
 	{
-		if (m_TaskInfo.tasks[j].wTaskId > 0)
+		if (_taskInfo().tasks[j].wTaskId > 0)
 		{
-			m_TaskInfo.tasks[ptr] = m_TaskInfo.tasks[j];
-			m_TaskInfo.tasks[j].wStep = 0;
-			m_TaskInfo.tasks[j].wTaskId = 0;
-			m_TaskIdToIndexMap[m_TaskInfo.tasks[ptr].wTaskId] = ptr;
+			_taskInfo().tasks[ptr] = _taskInfo().tasks[j];
+			_taskInfo().tasks[j].wStep = 0;
+			_taskInfo().tasks[j].wTaskId = 0;
+			_taskIdMap()[_taskInfo().tasks[ptr].wTaskId] = ptr;
 			ptr++;
 		}
 	}
 	// 清空后续可能残留的任务
 	for (int j = ptr; j < MAX_TASK; j++)
 	{
-		m_TaskInfo.tasks[j].wStep = 0;
-		m_TaskInfo.tasks[j].wTaskId = 0;
+		_taskInfo().tasks[j].wStep = 0;
+		_taskInfo().tasks[j].wTaskId = 0;
 	}
 }
 

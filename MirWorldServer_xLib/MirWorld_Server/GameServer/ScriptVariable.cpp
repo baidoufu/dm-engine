@@ -58,14 +58,14 @@ BOOL CVariableFile::Reload()
 	return TRUE;
 }
 
-static thread_local std::array<char, 1024> g_szFilename{};
 BOOL CVariableFile::Save()
 {
 	if (m_pFilename == nullptr)
 	{
 		if (m_szName[0] == 0)return FALSE;
-		sprintf(g_szFilename.data(), ".\\Data\\Variables\\%s.txt", m_szName.data());
-		m_pFilename.reset(copystring(g_szFilename.data()));
+		char szFilename[1024];
+		sprintf(szFilename, ".\\Data\\Variables\\%s.txt", m_szName.data());
+		m_pFilename.reset(copystring(szFilename));
 	}
 	FILE* fp = fopen(m_pFilename.get(), "w");
 	if (fp == nullptr)return FALSE;

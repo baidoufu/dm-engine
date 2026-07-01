@@ -1,5 +1,4 @@
 #pragma once
-#include <unordered_map>
 #include <string>
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -15,5 +14,5 @@ public:
 	BOOL ChangeCommandName(const char* pszCommand, const char* pszNewName);
 protected:
 	xStringList<1024> m_xCommandList;
-	std::unordered_map<std::string, fnCommandProc> m_xCache;
+	SmallFlatMap<std::string, fnCommandProc, 256> m_xCache;  // GMÃüÁî»º´æ (Õ»´æ´¢, Ìæ´ú unordered_map)
 };

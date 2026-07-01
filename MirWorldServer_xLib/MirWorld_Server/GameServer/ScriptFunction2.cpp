@@ -28,6 +28,7 @@
 #include "scriptobjectmgr.h"
 #include "gmmanager.h"
 #include "downitemmgr.h"
+#include "BotManager.h"
 #include "guildmanagerex.h"
 #include "marketmanager.h"
 #include "guildwarmanager.h"
@@ -128,7 +129,7 @@ DEFINE_SCRIPT_FUNCTION(SETBIGBAG) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(SENDSINGLEMSG) {
 	if (nParam != 2)return FALSE;
-	thread_local char szMsg[65536]; // 使用thread_local复用缓冲区，避免每帧64KB堆分配
+	char szMsg[65536];
 	CHumanPlayer* p = CHumanPlayerMgr::GetInstance()->FindbyName(Params[0].pszParam);
 	if (p != nullptr)
 	{
@@ -144,7 +145,7 @@ DEFINE_SCRIPT_FUNCTION(SENDSINGLEMSG) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(SENDMSG) {
 	if (nParam != 1)return FALSE;
-	thread_local char szMsg[65536]; // 使用thread_local复用缓冲区，避免每帧64KB堆分配
+	char szMsg[65536];
 	int size = GetMsgFromString(Params[0].pszParam, szMsg);
 	if (size > 0)
 		pPlayer->OnAroundMsg(pPlayer, szMsg, size);
@@ -262,9 +263,7 @@ DEFINE_SCRIPT_FUNCTION(CALLMON) {
 		pItem = pPlayer->GetUsingItem();
 		if (pItem != nullptr && strcmp(pItem->baseitem.szName, "豹魔石") == 0)
 		{
-			time_t t;
-			time(&t);
-			DWORD dwT2 = (DWORD)t;
+			DWORD dwT2 = GetUnixTimeSec();
 			if (!pItem->IsBind()) // 绑定灵兽
 			{
 				pItem->SetBind(TRUE);
@@ -511,6 +510,8 @@ DEFINE_SCRIPT_FUNCTION(MAPINFO) {
 		pPlayer->SaySystem("配置序号: %d", pMap->GetIndex());
 		pPlayer->SaySystem("地面物品: %d 个", pMap->GetObjectCount(OBJ_DOWNITEM));
 		pPlayer->SaySystem("怪物个数: %d 个", pMap->GetObjectCount(OBJ_MONSTER));
+		pPlayer->SaySystem("守卫个数: %d 个", pMap->GetObjectCount(OBJ_GUARD));
+		pPlayer->SaySystem("树木个数: %d 个", pMap->GetObjectCount(OBJ_TREE));
 		pPlayer->SaySystem("ＮＰＣ数: %d 个", pMap->GetObjectCount(OBJ_NPC));
 		pPlayer->SaySystem("玩家个数: %d 个", pMap->GetObjectCount(OBJ_PLAYER));
 		pPlayer->SaySystem("地面事件: %d 个", pMap->GetObjectCount(OBJ_EVENT));
@@ -1610,7 +1611,7 @@ DEFINE_SCRIPT_FUNCTION(SETPETBAG){
 //		注释：
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(ISNEXTDAY) {
-	DWORD nDay = IsNextDay(Params[0].nParam, pPlayer->GetTimeStamp());
+	DWORD nDay = IsNextDay(Params[0].nParam, GetUnixTimeSec());
 	pPlayer->setVParam(0, nDay);
 	if (nParam == 1 && nDay > 0)
 		return TRUE;
@@ -1702,9 +1703,9 @@ DEFINE_SCRIPT_FUNCTION(SECNONDTIMEOUT) {
 	if (nParam < 2) return FALSE;
 	if (nParam == 2)
 		CGameWorld::GetInstance()->AddGlobeProcess(EP_SECNONDTIMEOUT, Params[0].nParam, Params[1].nParam, 0, 0, 50, 1);
-    else if (nParam == 3)
+	else if (nParam == 3)
 		CGameWorld::GetInstance()->AddGlobeProcess(EP_SECNONDTIMEOUT, Params[0].nParam, Params[1].nParam, Params[2].nParam, 0, 50, 1);
-    else if (nParam == 4)
+	else if (nParam == 4)
 		CGameWorld::GetInstance()->AddGlobeProcess(EP_SECNONDTIMEOUT, Params[0].nParam, Params[1].nParam, Params[2].nParam, 0, 50, 1, Params[3].pszParam);
 	return TRUE;
 }END_SCRIPT_FUNCTION
@@ -1761,7 +1762,7 @@ DEFINE_SCRIPT_FUNCTION(SETFENGHAOGROW) {
 		}
 		if (nBoolean && pConfig->btLastDay > 0)
 		{
-			DWORD dwNow = (DWORD)time(nullptr); // 返回秒
+			DWORD dwNow = GetUnixTimeSec(); // 返回秒
 			pFenghaoInfo->mFengHaoRow[nId].dwLastDate = ONE_DAY_SECONDS * pConfig->btLastDay + dwNow;
 		}
 		return TRUE;
@@ -1916,4 +1917,85 @@ DEFINE_SCRIPT_FUNCTION(EXCHANGEBOX) {
 		return TRUE;
 	}
 	return FALSE;
+}END_SCRIPT_FUNCTION
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+//		描述：	机器人命令
+//		用法：	@BOT list                  — 列出所有机器人摘要
+//		        @BOT info <名称>           — 查看单个机器人详情
+//		        @BOT pause <名称> <秒>     — 暂停指定机器人
+//		        @BOT resume <名称>         — 恢复指定机器人
+//		        @BOT stop <名称>           — 停止指定机器人
+//		        @BOT start <名称>          — 启动指定机器人
+//		        @BOT pauseall <秒>         — 暂停所有机器人
+//		        @BOT resumeall             — 恢复所有机器人
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+DEFINE_SCRIPT_FUNCTION(BOT) {
+	if (nParam < 1)
+	{
+		pPlayer->SaySystem("用法: @BOT list|info|pause|resume|stop|start|pauseall|resumeall");
+		return FALSE;
+	}
+
+	const char* pszSub = Params[0].pszParam;
+	CBotManager* pMgr = CBotManager::GetInstance();
+
+	switch (str_hash(pszSub))  // 注意：是运行时哈希
+	{
+	case "list"_hash: {
+		pMgr->DumpAllBots(pPlayer);
+		break;
+	}
+	case "info"_hash: {
+		if (nParam < 2) { pPlayer->SaySystem("用法: @BOT info <机器人名称>"); return FALSE; }
+		pMgr->DumpBotInfo(pPlayer, Params[1].pszParam);
+		break;
+	}
+	case "pause"_hash: {
+		if (nParam < 2) { pPlayer->SaySystem("用法: @BOT pause <名称> [秒数]"); return FALSE; }
+		DWORD dwDuration = (nParam >= 3) ? (DWORD)Params[2].nParam : 60000;
+		CBotPlayer* pBot = pMgr->FindBotByName(Params[1].pszParam);
+		if (pBot) { pBot->PauseBot(dwDuration); pPlayer->SaySystem("机器人 [%s] 已暂停 %ums", Params[1].pszParam, dwDuration); }
+		else pPlayer->SaySystem("机器人 [%s] 不存在", Params[1].pszParam);
+		break;
+	}
+	case "resume"_hash: {
+		if (nParam < 2) { pPlayer->SaySystem("用法: @BOT resume <名称>"); return FALSE; }
+		CBotPlayer* pBot = pMgr->FindBotByName(Params[1].pszParam);
+		if (pBot) { pBot->ResumeBot(); pPlayer->SaySystem("机器人 [%s] 已恢复", Params[1].pszParam); }
+		else pPlayer->SaySystem("机器人 [%s] 不存在", Params[1].pszParam);
+		break;
+	}
+	case "stop"_hash: {
+		if (nParam < 2) { pPlayer->SaySystem("用法: @BOT stop <名称>"); return FALSE; }
+		CBotPlayer* pBot = pMgr->FindBotByName(Params[1].pszParam);
+		if (pBot) { pBot->StopBot(); pPlayer->SaySystem("机器人 [%s] 已停止", Params[1].pszParam); }
+		else pPlayer->SaySystem("机器人 [%s] 不存在", Params[1].pszParam);
+		break;
+	}
+	case "start"_hash: {
+		if (nParam < 2) { pPlayer->SaySystem("用法: @BOT start <名称>"); return FALSE; }
+		CBotPlayer* pBot = pMgr->FindBotByName(Params[1].pszParam);
+		if (pBot) { pBot->StartBot(); pPlayer->SaySystem("机器人 [%s] 已启动", Params[1].pszParam); }
+		else pPlayer->SaySystem("机器人 [%s] 不存在", Params[1].pszParam);
+		break;
+	}
+	case "pauseall"_hash: {
+		DWORD dwDuration = (nParam >= 2) ? (DWORD)Params[1].nParam : 60000;
+		pMgr->PauseAllBots(dwDuration);
+		pPlayer->SaySystem("所有机器人已暂停 %ums", dwDuration);
+		break;
+	}
+	case "resumeall"_hash: {
+		pMgr->StartAllBots();
+		pPlayer->SaySystem("所有机器人已恢复");
+		break;
+	}
+	default:
+	{
+		pPlayer->SaySystem("未知子命令: %s. 可用: list info pause resume stop start pauseall resumeall", pszSub);
+		return FALSE;
+	}
+	}
+	return TRUE;
 }END_SCRIPT_FUNCTION

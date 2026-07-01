@@ -375,15 +375,28 @@ VOID CSe_NormalAct::Destroy()
 //		ÃèÊö£º
 //		×¢ÊÍ£º
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
-static thread_local std::array<char, 65536> g_szTempBuffer{};
+static thread_local int s_reentryGuard = 0;
+static thread_local std::array<char, 65536> s_szTempBuffer{};
 BOOL CSe_NormalSay::Parse(CScriptFile& file)
 {
 	CScriptElement::Parse(file);
 	char* pLine = file.CurrentLineRaw();
 	if (pLine == nullptr || *pLine == 0)return FALSE;
-	int size = ProcFmtText(pLine, g_szTempBuffer.data(), 65535, (xVariableProvider*)CScriptObjectMgr::GetInstance());
-	if (size > 0)
-		this->m_pSayWords.reset(copystring(g_szTempBuffer.data()));
+	if (s_reentryGuard > 0)
+	{
+		std::string localBuf(s_szTempBuffer.size(), '\0');
+		int size = ProcFmtText(pLine, &localBuf[0], (int)localBuf.size() - 1, (xVariableProvider*)CScriptObjectMgr::GetInstance());
+		if (size > 0)
+			this->m_pSayWords.reset(copystring(localBuf.c_str()));
+	}
+	else
+	{
+		++s_reentryGuard;
+		int size = ProcFmtText(pLine, s_szTempBuffer.data(), (int)s_szTempBuffer.size() - 1, (xVariableProvider*)CScriptObjectMgr::GetInstance());
+		if (size > 0)
+			this->m_pSayWords.reset(copystring(s_szTempBuffer.data()));
+		--s_reentryGuard;
+	}
 	return TRUE;
 }
 
@@ -391,18 +404,39 @@ BOOL CSe_NormalSay::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CScrip
 {
 	if (m_pSayWords)
 	{
-		int size = ProcFmtText(m_pSayWords.get(), g_szTempBuffer.data(), 65535, (xVariableProvider*)pTarget);
-		if (g_bDebugScript)
+		if (s_reentryGuard > 0)
 		{
-			PRINT(ERROR_RED, "(");
-			PRINT(SUCCESS_GREEN, "%u", this->m_nLineNumber);
-			PRINT(ERROR_RED, ")[");
-			PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner() ? ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName() : "null");
-			PRINT(ERROR_RED, "]");
-			PRINT(ERROR_RED, ":AddWords:");
-			PRINT(SUCCESS_GREEN, "%s \n", g_szTempBuffer.data());
+			std::string localBuf(s_szTempBuffer.size(), '\0');
+			ProcFmtText(m_pSayWords.get(), &localBuf[0], (int)localBuf.size() - 1, (xVariableProvider*)pTarget);
+			if (g_bDebugScript)
+			{
+				PRINT(ERROR_RED, "(");
+				PRINT(SUCCESS_GREEN, "%u", this->m_nLineNumber);
+				PRINT(ERROR_RED, ")[");
+				PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner() ? ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName() : "null");
+				PRINT(ERROR_RED, "]");
+				PRINT(ERROR_RED, ":AddWords:");
+				PRINT(SUCCESS_GREEN, "%s \n", localBuf.c_str());
+			}
+			pView->AppendWords(localBuf.c_str());
 		}
-		pView->AppendWords(g_szTempBuffer.data());
+		else
+		{
+			++s_reentryGuard;
+			int size = ProcFmtText(m_pSayWords.get(), s_szTempBuffer.data(), (int)s_szTempBuffer.size() - 1, (xVariableProvider*)pTarget);
+			if (g_bDebugScript)
+			{
+				PRINT(ERROR_RED, "(");
+				PRINT(SUCCESS_GREEN, "%u", this->m_nLineNumber);
+				PRINT(ERROR_RED, ")[");
+				PRINT(SUCCESS_GREEN, "%s", ((CScriptTargetForPlayer*)pTarget)->GetOwner() ? ((CScriptTargetForPlayer*)pTarget)->GetOwner()->GetName() : "null");
+				PRINT(ERROR_RED, "]");
+				PRINT(ERROR_RED, ":AddWords:");
+				PRINT(SUCCESS_GREEN, "%s \n", s_szTempBuffer.data());
+			}
+			pView->AppendWords(s_szTempBuffer.data());
+			--s_reentryGuard;
+		}
 	}
 	return TRUE;
 }
@@ -831,10 +865,23 @@ BOOL CSe_JsonStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, CS
 {
 	if (m_pWords)
 	{
-		ProcFmtText(m_pWords.get(), g_szTempBuffer.data(), 65535, (xVariableProvider*)pTarget);
-		CScriptNpc* pNPC = (CScriptNpc*)pShell;
-		if (pNPC)
-			pNPC->SendMerChantJsonMsg(pTarget, g_szTempBuffer.data(), m_nType);
+		if (s_reentryGuard > 0)
+		{
+			std::string localBuf(s_szTempBuffer.size(), '\0');
+			ProcFmtText(m_pWords.get(), &localBuf[0], (int)localBuf.size() - 1, (xVariableProvider*)pTarget);
+			CScriptNpc* pNPC = (CScriptNpc*)pShell;
+			if (pNPC)
+				pNPC->SendMerChantJsonMsg(pTarget, localBuf.c_str(), m_nType);
+		}
+		else
+		{
+			++s_reentryGuard;
+			ProcFmtText(m_pWords.get(), s_szTempBuffer.data(), (int)s_szTempBuffer.size() - 1, (xVariableProvider*)pTarget);
+			CScriptNpc* pNPC = (CScriptNpc*)pShell;
+			if (pNPC)
+				pNPC->SendMerChantJsonMsg(pTarget, s_szTempBuffer.data(), m_nType);
+			--s_reentryGuard;
+		}
 	}
 	return TRUE;
 }
@@ -878,9 +925,21 @@ BOOL CSe_FlashStatement::Execute(CScriptShell* pShell, CScriptTarget* pTarget, C
 {
 	if (m_pWords)
 	{
-		ProcFmtText(m_pWords.get(), g_szTempBuffer.data(), 65536, (xVariableProvider*)pTarget);
-		pView->AppendWords(g_szTempBuffer.data());
-		pView->SetParam(m_nType);
+		if (s_reentryGuard > 0)
+		{
+			std::string localBuf(s_szTempBuffer.size(), '\0');
+			ProcFmtText(m_pWords.get(), &localBuf[0], (int)localBuf.size() - 1, (xVariableProvider*)pTarget);
+			pView->AppendWords(localBuf.c_str());
+			pView->SetParam(m_nType);
+		}
+		else
+		{
+			++s_reentryGuard;
+			ProcFmtText(m_pWords.get(), s_szTempBuffer.data(), (int)s_szTempBuffer.size() - 1, (xVariableProvider*)pTarget);
+			pView->AppendWords(s_szTempBuffer.data());
+			pView->SetParam(m_nType);
+			--s_reentryGuard;
+		}
 	}
 	return TRUE;
 }

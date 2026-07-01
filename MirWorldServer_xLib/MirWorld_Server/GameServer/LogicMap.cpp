@@ -69,7 +69,7 @@ BOOL CLogicMap::AddObject(CMapObject* pObject)
 	if (pNode->BelongTo(&m_xObjList))return FALSE;
 	if (!m_xObjList.addNode(pNode))return FALSE;
 	{// 锁只保护数据结构
-		std::unique_lock lock(m_MapMutex);
+		SWLock lock(m_MapMutex);
 		if (!AddObjectToPos(pObject->getX(), pObject->getY(), pObject))
 		{
 			m_xObjList.removeNode(pNode);
@@ -99,7 +99,7 @@ BOOL CLogicMap::RemoveObject(CMapObject* pObject)
 	int nx = pObject->getX();
 	int ny = pObject->getY();
 	{// 锁只保护数据结构
-		std::unique_lock lock(m_MapMutex);
+		SWLock lock(m_MapMutex);
 		if (!RemoveObjectFromPos(nx, ny, pObject))
 			return FALSE;
 		if (!m_xObjList.removeNode(pNode))
@@ -138,7 +138,7 @@ BOOL CLogicMap::InitMapCells()
 BOOL CLogicMap::SendMsg(CMapObject* pSender, const char* pszCodedMsg, int size)
 {
 	if (pszCodedMsg == nullptr || size <= 0) return FALSE;
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	for (auto pNode = m_xObjList.getHead(); pNode != nullptr; pNode = pNode->getNext())
 	{
 		CMapObject* pObj = pNode->getObject();
@@ -155,7 +155,6 @@ BOOL CLogicMap::IsBlocked(int x, int y)
 {
 	if (IsLocked(x, y))return TRUE;
 	if (m_pPhysicsMap == nullptr)return TRUE;
-	std::shared_lock lock(m_MapMutex);
 	return m_pPhysicsMap->IsBlocked(x, y);
 }
 
@@ -183,7 +182,9 @@ VOID CLogicMap::SetFlag(const char* pszFlag)
 	if (flag >= MF_MAX)
 		return;
 
+	// 先在临时变量中构建所有数据，然后在锁内原子性应用
 	DWORD dwParam = 0;
+	std::vector<std::string> newExtraParams;
 	if (nParam >= 1 && IsIntegerNumber(Params[0]))
 	{
 		if (nParam >= 2 && IsIntegerNumber(Params[0]) && IsIntegerNumber(Params[1]))
@@ -195,7 +196,7 @@ VOID CLogicMap::SetFlag(const char* pszFlag)
 				DWORD dwParam3 = StringToInteger(Params[2]) & 0xff;
 				dwParam = dwParam1 | (dwParam2 << 16) | (dwParam3 << 24);
 				if (nParam > 3)
-					m_flagExtraParams[(int)flag].assign(Params + 3, Params + nParam);
+					newExtraParams.assign(Params + 3, Params + nParam);
 			}
 			else
 			{
@@ -203,24 +204,28 @@ VOID CLogicMap::SetFlag(const char* pszFlag)
 				DWORD dwParam2 = StringToInteger(Params[1]) & 0xffff;
 				dwParam = dwParam1 | (dwParam2 << 16);
 				if (nParam > 2)
-					m_flagExtraParams[(int)flag].assign(Params + 2, Params + nParam);
+					newExtraParams.assign(Params + 2, Params + nParam);
 			}
 		}
 		else
 		{
 			dwParam = StringToInteger(Params[0]);
 			if (nParam > 1)
-				m_flagExtraParams[(int)flag].assign(Params + 1, Params + nParam);
+				newExtraParams.assign(Params + 1, Params + nParam);
 		}
 	}
 	else if (nParam >= 1)
-		m_flagExtraParams[(int)flag].assign(Params, Params + nParam);
+		newExtraParams.assign(Params, Params + nParam);
 
+	SWLock lock(m_MapMutex);
 	if (m_Flag.IsSeted((int)flag))
 	{
 		m_Flag.ClrStatus((int)flag);
 		m_flagExtraParams.erase((int)flag);
 	}
+
+	if (!newExtraParams.empty())
+		m_flagExtraParams[(int)flag] = std::move(newExtraParams);
 
 	m_Flag.SetStatus((int)flag, dwParam, 0xffffffff);
 }
@@ -238,12 +243,14 @@ VOID CLogicMap::UnSetFlag(const char* pszFlag)
 
 VOID CLogicMap::UnSetFlag(e_map_flag flag)
 {
+	SWLock lock(m_MapMutex);
 	m_Flag.ClrStatus((int)flag);
 	m_flagExtraParams.erase((int)flag);
 }
 
 BOOL CLogicMap::IsFlagSeted(e_map_flag findex, DWORD& dwParam, std::vector<std::string>& szExtraParams)
 {
+	SRLock lock(m_MapMutex);
 	if (m_Flag.IsSeted((int)findex))
 	{
 		dwParam = m_Flag.GetParam((int)findex);
@@ -317,7 +324,7 @@ VOID CLogicMap::SetPhysicsMap(CPhysicsMap* pPhysicsMap)
 
 CMapObject* CLogicMap::FindObject(int x, int y, e_object_type type)
 {
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
 	if (pCellInfo == nullptr)return nullptr;
 	xListHost<CMapObject>::xListNode* pNode = pCellInfo->m_xObjectList.getHead();
@@ -333,7 +340,7 @@ CMapObject* CLogicMap::FindObject(int x, int y, e_object_type type)
 
 CMapObject* CLogicMap::FindEventObject(int x, int y, int View)
 {
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
 	if (pCellInfo == nullptr) return nullptr;
 
@@ -374,7 +381,7 @@ CMapObject* CLogicMap::FindEventObject(int x, int y, int View)
 CAliveObject* CLogicMap::FindTarget(CAliveObject* pAttacker, UINT x, UINT y, BOOL IsProperTarget, BOOL IsDeath)
 {
 	if (pAttacker == nullptr) return nullptr;
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pCellInfo = GetMapCellInfo(x, y);
 	if (pCellInfo == nullptr)return nullptr;
 	xListHost<CMapObject>::xListNode* pNode = pCellInfo->m_xObjectList.getHead();
@@ -417,7 +424,7 @@ BOOL CLogicMap::MoveObject(CMapObject* pObject, int x, int y)
 	BOOL bInSafeArea = pObject->InSafeArea();
 	BOOL bInWarArea = pObject->InWarArea();
 	{// 锁保护 RemoveObjectFromPos + AddObjectToPos 的原子性
-		std::unique_lock lock(m_MapMutex);
+		SWLock lock(m_MapMutex);
 		CMapCellInfo* pCellInfo = GetMapCellInfo_Safe(oldx, oldy);
 		CMapCellInfo* pToCellInfo = GetMapCellInfo_Safe(x, y);
 		if (pCellInfo == nullptr || pToCellInfo == nullptr)return FALSE;
@@ -507,7 +514,7 @@ BOOL CLogicMap::RemoveObjectFromPos(int x, int y, CMapObject* pObject)
 
 int CLogicMap::GetDupCount(int x, int y)
 {
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr)return 0;
 	int iDupCount = 0;
@@ -536,7 +543,7 @@ int CLogicMap::GetDupCount(int x, int y, e_object_type type)
 {
 	// 障碍处没有堆积~
 	if (this->m_pPhysicsMap && this->m_pPhysicsMap->IsBlocked(x, y))return -1;
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr)return 0;
 	int iDupCount = 0;
@@ -616,7 +623,7 @@ int CLogicMap::GetValidPoint(int x, int y, POINT* ptArray, int ArraySize)
 VOID CLogicMap::CheckEnterCity(CHumanPlayer* pPlayer)
 {
 	if (pPlayer == nullptr)return;
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(pPlayer->getX(), pPlayer->getY());
 	if (pInfo == nullptr)return;
 
@@ -631,7 +638,7 @@ VOID CLogicMap::CheckEnterCity(CHumanPlayer* pPlayer)
 VOID CLogicMap::CheckEnterEvent(CMapObject* pObject, int x, int y)
 {
 	if (pObject == nullptr) return;
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr || !(pInfo->wEventFlag & EVENTFLAG_ENTEREVENT))
 		return;
@@ -654,7 +661,7 @@ VOID CLogicMap::CheckEnterEvent(CMapObject* pObject, int x, int y)
 VOID CLogicMap::CheckLeaveEvent(CMapObject* pObject, int x, int y)
 {
 	if (pObject == nullptr) return;
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = GetMapCellInfo(x, y);
 	if (pInfo == nullptr || !(pInfo->wEventFlag & EVENTFLAG_LEAVEEVENT))
 		return;
@@ -700,7 +707,7 @@ VOID CLogicMap::SetSafeArea(int x, int y, int range)
 	int endy = MIN((int)m_iHeight, y + range);
 	if (startx > endx || starty > endy || range < 0)
 		return;
-	std::unique_lock lock(m_MapMutex);
+	SWLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int tx = startx; tx < endx; tx++)
 	{
@@ -721,7 +728,7 @@ VOID CLogicMap::SetMapEventFlagRect(int x, int y, int xrange, int yrange, DWORD 
 	int endy = MIN((int)m_iHeight, y + yrange);
 	if (startx > endx || starty > endy || xrange < 0 || yrange < 0)
 		return;
-	std::unique_lock lock(m_MapMutex);
+	SWLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int tx = startx; tx < endx; tx++)
 	{
@@ -752,7 +759,7 @@ VOID CLogicMap::AddStartPoint(START_POINT* pStartPoint)
 	int endy = MIN((int)m_iHeight, y + range);
 	if (startx > endx || starty > endy || range < 0)
 		return;
-	std::unique_lock lock(m_MapMutex);
+	SWLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int tx = startx; tx < endx; tx++)
 	{
@@ -845,65 +852,71 @@ VOID CLogicMap::ClearAllMonsters(const char* pszClassName)
 	CMonsterManagerEx* pMonsterMgr = CMonsterManagerEx::GetInstance();
 	if (pszClassName != nullptr)
 		pDesc = pMonsterMgr->GetClassByName(pszClassName);
-	xListHost<CMapObject>::xListNode* pNode = m_xObjList.getHead();
-	xListHost<CMapObject>::xListNode* pNext = nullptr;
-#ifdef _DEBUG
-	UINT nCount = 0;
-	UINT nMCount = 0;
-	UINT nOCount = 0;
-#endif
-	if (pszClassName == nullptr) // 删除所有怪物
+
+	// 在锁内收集怪物指针，避免遍历期间 m_xObjList 被并发修改
+	std::vector<CMonsterEx*> monstersToRemove;
 	{
-		while (pNode)
-		{
-			pNext = pNode->getNext();
-			CMapObject* pObj = pNode->getObject();
-			if (pObj && pObj->GetType() == OBJ_MONSTER)
-			{
-				CMonsterEx* pMonster = static_cast<CMonsterEx*>(pObj);
-				pGameWorld->RemoveMapObject(pMonster);
-				pMonsterMgr->DeleteMonsterImm(pMonster);
+		SRLock lock(m_MapMutex);
+		xListHost<CMapObject>::xListNode* pNode = m_xObjList.getHead();
 #ifdef _DEBUG
-				nCount++;
-				nMCount++;
+		UINT nCount = 0;
+		UINT nMCount = 0;
+		UINT nOCount = 0;
 #endif
-			}
-#ifdef _DEBUG
-			nOCount++;
-#endif
-			pNode = pNext;
-		}
-	}
-	else // 只删除指定类型的怪物
-	{
-		while (pNode)
+		if (pszClassName == nullptr) // 删除所有怪物
 		{
-			pNext = pNode->getNext();
-			CMapObject* pObj = pNode->getObject();
-			if (pObj && pObj->GetType() == OBJ_MONSTER)
+			while (pNode)
 			{
-				CMonsterEx* pMonster = static_cast<CMonsterEx*>(pObj);
-				if (pDesc == pMonster->GetDesc())
+				CMapObject* pObj = pNode->getObject();
+				if (pObj && pObj->GetType() == OBJ_MONSTER)
 				{
-					pGameWorld->RemoveMapObject(pMonster);
-					pMonsterMgr->DeleteMonsterImm(pMonster);
+					monstersToRemove.push_back(static_cast<CMonsterEx*>(pObj));
 #ifdef _DEBUG
 					nCount++;
+					nMCount++;
 #endif
 				}
 #ifdef _DEBUG
-				nMCount++;
+				nOCount++;
 #endif
+				pNode = pNode->getNext();
 			}
-#ifdef _DEBUG
-			nOCount++;
-#endif
-			pNode = pNext;
 		}
-	}
-#ifdef	_DEBUG
-	PRINT(ERROR_RED, "trace %u objects found %u monsters remove %u monsters\n", nOCount, nMCount, nCount);
+		else // 只删除指定类型的怪物
+		{
+			while (pNode)
+			{
+				CMapObject* pObj = pNode->getObject();
+				if (pObj && pObj->GetType() == OBJ_MONSTER)
+				{
+					CMonsterEx* pMonster = static_cast<CMonsterEx*>(pObj);
+					if (pDesc == pMonster->GetDesc())
+					{
+						monstersToRemove.push_back(pMonster);
+#ifdef _DEBUG
+						nCount++;
 #endif
+					}
+#ifdef _DEBUG
+					nMCount++;
+#endif
+				}
+#ifdef _DEBUG
+				nOCount++;
+#endif
+				pNode = pNode->getNext();
+			}
+		}
+#ifdef	_DEBUG
+		PRINT(ERROR_RED, "trace %u objects found %u monsters remove %u monsters\n", nOCount, nMCount, nCount);
+#endif
+	}// SRLock 释放 — RemoveMapObject→RemoveObject 内部会获取 SWLock
+
+	for (auto* pMonster : monstersToRemove)
+	{
+		pGameWorld->RemoveMapObject(pMonster);
+		pMonsterMgr->DeleteMonsterImm(pMonster);
+	}
 }
 
 UINT CLogicMap::CountAllMonsters(const char* pszClassName)
@@ -911,8 +924,8 @@ UINT CLogicMap::CountAllMonsters(const char* pszClassName)
 	MonsterClass* pDesc = nullptr;
 	if (pszClassName != nullptr)
 		pDesc = CMonsterManagerEx::GetInstance()->GetClassByName(pszClassName);
-	xListHost<CMapObject>::xListNode* pNode = nullptr;
-	pNode = this->m_xObjList.getHead();
+	SRLock lock(m_MapMutex);
+	xListHost<CMapObject>::xListNode* pNode = this->m_xObjList.getHead();
 	UINT nCount = 0;
 	while (pNode)
 	{
@@ -943,7 +956,7 @@ VOID CLogicMap::SendAroundMsg(int x, int y, int range, const char* szMsg, int si
 	int endy = MIN(m_iHeight - 1, y + range);
 	if (startx > endx || starty > endy) return;
 
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	CMapCellInfo* pInfo = nullptr;
 	for (int _x = startx; _x <= endx; _x++)
 	{
@@ -956,6 +969,7 @@ VOID CLogicMap::SendAroundMsg(int x, int y, int range, const char* szMsg, int si
 			{
 				CMapObject* pTarget = pNode->getObject();
 				pNode = pNode->getNext();
+				if (pTarget == nullptr) continue;
 				// 快速跳过非玩家对象，避免虚函数调用开销
 				if (pTarget->GetType() != OBJ_PLAYER) continue;
 				if (!bIncludeSelf && pSender == pTarget) continue;
@@ -978,49 +992,64 @@ BOOL CLogicMap::DamageAround(CAliveObject* pAttacker, UINT x, UINT y, UINT nRang
 	int nEndY = MIN((int)m_iHeight - 1, (int)y + (int)nRange);
 	if (nStartX > nEndX || nStartY > nEndY) return FALSE;
 
-	xListHost<CMapObject>::xListNode* pNode = nullptr;
-	CMapCellInfo* pInfo = nullptr;
-	std::shared_lock lock(m_MapMutex);
-	for (int _x = nStartX; _x <= nEndX; _x++)
-	{
-		if (_x < 0 || _x >= this->m_iWidth)continue;
-		for (int _y = nStartY; _y <= nEndY; _y++)
+	// 推迟击退操作到锁释放后执行，避免 SRLock(S)→SWLock(X) SRWLOCK 升级死锁
+	struct PendingPush { CAliveObject* target; int dir; };
+	PendingPush pendingPushes[12]{};
+	int pushCount = 0;
+
+	{// SRLock 作用域 — 只保护 CellInfo 遍历和 BeAttack，击退推迟到锁外
+		xListHost<CMapObject>::xListNode* pNode = nullptr;
+		CMapCellInfo* pInfo = nullptr;
+		SRLock lock(m_MapMutex);
+		for (int _x = nStartX; _x <= nEndX; _x++)
 		{
-			if (_y < 0 || _y >= this->m_iHeight)continue;
-			pInfo = this->GetMapCellInfo(_x, _y);
-			if (pInfo == nullptr || pInfo->m_xObjectList.getCount() == 0)continue;
-			pNode = pInfo->m_xObjectList.getHead();
-			while (pNode)
+			if (_x < 0 || _x >= this->m_iWidth)continue;
+			for (int _y = nStartY; _y <= nEndY; _y++)
 			{
-				CMapObject* pObj = pNode->getObject();
-				if (pObj == nullptr || pObj->GetClassType() != CLS_ALIVEOBJECT)
+				if (_y < 0 || _y >= this->m_iHeight)continue;
+				pInfo = this->GetMapCellInfo(_x, _y);
+				if (pInfo == nullptr || pInfo->m_xObjectList.getCount() == 0)continue;
+				pNode = pInfo->m_xObjectList.getHead();
+				while (pNode)
 				{
-					pNode = pNode->getNext();
-					continue;
-				}
-				CAliveObject* pTarget = static_cast<CAliveObject*>(pObj);
-				if (pTarget && !pTarget->IsDeath() && pAttacker->IsProperTarget(pTarget))
-				{
-					if (dwDelay == 0)
-						pTarget->BeAttack(pAttacker, nDamage, damagetype, dwFlag);
-					else
-						pTarget->AddProcess(EP_BEATTACKED, nDamage, pAttacker->GetId(), (DWORD)damagetype, dwFlag, dwDelay, 0, nullptr);
-					if (bPushed && pTarget->CanBePushed(pAttacker))
+					CMapObject* pObj = pNode->getObject();
+					if (pObj == nullptr || pObj->GetClassType() != CLS_ALIVEOBJECT)
 					{
-						int rx = pTarget->getX();
-						int ry = pTarget->getY();
-						if (rx != x || ry != y)
-						{
-							int dir = GetDirectionTo(rx, ry, x, y);
-							pTarget->DoPushed(dir);
-						}
+						pNode = pNode->getNext();
+						continue;
 					}
-					bRet = TRUE;
+					CAliveObject* pTarget = static_cast<CAliveObject*>(pObj);
+					if (pTarget && !pTarget->IsDeath() && pAttacker->IsProperTarget(pTarget))
+					{
+						if (dwDelay == 0)
+							pTarget->BeAttack(pAttacker, nDamage, damagetype, dwFlag);
+						else
+							pTarget->AddProcess(EP_BEATTACKED, nDamage, pAttacker->GetId(), (DWORD)damagetype, dwFlag, dwDelay, 0, nullptr);
+						if (bPushed && pushCount < 12 && pTarget->CanBePushed(pAttacker))
+						{
+							int rx = pTarget->getX();
+							int ry = pTarget->getY();
+							if (rx != x || ry != y)
+							{
+								pendingPushes[pushCount].target = pTarget;
+								pendingPushes[pushCount].dir = GetDirectionTo(rx, ry, x, y);
+								pushCount++;
+							}
+						}
+						bRet = TRUE;
+					}
+					pNode = pNode->getNext();
 				}
-				pNode = pNode->getNext();
 			}
 		}
+	}// SRLock 在此释放
+
+	// 锁释放后执行击退 — DoPushed → MoveObject 内部会获取 SWLock
+	for (int i = 0; i < pushCount; i++)
+	{
+		pendingPushes[i].target->DoPushed(pendingPushes[i].dir);
 	}
+
 	return bRet;
 }
 
@@ -1035,7 +1064,7 @@ BOOL CLogicMap::CureBagStatusAround(CAliveObject* pAttacker, UINT x, UINT y, UIN
 	if (nStartX > nEndX || nStartY > nEndY) return FALSE;
 	if (nArraySize == 0) return FALSE;
 	if (retTargets != nullptr) retTargets->clear(); // 清空返回的目标列表
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	for (int _x = nStartX; _x <= nEndX; _x++)
 	{
 		if (_x < 0 || _x >= this->m_iWidth)continue;
@@ -1110,7 +1139,7 @@ BOOL CLogicMap::CureBagStatusAround(CAliveObject* pAttacker, UINT x, UINT y, UIN
 BOOL CLogicMap::AddAllProcess(DWORD dwTypeFlag, e_process ident, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4,
 	DWORD dwDelay, int repeattimes, const char* pszString)
 {
-	std::shared_lock lock(m_MapMutex);
+	SRLock lock(m_MapMutex);
 	xListHost<CMapObject>::xListNode* pNode = m_xObjList.getHead();
 	while (pNode)
 	{

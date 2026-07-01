@@ -96,15 +96,15 @@ VOID CScriptTargetForPlayer::SendClosePage(CScriptShell* pShell)
 	CScriptTarget::SendClosePage(pShell);
 }
 
-static thread_local char g_szVariable[1024];
 char* CScriptTargetForPlayer::GetVariableValue(const char* pszVariable)
 {
-	o_strncpy(g_szVariable, pszVariable, 1020);
-	if (g_szVariable[0] == '$')
-		pszVariable = GetVariableValue(g_szVariable + 1);
+	char szVar[1024];
+	o_strncpy(szVar, pszVariable, 1020);
+	if (szVar[0] == '$')
+		pszVariable = GetVariableValue(szVar + 1);
 	else
-		pszVariable = g_szVariable;
-	char* p = strchr(g_szVariable, '.');
+		pszVariable = szVar;
+	char* p = strchr(szVar, '.');
 	char* pVal = nullptr;
 	if (p == nullptr)
 		pVal = CScriptTarget::GetVariableValue(pszVariable);
@@ -131,9 +131,10 @@ char* CScriptTargetForPlayer::GetVariableValue(const char* pszVariable)
 
 VOID CScriptTargetForPlayer::SetVariableValue(const char* pszVariable, const char* pszValue)
 {
-	o_strncpy(g_szVariable, pszVariable, 1020);
-	pszVariable = g_szVariable;
-	char* p = strchr(g_szVariable, '.');
+	char szVar[1024];
+	o_strncpy(szVar, pszVariable, 1020);
+	pszVariable = szVar;
+	char* p = strchr(szVar, '.');
 	if (p == nullptr)
 	{
 		return CScriptTarget::SetVariableValue(pszVariable, pszValue);
@@ -153,9 +154,10 @@ VOID CScriptTargetForPlayer::SetVariableValue(const char* pszVariable, const cha
 
 VOID CScriptTargetForPlayer::ClrVariable(const char* pszVariable)
 {
-	o_strncpy(g_szVariable, pszVariable, 1020);
-	pszVariable = g_szVariable;
-	char* p = strchr(g_szVariable, '.');
+	char szVar[1024];
+	o_strncpy(szVar, pszVariable, 1020);
+	pszVariable = szVar;
+	char* p = strchr(szVar, '.');
 	if (p == nullptr)
 	{
 		return CScriptTarget::ClrVariable(pszVariable);
@@ -175,9 +177,10 @@ VOID CScriptTargetForPlayer::ClrVariable(const char* pszVariable)
 
 BOOL CScriptTargetForPlayer::AddVariable(const char* pszVariable, const char* pszValue)
 {
-	o_strncpy(g_szVariable, pszVariable, 1020);
-	pszVariable = g_szVariable;
-	char* p = strchr(g_szVariable, '.');
+	char szVar[1024];
+	o_strncpy(szVar, pszVariable, 1020);
+	pszVariable = szVar;
+	char* p = strchr(szVar, '.');
 	if (p == nullptr)
 	{
 		//if( m_xVarList.GetVarValue( pszVariable ) != nullptr )return FALSE;
@@ -215,14 +218,13 @@ VOID CScriptTargetForPlayer::LoadVars(const char* pszFilename)
 
 BOOL CScriptTargetForPlayer::CheckExceedDistance(BOOL boCLose)
 {
+	if (!m_pCurShell || m_pCurShell->GetTitleId() == 0xffffffff || !m_pOwner)
+		return FALSE;
 	CScriptNpc* pNPC = (CScriptNpc*)m_pCurShell;
-	if (pNPC && m_pOwner)
+	if (boCLose && pNPC->IsNPC() && DISTANCE(pNPC->getX(), pNPC->getY(), m_pOwner->getX(), m_pOwner->getY()) > pNPC->GetDistance())
 	{
-		if (boCLose && pNPC->IsNPC() && DISTANCE(pNPC->getX(), pNPC->getY(), m_pOwner->getX(), m_pOwner->getY()) > pNPC->GetDistance())
-		{
-			SendClosePage(m_pCurShell);
-			return TRUE;
-		}
+		SendClosePage(m_pCurShell);
+		return TRUE;
 	}
 	return FALSE;
 }

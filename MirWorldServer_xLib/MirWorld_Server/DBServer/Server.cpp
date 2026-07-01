@@ -1,6 +1,5 @@
 #include "StdAfx.h"
 #include ".\server.h"
-#include "time.h"
 #include "dbserver.h"
 
 CServer::CServer(VOID)

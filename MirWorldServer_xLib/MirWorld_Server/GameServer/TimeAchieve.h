@@ -55,7 +55,7 @@ typedef struct tagTimeAchieveLevel
 	}
 	DWORD nMaxExp; //成就总进度
 	// job -> (prop_name -> prop_value)
-	std::unordered_map<int, std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>> mapJobProps; //成就职业属性
+	SmallFlatMap<int, SmallFlatMap<std::string, TIMEACHIEVE_PROPVALUE, 8>, 8> mapJobProps; //成就职业属性 (栈存储替代 unordered_map)
 } TIMEACHIEVE_LEVEL;
 
 // 成就配置 (Achieve)
@@ -88,7 +88,7 @@ public:
 	// 获取某个等级的配置
 	const TIMEACHIEVE_LEVEL* GetLevel(int nLevel) const;
 	// 获取某个等级、某个职业的所有属性加成
-	const std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>* GetJobProps(int nLevel, int nJob) const;
+	const SmallFlatMap<std::string, TIMEACHIEVE_PROPVALUE, 8>* GetJobProps(int nLevel, int nJob) const;
 	// 获取某个等级、某个职业、某个属性的加成值
 	BOOL GetPropValue(int nLevel, int nJob, const char* pszPropName, TIMEACHIEVE_PROPVALUE& outValue) const;
 	// 获取某个等级升级所需的最大经验 (max_exp)
@@ -107,15 +107,15 @@ public:
 	VOID SendAchieveData(CHumanPlayer* pPlayer);
 private:
 	// job -> ShowProp list
-	std::unordered_map<int, std::vector<TIMEACHIEVE_SHOWPROP>> m_mapShowProps;
+	SmallFlatMap<int, std::vector<TIMEACHIEVE_SHOWPROP>, 8> m_mapShowProps; // 栈存储替代 unordered_map
 	// level index -> Level config
 	std::vector<TIMEACHIEVE_LEVEL> m_vecLevels;
 	// Achieve list
 	std::vector<TIMEACHIEVE_ITEM> m_vecAchieves;
-	// Achieve ID -> index (for fast lookup)
-	std::unordered_map<int, int> m_mapAchieveIdToIndex;
+	// Achieve ID -> index (for fast lookup, 栈存储替代 unordered_map)
+	SmallFlatMap<int, int, 512> m_mapAchieveIdToIndex;
 	// Group ID -> Achieve index list (for fast lookup)
-	std::unordered_map<int, std::vector<int>> m_mapGroupToIndex;
+	SmallFlatMap<int, std::vector<int>, 128> m_mapGroupToIndex; // 栈存储替代 unordered_map
 };
 
 //插入属性块数据

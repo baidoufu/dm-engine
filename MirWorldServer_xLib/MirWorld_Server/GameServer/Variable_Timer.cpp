@@ -39,7 +39,7 @@ DEFINE_SCRIPT_VAR(SECOND) {
 }END_SCRIPT_VAR
 
 DEFINE_SCRIPT_VAR(DATETIMETOWOLTIME) {
-	DWORD dwNow = (DWORD)time(nullptr);
+	DWORD dwNow = GetUnixTimeSec();
 	result.SetValue(dwNow);
 }END_SCRIPT_VAR
 

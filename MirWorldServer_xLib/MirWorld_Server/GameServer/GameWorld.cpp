@@ -19,6 +19,10 @@
 #include "BundleManager.h"
 #include "eventmanager.h"
 #include "BossTJ.h"
+#include "PlayerComponentManager.h"
+#include "AliveComponentsManager.h"
+#include "ECSSystem.h"
+#include "TimerSystem.h"
 #include "TimeAchieve.h"
 #include "GameStage.h"
 #include "guildex.h"
@@ -36,6 +40,8 @@
 #include "sandcity.h"
 #include "scriptnpc.h"
 #include "timesystem.h"
+#include "StatusSystem.h"
+#include "PotionRecoverSystem.h"
 #include "systemscript.h"
 #include "topmanager.h"
 #include ".\specialequipmentmanager.h"
@@ -598,6 +604,12 @@ BOOL CGameWorld::Init()
 	CBotManager::GetInstance()->CreateBotsFromConfig(".\\Data\\Bot\\BotConfig.csv");
 
 	InitThreadPool(); // 初始化工作线程池
+
+	// 注册 ECS 系统
+	SystemRunner::GetInstance()->Register(std::make_unique<TimerSystem>());
+	SystemRunner::GetInstance()->Register(std::make_unique<StatusSystem>());
+	SystemRunner::GetInstance()->Register(std::make_unique<PotionRecoverSystem>());
+
 	return TRUE;
 }
 
@@ -721,6 +733,13 @@ VOID CGameWorld::Update()
 {
 	//分帧更新
 	DWORD dwkey = (m_dwUpdateKey % 10);
+	// 统一定时器批量预计算 (单次 ecs_view<TimerComponent> 扫描全部 23 槽)
+	AliveComponentsManager::GetInstance()->BatchPrecomputeTimers(CFrameTime::GetFrameTime());
+	// 状态过期批量预计算 (ecs_view<StatusComponent> 扫描, 预填 statusExpiredMask)
+	AliveComponentsManager::GetInstance()->BatchPrecomputeStatusExpire(CFrameTime::GetFrameTime());
+	// ECS System 批量处理 (替代 per-entity 虚函数调用, SoA 缓存友好)
+	SystemRunner::GetInstance()->ExecuteAll(CFrameTime::GetFrameTime());
+
 	switch (dwkey)
 	{
 	case 0: case 4:
@@ -762,7 +781,10 @@ VOID CGameWorld::Update()
 			CMonsterManagerEx::GetInstance()->UpdateFreeObjects(); // 释放
 			barrier.Signal();
 		});
-		barrier.Arrive();
+		if (!barrier.Arrive(5000))
+		{
+			assert(!"Update: worker tasks did not complete within 5s timeout");
+		}
 		CEventManager::GetInstance()->UpdateDeleteObject();
 		CDownItemMgr::GetInstance()->UpdateDeletedObject();
 		CMonsterManagerEx::GetInstance()->UpdateDeleteMonster(); // 删除
@@ -789,7 +811,10 @@ VOID CGameWorld::Update()
 			CMonsterGenManager::GetInstance()->UpdateGen(); // 刷怪
 			barrier.Signal();
 		});
-		barrier.Arrive();
+		if (!barrier.Arrive(5000))
+		{
+			assert(!"UpdatePlayers: worker tasks did not complete within 5s timeout");
+		}
 	}
 	break;
 	case 6: case 9:
@@ -1106,13 +1131,12 @@ VOID CGameWorld::AddUpdateMonster(CMonsterEx* pMonster)
 
 VOID CGameWorld::UpdateMonster(xListHost<CMonsterEx>& monsterList, MonsterUpdateType updateType)
 {
-	// 使用thread_local vector避免每帧内存分配
 	struct ThreadLocalBuffers {
 		std::vector<CMonsterEx*> updateMonsters;
 		std::vector<xListHost<CMonsterEx>::xListNode*> nodesToRemove;
 		std::vector<xListHost<CMonsterEx>::xListNode*> switchMonsters;
 	};
-	thread_local ThreadLocalBuffers tls;
+	static ThreadLocalBuffers tls;
 	tls.updateMonsters.clear();
 	tls.nodesToRemove.clear();
 	tls.switchMonsters.clear();
@@ -1218,6 +1242,12 @@ VOID CGameWorld::UpdateMonsterParallel(xListHost<CMonsterEx>& monsterList, Monst
 	}
 	if (validMonsters.empty()) return;
 
+	// 按地图ID排序，确保同地图怪物在数组中相邻，从而归入同一批次
+	// 避免跨线程并发修改同一地图内玩家的可见对象列表(m_mapVisibleObject/m_xVisibleObjectList)
+	std::sort(validMonsters.begin(), validMonsters.end(), [](CMonsterEx* a, CMonsterEx* b) {
+		return a->GetMapId() < b->GetMapId();
+	});
+
 	// 按批次并行怪物 AI 更新（无锁，每批次独立收集切换节点）
 	int totalMonsters = (int)validMonsters.size();
 	int numBatches = (totalMonsters + nBatchSize - 1) / nBatchSize;
@@ -1260,9 +1290,9 @@ VOID CGameWorld::UpdateMonsterParallel(xListHost<CMonsterEx>& monsterList, Monst
 		});
 	}
 	// 3秒超时：若工作线程异常未能Signal，避免主线程永久卡死
-	if (!barrier.Arrive(3000))
+	if (!barrier.Arrive(5000))
 	{
-		assert(!"UpdateMonsterParallel: worker tasks did not complete within 3s timeout");
+		assert(!"UpdateMonsterParallel: worker tasks did not complete within 5s timeout");
 	}
 
 	// 主线程合并各批次切换节点，批量列表迁移（持锁）
@@ -1290,11 +1320,10 @@ VOID CGameWorld::UpdatePlayers()
 	while (globeprocesscount < UPDATE_GLOBE_PROCESS_COUNT && (pProcesses[globeprocesscount] = m_xGlobeProcessQueue.pop()))
 		globeprocesscount++;
 	MAPOBJECT_LIST* pList = m_pObjectList[OBJ_PLAYER].get();
-	// 使用静态缓冲区避免每次重新分配
 	struct ThreadLocalPlayerBuffers {
 		std::vector<CHumanPlayer*> players;
 	};
-	thread_local ThreadLocalPlayerBuffers ptls;
+	static ThreadLocalPlayerBuffers ptls;
 	ptls.players.clear();
 	{
 		SRLock lock(m_rwObjectListLock);
@@ -1337,11 +1366,10 @@ VOID CGameWorld::UpdatePlayers()
 	struct MapGroup {
 		std::vector<CHumanPlayer*> players;
 	};
-	// 使用thread_local复用，避免每帧堆分配
 	struct MapGroupBuffers
 	{
 		std::vector<MapGroup> groups;
-		std::unordered_map<UINT, size_t> mapIndex;
+		SmallFlatMap<UINT, size_t, 512> mapIndex;  // 地图分组索引 (栈存储, 替代 unordered_map)
 		VOID clear()
 		{
 			for (auto& g : groups) g.players.clear();
@@ -1349,7 +1377,7 @@ VOID CGameWorld::UpdatePlayers()
 			mapIndex.clear();
 		}
 	};
-	thread_local MapGroupBuffers mgBuf;
+	static MapGroupBuffers mgBuf;
 	mgBuf.clear();
 	auto& groups = mgBuf.groups;
 	auto& mapIndex = mgBuf.mapIndex;
@@ -1420,7 +1448,10 @@ VOID CGameWorld::UpdatePlayers()
 			barrier.Signal();
 		}
 		// 自旋等待所有工作线程完成（无需内核态切换）
-		barrier.Arrive();
+		if (!barrier.Arrive(5000))
+		{
+			assert(!"UpdatePlayers: worker tasks did not complete within 5s timeout");
+		}
 	}
 	else
 	{

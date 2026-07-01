@@ -71,7 +71,7 @@ VOID CServer::Update()
 	}
 	const DWORD dwUpdateKey = GetUpdateKey();
 	if ((dwUpdateKey & 1) == 0)
-		UpdateSCServer(); // 偶数帧：处理服务中心消息
-	else
 		UpdateDBServer(); // 奇数帧：处理数据中心消息
+	else
+		UpdateSCServer(); // 偶数帧：处理服务中心消息
 }

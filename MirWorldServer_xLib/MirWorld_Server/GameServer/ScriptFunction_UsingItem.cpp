@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include ".\scriptfunction.h"
 #include ".\cmdproc.h"
-#include "time.h"
 #include ".\scriptview.h"
 #include <array>
 #include ".\scripttarget.h"
@@ -76,21 +75,19 @@ DEFINE_SCRIPT_FUNCTION(US_CHECKANDUPTODATE)
 	ITEM* pItem = pPlayer->GetUsingItem();
 	if (pItem)
 	{
-		DWORD& dwItemTime = *(DWORD*)&pItem->baseitem.btMinDef;
+		DWORD dwItemTime = 0; // 用局部变量替代引用, 避免严格别名违规(UB)
+		memcpy(&dwItemTime, &pItem->baseitem.btMinDef, sizeof(DWORD));
 		if (dwItemTime == 0)	//	没有开始使用
 		{
-			time_t t;
-			time(&t);
-			dwItemTime = (DWORD)t;
+			dwItemTime = GetUnixTimeSec();
+			memcpy(&pItem->baseitem.btMinDef, &dwItemTime, sizeof(DWORD)); // 写回字段
 			CItemManager::GetInstance()->AddItemModifyFlag(*pItem, ITEMMODIFY_DURACHANGED);
 			pItem->dwParam[3] = UR_UPDATED;
 			return 1;			//	开使使用~~
 		}
 		else
 		{
-			time_t t;
-			time(&t);
-			DWORD dwT2 = (DWORD)t;
+			DWORD dwT2 = GetUnixTimeSec();
 			DWORD dwT3 = pItem->wCurDura * 86400;
 			if (dwT2 > dwItemTime)
 			{
@@ -141,6 +138,12 @@ DEFINE_SCRIPT_FUNCTION(US_UPGRADE)
 	else
 	{
 		pUsItem = pPlayer->GetbaoziItem();
+		if (pUsItem == nullptr) // 判空防止空指针崩溃, IsHasPet与GetbaoziItem语义不同
+		{
+			pPlayer->SetUsItem(UR_UPDATED);
+			pPlayer->SaySystem("未找到豹魔石物品, 无法喂食.");
+			return 0;
+		}
 		pUsItem->SetPetTime();
 		pPlayer->SaySystemAttrib(CC_REDPET, "喂食成功, 你的从林豹又充满精神!");
 	}
@@ -311,17 +314,6 @@ DEFINE_SCRIPT_FUNCTION(US_RELEASEPET)
 	return pPlayer->SummonPet(szPetName.data());
 	//if( nParam == 0 )return 0;
 	//pPlayer->SetPrivateShopSign( Params[0].nParam );
-}
-END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：检查限制 - 待完善
-//		注释：
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(US_CHECKLIMIT)
-{
-	if (nParam == 0)return 0;
-
 }
 END_SCRIPT_FUNCTION
 

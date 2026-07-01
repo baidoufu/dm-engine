@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include ".\npcmanager.h"
 #include "scriptnpc.h"
+#include "NpcComponentManager.h"
 #include "scriptobjectmgr.h"
 #include "gameworld.h"
 #include "server.h"
@@ -43,6 +44,8 @@ CScriptNpc* CNpcManager::AddNpc(const char* pszString)
 	if (id == 0 || pLoadingNpc == nullptr) return nullptr;
 	id = (id & 0xffffff) | (OBJ_NPC << 24);
 	pLoadingNpc->SetId(id);
+	// 先创建ECS组件, 后续 Init/Setter 才能写入ECS
+	NpcComponentManager::GetInstance()->CreateNpcComponents(pLoadingNpc);
 	if (nParam > 9 && Params[9][0] != '\0')
 	{
 		FLOAT fPercent = (float)abs(StringToInteger(Params[9])) / 100;
@@ -88,6 +91,8 @@ CScriptNpc* CNpcManager::NewNpc()
 	if (id == 0 || npc == nullptr)return nullptr;
 	id = (id & 0xffffff) | (OBJ_NPC << 24);
 	npc->SetId(id);
+	// 创建 NPC 专属组件
+	NpcComponentManager::GetInstance()->CreateNpcComponents(npc);
 	return npc;
 }
 
@@ -95,6 +100,7 @@ VOID CNpcManager::DelNpc(CScriptNpc* pNpc)
 {
 	UINT id = pNpc->GetId() & 0xffffff;
 	pNpc->Clean();
+	NpcComponentManager::GetInstance()->DestroyNpcComponents(pNpc->GetId());
 	m_ScriptNpcs.Del(id);
 }
 

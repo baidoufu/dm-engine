@@ -19,14 +19,15 @@ private:
 	// 线程安全的随机数生成器（每线程独立引擎，避免rand()的数据竞争）
 	static std::mt19937& GetRng()
 	{
-		thread_local std::mt19937 rng(std::random_device{}());
-		return rng;
+		thread_local std::mt19937 s_rng(std::random_device{}());
+		return s_rng;
 	}
 
 public:
 	// 随机数范围生成 - 默认闭区间
 	static int RandomRange(int nMax, e_randomType bType = RANDOM_CI)
 	{
+		if (nMax <= 0) return 0;  // 防止除零崩溃
 		if (bType == RANDOM_OI)
 			return (GetRng()() % (nMax));
 		else if (bType == RANDOM_CI)

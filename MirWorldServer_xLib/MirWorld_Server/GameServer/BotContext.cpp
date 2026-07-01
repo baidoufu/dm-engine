@@ -57,9 +57,23 @@ CAliveObject* CBotContext::FindNearestMonster(int nRange)
 // ============================================================================
 // 预计算目标：在 BT 执行前调用，将重型 FindNearestMonster 提前到冷路径
 // 同一帧内 BT 节点再调用 GetCachedTarget 时直接命中缓存，O(1) 返回
+// 增加 100ms 最小扫描间隔，避免高频调用导致 CPU 飙升影响真实玩家
 // ============================================================================
 VOID CBotContext::PrecomputeTarget()
 {
+	// 目标缓存间隔保护：100ms内不重复全量扫描
+	if (m_dwFrameTime - m_dwTargetUpdateTime < 100)
+		return;
+
+	// 如果机器人已有锁定目标（通过OnDamage等SetTarget设置），直接使用，不搜索新怪
+	CAliveObject* pLockedTarget = m_pBot->GetTarget();
+	if (pLockedTarget && !pLockedTarget->IsDeath() && IsTargetValid(pLockedTarget))
+	{
+		m_refCachedTarget.SetObject(pLockedTarget);
+		m_dwTargetUpdateTime = m_dwFrameTime;
+		return;
+	}
+
 	// 仅当缓存失效时才触发搜索（同一帧内第二次调用无开销）
 	if (!m_refCachedTarget.IsValid())
 	{
@@ -155,21 +169,44 @@ DWORD CBotContext::FindPotionInBag(BOOL bHP)
 	if (!m_pBot) return 0;
 
 	CItemBox& bag = m_pBot->GetBag();
-	// 遍历背包查找药水
-	// HP药水名称特征：金创药、强效金创药等
-	// MP药水名称特征：魔法药、强效魔法药等
-	const char* pszKeyword = bHP ? "金创药" : "魔法药";
+	static const char* s_szHPPotions[] =
+	{
+		"超级天山雪莲",		// HP 高级特殊药
+		"天山雪莲",
+		"超级金创药",		// HP 常规药（高级→低级）
+		"特级金创药",
+		"金创药(大量)",
+		"金创药(中量)",
+		"金创药(小量)",
+		"治疗药水",			// 应急兜底：同时回复HP&MP
+		"强效太阳神水",
+		"太阳神水",
+	};
 
-	ITEM* pItem = bag.FindItem(pszKeyword, FALSE);
-	if (pItem)
-		return pItem->dwMakeIndex;
+	static const char* s_szMPPotions[] =
+	{
+		"超级深海灵礁",		// MP 高级特殊药
+		"深海灵礁",
+		"超级魔法药",		// MP 常规药（高级→低级）
+		"特级魔法药",
+		"魔法药(大量)",
+		"魔法药(中量)",
+		"魔法药(小量)",
+		"治疗药水",			// 应急兜底：同时回复HP&MP
+		"强效太阳神水",
+		"太阳神水",
+	};
 
-	// 尝试查找强效版本
-	char szName[64];
-	sprintf_s(szName, "强效%s", pszKeyword);
-	pItem = bag.FindItem(szName, FALSE);
-	if (pItem)
-		return pItem->dwMakeIndex;
+	const char* const* pList = bHP ? s_szHPPotions : s_szMPPotions;
+	size_t nCount = bHP ? _countof(s_szHPPotions) : _countof(s_szMPPotions);
+
+	// 按优先级依次精确查找，命中即返回
+	for (size_t i = 0; i < nCount; ++i)
+	{
+		ITEM* pItem = bag.FindItem(pList[i], FALSE);
+		if (pItem)
+			return pItem->dwMakeIndex;
+	}
 
 	return 0;
 }
@@ -186,44 +223,8 @@ DWORD CBotContext::FindItemInBag(const char* pszName)
 }
 
 // ============================================================================
-// 技能查询
+// 技能是否准备好
 // ============================================================================
-WORD CBotContext::FindBestAttackSkill(int nTargetDistance)
-{
-	if (!m_pBot) return 0;
-
-	BYTE btPro = m_pBot->GetPro();
-
-	// 遍历已学技能，选择权重最高的攻击技能
-	if (btPro == PRO_WARRIOR)
-	{
-		if (nTargetDistance <= 2)
-		{
-			if (IsSkillReady(26)) return 26; // 烈火
-			if (IsSkillReady(25)) return 25; // 半月
-		}
-	}
-	else if (btPro == PRO_MAGICIAN)
-	{
-		if (nTargetDistance <= 8)
-		{
-			if (IsSkillReady(11)) return 11; // 雷电
-			if (IsSkillReady(23)) return 23; // 爆裂火焰
-		}
-	}
-	else if (btPro == PRO_TAOSHI)
-	{
-		if (nTargetDistance <= 7)
-		{
-			if (IsSkillReady(6))  return 6;  // 施毒
-			if (IsSkillReady(67)) return 67; // 幽冥火咒
-			if (IsSkillReady(13)) return 13; // 灵魂火符
-		}
-	}
-
-	return 0;
-}
-
 BOOL CBotContext::IsSkillReady(WORD wSkillId)
 {
 	if (!m_pBot) return FALSE;

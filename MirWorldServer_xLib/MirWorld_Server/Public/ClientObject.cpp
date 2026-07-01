@@ -152,14 +152,22 @@ int	CClientObject::ParseMessage(char* pszMsg, int iSize)
 					const int length = static_cast<int>(_UnGameCode(pStart, (BYTE*)szDecodeBuffer));
 					// 解码后长度安全检查
 					if (length <= 0 || length > static_cast<int>(m_xDecodePacket.getfreesize()))
-					{
-						// 解码数据异常，丢弃此消息
-						pStart = nullptr;
-						ParsedSize = i + 1;
-						break;
-					}
-					if (m_pMsgProcessor)
-						m_pMsgProcessor->OnCodedMsg(this, (MIRMSG*)szDecodeBuffer, length - sizeof(MIRMSGHEADER));
+				{
+					// 解码数据异常，丢弃此消息
+					pStart = nullptr;
+					ParsedSize = i + 1;
+					break;
+				}
+				// 消息长度必须至少包含消息头, 防止短包导致整数下溢和堆越界读
+				int headerLen = sizeof(MIRMSGHEADER);
+				if (length < headerLen)
+				{
+					pStart = nullptr;
+					ParsedSize = i + 1;
+					break;
+				}
+				if (m_pMsgProcessor)
+					m_pMsgProcessor->OnCodedMsg(this, (MIRMSG*)szDecodeBuffer, length - headerLen);
 				}
 				pszMsg[i] = '!';
 				pStart = nullptr;

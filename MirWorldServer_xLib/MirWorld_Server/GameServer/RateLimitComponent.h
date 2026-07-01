@@ -25,11 +25,11 @@ struct RateLimitComponent
     static constexpr int DEFAULT_INTERVALS[ACT_COUNT] = {
         800,   // ACT_SPECIAL_ATTACK
         800,   // ACT_MINE
-        5000,  // ACT_RELIVE
-        250,   // ACT_USE_ITEM
+        1000,  // ACT_RELIVE
+        300,   // ACT_USE_ITEM
         300,   // ACT_PICKUP_ITEM
-        200,   // ACT_DROP_ITEM
-        200    // ACT_EQUIP_CHANGE
+        300,   // ACT_DROP_ITEM
+        300    // ACT_EQUIP_CHANGE
     };
 
     int intervals[ACT_COUNT];  // 各项间隔 (运行时配置, 支持动态修改)

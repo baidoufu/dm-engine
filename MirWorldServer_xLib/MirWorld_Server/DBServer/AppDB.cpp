@@ -6,8 +6,7 @@
 #include <string>
 #include "dbserver.h"
 #include <wincrypt.h>
-
-static thread_local char g_szTempBuffer[65536];
+#include <chrono>
 
 // ============================================================================
 // PasswordHash 实现
@@ -42,7 +41,7 @@ static std::string MD5Hash(const std::string& input)
 		return result;
 	}
 
-	char hex[33];
+	char hex[33]{};
 	for (DWORD i = 0; i < cbHash; i++)
 		sprintf(hex + i * 2, "%02x", rgbHash[i]);
 	hex[32] = '\0';
@@ -56,13 +55,15 @@ static std::string MD5Hash(const std::string& input)
 static std::string GenerateSalt()
 {
 	HCRYPTPROV hProv = 0;
-	BYTE randomBytes[4];
+	BYTE randomBytes[4]{};
 	std::string salt;
 
 	if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 	{
-		// 回退：使用时间作为种子
-		srand(GetTickCount());
+		// 使用 steady_clock 毫秒作为种子
+		unsigned uSeed = static_cast<unsigned>(std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::steady_clock::now().time_since_epoch()).count());
+		srand(uSeed);
 		sprintf(reinterpret_cast<char*>(randomBytes), "%04x", rand() & 0xFFFF);
 	}
 	else
@@ -71,7 +72,7 @@ static std::string GenerateSalt()
 		CryptReleaseContext(hProv, 0);
 	}
 
-	char hex[9];
+	char hex[9]{};
 	for (int i = 0; i < 4; i++)
 		sprintf(hex + i * 2, "%02x", randomBytes[i]);
 	hex[8] = '\0';
@@ -1755,7 +1756,7 @@ static VOID DeserializeTasksBinary(const BYTE* pData, UINT dataSize, TASKINFO* p
 	}
 }
 
-static thread_local BYTE g_szTasksBinary[TASK_BINARY_SIZE];
+static thread_local BYTE s_szTasksBinary[TASK_BINARY_SIZE];
 SERVER_ERROR CAppDB::QueryTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 {
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
@@ -1769,10 +1770,10 @@ SERVER_ERROR CAppDB::QueryTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 	{
 		pDataUnit->GetValue(pInfo->dwAchievement);
 		pDataUnit->GetValue(pInfo->dwTotalTaskCount);
-		memset(g_szTasksBinary, 0, sizeof(g_szTasksBinary));
-		int binarySize = sizeof(g_szTasksBinary);
-		pDataUnit->GetData(3, SQL_C_BINARY, g_szTasksBinary, binarySize);
-		DeserializeTasksBinary(g_szTasksBinary, binarySize, pInfo);
+		memset(s_szTasksBinary, 0, sizeof(s_szTasksBinary));
+		int binarySize = sizeof(s_szTasksBinary);
+		pDataUnit->GetData(3, SQL_C_BINARY, s_szTasksBinary, binarySize);
+		DeserializeTasksBinary(s_szTasksBinary, binarySize, pInfo);
 	}
 	else
 	{
@@ -1796,12 +1797,12 @@ SERVER_ERROR CAppDB::InstertTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 		m_pDBConnection->DelDataUnit(pDataUnit);
 		return SE_FAIL;
 	}
-	SerializeTasksBinary(pInfo, g_szTasksBinary, sizeof(g_szTasksBinary));
+	SerializeTasksBinary(pInfo, s_szTasksBinary, sizeof(s_szTasksBinary));
 	std::string hexString;
 	hexString.resize(TASK_BINARY_SIZE * 2);
 	for (int i = 0; i < TASK_BINARY_SIZE; i++)
 	{
-		BYTE b = g_szTasksBinary[i];
+		BYTE b = s_szTasksBinary[i];
 		hexString[i * 2] = HEX_TABLE[b >> 4];
 		hexString[i * 2 + 1] = HEX_TABLE[b & 0xF];
 	}
@@ -1828,12 +1829,12 @@ SERVER_ERROR CAppDB::UpdateTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 		m_pDBConnection->DelDataUnit(pDataUnit);
 		return SE_FAIL;
 	}
-	SerializeTasksBinary(pInfo, g_szTasksBinary, sizeof(g_szTasksBinary));
+	SerializeTasksBinary(pInfo, s_szTasksBinary, sizeof(s_szTasksBinary));
 	std::string hexString;
 	hexString.resize(TASK_BINARY_SIZE * 2);
 	for (int i = 0; i < TASK_BINARY_SIZE; i++)
 	{
-		BYTE b = g_szTasksBinary[i];
+		BYTE b = s_szTasksBinary[i];
 		hexString[i * 2] = HEX_TABLE[b >> 4];
 		hexString[i * 2 + 1] = HEX_TABLE[b & 0xF];
 	}
@@ -1876,7 +1877,7 @@ static VOID DeserializeFengHaoGrowsBinary(const BYTE* pData, int dataSize, Fengh
 }
 
 static constexpr int FENGHAOGROW_BINARY_SIZE = sizeof(FengHaoRow) * MAX_FENGHAO;
-static thread_local BYTE g_szFengHaoGrowsBinary[FENGHAOGROW_BINARY_SIZE];
+static thread_local BYTE s_szFengHaoGrowsBinary[FENGHAOGROW_BINARY_SIZE];
 SERVER_ERROR CAppDB::QueryFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
 {
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
@@ -1892,10 +1893,10 @@ SERVER_ERROR CAppDB::QueryFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
 		pDataUnit->GetValue(pInfo->btType2);
 		pDataUnit->GetValue(pInfo->btType3);
 
-		memset(g_szFengHaoGrowsBinary, 0, sizeof(g_szFengHaoGrowsBinary));
-		int binarySize = sizeof(g_szFengHaoGrowsBinary);
-		pDataUnit->GetData(4, SQL_C_BINARY, g_szFengHaoGrowsBinary, binarySize);
-		DeserializeFengHaoGrowsBinary(g_szFengHaoGrowsBinary, binarySize, pInfo);
+		memset(s_szFengHaoGrowsBinary, 0, sizeof(s_szFengHaoGrowsBinary));
+		int binarySize = sizeof(s_szFengHaoGrowsBinary);
+		pDataUnit->GetData(4, SQL_C_BINARY, s_szFengHaoGrowsBinary, binarySize);
+		DeserializeFengHaoGrowsBinary(s_szFengHaoGrowsBinary, binarySize, pInfo);
 	}
 	else if (ret == SE_DB_NOMOREDATA)
 	{
@@ -1914,13 +1915,13 @@ SERVER_ERROR CAppDB::InstertFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 
-	SerializeFengHaoGrowsBinary(pInfo, g_szFengHaoGrowsBinary, sizeof(g_szFengHaoGrowsBinary));
+	SerializeFengHaoGrowsBinary(pInfo, s_szFengHaoGrowsBinary, sizeof(s_szFengHaoGrowsBinary));
 
 	std::string hexString;
 	hexString.resize(FENGHAOGROW_BINARY_SIZE * 2);
 	for (int i = 0; i < FENGHAOGROW_BINARY_SIZE; i++)
 	{
-		BYTE b = g_szFengHaoGrowsBinary[i];
+		BYTE b = s_szFengHaoGrowsBinary[i];
 		hexString[i * 2] = HEX_TABLE[b >> 4];
 		hexString[i * 2 + 1] = HEX_TABLE[b & 0xF];
 	}
@@ -1937,13 +1938,13 @@ SERVER_ERROR CAppDB::UpdateFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 
-	SerializeFengHaoGrowsBinary(pInfo, g_szFengHaoGrowsBinary, sizeof(g_szFengHaoGrowsBinary));
+	SerializeFengHaoGrowsBinary(pInfo, s_szFengHaoGrowsBinary, sizeof(s_szFengHaoGrowsBinary));
 
 	std::string hexString;
 	hexString.resize(FENGHAOGROW_BINARY_SIZE * 2);
 	for (int i = 0; i < FENGHAOGROW_BINARY_SIZE; i++)
 	{
-		BYTE b = g_szFengHaoGrowsBinary[i];
+		BYTE b = s_szFengHaoGrowsBinary[i];
 		hexString[i * 2] = HEX_TABLE[b >> 4];
 		hexString[i * 2 + 1] = HEX_TABLE[b & 0xF];
 	}

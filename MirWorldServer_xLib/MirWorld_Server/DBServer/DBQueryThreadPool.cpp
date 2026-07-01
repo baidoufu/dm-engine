@@ -168,6 +168,7 @@ VOID CDBQueryThreadPool::WorkerThreadProc(int nThreadIndex)
 		if (!m_bRunning.load())
 		{
 			PRINT(ERROR_RED, "DB查询线程[%d] 线程池已停止, 退出\n", nThreadIndex);
+			xPacketPool::DrainThreadLocal(); // 修复: 释放线程TLS封包池, 避免泄漏
 			return;
 		}
 	}
@@ -263,4 +264,7 @@ VOID CDBQueryThreadPool::WorkerThreadProc(int nThreadIndex)
 			m_nCompletedResults.fetch_add(1, std::memory_order_relaxed);
 		}
 	}
+
+	// 修复: 线程退出前释放TLS封包池, 避免泄漏
+	xPacketPool::DrainThreadLocal();
 }

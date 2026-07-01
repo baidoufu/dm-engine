@@ -28,6 +28,7 @@ class CBotPlayer : public CHumanPlayer
 public:
 	CBotPlayer(VOID);
 	virtual ~CBotPlayer(VOID);
+	e_object_type GetType() { return OBJ_PLAYER; }
 
 	// 初始化机器人
 	BOOL InitBot(BOT_CREATE_DESC& desc);
@@ -36,6 +37,7 @@ public:
 	virtual VOID Update();                  // 机器人主更新循环
 	virtual BOOL CanRecvMsg();              // 机器人不需要真实网络消息
 	virtual VOID OnDeath(DWORD dwKiller);   // 死亡处理
+	virtual VOID OnDamage(CAliveObject* pAttacker, int nDamage, damage_type type); // 受伤时锁定攻击者
 
 	// 决策上下文接口
 	CBotContext* GetContext() { return m_pContext; }
@@ -70,6 +72,7 @@ public:
 	VOID SimulatePatrol();          // 巡逻移动
 	BOOL SimulateFlee();            // 逃跑
 	VOID SimulateRest(DWORD dwDuration);  // 休息
+	BOOL SimulateRevive(int nHpPercent, BOOL bTeleportHome);  // 复活
 	BOOL SimulateUsePotion(BOOL bHP);     // 使用药水
 	BOOL SimulateUseItem(const char* pszItemName);// 使用物品
 	BOOL SimulateEquipItem(const char* pszItemName);// 穿戴装备
@@ -91,6 +94,11 @@ public:
 	// 自适应思考间隔：战斗中400ms / 巡逻1000ms / 安全区3000ms / 死亡跳过
 	DWORD ComputeThinkInterval();
 
+	// 获取死亡时间戳（供CBTActionRevive判断复活延迟）
+	DWORD GetDeathTime() const { return m_dwDeathTime; }
+	// 获取死亡后已流逝的毫秒数（供CBTActionRevive判断复活延迟）
+	DWORD GetDeathElapsed() const;
+
 private:
 	CBotContext* m_pContext;             // 决策上下文（替代AIController）
 	CBotBehaviorTree* m_pBehaviorTree;  // 行为树（唯一决策入口）
@@ -101,6 +109,7 @@ private:
 
 	BOOL m_bRunning;        // 是否运行中
 	BOOL m_bPaused;         // 是否暂停
+	DWORD m_dwDeathTime;    // 死亡时间戳（用于复活延迟判断）
 	
 	// 人类行为模拟参数
 	DWORD m_dwThinkInterval;// 思考间隔(毫秒)

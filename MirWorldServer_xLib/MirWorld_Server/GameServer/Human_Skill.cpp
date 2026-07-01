@@ -409,8 +409,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 					SaySystemAttrib(CC_GREENS, "关闭%s", szName);
 				return TRUE;
 			}
-			else
-				DPRINT(ERROR_RED, "未处理的技能 %u \n", wMagicId);
 		}
 		break;
 		}
@@ -1512,7 +1510,10 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	// 统一计算百分比伤害的辅助函数
 	auto CalculateBonusDamage = [this](int basePower, WORD skillId) -> int {
 		const Magic& magicskill = CMagicManager::GetInstance()->GetMagic(skillId);
-		const int pow = magicskill.skills[this->GetMagic(skillId)->magic.btLevel].value3;
+		const USERMAGIC* pUserMagic = this->GetMagic(skillId);
+		if (pUserMagic == nullptr) return 0;
+		const BYTE btLevel = pUserMagic->magic.btLevel;
+		const int pow = magicskill.skills[btLevel].value3;
 		const double powerMultiplier = pow / 100.0;
 		return static_cast<int>(basePower * powerMultiplier);
 	};
@@ -1813,7 +1814,7 @@ BOOL CHumanPlayer::CanBePushed(CAliveObject* pAttacker)
 	if (GetActionType() == AT_PRIVATESHOP)return FALSE;
 	if (CAliveObject::CanBePushed(pAttacker))return TRUE;
 	if (pAttacker->GetType() == OBJ_PLAYER)
-		return (((CHumanPlayer*)pAttacker)->m_iCurrentTitleIndex > m_iCurrentTitleIndex);
+		return (((CHumanPlayer*)pAttacker)->_currentTitleIndex() > _currentTitleIndex());
 	return FALSE;
 }
 

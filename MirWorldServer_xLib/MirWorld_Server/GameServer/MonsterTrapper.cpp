@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include ".\monstertrapper.h"
+#include "monstertrapper.h"
 #include "logicmap.h"
 #include "humanplayer.h"
 #include "monsterex.h"
@@ -22,7 +22,7 @@ VOID CTrapperEvent::Clean()
 VOID CTrapperEvent::OnEnter(CMapObject* pObject)
 {
 	if (pObject->GetType() == OBJ_PLAYER)
-		if (m_pTrapper)m_pTrapper->Destroy();
+		if (m_pTrapper) m_pTrapper->SetPendingDestroy();
 }
 
 VOID CTrapperEvent::EnterMap(CLogicMap* pMap, UINT x, UINT y)
@@ -100,6 +100,7 @@ xObjectPool<CMonsterTrapper> CMonsterTrapper::m_xEventPool;
 CMonsterTrapper::CMonsterTrapper(VOID):
 	m_dwMonsterCount(0),
 	m_bFailed(FALSE),
+	m_bPendingDestroy(FALSE),
 	m_nDamage(0),
 	m_dwLastTime(0),
 	m_dwOwnerInstanceKey(0),
@@ -114,6 +115,11 @@ CMonsterTrapper::CMonsterTrapper(VOID):
 
 CMonsterTrapper::~CMonsterTrapper(VOID)
 {
+	for (auto& trapped : m_pTrapped)
+	{
+		delete trapped;
+		trapped = nullptr;
+	}
 }
 
 VOID CMonsterTrapper::OnUpdate(CVisibleEvent* pEvent)
@@ -214,6 +220,11 @@ VOID CMonsterTrapper::Destroy()
 
 VOID CMonsterTrapper::Update()
 {
+	if (m_bPendingDestroy)
+	{
+		Destroy();
+		return;
+	}
 	for (auto& event : m_pEvents)
 	{
 		if (event)

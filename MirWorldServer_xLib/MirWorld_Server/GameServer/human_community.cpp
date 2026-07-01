@@ -19,18 +19,18 @@ BOOL CHumanPlayer::Marry(CHumanPlayer* pEachOther)
 BOOL CHumanPlayer::UnMarry()
 {
 	if (!IsMarried())return FALSE;
-	CHumanPlayer* pWife = CHumanPlayerMgr::GetInstance()->FindbyName(m_sWife.data());
+	CHumanPlayer* pWife = CHumanPlayerMgr::GetInstance()->FindbyName(_wife().data());
 	if (pWife == nullptr)
 	{
 		//	send unmarry to db
 		CDBClientObj* pObj = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 		if (pObj)
-			pObj->SendBreakMarriage(m_sWife.data(), this->GetName());
+			pObj->SendBreakMarriage(_wife().data(), this->GetName());
 	}
 	else
 	{
 		//SetWife( nullptr );
-		if (strcmp(pWife->m_sWife.data(), this->GetName()) != 0)
+		if (strcmp(pWife->_wife().data(), this->GetName()) != 0)
 			return FALSE;
 		pWife->SetWife(nullptr);
 	}
@@ -38,14 +38,14 @@ BOOL CHumanPlayer::UnMarry()
 	return TRUE;
 }
 
-UINT CHumanPlayer::GetStudentCount()const
+UINT CHumanPlayer::GetStudentCount()
 {
-	return (m_sStudents[0][0] != 0) + (m_sStudents[1][0] != 0) + (m_sStudents[2][0] != 0);
+	return (_students()[0][0] != 0) + (_students()[1][0] != 0) + (_students()[2][0] != 0);
 }
 
-BOOL CHumanPlayer::IsMyStudent(const char* pszName)const
+BOOL CHumanPlayer::IsMyStudent(const char* pszName)
 {
-	for (const auto& student : m_sStudents)
+	for (const auto& student : _students())
 	{
 		if (strcmp(student.data(), pszName) == 0)
 			return TRUE;
@@ -60,7 +60,7 @@ BOOL CHumanPlayer::AddStudent(CHumanPlayer* pStudent)
 		return FALSE;
 	if (pStudent->HasMaster())
 		return FALSE;
-	for (auto& student : m_sStudents)
+	for (auto& student : _students())
 	{
 		if (student[0] == 0)
 		{
@@ -76,7 +76,7 @@ BOOL CHumanPlayer::AddStudent(CHumanPlayer* pStudent)
 BOOL CHumanPlayer::DeleteStudent(const char* pszName)
 {
 	CHumanPlayer* pStudent = CHumanPlayerMgr::GetInstance()->FindbyName(pszName);
-	for (auto& student : m_sStudents)
+	for (auto& student : _students())
 	{
 		if (strcmp(student.data(), pszName) == 0)
 		{
@@ -98,19 +98,19 @@ BOOL CHumanPlayer::DeleteStudent(const char* pszName)
 
 BOOL CHumanPlayer::LeaveTeacher()
 {
-	if (m_sMaster[0] == 0)return FALSE;
-	CHumanPlayer* pMaster = CHumanPlayerMgr::GetInstance()->FindbyName(m_sMaster.data());
+	if (_master()[0] == 0)return FALSE;
+	CHumanPlayer* pMaster = CHumanPlayerMgr::GetInstance()->FindbyName(_master().data());
 	if (pMaster)
 	{
 		pMaster->DeleteStudent(this->GetName());
-		if (m_sMaster[0] != 0)
+		if (_master()[0] != 0)
 			SetMaster(nullptr);
 	}
 	else
 	{
 		CDBClientObj* pObj = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 		if (pObj)
-			pObj->SendBreakTeacher(m_sMaster.data(), this->GetName());
+			pObj->SendBreakTeacher(_master().data(), this->GetName());
 		SetMaster(nullptr);
 	}
 	return TRUE;
@@ -121,13 +121,13 @@ VOID CHumanPlayer::SetMaster(CHumanPlayer* pMaster)
 	if (pMaster == this) return;
 	if (pMaster == nullptr)
 	{
-		SendDeleteCommunity(1, m_sMaster.data());
-		m_sMaster[0] = 0;
+		SendDeleteCommunity(1, _master().data());
+		_master()[0] = 0;
 	}
 	else
 	{
-		o_strncpy(m_sMaster.data(), pMaster->GetName(), 16);
-		SendAddCommunity(1, m_sMaster.data());
+		o_strncpy(_master().data(), pMaster->GetName(), 16);
+		SendAddCommunity(1, _master().data());
 	}
 	UpdateViewName();
 }
@@ -137,45 +137,45 @@ VOID CHumanPlayer::SetWife(CHumanPlayer* pWife)
 	if (pWife == this)return;
 	if (pWife == nullptr)
 	{
-		SendDeleteCommunity(3, m_sWife.data());
-		m_sWife[0] = 0;
+		SendDeleteCommunity(3, _wife().data());
+		_wife()[0] = 0;
 	}
 	else
 	{
-		o_strncpy(m_sWife.data(), pWife->GetName(), 16);
-		SendAddCommunity(3, m_sWife.data());
+		o_strncpy(_wife().data(), pWife->GetName(), 16);
+		SendAddCommunity(3, _wife().data());
 	}
 	UpdateViewName();
 }
 
-static thread_local std::array<char, 65536> g_szTempBuffer{};
+static thread_local std::array<char, 8192> s_szTempBuffer{};
 VOID CHumanPlayer::OnCommunityInfo(const char* pszCommunityInfo)
 {
-	o_strncpy(g_szTempBuffer.data(), pszCommunityInfo, 65535);
-	xStringsExpander<200> community(g_szTempBuffer.data(), '/');
+	o_strncpy(s_szTempBuffer.data(), pszCommunityInfo, 8191);
+	xStringsExpander<200> community(s_szTempBuffer.data(), '/');
 	char* pszWife = community[0] == nullptr ? "" : community[0];
 	char* pszMaster = community[1] == nullptr ? "" : community[1];
 
-	o_strncpy(m_sWife.data(), pszWife, 16);
-	o_strncpy(m_sMaster.data(), pszMaster, 16);
+	o_strncpy(_wife().data(), pszWife, 16);
+	o_strncpy(_master().data(), pszMaster, 16);
 
 	int count = 0;
-	for (auto& student : m_sStudents) student.fill(0);
+	for (auto& student : _students()) student.fill(0);
 	char* pszStudent = nullptr;
 	for (int i = 0; i < 3; i++)
 	{
 		pszStudent = community[2 + i] == nullptr ? "" : community[2 + i];
-		if (pszStudent[0] != 0)
-			o_strncpy(m_sStudents[count++].data(), pszStudent, 16);
+		if (pszStudent[0] != 0 && count < 3)
+			o_strncpy(_students()[count++].data(), pszStudent, 16);
 	}
 	count = 0;
-	for (auto& friendName : m_sFriends) friendName.fill(0);
+	for (auto& friendName : _friends()) friendName.fill(0);
 	char* pszFriend = nullptr;
 	for (int i = 0; i < 32; i++)
 	{
 		pszFriend = community[5 + i] == nullptr ? "" : community[5 + i];
-		if (pszFriend[0] != 0)
-			o_strncpy(m_sFriends[count++].data(), pszFriend, 16);
+		if (pszFriend[0] != 0 && count < 32)
+			o_strncpy(_friends()[count++].data(), pszFriend, 16);
 	}
 	UpdateCommunityInfoToClient();
 	SetSystemFlag(SF_COMMUNITYLOADED, TRUE);
@@ -186,16 +186,16 @@ int	CHumanPlayer::GetCommunityInfo(char* pszCommunityBuffer, int iSize)
 	xPacketPool::ScopedPacket packet(pszCommunityBuffer, iSize);
 	packet->push((LPVOID)GetName(), (int)strlen(GetName()));
 	packet->push((LPVOID)"/", 1);
-	if (m_sWife[0] != 0)packet->push((LPVOID)m_sWife.data(), (int)strlen(m_sWife.data()));
+	if (_wife()[0] != 0)packet->push((LPVOID)_wife().data(), (int)strlen(_wife().data()));
 	packet->push((LPVOID)"/", 1);
-	if (m_sMaster[0] != 0)packet->push((LPVOID)m_sMaster.data(), (int)strlen(m_sMaster.data()));
+	if (_master()[0] != 0)packet->push((LPVOID)_master().data(), (int)strlen(_master().data()));
 	packet->push((LPVOID)"/", 1);
-	for (const auto& student : m_sStudents)
+	for (const auto& student : _students())
 	{
 		if (student[0] != 0)packet->push((LPVOID)student.data(), (int)strlen(student.data()));
 		packet->push((LPVOID)"/", 1);
 	}
-	for (const auto& friendName : m_sFriends)
+	for (const auto& friendName : _friends())
 	{
 		if (friendName[0] != 0)packet->push((LPVOID)friendName.data(), (int)strlen(friendName.data()));
 		packet->push((LPVOID)"/", 1);
@@ -215,10 +215,10 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 	char* pName = (char*)GetName();
 	for (int i = 0; i < 32; i++)
 	{
-		if (m_sFriends[i][0] == 0)continue;
-		packet->push((LPVOID)m_sFriends[i].data(), (int)strlen(m_sFriends[i].data()));
+		if (_friends()[i][0] == 0)continue;
+		packet->push((LPVOID)_friends()[i].data(), (int)strlen(_friends()[i].data()));
 		packet->push((LPVOID)"/", 1);
-		if (pMgr && (p = pMgr->FindbyName(m_sFriends[i].data())))
+		if (pMgr && (p = pMgr->FindbyName(_friends()[i].data())))
 		{
 			nPacket->clear();
 			nPacket->push(pName);
@@ -226,7 +226,7 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 			nPacket->push(GetGuildName());
 			if (bNoticeOnline)p->SendMsg(1, 0x1c5, 0, 0, MAKEWORD(GetPropValue(PI_LEVEL), GetPro()), (LPVOID)nPacket->getbuf(), nPacket->getsize());//在好友那边告诉我在线通知
 			nPacket->clear();
-			nPacket->push(m_sFriends[i].data());
+			nPacket->push(_friends()[i].data());
 			nPacket->push(1);
 			nPacket->push(p->GetGuildName());
 			char szTempBuffer[1024];
@@ -241,14 +241,14 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 		SendMsg(0, 0x1c1, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize()); // 返回好友列表
 		packet->clear();
 	}
-	if (m_sMaster[0] != 0)
+	if (_master()[0] != 0)
 	{
 		int i = 0;
-		packet->push((LPVOID)m_sMaster.data(), (int)strlen(m_sMaster.data()));
+		packet->push((LPVOID)_master().data(), (int)strlen(_master().data()));
 		packet->push((LPVOID)"/", 1);
 		SendMsg(0, 0x1c1, 1, 0, 0, (LPVOID)packet->getbuf(), packet->getsize()); // 返回师父列表
 		packet->clear();
-		if (pMgr && (p = pMgr->FindbyName(m_sMaster.data())))
+		if (pMgr && (p = pMgr->FindbyName(_master().data())))
 		{
 			nPacket->clear();
 			nPacket->push(pName);
@@ -256,7 +256,7 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 			nPacket->push(GetGuildName());
 			if (bNoticeOnline)p->SendMsg(1, 0x1c5, 1, 0, MAKEWORD(GetPropValue(PI_LEVEL), GetPro()), (LPVOID)nPacket->getbuf(), nPacket->getsize());
 			nPacket->clear();
-			nPacket->push(m_sMaster.data());
+			nPacket->push(_master().data());
 			nPacket->push(1);
 			nPacket->push(p->GetGuildName());
 			char szTempBuffer[1024];
@@ -267,10 +267,10 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 	}
 	for (int i = 0; i < 3; i++)
 	{
-		if (m_sStudents[i][0] == 0)continue;
-		packet->push((LPVOID)m_sStudents[i].data(), (int)strlen(m_sStudents[i].data()));
+		if (_students()[i][0] == 0)continue;
+		packet->push((LPVOID)_students()[i].data(), (int)strlen(_students()[i].data()));
 		packet->push((LPVOID)"/", 1);
-		if (pMgr && (p = pMgr->FindbyName(m_sStudents[i].data())))
+		if (pMgr && (p = pMgr->FindbyName(_students()[i].data())))
 		{
 			nPacket->clear();
 			nPacket->push(pName);
@@ -278,7 +278,7 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 			nPacket->push(GetGuildName());
 			if (bNoticeOnline)p->SendMsg(1, 0x1c5, 2, 0, MAKEWORD(GetPropValue(PI_LEVEL), GetPro()), (LPVOID)nPacket->getbuf(), nPacket->getsize());
 			nPacket->clear();
-			nPacket->push(m_sStudents[i].data());
+			nPacket->push(_students()[i].data());
 			nPacket->push(1);
 			nPacket->push(p->GetGuildName());
 			char szTempBuffer[1024];
@@ -292,13 +292,13 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 		SendMsg(0, 0x1c1, 2, 0, 0, (LPVOID)packet->getbuf(), packet->getsize()); // 返回徒弟列表
 		packet->clear();
 	}
-	if (m_sWife[0] != 0)
+	if (_wife()[0] != 0)
 	{
 		int i = 0;
-		packet->push((LPVOID)m_sWife.data(), (int)strlen(m_sWife.data()));
+		packet->push((LPVOID)_wife().data(), (int)strlen(_wife().data()));
 		packet->push((LPVOID)"/", 1);
 		SendMsg(0, 0x1c1, 3, 0, 0, (LPVOID)packet->getbuf(), packet->getsize()); // 返回夫妻列表
-		if (pMgr && (p = pMgr->FindbyName(m_sWife.data())))
+		if (pMgr && (p = pMgr->FindbyName(_wife().data())))
 		{
 			nPacket->clear();
 			nPacket->push(pName);
@@ -306,7 +306,7 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 			nPacket->push(GetGuildName());
 			if (bNoticeOnline)p->SendMsg(1, 0x1c5, 3, 0, MAKEWORD(GetPropValue(PI_LEVEL), GetPro()), (LPVOID)nPacket->getbuf(), nPacket->getsize());
 			nPacket->clear();
-			nPacket->push(m_sWife.data());
+			nPacket->push(_wife().data());
 			nPacket->push(1);
 			nPacket->push(p->GetGuildName());
 			char szTempBuffer[1024];
@@ -316,7 +316,7 @@ VOID CHumanPlayer::UpdateCommunityInfoToClient(BOOL bNoticeOnline)
 		}
 	}
 
-	if (m_sWife[0] != 0 || m_sMaster[0] != 0)
+	if (_wife()[0] != 0 || _master()[0] != 0)
 		this->UpdateViewName();
 	OnAroundMsg(nullptr, lpacket->getbuf(), lpacket->getsize());
 }
@@ -343,22 +343,22 @@ BOOL CHumanPlayer::AddFriend(CHumanPlayer* pFriend)
 
 	for (int i = 0; i < 32; i++)
 	{
-		if (m_sFriends[i][0] == 0)
+		if (_friends()[i][0] == 0)
 			if (freeptr == -1) freeptr = i;
 		else
 		{
-			if (strcmp(m_sFriends[i].data(), pFriendName) == 0)
+			if (strcmp(_friends()[i].data(), pFriendName) == 0)
 			{
 				SendFriendSystemError(FE_ADD_ALREADYFRIEND, pFriendName);
 				pFriend->SendFriendSystemError(FE_ADD_ALREADYFRIEND, pName);
 				return FALSE;
 			}
 		}
-		if (pFriend->m_sFriends[i][0] == 0)
+		if (pFriend->_friends()[i][0] == 0)
 			if (friendfreeptr == -1)friendfreeptr = i;
 		else
 		{
-			if (strcmp(pFriend->m_sFriends[i].data(), pName) == 0)
+			if (strcmp(pFriend->_friends()[i].data(), pName) == 0)
 			{
 				SendFriendSystemError(FE_ADD_ALREADYFRIEND, pFriendName);
 				pFriend->SendFriendSystemError(FE_ADD_ALREADYFRIEND, pName);
@@ -379,8 +379,8 @@ BOOL CHumanPlayer::AddFriend(CHumanPlayer* pFriend)
 		return FALSE;
 	}
 
-	o_strncpy(m_sFriends[freeptr].data(), pFriend->GetName(), 16);
-	o_strncpy(pFriend->m_sFriends[friendfreeptr].data(), GetName(), 16);
+	o_strncpy(_friends()[freeptr].data(), pFriend->GetName(), 16);
+	o_strncpy(pFriend->_friends()[friendfreeptr].data(), GetName(), 16);
 
 	SendAddFriend(pFriend->GetName());
 	pFriend->SendAddFriend(GetName());
@@ -391,12 +391,12 @@ BOOL CHumanPlayer::DeleteFriend(const char* pszName)
 {
 	for (int i = 0; i < 32; i++)
 	{
-		if (strcmp(pszName, m_sFriends[i].data()) == 0)
+		if (strcmp(pszName, _friends()[i].data()) == 0)
 		{
-			m_sFriends[i][0] = 0;
+			_friends()[i][0] = 0;
 			for (int j = i; j < 31; j++)
 			{
-				o_strncpy(m_sFriends[j].data(), m_sFriends[j + 1].data(), 16);
+				o_strncpy(_friends()[j].data(), _friends()[j + 1].data(), 16);
 			}
 			SendDelFriend(pszName);
 			CHumanPlayer* pPlayer = CHumanPlayerMgr::GetInstance()->FindbyName(pszName);
@@ -405,12 +405,12 @@ BOOL CHumanPlayer::DeleteFriend(const char* pszName)
 				for (int j = 0; j < 32; j++)
 				{
 					pszName = GetName();
-					if (strcmp(pszName, pPlayer->m_sFriends[j].data()) == 0)
+					if (strcmp(pszName, pPlayer->_friends()[j].data()) == 0)
 					{
-						pPlayer->m_sFriends[j][0] = 0;
+						pPlayer->_friends()[j][0] = 0;
 						for (int k = j; k < 31; k++)
 						{
-							o_strncpy(pPlayer->m_sFriends[k].data(), pPlayer->m_sFriends[k + 1].data(), 16);
+							o_strncpy(pPlayer->_friends()[k].data(), pPlayer->_friends()[k + 1].data(), 16);
 						}
 						pPlayer->SendDelFriend(GetName());
 					}
@@ -453,26 +453,26 @@ VOID CHumanPlayer::NoticeFriendOffline()
 	CHumanPlayerMgr* pMgr = CHumanPlayerMgr::GetInstance();
 	CHumanPlayer* p = nullptr;
 	char* pName = (char*)this->GetName();
-	for (const auto& friendName : m_sFriends)
+	for (const auto& friendName : _friends())
 	{
 		if (friendName[0] == 0)continue;
 		if (pMgr && (p = pMgr->FindbyName(friendName.data())))
 			p->SendMsg(0, 0x1c5, 0, 0, GetPropValue(PI_LEVEL), (LPVOID)pName);
 	}
-	for (const auto& student : m_sStudents)
+	for (const auto& student : _students())
 	{
 		if (student[0] == 0)continue;
 		if (pMgr && (p = pMgr->FindbyName(student.data())))
 			p->SendMsg(0, 0x1c5, 2, 0, GetPropValue(PI_LEVEL), (LPVOID)pName);
 	}
-	if (m_sMaster[0] != 0)
+	if (_master()[0] != 0)
 	{
-		if (pMgr && (p = pMgr->FindbyName(m_sMaster.data())))
+		if (pMgr && (p = pMgr->FindbyName(_master().data())))
 			p->SendMsg(0, 0x1c5, 1, 0, GetPropValue(PI_LEVEL), (LPVOID)pName);
 	}
-	if (m_sWife[0] != 0)
+	if (_wife()[0] != 0)
 	{
-		if (pMgr && (p = pMgr->FindbyName(m_sWife.data())))
+		if (pMgr && (p = pMgr->FindbyName(_wife().data())))
 			p->SendMsg(0, 0x1c5, 3, 0, GetPropValue(PI_LEVEL), (LPVOID)pName);
 	}
 }

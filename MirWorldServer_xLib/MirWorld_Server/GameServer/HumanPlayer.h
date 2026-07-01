@@ -111,7 +111,8 @@ public:
 	//获取时长封号特殊封号值
 	BYTE GetFenghaoType23() override 
 	{ 
-		return m_FenghaoInfo.btType2 > 0 ? m_FenghaoInfo.btType2 : m_FenghaoInfo.btType3;
+		auto* fc = GetFenghaoComp();
+		return fc ? (fc->Info.btType2 > 0 ? fc->Info.btType2 : fc->Info.btType3) : 0;
 	}
 	//发送时长封号加密数据
 	VOID SendFengHaoData();
@@ -120,7 +121,7 @@ public:
 	//时长封号穿戴
 	VOID SendFengHaoEquip(int nCount);
 	//获取玩家时长封号信息
-	FenghaoInfo* GetFenghaoInfo() { return &m_FenghaoInfo; }
+	FenghaoInfo* GetFenghaoInfo() { auto* fc = GetFenghaoComp(); return fc ? &fc->Info : nullptr; }
 	//检查时长封号是否过期
 	VOID CheckFengHaoTimeOut();
 	//玩家登录时, 请求获取封号数据
@@ -174,9 +175,10 @@ public:
 	VOID OnPickupItem(ITEM& item, UINT x, UINT y);
 	VOID OnDropItem(ITEM& item, UINT x, UINT y);
 	VOID OnKillTarget(CAliveObject* pTarget);
-	BOOL HasUpgradeWeapon()const { return (m_UpgradeItem.dwMakeIndex != 0); }
-	ITEM& GetUpgradeWeapon() { return m_UpgradeItem; }
-	int GetVarValue(const char* pszVar) const;
+	BOOL HasUpgradeWeapon()const { auto* uc = const_cast<CHumanPlayer*>(this)->GetUpgradeItemComp(); return uc ? (uc->Item.dwMakeIndex != 0) : FALSE; }
+	ITEM& GetUpgradeWeapon() { return GetUpgradeItemComp()->Item; }
+	ITEM& GetUpgradeWeapon()const { return const_cast<CHumanPlayer*>(this)->GetUpgradeItemComp()->Item; }
+	int GetVarValue(const char* pszVar);
 	VOID SetVarValue(const char* pszVar, int value) {}
 	BOOL CreateBagItem(const char* pszName, BOOL IsBing = FALSE);
 	VOID AddExp(DWORD dwExp, int level = 0, DWORD dwId = 0);
@@ -201,14 +203,15 @@ public:
 			count++;
 		return count;
 	}
-	CSystemTime* GetLoginTime() { return &m_LoginTime; }
+	CSystemTime* GetLoginTime() { auto* ms = GetMiscStateComp(); return ms ? &ms->LoginTime : nullptr; }
 	DWORD GetLoginLong() {
 		CSystemTime curtime;
-		return m_LoginTime.GetToTimeSecond(curtime);
+		auto* ms = GetMiscStateComp();
+		return ms ? ms->LoginTime.GetToTimeSecond(curtime) : 0;
 	}
-	const char* GetMaster() { return m_sMaster.data(); }
-	const char* GetMarriage() { return m_sWife.data(); }
-	const char* GetStudent(UINT nIndex) { if (nIndex >= 3)return ""; return m_sStudents[nIndex].data(); }
+	const char* GetMaster() { auto* sc = GetSocialComp(); return sc ? sc->Master.data() : ""; }
+	const char* GetMarriage() { auto* sc = GetSocialComp(); return sc ? sc->Wife.data() : ""; }
+	const char* GetStudent(UINT nIndex) { if (nIndex >= 3)return ""; auto* sc = GetSocialComp(); return sc ? sc->Students[nIndex].data() : ""; }
 	const char* GetGuildName();
 public:
 	DWORD GetLevelupExp();
@@ -278,9 +281,62 @@ public:
 	{
 		return PlayerComponentManager::GetInstance()->GetSpecialEquip(this);
 	}
+	// 纯数据组件访问器
+	inline TaskComponent* GetTaskComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetTask(this);
+	}
+	inline FenghaoComponent* GetFenghaoComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetFenghao(this);
+	}
+	inline AchievementComponent* GetAchieveComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetAchievement(this);
+	}
+	inline SocialComponent* GetSocialComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetSocial(this);
+	}
+	inline ChatComponent* GetChatComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetChat(this);
+	}
+	inline PkComponent* GetPkComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetPk(this);
+	}
+	inline MarketComponent* GetMarketComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetMarket(this);
+	}
+	inline TitleComponent* GetTitleComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetTitle(this);
+	}
+	inline ScriptVarComponent* GetScriptVarComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetScriptVar(this);
+	}
+	inline MiscStateComponent* GetMiscStateComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetMiscState(this);
+	}
+	inline ZhenBaoComponent* GetZhenBaoComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetZhenBao(this);
+	}
+	inline RecalcCacheComponent* GetRecalcCacheComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetRecalcCache(this);
+	}
+	inline UpgradeItemComponent* GetUpgradeItemComp()
+	{
+		return PlayerComponentManager::GetInstance()->GetUpgradeItem(this);
+	}
 	inline BOOL CheckTimer(TimerType type, DWORD intervalMs)
 	{
-		return PlayerComponentManager::GetInstance()->CheckPlayerTimer(GetId(), type, intervalMs);
+		return PlayerComponentManager::GetInstance()->CheckPlayerTimer(GetECSEntity(), type, intervalMs);
 	}
 	inline BOOL TryRateLimit(RateLimitComponent::Action act)
 	{
@@ -288,20 +344,59 @@ public:
 	}
 	inline BOOL CheckTimerNoReset(TimerType type, DWORD intervalMs, int& outLastTickMs)
 	{
-		return PlayerComponentManager::GetInstance()->CheckPlayerTimerNoReset(GetId(), type, intervalMs, outLastTickMs);
+		return PlayerComponentManager::GetInstance()->CheckPlayerTimerNoReset(GetECSEntity(), type, intervalMs, outLastTickMs);
 	}
 	inline VOID ResetTimer(TimerType type)
 	{
-		PlayerComponentManager::GetInstance()->ResetPlayerTimer(GetId(), type);
+		PlayerComponentManager::GetInstance()->ResetPlayerTimer(GetECSEntity(), type);
 	}
 	inline VOID OffsetTimer(TimerType type, int offsetMs)
 	{
-		PlayerComponentManager::GetInstance()->OffsetPlayerTimer(GetId(), type, offsetMs);
+		PlayerComponentManager::GetInstance()->OffsetPlayerTimer(GetECSEntity(), type, offsetMs);
 	}
 	inline VOID SetRateLimitInterval(RateLimitComponent::Action act, int ms)
 	{
 		PlayerComponentManager::GetInstance()->GmSetRateLimitInterval(this, act, ms);
 	}
+
+	// 注意: 这些方法假定 ECS 组件已创建(Init 之后), 构造期间的 Clean() 不应通过此路径访问
+	inline DWORD& _pkValue()				{ return GetPkComp()->PkValue; }
+	inline BOOL&  _justPk()					{ return GetPkComp()->JustPk; }
+	inline CSystemTime& _loginTime()		{ return GetMiscStateComp()->LoginTime; }
+	inline DWORD& _mineCounter()			{ return GetMiscStateComp()->MineCounter; }
+	inline std::array<char,200>& _currentTitle()	{ return GetTitleComp()->CurrentTitle; }
+	inline int&  _currentTitleIndex()		{ return GetTitleComp()->CurrentTitleIndex; }
+	inline std::array<S_PARAM,10>& _sParam()	{ return GetScriptVarComp()->StringParams; }
+	inline std::array<V_PARAM,10>& _vParam()	{ return GetScriptVarComp()->ValueParams; }
+	inline std::array<BOOL,CCH_MAX>& _chatDisabled()	{ return GetChatComp()->DisabledChannels; }
+	inline e_chatchannel& _chatChannel()	{ return GetChatComp()->CurrentChannel; }
+	inline std::array<char,32>& _wisperTarget()	{ return GetChatComp()->CurWisperTarget; }
+	inline S_CHARNAME& _wife()				{ return GetSocialComp()->Wife; }
+	inline S_CHARNAME& _master()			{ return GetSocialComp()->Master; }
+	inline std::array<S_CHARNAME,3>& _students()	{ return GetSocialComp()->Students; }
+	inline std::array<S_CHARNAME,32>& _friends()	{ return GetSocialComp()->Friends; }
+	inline FenghaoInfo& _fenghaoInfo()		{ return GetFenghaoComp()->Info; }
+	inline TASKINFO& _taskInfo()			{ return GetTaskComp()->TaskInfo; }
+	inline TaskIdMap& _taskIdMap()			{ return GetTaskComp()->TaskIdToIndexMap; }
+	inline AchievementData& _achievement()	{ return GetAchieveComp()->Data; }
+	inline int&  _shopItemCount()			{ return GetMarketComp()->ItemCount; }
+	inline std::array<PrivateShopItemCache,10>& _shopCache()	{ return GetMarketComp()->ShopCache; }
+	inline std::array<char,64>& _shopName()	{ return GetMarketComp()->ShopName; }
+	inline WORD& _shopStyle()				{ return GetMarketComp()->ShopStyle; }
+	inline WORD& _shopFlags()				{ return GetMarketComp()->ShopFlags; }
+	inline DWORD& _shopSign()				{ return GetMarketComp()->ShopSign; }
+	inline DWORD& _zhenBaoExpMax()			{ return GetZhenBaoComp()->ZhenBaoExpMax; }
+	inline DWORD& _zhenBaoStar()			{ return GetZhenBaoComp()->ZhenBaoStar; }
+	inline WORD&  _yuanQi()					{ return GetZhenBaoComp()->YuanQi; }
+	inline BOOL&  _isYuanQiFull()			{ return GetZhenBaoComp()->IsYuanQiFull; }
+	inline int&   _recalcHit()				{ return GetRecalcCacheComp()->RecalcHit; }
+	inline int&   _recalcSpeed()			{ return GetRecalcCacheComp()->RecalcSpeed; }
+	inline int&   _materialBagPos()			{ return GetMiscStateComp()->MaterialBagPos; }
+	inline UINT&  _cutMonsterId()			{ return GetMiscStateComp()->CutMonsterId; }
+	inline UINT&  _cutTimes()				{ return GetMiscStateComp()->CutTimes; }
+	inline std::array<DWORD,4>& _dwParams()	{ return GetMiscStateComp()->Params; }
+	inline std::array<char,256>& _tempScriptVar() { return GetMiscStateComp()->TempScriptVarValue; }
+	inline BYTE&  _chatColor()				{ return GetChatComp()->ChatColor; }
 
 	BOOL Trade(CHumanPlayer* pPlayer = nullptr);
 	BOOL PutTradeItem(DWORD dwMakeIndex);
@@ -323,7 +418,7 @@ public:
 	int GetAutoRecoverHptime() { return 6000; }
 	int GetAutoRecoverMptime() { return 15000; }
 	//设置活力值
-	VOID SetHuoLi(int h) { m_iHuoli = h; }
+	VOID SetHuoLi(int h);
 	//施放技能或者魔法, x, y 是鼠标的坐标
 	BOOL SpellCast(int x, int y, UINT nTarget, WORD wMagicId);
 	//战士技能攻击
@@ -535,26 +630,34 @@ public:
 
 	VOID setVParam(UINT index, DWORD dwParam)
 	{
-		if (index >= m_vParam.size()) return;
-		m_vParam[index] = dwParam;
+		auto* svc = GetScriptVarComp();
+		if (!svc) return;
+		if (index >= svc->ValueParams.size()) return;
+		svc->ValueParams[index] = dwParam;
 	}
 
 	DWORD getVParam(UINT index)
 	{
-		if (index >= m_vParam.size()) return 0;
-		return m_vParam[index];
+		auto* svc = GetScriptVarComp();
+		if (!svc) return 0;
+		if (index >= svc->ValueParams.size()) return 0;
+		return svc->ValueParams[index];
 	}
 
 	VOID setSParam(UINT index, const char* pszParam)
 	{
-		if (index >= m_sParam.size()) return;
-		o_strncpy(m_sParam[index].data(), pszParam, 128);
+		auto* svc = GetScriptVarComp();
+		if (!svc) return;
+		if (index >= svc->StringParams.size()) return;
+		o_strncpy(svc->StringParams[index].data(), pszParam, 128);
 	}
 
 	const char* getSParam(UINT index)
 	{
-		if (index >= m_sParam.size()) return "<OUT_OF_INDEX>";
-		return m_sParam[index].data();
+		auto* svc = GetScriptVarComp();
+		if (!svc) return "<NO_ECS>";
+		if (index >= svc->StringParams.size()) return "<OUT_OF_INDEX>";
+		return svc->StringParams[index].data();
 	}
 
 	BOOL getSelfFlag(int index)const
@@ -600,9 +703,9 @@ public:
 	//拿走仓库物品
 	BOOL TakeBankItem(DWORD dwMakeIndex);
 	//获取经验倍数
-	FLOAT GetExpFactor()const { return m_fExpFactor; }
+	FLOAT GetExpFactor()const { auto* ms = const_cast<CHumanPlayer*>(this)->GetMiscStateComp(); return ms ? ms->ExpFactor : 1.0f; }
 	//设置经验倍数
-	VOID SetExpFactor(FLOAT fFactor) { m_fExpFactor = fFactor; }
+	VOID SetExpFactor(FLOAT fFactor) { auto* ms = GetMiscStateComp(); if (ms) ms->ExpFactor = fFactor; }
 	//增加技能
 	VOID OnAddMagic(USERMAGIC* pMagic);
 	//更新被动技能
@@ -616,20 +719,20 @@ public:
 	//切换聊天频道
 	VOID ChangeChatChannel(e_chatchannel channel = CCH_MAX);
 	//获取聊天频道
-	e_chatchannel GetChatChannel()const { return m_ChatChannel; }
+	e_chatchannel GetChatChannel()const { return const_cast<CHumanPlayer*>(this)->_chatChannel(); }
 	VOID DisableChannel(e_chatchannel channel = CCH_MAX);
 	VOID EnableChannel(e_chatchannel channel = CCH_MAX);
-	BOOL IsChannelDisabled(e_chatchannel channel = CCH_MAX)const;
+	BOOL IsChannelDisabled(e_chatchannel channel = CCH_MAX);
 
 	//设置目标为私聊对象
 	VOID SetWisperTarget(const char* pszName)
 	{
-		if (m_ChatChannel != CCH_WISPER)return;
-		if (strcmp(pszName, m_szCurWisperTarget.data()) == 0)return;
-		o_strncpy(m_szCurWisperTarget.data(), pszName, 31);
+		if (_chatChannel() != CCH_WISPER)return;
+		if (strcmp(pszName, _wisperTarget().data()) == 0)return;
+		o_strncpy(_wisperTarget().data(), pszName, 31);
 		SaySystemAttrib(CC_GREEN, "%s 被设置成当前密谈对象", pszName);
 	}
-	const char* GetWisperTarget() { if (m_szCurWisperTarget[0] == 0)return nullptr; return m_szCurWisperTarget.data(); }
+	const char* GetWisperTarget() { if (_wisperTarget()[0] == 0)return nullptr; return _wisperTarget().data(); }
 
 	VOID ChannelSay(e_chatchannel channel, const char* pszParam, const char* pszWords/*, ... */);
 	BOOL ChannelHear(e_chatchannel channel, DWORD dwParam, const char* pszWords, ...);
@@ -714,8 +817,8 @@ public:
 	VOID ReplyAddToGuildRequest(BOOL bAccept);
 	VOID AcceptAddToGuildRequest(CHumanPlayer* pMember);
 	CHumanPlayer* GetAddToGuildRequester() { return m_pAddToGuildRequester; }
-	BOOL IsMyFriend(CHumanPlayer* pPlayer)const;
-	BOOL IsMyFriend(const char* pszName)const;
+	BOOL IsMyFriend(CHumanPlayer* pPlayer);
+	BOOL IsMyFriend(const char* pszName);
 
 	BOOL PostAddFriendRequest(CHumanPlayer* poster);
 	VOID ReplyAddFriendRequest(BOOL bAccept, const char* pszName);
@@ -732,7 +835,7 @@ public:
 
 	BYTE GetRunSpeed() { if (m_bRideHorse)return 3; return 2; }
 
-	DWORD GetPkValue()const { return m_dwPkValue; }
+	DWORD GetPkValue()const { auto* pk = const_cast<CHumanPlayer*>(this)->GetPkComp(); return pk ? pk->PkValue : 0; }
 
 	VOID AddPkPoint(DWORD btPoint = 1);
 	VOID DecPkPoint(DWORD btPoint = 1);
@@ -765,7 +868,7 @@ public:
 	VOID SetCurPrivateShopView(CHumanPlayer* player) { m_curPrivateShopView = player; }
 	VOID UpdatePrivateShopToAround();
 	BOOL BuyPrivateShopItem(CHumanPlayer* pBuyer, DWORD dwItemId, const char* pszName);
-	int	GetPrivateShopItemCount()const { return m_iPrivateShopItemCount; }
+	int	GetPrivateShopItemCount()const { return const_cast<CHumanPlayer*>(this)->_shopItemCount(); }
 	BOOL TestAddMoney(money_type type, DWORD dwCount)const;
 
 	VOID OnCommunityInfo(const char* pszCommunityInfo);
@@ -829,7 +932,7 @@ public:
 	BOOL Damage(DWORD dwHitter, int value);
 	VOID SendUpdateItem(ITEM& item);
 	VOID UpdateMineEffect();
-	VOID SetUpgradeItem(ITEM& item) { m_UpgradeItem = item; }
+	VOID SetUpgradeItem(ITEM& item) { auto* uc = GetUpgradeItemComp(); if (uc) uc->Item = item; }
 	VOID UpgradeWeapon();
 	VOID SendWeaponBroken();
 	//是否已经穿戴马牌
@@ -841,17 +944,18 @@ public:
 
 	BOOL Marry(CHumanPlayer* pEachOther);
 	BOOL UnMarry();
-	BOOL IsMarried()const { return m_sWife[0] != 0; }
+	BOOL IsMarried()const { auto* sc = const_cast<CHumanPlayer*>(this)->GetSocialComp(); return sc ? (sc->Wife[0] != 0) : FALSE; }
 
-	UINT GetStudentCount()const;
-	BOOL HasMaster()const { return m_sMaster[0] != 0; }
+	UINT GetStudentCount();
+	BOOL HasMaster()const { auto* sc = const_cast<CHumanPlayer*>(this)->GetSocialComp(); return sc ? (sc->Master[0] != 0) : FALSE; }
 	BOOL AddStudent(CHumanPlayer* pStudent);
 	BOOL DeleteStudent(const char* pszName);
-	BOOL IsMyStudent(const char* pszName)const;
+	BOOL IsMyStudent(const char* pszName);
 	BOOL HasStudent(UINT nPos)const
 	{
 		if (nPos >= 3)return FALSE;
-		return (this->m_sStudents[nPos][0] != 0);
+		auto* sc = const_cast<CHumanPlayer*>(this)->GetSocialComp();
+		return sc ? (sc->Students[nPos][0] != 0) : FALSE;
 	}
 	BOOL LeaveTeacher();
 
@@ -864,7 +968,7 @@ public:
 	BOOL TakeEquipment(int pos, ITEM& item);
 	ITEM* GetEquipment(const char* pszName) { int pos = 0; return GetEquipment(pszName, pos); }
 	ITEM* GetEquipment(const char* pszName, int& posout);
-	BOOL AddTeacherCredit(UINT nCount)const;
+	BOOL AddTeacherCredit(UINT nCount);
 	VOID SetBagCountLimit(int iCountLimit)
 	{
 		if (iCountLimit == BIGBAG_SLOT)
@@ -887,7 +991,7 @@ public:
 	VOID TransformInto(WORD wRace, WORD wImage, DWORD dwTime = 0xffffffff);
 	ITEM* GetUsingItem() { return m_pUsingItem; }
 	ITEM* GetPackItem() { return m_pPackItem; }
-	VOID SetUsItem(USEITEM_RESULT id) { m_pUsingItem->dwParam[3] = id; }
+	VOID SetUsItem(USEITEM_RESULT id) { if (m_pUsingItem) m_pUsingItem->dwParam[3] = id; }
 	DWORD GetbaoziId()const { return m_baozhiID; }//取出豹子的IDINDEX
 	ITEM* GetbaoziItem() {  //目的在于取出豹子的物品信息
 		DWORD makeindex = GetbaoziId();
@@ -895,7 +999,7 @@ public:
 			return m_ItemBox.FindItem(makeindex);
 		return nullptr;
 	}
-	VOID SetPetName(const char* pszName)const { strcpy(petname.data(), pszName); }
+	VOID SetPetName(const char* pszName)const { if (pszName) { o_strncpy(petname.data(), pszName, (int)petname.size() - 1); petname[petname.size() - 1] = 0; } } // P1-5: 边界检查防止溢出
 	VOID SetUsingItem(ITEM* pItem) { m_pUsingItem = pItem; if (pItem)pItem->dwParam[3] = UR_NORESULT; }
 	VOID OnPutItem(DWORD dwShellId, DWORD dwMakeIndex);
 
@@ -905,9 +1009,9 @@ public:
 	BOOL CanBePushed(CAliveObject* pAttacker);
 	VOID PostMsg(const char* pszMsg, int length = 0);
 	VOID SendTimeWeatherChanged();
-	VOID SetPrivateShopSign(DWORD dwSign) { m_wPrivateShopFlags = 1; m_wPrivateShopSign = dwSign; }
-	VOID SetPrivateShopStyle(WORD wStyle) { m_wPrivateShopStyle = wStyle; }
-	VOID SetChatColor(BYTE btColor) { m_btChatColor = btColor; }
+	VOID SetPrivateShopSign(DWORD dwSign) { _shopFlags() = 1; _shopSign() = dwSign; }
+	VOID SetPrivateShopStyle(WORD wStyle) { _shopStyle() = wStyle; }
+	VOID SetChatColor(BYTE btColor) { _chatColor() = btColor; }
 	VOID ReviewAroundNameColor();
 
 	CScriptTargetForPlayer* GetScriptTarget() { return &m_ScriptTarget; }
@@ -916,9 +1020,9 @@ public:
 	//冰泉圣水修复穿戴物品持久
 	BOOL RepairEquipment(UINT pos, UINT nCount = 1);
 
-	DWORD GetParam(UINT nIndex)const { if (nIndex >= m_dwParams.size()) return 0; return m_dwParams[nIndex]; }
-	VOID SetParam(UINT nIndex, DWORD dwParam) { if (nIndex >= m_dwParams.size()) return; m_dwParams[nIndex] = dwParam; }
-	VOID ClearParam()const { m_dwParams.fill(0); }
+	DWORD GetParam(UINT nIndex)const { auto& p = const_cast<CHumanPlayer*>(this)->_dwParams(); if (nIndex >= p.size()) return 0; return p[nIndex]; }
+	VOID SetParam(UINT nIndex, DWORD dwParam) { auto& p = _dwParams(); if (nIndex >= p.size()) return; p[nIndex] = dwParam; }
+	VOID ClearParam()const { auto* ms = const_cast<CHumanPlayer*>(this)->GetMiscStateComp(); if (ms) ms->Params.fill(0); }
 
 	//玩家登录时, 请求获取任务数据
 	VOID OnTaskInfo(TASKINFO* pInfo);
@@ -993,16 +1097,15 @@ public:
 	//发送精力值
 	VOID SendJingLiZhi(DWORD wStamina);
 	//判断是否积满元气
-	BOOL IsYuanQiFull()const { return m_bYuanQi; }
+	BOOL IsYuanQiFull()const { auto* zb = const_cast<CHumanPlayer*>(this)->GetZhenBaoComp(); return zb ? zb->IsYuanQiFull : FALSE; }
 	//减少元气值
 	VOID DecYuanqi(WORD nValue) 
 	{ 
-		m_wYuanQi -= nValue; 
-		if (m_wYuanQi <= 0)
-		{
-			m_wYuanQi = 0;
-			m_bYuanQi = FALSE;
-		}
+		auto* zb = GetZhenBaoComp();
+		if (!zb) return;
+		zb->YuanQi = (zb->YuanQi > nValue) ? (zb->YuanQi - nValue) : 0;
+		if (zb->YuanQi == 0)
+			zb->IsYuanQiFull = FALSE;
 	}
 	// 检查是否穿戴了指定物品
 	BOOL CheckItemInfo(int pos, BYTE stdMode, BYTE btShape) { return m_Equipments.CheckItemInfo(pos, stdMode, btShape); }
@@ -1024,35 +1127,33 @@ public: //成就相关函数
 	//组包玩家的成就数据
 	VOID PacketAchieve(xPacket& packet, BYTE btType, DWORD nAchieveCount);
 	//获取玩家当前的成就进度
-	DWORD GetAchieveExp() const { return m_Achievement.dwExp; }
+	DWORD GetAchieveExp() const { auto* ac = const_cast<CHumanPlayer*>(this)->GetAchieveComp(); return ac ? ac->Data.dwExp : 0; }
 	//获取玩家当前的成就等级
-	BYTE GetAchieveLevel() const { return m_Achievement.btLevel; }
+	BYTE GetAchieveLevel() const { auto* ac = const_cast<CHumanPlayer*>(this)->GetAchieveComp(); return ac ? ac->Data.btLevel : 0; }
 	//获取指定成就的进度值
-	DWORD GetAchieveExpById(WORD wId) const;
+	DWORD GetAchieveExpById(WORD wId);
 	//获取指定成就的状态值
-	BYTE GetAchieveStateById(WORD wId) const;
+	BYTE GetAchieveStateById(WORD wId);
 	//获取指定成就的完成时间
-	DWORD GetAchieveCompleteTimeById(WORD wId) const;
+	DWORD GetAchieveCompleteTimeById(WORD wId);
 	// 检查成就等级是否升级
 	VOID CheckAchieveLevelUp();
 protected:
 	VOID SendClientfunction();
-	DWORD m_dwForgePoint;
-	mutable std::array<DWORD, 4> m_dwParams;
+	VOID CheckPk(CAliveObject* pTarget);
+	VOID GetPrivateShopView(PRIVATESHOPHEADER& header);
+	//被动技能重新计算增加属性
+	VOID RecalcHitSpeed();
+	BOOL MagMakeDefenceArea(int x, int y, int nRange, int nSec, int nState);
+	// 重建任务哈希表, 从指定起始索引开始
+	VOID RebuildTaskIdIndexMap(int startIndex = 0);
+	// 解析任务系统的 @PS0 和 @PI0 这类动态变量（使用玩家特定参数）
+	VOID ParseTaskParams(const char* pszText, char* pszOutBuffer, int iOutBufferSize, TASKNODE* pTaskNode);
 
 	CScriptTargetForPlayer m_ScriptTarget;
-	VOID GetPrivateShopView(PRIVATESHOPHEADER& header)const;
 	CHumanPlayer* m_curPrivateShopView;
 
 	AbilityShellRef m_xAbilityShellRef;
-	//char m_szCurrentNpcPage[128];
-
-	CSystemTime m_LoginTime;
-	std::array<char, 256> m_szTempScriptVarValue{};
-
-	DWORD m_dwPkValue;
-	BOOL m_bJustPk;
-	VOID CheckPk(CAliveObject* pTarget);
 
 	BOOL m_bRefuseAddFriend;
 
@@ -1061,19 +1162,9 @@ protected:
 	CGuildEx* m_pGuild;
 	std::array<char, 64> m_szGuildTitle{};
 	int	 m_iGuildTitleLevel;
-	//被动技能重新计算增加属性
-	VOID RecalcHitSpeed();
-
-	BOOL MagMakeDefenceArea(int x, int y, int nRange, int nSec, int nState);
-
+	
 	CItemBox m_ItemBank; // 仓库
 	CItemBox m_ItemPetBag; // 宠物背包
-
-	std::array<BOOL, CCH_MAX> m_bChatChannelDisabled;
-	e_chatchannel m_ChatChannel;
-	std::array<char, 32> m_szCurWisperTarget{};
-
-	INT	m_iHuoli;
 
 	BOOL m_bEnterMap;//是否进入地图
 	BOOL m_bFirstLogin;//是否首次登录
@@ -1095,68 +1186,23 @@ protected:
 	int	m_iPetCount;
 	DWORD m_dwStartPointIndex;
 	BOOL m_bFirstEnterMap;
-	std::array<char, 200> m_szCurrentTitle{};
-	int	m_iCurrentTitleIndex;
-
-	std::array<S_PARAM, 10> m_sParam{}; // 个人变量
-	std::array<V_PARAM, 10> m_vParam{}; // 个人变量
 
 	std::array<USERMAGIC*, 8> m_pAutoMagic;
 	int	m_iAutoMagicCount;
 	USERMAGIC* m_pExpMagic;
 	USERMAGIC* m_pTimeOutDeActiveMagic;
-	FLOAT m_fExpFactor;
+
 	CMonsterEx* m_pHorse; //骑乘类对象
 	mutable std::array<char, 20> petname{};//豹子的名字
 	BOOL ISzhaohuan;//是否召唤出来
-	DWORD m_baozhiID;
+	DWORD m_baozhiID = 0; // 豹子对象ID
 	BOOL m_bRideHorse;
 	CAliveObject* m_pSeizedObject;
 	int	m_iSeizedTimes;
 
-	int	m_iPrivateShopItemCount;
-	std::array<PrivateShopItemCache, 10> m_PrivateShopCache;
-	std::array<char, 64> m_szPrivateShopName{};
-
-	S_CHARNAME m_sWife; // 妻子
-	S_CHARNAME m_sMaster; // 师傅
-	std::array<S_CHARNAME, 3> m_sStudents; // 3个徒弟
-	std::array<S_CHARNAME, 32> m_sFriends; // 32个好友
-
-	DWORD m_dwMineCounter;
-
-	ITEM m_UpgradeItem;
 	BOOL m_bHorseRest; // 马是否休息
 
-	ITEM* m_pUsingItem;
-	ITEM* m_pPackItem; // 使用物品时, 与物品同时的物品
-	ITEM* m_pPutItem;
-	UINT m_nCutMonsterId;
-	UINT m_nCutTimes;
-	WORD m_wPrivateShopStyle;
-	WORD m_wPrivateShopFlags;
-	DWORD m_wPrivateShopSign;
-	BYTE m_btChatColor;
-
-	FenghaoInfo m_FenghaoInfo; // 玩家时长封号信息
-	AchievementData m_Achievement;  // 成就数据
-
-	TASKINFO m_TaskInfo;
-private:
-	// 任务哈希表, 用于快速查找任务ID对应的索引
-	std::unordered_map<WORD, int> m_TaskIdToIndexMap;
-	// 重建任务哈希表, 从指定起始索引开始
-	VOID RebuildTaskIdIndexMap(int startIndex = 0);
-	// 解析任务系统的 @PS0 和 @PI0 这类动态变量（使用玩家特定参数）
-	VOID ParseTaskParams(const char* pszText, char* pszOutBuffer, int iOutBufferSize, TASKNODE* pTaskNode);
-private:
-	int m_nMaterialBagPos; // CheckMaterial时, 在背包中找到的物品位置
-	int m_nRecalcHit; // 在使用 RecalcHitSpeed 函数计算被动技能增加命中值多少, 用于计算增加和减少
-	int m_nRecalcSpeed; // 在使用 RecalcHitSpeed 函数计算被动技能增加躲避值多少, 用于计算增加和减少
-	DWORD m_dwZhenBaoExpMax;
-	DWORD m_dwZhenBaoStar;
-	WORD m_wYuanQi;		//当前元气值
-	BOOL m_bYuanQi;		//是否触发元气
-	WORD m_wStamina;	//精力值
-	WORD m_wMaxStamina;	//最大精力值
+	ITEM* m_pUsingItem = nullptr; // 使用的物品
+	ITEM* m_pPackItem = nullptr; // 使用物品时, 与物品同时的物品
+	ITEM* m_pPutItem = nullptr; // 提交的物品
 };

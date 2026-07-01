@@ -78,7 +78,7 @@ VOID CTimeAchieve::Load(const char* pszFilename)
 			jobPropElem->QueryIntAttribute("job", &nJob);
 			if (nJob < 0) continue;
 
-			std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE> mapProps;
+			SmallFlatMap<std::string, TIMEACHIEVE_PROPVALUE, 8> mapProps;
 			for (TiXmlElement* propElem = jobPropElem->FirstChildElement("Prop"); propElem != nullptr; propElem = propElem->NextSiblingElement("Prop"))
 			{
 				const char* pszName = propElem->Attribute("name");
@@ -148,7 +148,7 @@ const TIMEACHIEVE_LEVEL* CTimeAchieve::GetLevel(int nLevel) const
 	return nullptr;
 }
 
-const std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>* CTimeAchieve::GetJobProps(int nLevel, int nJob) const
+const SmallFlatMap<std::string, TIMEACHIEVE_PROPVALUE, 8>* CTimeAchieve::GetJobProps(int nLevel, int nJob) const
 {
 	const TIMEACHIEVE_LEVEL* pLevel = GetLevel(nLevel);
 	if (pLevel == nullptr) return nullptr;
@@ -161,7 +161,7 @@ const std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>* CTimeAchieve::GetJ
 
 BOOL CTimeAchieve::GetPropValue(int nLevel, int nJob, const char* pszPropName, TIMEACHIEVE_PROPVALUE& outValue) const
 {
-	const std::unordered_map<std::string, TIMEACHIEVE_PROPVALUE>* pProps = GetJobProps(nLevel, nJob);
+	const SmallFlatMap<std::string, TIMEACHIEVE_PROPVALUE, 8>* pProps = GetJobProps(nLevel, nJob);
 	if (pProps == nullptr || pszPropName == nullptr) return FALSE;
 
 	auto it = pProps->find(pszPropName);

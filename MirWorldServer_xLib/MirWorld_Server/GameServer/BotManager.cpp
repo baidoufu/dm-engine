@@ -5,6 +5,7 @@
 #include "BotHumanBehavior.h"
 #include "gameworld.h"
 #include "humanplayermgr.h"
+#include "HumanPlayer.h"
 
 // ============================================================================
 // 构造/析构
@@ -165,15 +166,19 @@ CBotPlayer* CBotManager::CreateBot(BOT_CREATE_DESC& desc)
 	static std::atomic<DWORD> s_dwBotIdCounter(10000);
 	DWORD dwBotId = (s_dwBotIdCounter.fetch_add(1) + 1) | (OBJ_PLAYER << 24);
 	pBot->SetId(dwBotId);
+	PlayerComponentManager::GetInstance()->CreatePlayerComponents(pBot);
 	if (!pBot->InitBot(desc))
 	{
 		LG2("机器人管理器: 初始化机器人 [%s] 失败\n", desc.dbinfo.szName);
+		PlayerComponentManager::GetInstance()->DestroyPlayerComponents(dwBotId);
 		delete pBot;
 		return nullptr;
 	}
 	if (!CHumanPlayerMgr::GetInstance()->RegisterBotPlayer(pBot))
 	{
 		LG2("机器人管理器: 注册机器人 [%s] 到玩家管理器失败\n", desc.dbinfo.szName);
+		PlayerComponentManager::GetInstance()->DestroyPlayerComponents(dwBotId);
+		CHumanPlayerMgr::GetInstance()->UnregisterBotPlayer(pBot);
 		pBot->Clean();
 		delete pBot;
 		return nullptr;
@@ -349,4 +354,111 @@ VOID CBotManager::RemoveBotFromList(CBotPlayer* pBot)
 		*it = m_vecBots.back();
 		m_vecBots.pop_back();
 	}
+}
+
+// ============================================================================
+// 列出所有机器人摘要
+// ============================================================================
+VOID CBotManager::DumpAllBots(CHumanPlayer* pCaller)
+{
+	if (!pCaller) return;
+
+	int nTotal = (int)m_vecBots.size();
+	int nRunning = GetRunningBotCount();
+
+	std::array<char, 512> szLine{};
+	pCaller->SaySystem("========== 机器人列表: 总计%d 运行%d ==========", nTotal, nRunning);
+
+	for (size_t i = 0; i < m_vecBots.size(); i++)
+	{
+		CBotPlayer* pBot = m_vecBots[i];
+		if (!pBot) continue;
+
+		const char* pszName = pBot->GetName();
+		const char* pszState = pBot->IsDeath() ? "死亡" :
+			pBot->IsBotPaused() ? "暂停" :
+			pBot->IsBotRunning() ? "运行" : "停止";
+
+		int hpPct = 0;
+		int iHp = pBot->GetPropValue(PI_CURHP);
+		int iMaxHp = pBot->GetPropValue(PI_MAXHP);
+		if (iMaxHp > 0) hpPct = iHp * 100 / iMaxHp;
+
+		CBotContext* pCtx = pBot->GetContext();
+		CAliveObject* pTarget = pCtx ? pCtx->GetCachedTarget() : nullptr;
+
+		pCaller->SaySystem("[%3zu] %-16s %s HP=%d%% 地图=%u (%d,%d) 目标=%s",
+			i, pszName, pszState, hpPct,
+			pBot->GetMapId(), pBot->getX(), pBot->getY(),
+			pTarget ? pTarget->GetName() : "无");
+	}
+	pCaller->SaySystem("================================================");
+}
+
+// ============================================================================
+// 单个机器人详细信息
+// ============================================================================
+VOID CBotManager::DumpBotInfo(CHumanPlayer* pCaller, const char* pszName)
+{
+	if (!pCaller || !pszName || pszName[0] == '\0')
+	{
+		if (pCaller) pCaller->SaySystem("用法: @bot info <机器人名称>");
+		return;
+	}
+
+	CBotPlayer* pBot = FindBotByName(pszName);
+	if (!pBot)
+	{
+		pCaller->SaySystem("机器人 [%s] 不存在", pszName);
+		return;
+	}
+
+	pCaller->SaySystem("========== 机器人详情: %s ==========", pszName);
+	pCaller->SaySystem("  状态: %s | 暂停: %s | 死亡: %s",
+		pBot->IsBotRunning() ? "运行中" : "已停止",
+		pBot->IsBotPaused() ? "是" : "否",
+		pBot->IsDeath() ? "是" : "否");
+
+	int hpPct = 0, mpPct = 0;
+	int iHp = pBot->GetPropValue(PI_CURHP);
+	int iMaxHp = pBot->GetPropValue(PI_MAXHP);
+	int iMp = pBot->GetPropValue(PI_CURMP);
+	int iMaxMp = pBot->GetPropValue(PI_MAXMP);
+	if (iMaxHp > 0) hpPct = iHp * 100 / iMaxHp;
+	if (iMaxMp > 0) mpPct = iMp * 100 / iMaxMp;
+
+	pCaller->SaySystem("  职业=%d 等级=%d HP=%d/%d(%d%%) MP=%d/%d(%d%%)",
+		pBot->GetPro(), pBot->GetPropValue(PI_LEVEL),
+		iHp, iMaxHp, hpPct, iMp, iMaxMp, mpPct);
+
+	pCaller->SaySystem("  地图=%u 坐标=(%d,%d) 安全区=%s",
+		pBot->GetMapId(), pBot->getX(), pBot->getY(),
+		pBot->InSafeArea() ? "是" : "否");
+
+	pCaller->SaySystem("  思考间隔=%ums 在线时长=%us 死亡时间=%u",
+		pBot->GetBotDesc().dwThinkInterval,
+		pBot->GetBotDesc().dwThinkInterval, // TODO: 需要在线时长统计
+		pBot->GetDeathTime());
+
+	CBotContext* pCtx = pBot->GetContext();
+	if (pCtx)
+	{
+		CAliveObject* pTarget = pCtx->GetCachedTarget();
+		if (pTarget)
+		{
+			int nDist = pCtx->DistanceTo(pTarget);
+			pCaller->SaySystem("  当前目标=%s 距离=%d HP=%d/%d",
+				pTarget->GetName(), nDist,
+				pTarget->GetPropValue(PI_CURHP),
+				pTarget->GetPropValue(PI_MAXHP));
+		}
+		else
+			pCaller->SaySystem("  当前目标=无");
+	}
+
+	const BOT_CREATE_DESC& desc = pBot->GetBotDesc();
+	pCaller->SaySystem("  行为文件=%s 技能数=%zu 装备数=%zu",
+		desc.szBehaviorFile, desc.vSkills.size(), desc.vEquipments.size());
+
+	pCaller->SaySystem("================================================");
 }
