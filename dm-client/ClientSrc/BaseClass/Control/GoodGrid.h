@@ -1,5 +1,5 @@
 #pragma once
-//by json 包裹格子
+// 包裹格子
 #include "Control.h"
 #include "GameData/Good.h"
 #include "XmlUser.h"

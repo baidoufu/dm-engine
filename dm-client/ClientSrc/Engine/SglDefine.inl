@@ -43,6 +43,7 @@ PACKAGE(others		, 50)	// 其他
 
 PACKAGE(human1		, 51)
 PACKAGE(human2	    , 52)
+PACKAGE(human3		, 53)
 PACKAGE(pattern1	, 56)	// 外套
 PACKAGE(pattern2	, 57)	// 外套
 PACKAGE(hair1		, 61)

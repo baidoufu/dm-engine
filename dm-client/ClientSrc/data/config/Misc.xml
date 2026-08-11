@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<!--
+守护者技能配置
+Keeper type表示是哪种守护者
+Skill type表示技能种类 index1表示学会后图标位置 index2表示未学习时图标位置
+Level type表示不同的等级
+-->
+<KeeperSkill>
+	<!--小恶魔-->
+	<Keeper type="1">
+		<Skill type="1" name="防护" index1="23713" index2="23714" des="减免一次伤害（技能冷却完毕时，当玩家受到伤害即刻释放，该次伤害全部减免，释放之后进入冷却时间。需要在守卫者召出时被动触发）">
+			<Level type="1" title="初级" des="该技能冷却时间300秒"/>
+			<Level type="2" title="中级" des="该技能冷却时间250秒"/>
+			<Level type="3" title="高级" des="该技能冷却时间200秒"/>
+			<Level type="4" title="专家" des="该技能冷却时间150秒"/>
+			<Level type="5" title="大师" des="该技能冷却时间100秒"/>
+			<Level type="6" title="王者" des="该技能冷却时间50秒"/>
+		</Skill>
+		<Skill type="2" name="狂乱" index1="23715" index2="23716" des="必定触发100%暴击（技能冷却完毕时，当玩家攻击敌方即刻释放，该次攻击必定触发暴击伤害，释放之后进入冷却时间。需要在守卫者召出时被动触发）">
+			<Level type="1" title="初级" des="该技能冷却时间300秒"/>
+			<Level type="2" title="中级" des="该技能冷却时间250秒"/>
+			<Level type="3" title="高级" des="该技能冷却时间200秒"/>
+			<Level type="4" title="专家" des="该技能冷却时间150秒"/>
+			<Level type="5" title="大师" des="该技能冷却时间100秒"/>
+			<Level type="6" title="王者" des="该技能冷却时间50秒"/>
+		</Skill>
+		<Skill type="3" name="破天" index1="23717" index2="23718" des="必定触发100%破防（技能冷却完毕时，当玩家攻击敌方即刻释放，该次攻击必定触发破防效果，忽视对方防御，释放之后进入冷却时间。需要在守卫者召出时被动触发）">
+			<Level type="1" title="初级" des="该技能冷却时间300秒"/>
+			<Level type="2" title="中级" des="该技能冷却时间250秒"/>
+			<Level type="3" title="高级" des="该技能冷却时间200秒"/>
+			<Level type="4" title="专家" des="该技能冷却时间150秒"/>
+			<Level type="5" title="大师" des="该技能冷却时间100秒"/>
+			<Level type="6" title="王者" des="该技能冷却时间50秒"/>
+		</Skill>
+	</Keeper>
+	<!--小雪人-->
+	<Keeper type="3">
+		<Skill type="1" name="防护" index1="23713" index2="23714" des="减免一次伤害（技能冷却完毕时，当玩家受到伤害即刻释放，该次伤害全部减免，释放之后进入冷却时间。需要在守卫者召出时被动触发）">
+			<Level type="1" title="初级" des="该技能冷却时间300秒"/>
+			<Level type="2" title="中级" des="该技能冷却时间250秒"/>
+			<Level type="3" title="高级" des="该技能冷却时间200秒"/>
+			<Level type="4" title="专家" des="该技能冷却时间150秒"/>
+			<Level type="5" title="大师" des="该技能冷却时间100秒"/>
+			<Level type="6" title="王者" des="该技能冷却时间50秒"/>
+		</Skill>
+		<Skill type="2" name="狂乱" index1="23715" index2="23716" des="必定触发100%暴击（技能冷却完毕时，当玩家攻击敌方即刻释放，该次攻击必定触发暴击伤害，释放之后进入冷却时间。需要在守卫者召出时被动触发）">
+			<Level type="1" title="初级" des="该技能冷却时间300秒"/>
+			<Level type="2" title="中级" des="该技能冷却时间250秒"/>
+			<Level type="3" title="高级" des="该技能冷却时间200秒"/>
+			<Level type="4" title="专家" des="该技能冷却时间150秒"/>
+			<Level type="5" title="大师" des="该技能冷却时间100秒"/>
+			<Level type="6" title="王者" des="该技能冷却时间50秒"/>
+		</Skill>
+		<Skill type="3" name="破天" index1="23717" index2="23718" des="必定触发100%破防（技能冷却完毕时，当玩家攻击敌方即刻释放，该次攻击必定触发破防效果，忽视对方防御，释放之后进入冷却时间。需要在守卫者召出时被动触发）">
+			<Level type="1" title="初级" des="该技能冷却时间300秒"/>
+			<Level type="2" title="中级" des="该技能冷却时间250秒"/>
+			<Level type="3" title="高级" des="该技能冷却时间200秒"/>
+			<Level type="4" title="专家" des="该技能冷却时间150秒"/>
+			<Level type="5" title="大师" des="该技能冷却时间100秒"/>
+			<Level type="6" title="王者" des="该技能冷却时间50秒"/>
+		</Skill>
+	</Keeper>
+</KeeperSkill>

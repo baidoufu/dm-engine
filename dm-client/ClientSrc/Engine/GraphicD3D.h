@@ -120,7 +120,9 @@ public:
 	BOOL		ValidateDX(void);
 	BOOL		ReCreateDX(void);
 	BOOL        ResizeWindow(int iW,int iH);
-	void		AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup = FALSE);
+	void		AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup = FALSE, BOOL bCenter = FALSE);
+	void		CenterWindow();
+	BOOL		MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint, BOOL bCenter = FALSE);
 
 	// ÆäËû
 	BOOL		WillShowFrame(void);

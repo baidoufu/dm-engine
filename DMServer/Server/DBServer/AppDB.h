@@ -105,10 +105,6 @@ public:
 	SERVER_ERROR QueryTaskInfo(DWORD dwOwner, TASKINFO* pInfo);
 	SERVER_ERROR UpdateTaskInfo(DWORD dwOwner, TASKINFO* pInfo);
 	SERVER_ERROR InstertTaskInfo(DWORD dwOwner, TASKINFO* pInfo);
-	//时长封号系统数据
-	SERVER_ERROR QueryFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo);
-	SERVER_ERROR UpdateFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo);
-	SERVER_ERROR InstertFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo);
 
 	VOID DoInit();
 

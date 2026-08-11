@@ -27,8 +27,6 @@ BOOL CServer::InitServer(CSettingFile& s)
 		m_bDisableRegister = TRUE;
 	}
 
-	m_strWAddr = s.GetString(m_strServerName.c_str(), "WAddr", "127.0.0.1");
-	m_nWPort = s.GetInteger(m_strServerName.c_str(), "WPort", 7501);
 	int maxconnection = s.GetInteger(m_strServerName.c_str(), "MaxConnection", MAX_CLIENTOBJECT);
 	create(maxconnection);
 	PRINT(SUCCESS_GREEN, "最大连接数 %d!\n", maxconnection);
@@ -56,9 +54,7 @@ VOID CServer::CleanServer()
 	m_strServerTips.clear();
 	m_strLoginOkTips.clear();
 	m_strRegisterTips.clear();
-	m_strWAddr.clear();
 	m_bDisableRegister = FALSE;
-	m_nWPort = 0;
 }
 
 VOID CServer::Update()

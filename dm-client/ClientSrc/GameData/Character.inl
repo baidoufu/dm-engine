@@ -30,7 +30,7 @@ inline DWORD CCharacter::GetPrecision()		{ return m_nPrecision;}
 inline DWORD CCharacter::GetSmartness()		{ return m_nSmartness;}
 inline BYTE	 CCharacter::GetMagicDef()		{ return m_MagicDef; }
 inline BYTE  CCharacter::GetPoisonDef()     { return m_PoisonDef; }
-//by json delete
+// É¾³ý
 //inline BYTE  CCharacter::GetRestoreLife()	{ return m_tagPlayerProperty.byHPRenew;}
 //inline BYTE  CCharacter::GetRestoreMana()	{ return m_tagPlayerProperty.byMPRenew;}
 inline WORD	 CCharacter::GetFame()          { return m_wFame; }
@@ -66,7 +66,7 @@ inline void CCharacter::SetWrist(BYTE nWrist)				{ m_tagPlayerProperty.byWristWe
 inline void CCharacter::SetWristMax(BYTE nWrist)			{ m_tagPlayerProperty.byMaxWristWeight = nWrist;}
 inline void CCharacter::SetPrecision(DWORD nPrecision)		{ m_nPrecision = nPrecision;}
 inline void CCharacter::SetSmartness(DWORD nSmartness)		{ m_nSmartness = nSmartness;}
-//by json delete
+// É¾³ý
 //inline void CCharacter::SetMove(BYTE m)						{ m_tagPlayerProperty.byMove = m; }
 //inline void CCharacter::SetRestoreLife(BYTE m)				{ m_tagPlayerProperty.byHPRenew = m;}
 //inline void CCharacter::SetRestoreMana(BYTE m)				{ m_tagPlayerProperty.byMPRenew = m;}	

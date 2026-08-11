@@ -128,29 +128,29 @@ bool CMagicData::FromBuffer(const char* buf,int iLen)
 
 	memcpy(name,buf + 11,buf[10]);
 
-	SetShortCutKey(buf[0]);
-	SetMagicLevel(buf[1]);
-	SetSkillValue(*((WORD*)(buf + 4)));
-	SetNewSpell(*((WORD*)(buf + 6)));
-	SetMagicID(*((WORD*)(buf + 8)));
-	SetMagicName(name);
-	SetMagicType(buf[23]);
-	SetEffect(buf[24]);
-	SetNewDefSpell(buf[25]);
-	SetSpell(Conv_WORD(buf + 26));
-	SetPower(Conv_WORD(buf + 28));
+	SetShortCutKey(buf[0]); // 快捷键索引
+	SetMagicLevel(buf[1]); // 技能等级
+	SetSkillValue(*((WORD*)(buf + 4))); // 技能值
+	SetNewSpell(*((WORD*)(buf + 6))); // 当前新技能经验值
+	SetMagicID(*((WORD*)(buf + 8))); // 技能编号
+	SetMagicName(name); // 技能名称
+	SetMagicType(buf[23]); // 效果类型
+	SetEffect(buf[24]); // 效果标志
+	SetNewDefSpell(buf[25]); // 新防御技能
+	SetSpell(Conv_WORD(buf + 26)); // 施法值
+	SetPower(Conv_WORD(buf + 28)); // 威力值
 
 	for(int ii = 0;ii < 4;ii++)
 	{
-		SetNeedLevel(ii,buf[30+ii]);
-		SetTrain(ii,Conv_DWORD(buf+36+ii*4));
+		SetNeedLevel(ii,buf[30+ii]); // 升级需要的等级
+		SetTrain(ii,Conv_DWORD(buf+36+ii*4)); // 修炼经验值
 	}
-	SetJob(buf[53]);
-	SetMagicDelay(Conv_WORD(buf + 56));
-	SetDefence(buf[60]);
-	SetDefencePower(buf[61]);
-	SetMaxPower(buf[62]);
-	SetDefenceMaxPower(buf[64]);
+	SetJob(buf[53]); // 职业类型
+	SetMagicDelay(Conv_WORD(buf + 56)); // CD时间
+	SetDefence(buf[60]); // 防御值
+	SetDefencePower(buf[61]); // 防御威力
+	SetMaxPower(buf[62]); // 最大威力
+	SetDefenceMaxPower(buf[64]); // 防御最大威力
 
 	SetNeedLevel(4,buf[66]);
 	SetNeedLevel(5,buf[67]);

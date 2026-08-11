@@ -36,7 +36,6 @@
 #include "autoscriptmanager.h"
 #include "monitemsmgr.h"
 #include "TriggerEvent.h"
-#include "FengHaoGrowManager.h"
 
 extern DWORD g_dwActionDelay[AT_MAX];
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -269,14 +268,14 @@ DEFINE_SCRIPT_FUNCTION(CALLMON) {
 			{
 				pItem->SetBind(TRUE);
 				// 豹魔石绑定时间
-				*reinterpret_cast<DWORD*>(&pItem->btItemExt[277]) = dwT2;
+				//*reinterpret_cast<DWORD*>(&pItem->btItemExt[277]) = dwT2;
 				// 喂养时间
 				pItem->SetPetTime();
 				pPlayer->SendUpdateItem(*pItem);
 			}
 
 			pItem->SetExName("丛林豹");
-			pPlayer->SendPetName(pItem);
+			pPlayer->SendExName(pItem);
 			
 			// 判断喂养时间
 			temp = (dwT2 - pItem->GetPetTime()) / 86400;
@@ -1604,6 +1603,8 @@ DEFINE_SCRIPT_FUNCTION(SETPETBAG){
 	UINT nCount = 0;
 	if (nParam > 0)
 		nCount = Params[0].nParam;
+	if (nCount > PETBAG_SLOT)
+		nCount = PETBAG_SLOT;
 	return pPlayer->SetPetBagSize(nCount);
 }END_SCRIPT_FUNCTION
 
@@ -1620,25 +1621,7 @@ DEFINE_SCRIPT_FUNCTION(ISNEXTDAY) {
 }END_SCRIPT_FUNCTION
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：发送时长区公告
-//		注释：
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(SENDGAMETIMENOTICE) {
-	pPlayer->Sendfirstdlg(CGameWorld::GetInstance()->GetNotice());
-	return TRUE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：发送打开时长区时间弹窗
-//		注释：
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(SENDOPENGAMETIMEINFO) {
-	pPlayer->SendOpenGameTimeInfo();
-	return TRUE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：更改玩家时长区游戏时间
+//		描述：更改玩家游戏时间
 //		注释：
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 DEFINE_SCRIPT_FUNCTION(CHANGEGAMETIME) {
@@ -1724,146 +1707,6 @@ DEFINE_SCRIPT_FUNCTION(SENDTREASUREINFO) {
 	if (nParam == 3)
 	{
 		pPlayer->SendZhenBao(Params[0].nParam, Params[1].nParam, Params[2].nParam);
-		return TRUE;
-	}
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：设置时长封号
-//		注释：参数1：封号序号、参数2：是否激活
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(SETFENGHAOGROW) {
-	if (nParam >= 2)
-	{
-		UINT nId = Params[0].nParam;
-		UINT nBoolean = Params[1].nParam;
-		FenghaoInfo* pFenghaoInfo = pPlayer->GetFenghaoInfo();
-		pFenghaoInfo->mFengHaoRow[nId].boActivation = nBoolean == 1;
-
-		CFengHaoGrowManager* pMgr = CFengHaoGrowManager::GetInstance();
-		FengHaoGrowItem* pConfig = pMgr->GetItem(nId);
-		if (!pConfig)return FALSE;
-		if (nBoolean == 0)
-		{
-			switch (pConfig->btType)
-			{
-			case 0:
-				if (pFenghaoInfo->btType1 == nId) pFenghaoInfo->btType1 = 0;
-			break;
-			case 1:
-				if (pFenghaoInfo->btType2 == nId) pFenghaoInfo->btType2 = 0;
-			break;
-			case 2:
-				if (pFenghaoInfo->btType3 == nId) pFenghaoInfo->btType3 = 0;
-			break;
-			}
-			pPlayer->SendMsg(pPlayer->GetId(), 0x9b0, 1, 0, 0);//卸下
-			pPlayer->RecalcFengHaoProp(nId, FALSE);
-		}
-		if (nBoolean && pConfig->btLastDay > 0)
-		{
-			DWORD dwNow = GetUnixTimeSec(); // 返回秒
-			pFenghaoInfo->mFengHaoRow[nId].dwLastDate = ONE_DAY_SECONDS * pConfig->btLastDay + dwNow;
-		}
-		return TRUE;
-	}
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：调整成就组进度值
-//		注释： 参数1 ：成就组ID 参数2 ：操作符 （+ 、- 、=） 参数3 ：值
-//		此命令执行后，将调整指定成就组内所有的成就ID进度值，满足成就总进度，引擎将自动完成成就！
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(CHANGEACHIEVEGROUPEXP) {
-	if (nParam == 3)
-	{
-		switch (Params[1].pszParam[0])
-		{
-		case '+':
-			return pPlayer->ChangeAchieveGroupExp(Params[0].nParam, 0, Params[2].nParam);
-		case '-':
-			return pPlayer->ChangeAchieveGroupExp(Params[0].nParam, 1, Params[2].nParam);
-		case '=':
-			return pPlayer->ChangeAchieveGroupExp(Params[0].nParam, 2, Params[2].nParam);
-		default:
-			return FALSE;
-		}
-	}
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：调整指定成就ID进度值
-//		注释： 参数1 ：成就ID 参数2 ：操作符 （+ 、- 、=） 参数3 ：值
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(CHANGEACHIEVEEXP) {
-	if (nParam == 3)
-	{
-		switch (Params[1].pszParam[0])
-		{
-		case '+':
-			return pPlayer->ChangeAchieveExp(Params[0].nParam, 0, Params[2].nParam);
-		case '-':
-			return pPlayer->ChangeAchieveExp(Params[0].nParam, 1, Params[2].nParam);
-		case '=':
-			return pPlayer->ChangeAchieveExp(Params[0].nParam, 2, Params[2].nParam);
-		default:
-			return FALSE;
-		}
-	}
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：调整指定成就ID状态
-//		注释： 参数1 ：成就ID 参数2 ：状态值 （ 0：未完成，1：已完成/可领取，2：已领取）
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(SETACHIEVESTATE) {
-	if (nParam == 2)
-		return pPlayer->SetAchieveState(Params[0].nParam, Params[1].nParam);
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：调整指定成就ID完成时间
-//		注释： 参数1 ：成就ID 参数2 ：完成时间 （需要使用此时间变量 <$DATETIMETOWOLTIME(2018-11-11-18:00:00)> ）
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(SETACHIEVETIME) {
-	if (nParam == 2)
-		return pPlayer->SetAchieveTime(Params[0].nParam, Params[1].nParam);
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：发送更新指定成就相关信息
-//		注释： 参数1 ：成就ID
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(SENDGOTACHIEVE) {
-	if (nParam == 1)
-		return pPlayer->SendGotAchieve(Params[0].nParam);
-	return FALSE;
-}END_SCRIPT_FUNCTION
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-//		描述：调整玩家成就点
-//		注释： 参数1 ：操作符 （ + 、- ） 参数2 ：值
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
-DEFINE_SCRIPT_FUNCTION(CHANGEACHIEVEPOINT) {
-	if (nParam == 2)
-	{
-		switch (Params[0].pszParam[0])
-		{
-		case '+':
-			return pPlayer->ChangeAchievePoint(0, Params[1].nParam);
-		case '-':
-			return pPlayer->ChangeAchievePoint(1, Params[1].nParam);
-		case '=':
-			return pPlayer->ChangeAchievePoint(2, Params[1].nParam);
-		default:
-			return FALSE;
-		}
 		return TRUE;
 	}
 	return FALSE;

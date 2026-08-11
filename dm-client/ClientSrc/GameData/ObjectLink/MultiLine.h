@@ -36,6 +36,10 @@ public:
 	void          clear();
 	void          clean(const char* str); //长度应该是一样的，处理脏话
 private:
+	// 禁止拷贝（防止 vector<CStringLine*> 裸指针被浅拷贝导致双重释放）
+	CMultiLine(const CMultiLine&);
+	CMultiLine& operator=(const CMultiLine&);
+
 	vector<CStringLine * > m_lines;
 	DWORD         m_dwColor; //字体颜色，用字节表示的颜色
 	DWORD         m_dwBack;  //背景色

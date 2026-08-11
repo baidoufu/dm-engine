@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<ProtocolList Ver="1">
+  <!--
+	<protocol id = "0x0713" length = "32">
+  	<data type = "ASSIGN_ID" var = "123"/>    
+  	<data type = "ASSIGN_DWORD" var = "123" pos = "6" />    
+  	<data type = "ASSIGN_WORD" var = "-123" pos = "10"/>
+    <data type = "ASSIGN_BYTE" var = "123" pos = "11"/>
+    <data type = "ADD_STR" var = "@AttackMode 1"/>
+    <data type = "ADD_WORD" var = "-123"/>
+    <data type = "ADD_DWORD" var = "123"/>
+    <data type = "ADD_BYTE" var = "12"/>
+    <data type = "ADD_ARRAY" var = "sss" length = "10"/>
+	</protocol>
+  -->
+  <protocol id = "0x0BD6" length = "256">
+    <data type = "ADD_STR" var = "@AttackMode 2"/>
+  </protocol>
+</ProtocolList>

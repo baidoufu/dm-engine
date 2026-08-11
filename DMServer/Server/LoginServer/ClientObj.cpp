@@ -319,29 +319,6 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 		}
 	}
 	break;
-	case 0x1c9: // 微端消息
-	{
-		const char* p = CServer::GetInstance()->GetWAddr();
-		if (p && p[0] != 0)
-		{
-			P2PServer p2pServer;
-			p2pServer.btRec = 01;
-			inet_pton(AF_INET, p, &p2pServer.nIPAddr);
-			p2pServer.wPort = CServer::GetInstance()->GetWPort();
-			SendMsg(0, 0xafe, 0, 0, 0, &p2pServer, sizeof(P2PServer));
-		}
-	}
-	break;
-	case 0x7e3:
-	{
-		DWORD dwTime = MAKEDWORD2W(pMsg->wParam[0], pMsg->wParam[1]);
-		if (dwTime != 20161104) // 如果不等, 就说明引擎不支持这个客户端
-		{
-			SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)"你的客户端版本不支持!");
-			Disconnect(3000); // 关闭连接
-		}
-	}
-	break;
 	default:
 	{
 		bSaveTime = FALSE;
@@ -364,7 +341,7 @@ VOID CClientObj::SendLoginSuccess(UINT nLoginId)
 {
 	char szBuffer[64];
 	sprintf_s(szBuffer, sizeof(szBuffer), "*%u", nLoginId);
-	SendMsg(static_cast<int>(strlen(szBuffer)), SM_LOGINOK, 0, 0, 0, szBuffer, static_cast<int>(strlen(szBuffer)));
+	SendMsg(0, SM_LOGINOK, 0, 0, 0, szBuffer, static_cast<int>(strlen(szBuffer)));
 }
 
 VOID CClientObj::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszData, int datasize)
@@ -397,6 +374,5 @@ VOID CClientObj::SendSelectServerOk()
 {
 	CHAR szData[200];
 	sprintf_s(szData, sizeof(szData), "%s/%u/%u", m_SelectCharServer.addr.addr.data(), m_SelectCharServer.addr.nPort, m_nSid);
-	//SendMsg(getId(), 0xaff, 1, 0, 0); // 1是1.9人物选择界面、3是时长专用
-	SendMsg(static_cast<DWORD>(strlen(szData)), SM_SELECTSERVEROK, 0, 0, 0, (LPVOID)szData, static_cast<int>(strlen(szData)));
+	SendMsg(0, SM_SELECTSERVEROK, 0, 0, 0, (LPVOID)szData, static_cast<int>(strlen(szData)));
 }

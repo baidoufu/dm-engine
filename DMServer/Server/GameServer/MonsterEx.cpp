@@ -500,7 +500,8 @@ VOID CMonsterEx::DecPropValue(PROP_INDEX index, int value)
 			m_wCurHp -= wDecHp;
 		if (IsStatusSet(SI_GREENPOISON))//绿毒状态
 		{
-			if (m_wCurHp <= 0) ToDeath(GetSetter(SI_GREENPOISON)); // 如果血量被减到0了, 就判断死亡
+			// 改为走EP_DEAD延迟队列统一死亡路径，避免直接调用ToDeath导致与Damage()中的EP_DEAD重复触发
+			if (m_wCurHp <= 0 && !IsDeath()) AddProcess(EP_DEAD, GetSetter(SI_GREENPOISON), 0, 0, 0, 2);
 		}
 	}
 	break;
@@ -630,10 +631,9 @@ BOOL CMonsterEx::AttackTarget(e_direction dir, BOOL bFromVolley)
 		SetDirection(dir);
 	//设置AI延时时间
 	SetAction(AT_ATTACK, dir, getX(), getY(), m_pDesc->attackdesc.Delay);
-	Stop(); // 停止上一次动作
 	//攻击方式
 	damage_type damagetype = (damage_type)m_pDesc->attackdesc.DamageType;
-	WORD wFlag = (m_pDesc->attackdesc.Action << 8) | (WORD)GetDirection();
+	WORD wFlag = (m_pDesc->attackdesc.Action << 8) | (WORD)GetDirection(); // Action 动作怪不同不一样
 	const int nDamage = GetPropPower();
 	switch (m_pDesc->attackdesc.AttackStyle)
 	{
@@ -793,7 +793,10 @@ BOOL CMonsterEx::CheckChangeInto()
 				if (IsDeath())
 				{
 					m_bIsShow = FALSE;
-					SetDeath(FALSE);
+					// 不再直接SetDeath(FALSE)重置死亡标志，改为通过EM_RELIVE延迟复活。
+					// 直接重置会导致ToDeath()的m_bDead防重入守卫失效，
+					// 若队列中有多个EP_DEAD进程，将触发多次OnDeath（重复掉落/重复事件）。
+					AddProcess(EM_RELIVE, GetPropValue(PI_MAXHP), 0, 0, 0, 100);
 				}
 				RefreshViewmsg();
 				SendChangeName();
@@ -919,6 +922,8 @@ BOOL CMonsterEx::SetDesc(MonsterClass* pClass)
 		AddVisibleObjectType(OBJ_PET);
 	if (m_pDesc->sprop.pFlag & SF_PICKUPITEM)
 		CAliveObject::AddVisibleObjectType(OBJ_DOWNITEM);
+	if (m_pDesc->sprop.pFlag & SF_BODYITEM)
+		m_bMonsterType = 0x10;
 	if (m_pDesc->aiset.LockDir == 0)
 		SetDirection((e_direction)Getrand(ED_MAX));
 	else
@@ -1300,9 +1305,7 @@ VOID CMonsterEx::OnCuted(CHumanPlayer* pCuter)
 	}
 	if (m_pDesc && (m_pDesc->sprop.pFlag & SF_CANBECUT))
 	{
-		WORD hp = static_cast<WORD>(GetPropValue(PI_CURHP));
-		WORD maxhp = static_cast<WORD>(GetPropValue(PI_MAXHP));
-		DWORD dwParam[3] = { GetFeather(), GetStatus(), static_cast<DWORD>((hp << 16) | maxhp) };
+		DWORD dwParam[2] = { GetFeather(), GetStatus()};
 		SendAroundMsg(GetId(), 0x21, getX(), getY(), static_cast<WORD>(GetDirection()), dwParam, sizeof(dwParam));
 		SetSystemFlag(SF_BONE, TRUE);
 	}

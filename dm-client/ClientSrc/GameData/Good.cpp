@@ -180,7 +180,7 @@ bool  CGood::FromBuffer(const char* buf,bool bByBooth,int iGoodLen)
 int CGood::PKLength()
 {
 	//return 78;
-	return 84;
+	return 87;
 }
 
 DWORD CGood::GetRecordTime(bool bFront)

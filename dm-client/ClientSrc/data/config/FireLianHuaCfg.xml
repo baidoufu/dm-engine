@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<BeastHelp Ver="1">  
+  <Helps>
+    <Help name="@@main" value="&lt;color=white 点击可查看三昧真火相关内容：&gt;
+      \    &lt;三昧真火概述/@@samadhifirequest&gt;
+      \    &lt;三昧真火等级/@@samadhifirelevel&gt;
+      \    &lt;三昧真火属性/@@samadhifireparameter&gt;
+      \    &lt;三昧真火成长/@@samadhifireup&gt;
+      \    &lt;三昧真火地图/@@samadhifiremap&gt;
+      \    &lt;火凝丹详述/@@samadhifireexp1&gt;"/>
+    
+    <Help name="@@samadhifirequest" value="&lt;color=00B050 三昧真火概述：&gt;
+      \    &lt;color=white 三昧真火为取自木灵、石&gt;
+      \&lt;color=white 灵及天灵之中的自然之力。修&gt;
+      \&lt;color=white 炼这种力量能够增加人物的自&gt;
+      \&lt;color=white 身属性，并能驾驭各种神奇的&gt;
+      \&lt;color=white 法宝。熔炼法宝的灵胚会在真&gt;
+      \&lt;color=white 火修炼场和宝地掉落，你也可&gt;
+      \&lt;color=white 以在百宝园和群英宝鉴中得到&gt;
+      \&lt;color=white 灵胚。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifirelevel" value="&lt;color=00B050 三昧真火等级：&gt;
+      \&lt;color=white     三昧真火共分81级，每9&gt;
+      \&lt;color=white 级为1重，每3重为1境界。&gt;
+      \&lt;color=white     各重数由低到高分为：&gt;
+      \&lt;color=white 下阶青火境、中阶青火境、上&gt;
+      \&lt;color=white 阶青火境、下阶石火境、中阶&gt;
+      \&lt;color=white 石火境、上阶石火境、下阶天&gt;
+      \&lt;color=white 火境，中阶天火境，上阶天火&gt;
+      \&lt;color=white 境。&gt;
+      \&lt;color=white     随着三昧真火等级的提升&gt;
+      \&lt;color=white 玩家可以驾驭的法宝种类也会&gt;
+      \&lt;color=white 越来越多。同时炼化法宝时所&gt;
+      \&lt;color=white 使用的炼化炉也会越来越大。&gt;
+      \&lt;color=white     另外在与人交战的过程中&gt;
+      \&lt;color=white 当你与对手等级相同时，三昧&gt;
+      \&lt;color=white 真火的等级决定了你是否能推&gt;
+      \&lt;color=white 动你的对手。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifireparameter" value="&lt;color=00B050 三昧真火属性：&gt;
+      \    &lt;color=white 随着三昧真火等级的提升&gt;
+      \&lt;color=white 人物本身的属性也会变得越来&gt;
+      \&lt;color=white 越强大。&gt;
+      \    &lt;color=white 三昧真火会为人物成长带&gt;
+      \&lt;color=white 来的属性包括：&gt;
+      \&lt;color=white 生命、魔法、攻击力、防御力&gt;
+      \&lt;color=white 魔法防御力、命中、魔法命中&gt;
+      \&lt;color=white 暴击、伤害反弹、吸血、破防&gt;
+      \&lt;color=white 抵抗、躲避、魔法躲避和幸运&gt;
+      \&lt;color=white 等全部人物可能带有的属性。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifireup" value="&lt;color=00B050 三昧真火成长：&gt;
+      \    &lt;color=white 三昧真火通过自己独特的&gt;
+      \&lt;color=white 经验值——真火值的增加来提升&gt;
+      \&lt;color=white 三昧真火的等级。&gt;
+      \    &lt;color=white 真火值的获得方式多种多&gt;
+      \&lt;color=white 样，主要可以分为：&gt;
+      \&lt;color=E36C0A     1）普通打怪获得&gt;
+      \&lt;color=E36C0A 这是最普遍也最常见的真火值&gt;
+      \&lt;color=E36C0A 获得的方式，所有地图的怪物&gt;
+      \&lt;color=E36C0A 经验值都会按照一定比率换算&gt;
+      \&lt;color=E36C0A 为真火值。&gt;
+      \&lt;color=E36C0A     2）吸收火凝丹获得&gt;
+      \&lt;color=E36C0A 当玩家获得了累满真火值的火&gt;
+      \&lt;color=E36C0A 凝丹之后，可以消耗精力值来&gt;
+      \&lt;color=E36C0A 获取火凝丹中蕴含的真火值。&gt;
+      \&lt;color=E36C0A     3）完成宝儿的每日任务&gt;
+      \&lt;color=E36C0A 当玩家三昧真火修炼到一定等&gt;
+      \&lt;color=E36C0A 级之后即可在宝儿处领取三昧&gt;
+      \&lt;color=E36C0A 真火的每日任务，完成即可获&gt;
+      \&lt;color=E36C0A 得大量真火值。&gt;
+      \&lt;color=E36C0A 此外领取每日任务时如果消耗&gt;
+      \&lt;color=E36C0A 一定精力值领取特殊任务的话&gt;
+      \&lt;color=E36C0A 还能获得更多多真火值。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifiremap" value="&lt;color=00B050 三昧真火地图：&gt;
+      \&lt;color=white     当玩家完成宝儿交与的特&gt;
+      \&lt;color=white 定任务，或者自行修炼到一定&gt;
+      \&lt;color=white 等级之后，即可在宝儿处开启&gt;
+      \&lt;color=white 特定的三昧真火修炼地图。&gt;
+      \&lt;color=white     在修炼地图中，玩家不但&gt;
+      \&lt;color=white 可以获得大量真火值，同时大&gt;
+      \&lt;color=white 部分在炼化法宝时所必需的各&gt;
+      \&lt;color=white 种炼化材料也会在真火地图中&gt;
+      \&lt;color=white 打怪爆出。&gt;
+      \&lt;color=white     修炼地图中的怪物也与外&gt;
+      \&lt;color=white 面的有所不同，即使是相同的&gt;
+      \&lt;color=white 怪物也不可掉以轻心。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifireexp1" value="&lt;color=00B050 火凝丹详述：&gt;
+      \&lt;color=white     火凝丹为能够额外积累真&gt;
+      \&lt;color=white 火值的神奇道具，当玩家领悟&gt;
+      \&lt;color=white 了三昧真火之后，携带火凝丹&gt;
+      \&lt;color=white 在身上打怪就能获得额外的真&gt;
+      \&lt;color=white 火值，加速三昧真火的修炼。&gt;
+      \&lt;color=E36C0A     火凝丹的种类：&gt;
+      \&lt;color=white     火凝丹对应三昧真火的种&gt;
+      \&lt;color=white 类，共有9种火凝丹。分别为&gt;
+      \&lt;color=white 下阶青火凝丹，中阶青火凝丹&gt;
+      \&lt;color=white 上阶青火凝丹，下阶石火凝丹&gt;
+      \&lt;color=white 中阶石火凝丹，上阶石火凝丹&gt;
+      \&lt;color=white 下阶天火凝丹，中阶天火凝丹&gt;
+      \&lt;color=white 和上阶天火凝丹。&gt;
+      \&lt;color=E36C0A     火凝丹的使用：&gt;
+      \&lt;color=white     火凝丹累满真火值之后双&gt;
+      \&lt;color=white 击即可通过消耗精力值来获得&gt;
+      \&lt;color=white 火凝丹中所蕴含的真火值。&gt;
+      \     &lt;下一页/@@samadhifireexp2&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifireexp2" value="&lt;color=00B050 火凝丹详述：&gt;
+      \&lt;color=E36C0A     火凝丹的使用：&gt;
+      \&lt;color=white     但是人物只能使用等于或&gt;
+      \&lt;color=white 者高于当前人物三昧真火重数&gt;
+      \&lt;color=white 的火凝丹，而不可使用低级的&gt;
+      \&lt;color=white 的火凝丹。&gt;
+      \&lt;color=white 例：中阶石火境的人物可以使&gt;
+      \&lt;color=white 用中阶石火凝丹及所有更高等&gt;
+      \&lt;color=white 级的火凝丹，但当人物三昧真&gt;
+      \&lt;color=white 火重数提升至上阶石火境之后&gt;
+      \&lt;color=white 将不可再使用中阶石火凝丹。&gt;
+      \&lt;color=E36C0A      火凝丹的产出&gt;
+      \&lt;color=white     火凝丹的产出对应人物的&gt;
+      \&lt;color=white 三昧真火重数，当玩家修炼到&gt;
+      \&lt;color=white 一定重数之后即可在打怪过程&gt;
+      \&lt;color=white 中获得相应等级的火凝丹。并&gt;
+      \&lt;color=white 有概率获得高等级的火凝丹。&gt;
+      \&lt;color=white 例：中阶石火境的玩家打怪时&gt;
+      \&lt;color=white 有较大概率打出中阶石火凝丹&gt;
+      \&lt;color=white 同时有较小概率打出上阶石火&gt;
+      \&lt;color=white 凝丹及下阶天火凝丹。&gt;
+      \     &lt;上一页/@@samadhifireexp1&gt;
+      \\    &lt;返回/@@main&gt;"/>
+
+    
+  </Helps>
+</BeastHelp>

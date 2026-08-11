@@ -1,11 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-///////////////////////////////////////////////////////////////////////
 #include "Net.h"
 
 #include "GameControl/GameControl.h"
@@ -154,11 +146,9 @@ bool CGameNet::InitDynCode(STNetMsgHeader* pHeader)
     return TRUE == SetDynEnDe(DED_New_Old, pNtf->dwDataLen, (const char*)pNtf->abyDataBuf);
 }
 
-#define DEFBLOCKSIZE			16
-
 //传世封包解析t
 static bool isOnGameProc = false;
-void CGameNet::OnSocketMessageRecieve(char* pszMsg)
+void CGameNet::OnSocketMessageRecieve(char* pszMsg, int nLen)
 {
 	_TDEFAULTMESSAGE	tdm;
 	INT	nChrPos[] = { 350, 280, 350, 250, 320, 390 };
@@ -175,14 +165,14 @@ void CGameNet::OnSocketMessageRecieve(char* pszMsg)
 	}
 
 	if(!isOnGameProc){
-		 output_debug("LS 协议 %d\n", tdm.wIdent);
+		 //output_debug("LS 协议 %d\n", tdm.wIdent);
 
 		//登录流程
 		if (tdm.wIdent <= SD_CLI_GS_MSG_ID_MIN)
 		{
 			*((unsigned short*)szPacket) = tdm.wIdent;
 			int nDecLen = sizeof(tdm.wIdent);
-			if(tdm.nRecog){
+			if (nLen > 0) {
 				char	szDecodeMsg[PACKAGE_LENGTH];
 				ZeroMemory(szDecodeMsg, sizeof(szDecodeMsg));
 				fnDecode6BitBuf((pszMsg + DEFBLOCKSIZE), szDecodeMsg, sizeof(szDecodeMsg));
@@ -195,7 +185,7 @@ void CGameNet::OnSocketMessageRecieve(char* pszMsg)
 		}
 	}else{
 
-		 output_debug("GS 协议 %d\n", tdm.wIdent);
+		 //output_debug("GS 协议 %d\n", tdm.wIdent);
 
 		//游戏流程
 		int nDecLen = sizeof(tdm.wIdent);
@@ -213,12 +203,12 @@ void CGameNet::OnSocketMessageRecieve(char* pszMsg)
 		*/
 		nDecLen += CMD_SIZE;
 
-		if(tdm.nRecog){
+		if (nLen > 0) {
 			char	szDecodeMsg[PACKAGE_LENGTH];
 			ZeroMemory(szDecodeMsg, sizeof(szDecodeMsg));
 			int decLen = fnDecode6BitBuf((pszMsg + DEFBLOCKSIZE), szDecodeMsg, sizeof(szDecodeMsg));
 			strcpy(szDecMsg+2+CMD_SIZE, szDecodeMsg);
-			//nDecLen += strlen(szDecodeMsg);			//by json 只能处理字符串,如果发过来的是结构,长度错误
+			//nDecLen += strlen(szDecodeMsg);			// 只能处理字符串,如果发过来的是结构,长度错误
 			nDecLen += decLen;
 		}
 		g_pGameControl->GCL_AddMsg(szDecMsg, nDecLen);   
@@ -257,7 +247,7 @@ void CGameNet::ProcessBuffer(SOCKET_INFORMATION* SocketInfo)
     }
     
     // 收集当前收到的字节，第二个封包开始需要递加1字节
-    SocketInfo->RecBuf.append(SocketInfo->Buffer, strlen(SocketInfo->Buffer));
+    SocketInfo->RecBuf.append(SocketInfo->Buffer, bytesRecv);
     SocketInfo->RecvLen += bytesRecv;
 
     bytesRecv = SocketInfo->RecvLen;
@@ -265,11 +255,15 @@ void CGameNet::ProcessBuffer(SOCKET_INFORMATION* SocketInfo)
 	//传世解析
 	char	*pszFirst = (char*)SocketInfo->RecBuf.c_str();
 	char	*pszEnd;
+	// 跳过前导残留字节，确保从 '#' 开始解析。否则分隔符 '#' 会被误并入头部编码，
+	// 导致 fnDecode6BitBuf 用含 '#' 的 16 字符解码，wIdent 变成乱码（如 27904 而非 504）
+	while (*pszFirst && *pszFirst != '#')
+		pszFirst++;
 	while (pszEnd = strchr(pszFirst, '!'))
 	{
 		*pszEnd = '\0';
 
-		OnSocketMessageRecieve(pszFirst + 1);
+		OnSocketMessageRecieve(pszFirst + 1, pszEnd - pszFirst - 1 - DEFBLOCKSIZE);
 
 		if (*(pszEnd + 1) == '#')
 			pszFirst = pszEnd + 1;
@@ -621,7 +615,11 @@ int CGameNet::SendBuf(int iServer,
 	{
 		if(bIsSGS){
 			//SEND_GAME_SERVER 后12位为MsgBody
-			fnEncode6BitBuf((unsigned char *)buf+12, m_szEncodeBody, strlen(buf+12), sizeof(m_szEncodeBody));
+			// 必须用真实 body 长度(len-12)编码, 不能用 strlen(buf+12):
+			// 二进制结构体(如 REGISTERACCOUNT)内含有 '\0', strlen 会在第一个 '\0' 处截断,
+			// 导致服务端收到的 datasize 远小于 226 而注册失败。len 即 iBLen(12字节头+数据)。
+			int nBodyLen = (len > 12) ? (int)(len - 12) : 0;
+			fnEncode6BitBuf((unsigned char *)buf+12, m_szEncodeBody, nBodyLen, sizeof(m_szEncodeBody));
 			sprintf(m_szPacket, "#%d%s%s!", SysCount, m_szEncodeDefMsg, m_szEncodeBody);
 		}else
 		{

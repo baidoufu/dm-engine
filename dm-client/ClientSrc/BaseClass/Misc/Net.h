@@ -1,20 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-//
-//
-//
-//
-//
-//
-///////////////////////////////////////////////////////////////////////
-
-//Net.h
-
 #pragma once
 
 #define MAXSERVER		  1
@@ -130,10 +113,10 @@ typedef struct tagTCHARDESC
 //MakeLong(MakeWord(btRaceImg, btWeapon), MakeWord(btHair, btDress));
 typedef struct tagFEATURE
 {
-	BYTE	bGender;	//btRaceImg
-	BYTE	bWeapon;	//btWeapon
-	BYTE	bHair;		//btHair
-	BYTE	bDress;		//btDress
+	BYTE	bGender;	//btRaceImg 外形 0标示人形
+	BYTE	bWeapon;	//btWeapon 武器
+	BYTE	bHair;		//btHair 头发
+	BYTE	bDress;		//btDress 衣服
 }FEATURE, *LPFEATURE;
 
 typedef struct tag_TDEFAULTMESSAGE
@@ -516,7 +499,7 @@ public:
 
 protected:
 	//传世
-	virtual void OnSocketMessageRecieve(char* pszMsg);
+	virtual void OnSocketMessageRecieve(char* pszMsg, int nLen);
 	//
 
 

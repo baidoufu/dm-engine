@@ -30,8 +30,6 @@ public:
 	VOID Update();
 	//初始化
 	BOOL InitServer(CSettingFile&);
-	BOOL MakeIndex(CSettingFile&);
 protected:
-	std::string m_dataRootPath;
-	std::string m_fileListPath;
+	std::string m_wpfDataPath;     // wpf文件目录(如客户端Data目录)
 };

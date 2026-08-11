@@ -136,7 +136,7 @@ void SaveException(char * file,char *fun,int line,const CSeException* pException
 
 	if(g_pStreamMgr && g_iCatchTimes <= 2 && !g_bAlertException)
 	{
-		/* by json 自动上传日志
+		/* 自动上传日志
 		strcat(strTemp,"&type=1");
 
 		string URL = g_pStreamMgr->GetWebsite("ExceptionReport");

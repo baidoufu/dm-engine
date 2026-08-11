@@ -37,7 +37,10 @@ CUserLoginWnd::CUserLoginWnd(void)
 	m_pHelp		= NULL;
 	m_bPreDownLoadTex = false;
 	g_pAudio->StopAll();
-
+	if (g_Config.GetBkMusicOn())
+	{
+		g_pAudio->PlayMusic(EAT_BKMUSIC, 8, true); // 1002.ogg
+	}
 	m_iIndex = 1657;
 
 	//if(g_pStreamMgr->GetGameInt("Area") >= 88 || g_iParamGameType != 0)
@@ -163,31 +166,31 @@ void CUserLoginWnd::OnCreate()
 
 
 	//公共的控件
-	m_pNewUser = new CCtrlButton;
-	AddControl(m_pNewUser);
-	m_pNewUser->CreateEx(this,76,285,1662,1663,1663,1663);
-	m_pNewUser->SetText("我要注册",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
+	//m_pNewUser = new CCtrlButton;
+	//AddControl(m_pNewUser);
+	//m_pNewUser->CreateEx(this,76,285,1662,1663,1663,1663);
+	//m_pNewUser->SetText("我要注册",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
 
-	m_pHelp = new CCtrlButton;
-	AddControl(m_pHelp);
-	m_pHelp->CreateEx(this,164,285,1662,1663,1663,1663);
-	m_pHelp->SetText("客服帮助",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
+	//m_pHelp = new CCtrlButton;
+	//AddControl(m_pHelp);
+	//m_pHelp->CreateEx(this,164,285,1662,1663,1663,1663);
+	//m_pHelp->SetText("客服帮助",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
 
 
-	m_pChangePassword = new CCtrlButton;
-	AddControl(m_pChangePassword);
-	m_pChangePassword->CreateEx(this,164,313,1662,1663,1663,1663);
-	m_pChangePassword->SetText("密码服务",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
+	//m_pChangePassword = new CCtrlButton;
+	//AddControl(m_pChangePassword);
+	//m_pChangePassword->CreateEx(this,164,313,1662,1663,1663,1663);
+	//m_pChangePassword->SetText("密码服务",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
 
-	m_pBindDynamicPassword = new CCtrlButton;
-	AddControl(m_pBindDynamicPassword);
-	m_pBindDynamicPassword->CreateEx(this,75,313,1662,1663,1663,1663);
-	m_pBindDynamicPassword->SetText("盛大密宝",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
+	//m_pBindDynamicPassword = new CCtrlButton;
+	//AddControl(m_pBindDynamicPassword);
+	//m_pBindDynamicPassword->CreateEx(this,75,313,1662,1663,1663,1663);
+	//m_pBindDynamicPassword->SetText("盛大密宝",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
 
-	m_pTakeSafeCard = new CCtrlButton;
-	AddControl(m_pTakeSafeCard);
-	m_pTakeSafeCard->CreateEx(this,251,285,1662,1663,1663,1663);
-	m_pTakeSafeCard->SetText("领安全卡",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
+	//m_pTakeSafeCard = new CCtrlButton;
+	//AddControl(m_pTakeSafeCard);
+	//m_pTakeSafeCard->CreateEx(this,251,285,1662,1663,1663,1663);
+	//m_pTakeSafeCard->SetText("领安全卡",COLOR_BTN_NORMAL_ULW,COLOR_BTN_MOUSEON_ULW,COLOR_BTN_PRESS_ULW,COLOR_BTN_DISABLE_ULW,12,DTF_BlackFrame,FONT_YAHEI);
 
 
 	if (!g_Login.IsSDOALogin())//不是SDOA登录

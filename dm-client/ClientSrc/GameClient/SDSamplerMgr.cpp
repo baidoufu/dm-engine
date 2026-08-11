@@ -211,10 +211,6 @@ bool CSDSamplerMgr::SendClientInfoSample()
 	{
 		strcat_s(t1.ClientStartupInfo.ExternalSoftware,64,"SDOA,");
 	}
-	//if (g_bEnableIga)
-	//{
-	//	strcat_s(t1.ClientStartupInfo.ExternalSoftware,64,"IGA,")
-	//}
 	strcat_s(t1.ClientStartupInfo.ExternalSoftware,64,"SDError,");
 	strcat_s(t1.ClientStartupInfo.ExternalSoftware,64,"RainBowSpirt");
 	if(g_pGfx->GetWidth() == 800)

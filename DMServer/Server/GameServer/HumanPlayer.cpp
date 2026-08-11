@@ -29,15 +29,13 @@
 #include "systemscript.h"
 #include "scriptvariable.h"
 #include "ScriptDef.h"
-#include "BossTJ.h"
-#include "FengHaoGrowManager.h"
 
 extern DWORD g_dwActionDelay[AT_MAX];
 CHumanPlayer::CHumanPlayer(VOID) :m_pClientObj(nullptr), m_Equipments(this), m_ScriptTarget(this)
 {
 	m_ItemBox.Create(BIGBAG_SLOT); // 玩家背包大小
-	m_ItemBank.Create(100); // 玩家仓库大小
-	m_ItemPetBag.Create(10); // 豹子背包大小
+	m_ItemBank.Create(STOREAGE_SLOT); // 玩家仓库大小
+	m_ItemPetBag.Create(PETBAG_SLOT); // 豹子背包大小
 	m_iHuoli = 0;
 	m_nRecalcHit = 0;
 	m_nRecalcSpeed = 0;
@@ -111,8 +109,6 @@ VOID CHumanPlayer::Clean()
 	m_sWife[0] = 0;
 	for (auto& student : m_sStudents) student.fill(0);
 	for (auto& friendName : m_sFriends) friendName.fill(0);
-	memset(&m_FenghaoInfo, 0, sizeof(m_FenghaoInfo));
-	InitAchievement(CTimeAchieve::GetInstance()->GetAchieveCount());
 
 	m_bRefuseAddFriend = FALSE;
 	m_pTimeOutDeActiveMagic = nullptr;
@@ -137,7 +133,7 @@ VOID CHumanPlayer::Clean()
 	m_baozhiID = 0;
 	m_dwZhenBaoExpMax = 0;
 	m_dwZhenBaoStar = 0;
-	m_wYuanQi = 0;
+	m_wYuanQi = 2000; // 临时把它默认最大，就不会一直发元气值更新，因为客户端现在不支持元气值
 	m_bYuanQi = FALSE;
 	m_wStamina = 0;
 	m_wMaxStamina = 2000;
@@ -244,7 +240,7 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 	else
 		iBagCount = SMALLBAG_SLOT;
 	m_ItemBox.SetCountLimit(iBagCount);
-	this->m_ItemBank.SetCountLimit(CGameWorld::GetInstance()->GetVar(EVI_STOREAGESIZE));
+	this->m_ItemBank.SetCountLimit(STOREAGE_SLOT);
 	m_Equipments.Clean();
 	m_iHuoli = 0;
 	m_nVisibleObjectFlag = 0;
@@ -256,20 +252,15 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 		AddVisibleObjectType(objTye);
 	}
 
-	SendMsg(GetId(), 0x9591, 256, 7, 3, "2, 0, 9, 0"); // 发送时长版本号
-	SendClientfunction();
-	SendMsg(0, 0x949, 1, 100, 0);
-	SendMsg(0, 0x510, 0, 0, 0);
+	SendMsg(0, 0x9591, 0, 0, 0, "9, 9, 9, 9"); // 发送版本号
 	SendMsg(0, 0x328, 1, 0, 0); // 服务器通知客户端是否使用动态加密算法, 以及动态加密数据的长度设置
-	SendMsg(GetId(), 0x9a9, 0, 0, 0);//关闭万兽谱、羽翼
-	SendMsg(GetId(), 0x9594, 0, iBagCount, 0);//38292 发送背包大小
+	SendMsg(0, 0x9594, 0, iBagCount, 10);//38292 发送背包大小
 	SendMsg(GetId(), 0x9593, 1, 0, desc.dbinfo.wPersonCode, (LPVOID)desc.dbinfo.szPersonSign);//38291 设置个性化签名
 	SendMsg(GetId(), 0x9593, 2, 0, 0, (LPVOID)desc.dbinfo.szTempRank);//38291 设置临时称号
 	Sendfirstdlg(CGameWorld::GetInstance()->GetNotice());//658 发送登录窗口提示
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(desc.dbinfo.mapid);
 	if (pMap == nullptr) return FALSE;
 	SendMsg(GetId(), SM_SETMAP, m_wX, m_wY, 0, (LPVOID)pMap->GetName());//人物在地图的位置
-	SendMsg(0xf2d505d7, SM_READY, 0, 0, 0);//1106
 	UpdateProp(); // 52人物信息
 	RecalcHitSpeed(); // 计算命中、躲避
 	UpdateSubProp(); // 752附加属性
@@ -293,7 +284,6 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 	m_tmrPkTimer.Savetime();
 	m_dwPkValue = m_Humandesc.dbinfo.dwFlag[1];
 	UpdateViewName();
-	SendFengHaoData();
 	m_LoginTime = CSystemTime();
 	return TRUE;
 }
@@ -305,10 +295,12 @@ DWORD CHumanPlayer::GetFeather()
 		btShape--;
 	if (m_Equipments[_U_WEAPON].baseitem.btStdMode == 6 && btShape == 19) // 鹤嘴锄外观值, 重写
 		btShape = btShape + 6;
+
+	BYTE btHair = m_Equipments[_U_HELMET].baseitem.btShape;
 	//四个字节分别是：bGender | (bWeapon << 8) | (bHair << 16) | (bDress << 24)
 	return MAKEFEATHER(
-		(m_Equipments[_U_DRESS].dwMakeIndex != 0 ? ((m_Equipments[_U_DRESS].baseitem.btShape & 0xf) << 4 | (m_Equipments[_U_DRESS].baseitem.wFeature & 0xf)) : 0), // 衣服外观
-		m_Humandesc.dbinfo.btHair, // 头发外观
+		GetShape(), // 衣服外观
+		(m_Equipments[_U_HELMET].dwMakeIndex != 0 ? btHair : m_Humandesc.dbinfo.btHair), // 头发外观
 		(m_Equipments[_U_WEAPON].dwMakeIndex != 0 ? btShape : 0), // 武器外观
 		(m_bRideHorse && m_pHorse) ? ((m_pHorse->GetFeather() & 0xff0000) >> 16) + 0x40 : 0
 	);
@@ -681,7 +673,8 @@ VOID CHumanPlayer::DecPropValue(PROP_INDEX index, int value)
 			m_Humandesc.dbinfo.hp -= wDecHp;
 		if (IsStatusSet(SI_GREENPOISON))//绿毒状态
 		{
-			if (m_Humandesc.dbinfo.hp <= 0) ToDeath(GetSetter(SI_GREENPOISON)); // 如果血量被减到0了, 就判断死亡
+			// 改为走EP_DEAD延迟队列统一死亡路径，避免直接调用ToDeath导致与Damage()中的EP_DEAD重复触发
+			if (m_Humandesc.dbinfo.hp <= 0 && !IsDeath()) AddProcess(EP_DEAD, GetSetter(SI_GREENPOISON), 0, 0, 0, 2);
 		}
 	}
 	break;
@@ -727,6 +720,9 @@ VOID CHumanPlayer::UpdateProp()
 {
 	HUMANPROP prop;
 	prop.wLevel = m_Humandesc.dbinfo.wLevel;
+
+	prop.wLevelUpCount = static_cast<WORD>(MIN(m_Humandesc.dbinfo.dwCurExp, static_cast<int>(USHRT_MAX)));
+	prop.wNextLevelUpCount = static_cast<WORD>(MIN(m_pHumanDataDesc->dwLevelupExp, static_cast<int>(USHRT_MAX)));
 	prop.dwCurexp = m_Humandesc.dbinfo.dwCurExp;
 	prop.dwMaxexp = m_pHumanDataDesc->dwLevelupExp;
 	//生命值、魔法值
@@ -738,10 +734,6 @@ VOID CHumanPlayer::UpdateProp()
 	prop.wMaxHp = static_cast<WORD>(MIN(iMaxHp, static_cast<int>(USHRT_MAX)));
 	prop.wCurMp = static_cast<WORD>(MIN(iCurMp, static_cast<int>(USHRT_MAX)));
 	prop.wMaxMp = static_cast<WORD>(MIN(iMaxMp, static_cast<int>(USHRT_MAX)));
-	prop.dwHP = iCurHp;
-	prop.dwMaxHP = iMaxHp;
-	prop.dwMP = iCurMp;
-	prop.dwMaxMP = iMaxMp;
 	//属性值
 	int iMinAc = GetPropValue(PI_MINAC);
 	int iMaxAc = GetPropValue(PI_MAXAC);
@@ -764,24 +756,6 @@ VOID CHumanPlayer::UpdateProp()
 	prop.btMinSprAtk = static_cast<WORD>(MIN(iMinSprAtk, static_cast<int>(USHRT_MAX)));
 	prop.btMaxSprAtk = static_cast<WORD>(MIN(iMaxSprAtk, static_cast<int>(USHRT_MAX)));
 
-	prop.wBaseDC1 = static_cast<WORD>(MIN(iMinAtk, static_cast<int>(USHRT_MAX)));
-	prop.wBaseDC2 = static_cast<WORD>(MIN(iMaxAtk, static_cast<int>(USHRT_MAX)));
-	prop.wBaseMC1 = static_cast<WORD>(MIN(iMinMagAtk, static_cast<int>(USHRT_MAX)));
-	prop.wBaseMC2 = static_cast<WORD>(MIN(iMaxMagAtk, static_cast<int>(USHRT_MAX)));
-	prop.wBaseSC1 = static_cast<WORD>(MIN(iMinSprAtk, static_cast<int>(USHRT_MAX)));
-	prop.wBaseSC2 = static_cast<WORD>(MIN(iMaxSprAtk, static_cast<int>(USHRT_MAX)));
-
-	prop.dwExtendAC1 = iMinAc;
-	prop.dwExtendAC2 = iMaxAc;
-	prop.dwExtendMAC1 = iMinMagicDef;
-	prop.dwExtendMAC2 = iMaxMagicDef;
-	prop.dwExtendDC1 = iMinAtk;
-	prop.dwExtendDC2 = iMaxAtk;
-	prop.dwExtendMC1 = iMinMagAtk;
-	prop.dwExtendMC2 = iMaxMagAtk;
-	prop.dwExtendSC1 = iMinSprAtk;
-	prop.dwExtendSC2 = iMaxSprAtk;
-
 	prop.wCurBagWeight = GetPropValue(PI_CURBAGWEIGHT);
 	prop.wMaxBagWeight = GetPropValue(PI_MAXBAGWEIGHT);
 	prop.btCurBodyWeight = GetPropValue(PI_CURBODYWEIGHT);
@@ -791,7 +765,6 @@ VOID CHumanPlayer::UpdateProp()
 
 	prop.wStamina = m_wStamina;
 	prop.wMaxStamina = m_wMaxStamina;
-	prop.wPersonalCode = m_Humandesc.dbinfo.wPersonCode;
 
 	WORD w1 = m_Humandesc.dbinfo.btClass; // 职业
 	SendMsg(m_Humandesc.dbinfo.dwGold, SM_UPDATEPROP, w1, 0, 0, &prop, sizeof(prop)); // 发送人物信息
@@ -801,25 +774,17 @@ VOID CHumanPlayer::UpdateSubProp()
 {
 	DWORD dwArr = ((m_Humandesc.dbinfo.dwFlag[0] & 0xffff) << 8) | (GetPropValue(PI_MAGESCAPE) & 0xff); // 声望 | 魔法躲避/10
 	WORD w1 = GetPropValue(PI_ESCAPE) << 8 | GetPropValue(PI_HITRATE); // 躲避 | 命中
-	WORD w2 = GetPropValue(PI_POISONESCAPE) << 8 | GetPropValue(PI_POISONRECOVER); // 中毒躲避/10 | 中毒恢复
+	WORD w2 = GetPropValue(PI_POISONESCAPE) << 8 | GetPropValue(PI_POISONRECOVER); // 客户端没有(中毒躲避)/10 | 中毒恢复
 	WORD w3 = GetPropValue(PI_HPRECOVER) << 8 | GetPropValue(PI_MPRECOVER); // 生命恢复 | 魔法恢复
 	HUMANSUPROP suprop;
 	suprop.wHuoli = m_iHuoli;
 	suprop.wHuoliMax = 600;
-	suprop.bColor = 1;
+	suprop.bHuoli = 1; // 开启活力条
 	suprop.dwForgePoint = m_Humandesc.dbinfo.dwForgePoint;
 	suprop.bLucky = (BYTE)GetPropValue(PI_LUCKY);
 	suprop.bDawn = (BYTE)GetPropValue(PI_DAWN);
 	suprop.btMagicNicety = GetPropValue(PI_MAGHITRATE);
 	suprop.btPoisonNicety = GetPropValue(PI_POISONHITRATE);
-
-	suprop.dwSpeedPoint = GetPropValue(PI_ESCAPE);
-	suprop.dwUnKnow = m_Humandesc.dbinfo.dwForgePoint;
-	suprop.dwHitPoint = GetPropValue(PI_HITRATE);
-	suprop.dwMagicNicety = GetPropValue(PI_MAGHITRATE);
-	suprop.dwAntiMagic = GetPropValue(PI_MAGESCAPE);
-	suprop.dwPoisonNicety = GetPropValue(PI_POISONHITRATE);
-	suprop.dwAntiPoison = GetPropValue(PI_POISONESCAPE);
 	SendMsg(dwArr, SM_UPDATESUBPROP, w1, w2, w3, &suprop, sizeof(suprop));
 }
 
@@ -840,6 +805,7 @@ VOID CHumanPlayer::GetViewDetail(xPacket& packet)
 			detail.btTitleNameLen = 15;
 	}
 	detail.dwFeature = GetFeather();
+	detail.dwStatus = GetStatus();
 	detail.dwNameColor = GetNameColor(this);
 	detail.btSex = GetSex();
 	for (int i = 0; i < _U_MAX; i++)
@@ -849,10 +815,7 @@ VOID CHumanPlayer::GetViewDetail(xPacket& packet)
 	}
 	//扩展信息
 	VIEWDETAIL_EX detailEx;
-	detailEx.wLevel = GetPropValue(PI_LEVEL); // 玩家等级
 	detailEx.btJob = GetPro(); // 玩家职业
-	memset(detailEx.btExtKown, 255, 17);
-	detailEx.btExtKown[0] = 0;
 	//push数据
 	packet.push(&detail, sizeof(VIEWDETAIL));
 	int nValue = (BYTE)strlen(m_Humandesc.dbinfo.szPersonSign);
@@ -966,29 +929,13 @@ VOID CHumanPlayer::Update()
 		if (m_tmrGameTime.IsTimeOut(1000))
 		{
 			m_tmrGameTime.Savetime();
-			if (m_Humandesc.dbinfo.nGameTime > -1) // 时长区-游戏时间计算
-			{
-				if (m_Humandesc.dbinfo.nGameTime != 0)
-				{
-					m_Humandesc.dbinfo.nGameTime--;
-					if (m_Humandesc.dbinfo.nGameTime == 0)
-						CSystemScript::GetInstance()->Execute(GetScriptTarget(), "游戏时长.TimeOver", FALSE);
-				}
-			}
-			
-			if (m_bYuanQi == FALSE && m_wYuanQi < 2000)
+			if (m_bYuanQi == FALSE && m_wYuanQi < 2000) // 元气值
 			{
 				m_wYuanQi++;
 				SendMsg(GetId(), 0x9611, m_wYuanQi, 2000, 0);
 				if (m_wYuanQi >= 2000)
 					m_bYuanQi = TRUE;
 			}
-		}
-		// 60秒检查
-		if (m_tmrFenghaoTime.IsTimeOut(60*1000))
-		{
-			m_tmrFenghaoTime.Savetime();
-			CheckFengHaoTimeOut();
 		}
 	}
 	break;
@@ -1124,8 +1071,8 @@ VOID CHumanPlayer::WinExp(DWORD dwExp, BOOL bNoBonus, DWORD dwId)
 		dwExp = ROUND(GetExpFactor() * dwExp);
 	}
 	m_Humandesc.dbinfo.dwCurExp += dwExp;
-
-	SendMsg(m_Humandesc.dbinfo.dwCurExp, SM_GETEXP, dwExp & 0xffff, (dwExp & 0xffff0000) >> 16, 0, nullptr);
+	UINT64 i64TmpExp = m_Humandesc.dbinfo.dwCurExp;  // DWORD → UINT64，高位自动补 0
+	SendMsg(0, SM_GETEXP, dwExp & 0xffff, (dwExp & 0xffff0000) >> 16, 0, (LPVOID)&i64TmpExp, sizeof(UINT64));
 	for (int i = 0; i < m_iPetCount; i++)
 	{
 		if (m_pPets[i] && !m_pPets[i]->IsDeath())
@@ -1174,7 +1121,8 @@ VOID CHumanPlayer::LevelUp(int level)
 	m_pHumanDataDesc = pHumanData;
 	OnLevelUp(level);
 	DWORD dwId = GetId();
-	SendMsg(m_Humandesc.dbinfo.dwCurExp, SM_LEVELUP, level, dwId & 0xffff, (dwId >> 16) & 0xffff, 0, 0); //发送升级特效
+	UINT64 i64TmpExp = m_Humandesc.dbinfo.dwCurExp;  // DWORD → UINT64，高位自动补 0
+	SendMsg(0, SM_LEVELUP, level, dwId & 0xffff, (dwId >> 16) & 0xffff, (LPVOID)&i64TmpExp, sizeof(UINT64)); //发送升级特效
 	UpdateProp();
 	UpdateSubProp();
 }
@@ -1269,8 +1217,8 @@ VOID CHumanPlayer::UpdateToDB()
 	}
 	//if( IsSystemFlagSeted( SF_BANKLOADED ) )
 	//{
-	//	BAGITEMPOS	itempos[100];
-	//	int count = m_ItemBank.GetItemPos( itempos, 100 );
+	//	BAGITEMPOS	itempos[STOREAGE_SLOT];
+	//	int count = m_ItemBank.GetItemPos( itempos, STOREAGE_SLOT );
 	//	if( count > 0 )pObj->SendUpdateItemPos( IDF_BANK, itempos, count );
 	//}
 	if (this->m_fMagicLoaded)
@@ -1890,7 +1838,6 @@ VOID CHumanPlayer::RecalcHitSpeed()
 		break;
 		case 7: // 攻杀剑法
 		{
-			pMagic->dwFlag |= USERMAGICFLAG_ACTIVED;
 			Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
 			int nValue = magicskill.skills[pMagic->magic.btLevel].value3;
 			AddProp(PI_HITRATE, nValue);//增加命中
@@ -2348,7 +2295,8 @@ VOID CHumanPlayer::CleanPets()
 		int petcount = m_iPetCount;
 		for (int i = 0; i < petcount; i++)
 		{
-			pPets[i]->ToDeath();
+			// 改为通过EP_DEAD延迟队列，避免主线程直接操作工作线程拥有的宠物对象
+			pPets[i]->AddProcess(EP_DEAD, 0, 0, 0, 0, 2);
 		}
 		m_iPetCount = 0;
 	}
@@ -2373,7 +2321,8 @@ VOID CHumanPlayer::CleanPets()
 				CMonsterManagerEx::GetInstance()->DeleteMonster(m_pHorse);
 			}
 			else
-				m_pHorse->ToDeath();
+				// 改为通过EP_DEAD延迟队列，避免主线程直接操作工作线程拥有的坐骑对象
+				m_pHorse->AddProcess(EP_DEAD, 0, 0, 0, 0, 2);
 		}
 		m_pHorse = nullptr;
 	}
@@ -2447,17 +2396,6 @@ VOID CHumanPlayer::UpdateViewName()
 		strncat(m_szLongName.data(), szTemp, nRemain);
 		nUsed = strlen(m_szLongName.data());
 		nRemain = (nUsed < m_szLongName.size() - 1) ? (m_szLongName.size() - 1 - nUsed) : 0;
-	}
-	//时长封号系统
-	CFengHaoGrowManager* pMgr = CFengHaoGrowManager::GetInstance();
-	if (m_FenghaoInfo.btType1 > 0 && nRemain > 0) // 普通封号
-	{
-		FengHaoGrowItem* pConfig = pMgr->GetItem(m_FenghaoInfo.btType1);
-		if (pConfig)
-		{
-			snprintf(szTemp, sizeof(szTemp), "\\%s$%u", pConfig->szName.data(), pConfig->btColorId);
-			strncat(m_szLongName.data(), szTemp, nRemain);
-		}
 	}
 	m_szLongName[m_szLongName.size() - 1] = '\0';
 	SendChangeName();

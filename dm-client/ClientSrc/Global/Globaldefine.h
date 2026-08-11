@@ -9,6 +9,12 @@
 #include <windows.h>
 #endif
 
+// #ifdef _WIN64
+#ifndef WITHOUT_SD_INTERFACE
+#define WITHOUT_SD_INTERFACE	// 64位不支持SDOA接口，本来也没用
+#endif
+// #endif
+
 #pragma warning(disable:4251) // disable: warning C4251: 说类导出了但成员变量中的复杂类型没有导出
 
 // 设置使用性能测试

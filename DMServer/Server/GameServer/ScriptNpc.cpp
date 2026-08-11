@@ -129,6 +129,7 @@ BOOL CScriptNpc::InitGoods(tagGoods* pGoodsList)
 				continue;
 
 			pGoodsListTail->dwTemplatePrice = ROUND(m_fBuyPercent * pItemClass->nPrice);
+			pGoodsListTail->defaultDura = ROUND(m_fBuyPercent * pItemClass->maxdura);
 		}
 	}
 	return TRUE;
@@ -328,7 +329,7 @@ VOID CScriptNpc::SendGoodsList(CHumanPlayer* pPlayer)
 		size_t len = strlen(pList->szTemplate.data());
 		if (len < 4) continue;
 		if (containschar(pList->szTemplate.data())) continue;
-		sprintf(p, "%s/%u/%u/%u/", pList->szTemplate.data(), pList->defaultcount != 0, pList->dwTemplatePrice, pList->currentcount);
+		sprintf(p, "%s/%u/%u/%u/%u/", pList->szTemplate.data(), pList->defaultcount != 0, pList->dwTemplatePrice, pList->currentcount, pList->defaultDura);
 		p += strlen(p);
 		count++;
 	}
@@ -902,133 +903,12 @@ VOID CScriptNpc::SendMerChantJsonMsg(CScriptTarget* pTarget, const char* pWords,
 	if (!pPlayer) return;
 	switch (nType)
 	{
-	case 0:
-		SendDayExpMain(pPlayer, pWords); // 每日经验-主界面
-	break;
-	case 1:
-		SendDayExpHelp(pPlayer, pWords); // 每日经验-帮助
-	break;
-	case 2:
-		SendActivityMain(pPlayer, pWords); // 活动主页
-	break;
 	case 3:
 		SendCreateGuildHelp(pPlayer, pWords); //创建行会帮助
 	break;
 	case 100:
 		SendCustomUIWnd(pPlayer, pWords); //发送自定义UI消息
 	}
-}
-
-VOID CScriptNpc::SendDayExpMain(CHumanPlayer* pPlayer, const char* pWords)
-{
-	Document doc;
-	doc.Parse(pWords);
-	if (doc.HasParseError()) return;
-
-	xPacketPool::ScopedPacket packet;
-	const char* s1C = "expback2020";
-	packet->push(s1C);
-	packet->push(2);
-	int nValue = 0x01;
-	packet->push((LPVOID)&nValue, 4);
-	packet->push(doc["注意事项"].GetString());
-	packet->push(1);
-	nValue = 0x07;
-	packet->push((LPVOID)&nValue, 4);
-	nValue = doc["今日可以获得经验下限"].GetInt();
-	packet->push((LPVOID)&nValue, 4);
-	nValue = doc["今日可以获得经验上限"].GetInt();
-	packet->push((LPVOID)&nValue, 4);
-	nValue = doc["今日可追赶经验"].GetInt();
-	packet->push((LPVOID)&nValue, 4);
-	nValue = doc["累积可追赶经验"].GetInt();
-	packet->push((LPVOID)&nValue, 4);
-	packet->push(8);
-	nValue = doc["开服天数"].GetInt();
-	packet->push((LPVOID)&nValue, 4);
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-}
-
-VOID CScriptNpc::SendDayExpHelp(CHumanPlayer* pPlayer, const char* pWords)
-{
-	Document doc;
-	doc.Parse(pWords);
-	if (doc.HasParseError()) return;
-
-	xPacketPool::ScopedPacket packet;
-	const char* s1C = "expback2020";
-	packet->push(s1C);
-	packet->push(1);
-	int nValue = 0x02;
-	packet->push((LPVOID)&nValue, 1);
-	nValue = 0x01;
-	packet->push((LPVOID)&nValue, 4);
-	packet->push(doc["帮助说明"].GetString());
-	packet->push(1);
-	pPlayer->SendMsg(pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-}
-
-VOID CScriptNpc::SendActivityMain(CHumanPlayer* pPlayer, const char* pWords)
-{
-	Document doc;
-	doc.Parse(pWords);
-	if (doc.HasParseError()) return;
-
-	xPacketPool::ScopedPacket packet(65535);
-	int nValue = 0x00;
-	packet->push((LPVOID)&nValue, 2);
-
-	int nDayActivity = doc["今日活跃度"].GetInt();
-	packet->push((LPVOID)&nDayActivity, 4);
-
-	int nWeekActivity = doc["本周累计活跃度"].GetInt();
-	packet->push((LPVOID)&nWeekActivity, 4);
-
-	int nBoxCount = doc["宝箱"].Size();
-	packet->push((LPVOID)&nBoxCount, 4);
-
-	for (int i = 0; i < nBoxCount; i++)
-	{
-		const rapidjson::Value& box = doc["宝箱"][i];
-		const char* szReward = box["奖励"].GetString();
-		packet->push(szReward);
-		packet->push(1);
-	}
-	packet->push(4);
-	packet->push((LPVOID)&nBoxCount, 4);
-	for (int i = 0; i < nBoxCount; i++)
-	{
-		const rapidjson::Value& box = doc["宝箱"][i];
-		int nStatus = box["状态"].GetInt();
-		packet->push((LPVOID)&nStatus, 4);
-	}
-	packet->push((LPVOID)&nBoxCount, 4);
-	for (int i = 0; i < nBoxCount; i++)
-	{
-		const rapidjson::Value& box = doc["宝箱"][i];
-		int nRequire = box["需求"].GetInt();
-		packet->push((LPVOID)&nRequire, 4);
-	}
-
-	int nTaskCount = doc["任务"].Size();
-	packet->push((LPVOID)&nTaskCount, 4);
-
-	for (int i = 0; i < nTaskCount; i++)
-	{
-		const rapidjson::Value& task = doc["任务"][i];
-		const char* szName = task["名称"].GetString();
-		packet->push(szName);
-		packet->push(1);
-	}
-	packet->push((LPVOID)&nTaskCount, 4);
-	for (int i = 0; i < nTaskCount; i++)
-	{
-		const rapidjson::Value& task = doc["任务"][i];
-		int nCount = task["次数"].GetInt();
-		packet->push((LPVOID)&nCount, 4);
-	}
-
-	pPlayer->SendMsg(pPlayer->GetId(), 0x836, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CScriptNpc::SendCreateGuildHelp(CHumanPlayer* pPlayer, const char* pWords)

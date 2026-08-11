@@ -49,7 +49,7 @@ bool CSimpleCharacter::IsHuman()
 	return (GetRaceType() == CHARACTER_HUMAN);
 }
 
-//by json 这里获取的类型全为CHARACTER_MONSTER, 导致NPC显示不出来, 因该是消息接收结构错误
+// 这里获取的类型全为CHARACTER_MONSTER, 导致NPC显示不出来, 因该是消息接收结构错误
 bool CSimpleCharacter::IsNpc()
 {
 	return (GetRaceType() == CHARACTER_NPC);
@@ -122,7 +122,7 @@ bool CSimpleCharacter::IsPet()
 
 bool CSimpleCharacter::FromBuffer(const char* buf,int iLen)
 {
-	//fixed by json NPC外观
+	// NPC外观
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)buf;
 
 	int x = lpPacketMsg->stDefMsg.wParam;
@@ -160,7 +160,7 @@ bool CSimpleCharacter::FromBuffer(const char* buf,int iLen)
 	//	iReserveLen = 78;
 
 	//name+"/"+color(iColorLen字节)+"\0"(1字节)+其它(iRevLen字节)+职业(1字节)+行会名+"\0";
-	///* delete by json
+	// 删除
 	int j = 0;
 	string str;
 	str.assign(buf+28,iLen-28);

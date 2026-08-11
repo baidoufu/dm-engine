@@ -80,8 +80,11 @@ BOOL CHumanPlayer::SendPrivateShopPage(CHumanPlayer* pQueryer, WORD wFlag)
 static thread_local std::array<char, 65536> g_szCodedMsgBuffer{};
 VOID CHumanPlayer::UpdatePrivateShopToAround()
 {
-	std::array<DWORD, 2> dwParam = { 0, 0 };
-	SendMsg(GetId(), 0x80d7, getX(), getY(), (WORD)GetDirection(), (LPVOID)dwParam.data(), sizeof(dwParam));
+	PRIVATESHOPHEADER psheader{};
+	this->GetPrivateShopView(psheader);
+	psheader.w2 = 0;
+	DWORD* pdwParam = (DWORD*)&psheader.w1;
+	SendMsg(GetId(), 0x80d7, getX(), getY(), (WORD)GetDirection(), (LPVOID)pdwParam, sizeof(DWORD) * 2);
 
 	if (m_xVisibleObjectList.getCount() == 0) return;
 

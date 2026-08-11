@@ -39,7 +39,10 @@ Thumbs.db
 *.idb
 *.lastbuildstate
 
-data/
+
 **/Debug/
 **/Release/
 **/.vs
+
+*.wpf
+*.wpf.hash

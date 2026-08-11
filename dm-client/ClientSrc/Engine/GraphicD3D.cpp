@@ -5,9 +5,6 @@
 #include "Global/Interface/CallBackInterface.h"
 #include "TexManager.h"
 
-//#include "GameClient/IGALive9.h"//视频广告
-
-
 #include "Global/PerfCheck.h"
 #include "BaseClass/Compress/Compr.h"
 #include "Global/MathUtil.h"
@@ -15,15 +12,14 @@
 #pragma comment(lib,"d3d9.lib")
 #pragma comment(lib,"d3dx9.lib")
 
-
 #include <stdio.h>
 
 
 #define M_DIS_WIDTH			0
 #define M_DIS_HEIGHT		60
 
-#define MAX_WINDOW_WIDTH            1280
-#define MAX_WINDOW_HEIGHT           800
+#define MAX_WINDOW_WIDTH            2560
+#define MAX_WINDOW_HEIGHT           1440
 
 
 #define ATOM_RECT_SIZE	16
@@ -210,7 +206,7 @@ BOOL CGraphicD3D::CreateD3D(HWND hWnd,int iW,int iH,DisplayMode eDisplayMode,BOO
 		
 
 		// 调整窗口大小
-		AdjustWindow(hWnd,iW,iH,m_eDisMode == DM_FULL_FALSE);
+		AdjustWindow(hWnd,iW,iH,m_eDisMode == DM_FULL_FALSE,TRUE);
 
 	}
 
@@ -272,15 +268,6 @@ BOOL CGraphicD3D::CreateD3D(HWND hWnd,int iW,int iH,DisplayMode eDisplayMode,BOO
 	m_d3dpp = d3dpp;
 
 	//need uncomment
-	////初始化igaliveGetDevice
-	//if(g_pGlobalParam->GetMagicCtrlMgr() && g_pMagicCtrlMgr->GetMagicRoot(MAGICID_SHOW_IGA))
-	//{
-	//	if( !IGALiveInitialize( m_p3d, m_p3dDev ) )
-	//	{
-	//		//MessageBox(NULL,"IGALive初始化失败","",MB_OK);
-	//		output_debug("IGALive初始化失败");
-	//	}
-	//}
 
 
 	// D3DSprite
@@ -454,15 +441,6 @@ void CGraphicD3D::KillD3D(bool bRestoreDesktop)
 	SAFE_RELEASE(m_pMemSurf);
 	SAFE_RELEASE(m_pBackSurf);
 
-	////need uncomment
-	//if(g_pGlobalParam->GetIgaLiveState() == 1)
-	//{
-	//  IGALiveCloseVideo();
-	//  g_pGlobalParam->GetIgaLiveState() = 0;
-	//}
-
-	//if(g_pGlobalParam->GetMagicCtrlMgr() && g_pMagicCtrlMgr->GetMagicRoot(MAGICID_SHOW_IGA))
-	//  IGALiveDestroy();
 
 
 	SAFE_RELEASE(m_p3dDev);
@@ -478,21 +456,63 @@ void CGraphicD3D::KillD3D(bool bRestoreDesktop)
 	}
 }
 
+void CGraphicD3D::CenterWindow()
+{
+	MoveWindow(m_hWnd, 0, 0, 0, 0, TRUE, TRUE);
+}
+
+BOOL CGraphicD3D::MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint, BOOL bCenter)
+{
+	// 获取窗口当前尺寸（如果你已经知道宽高，也可以直接传值）
+	RECT rcWnd;
+	GetWindowRect(m_hWnd, &rcWnd);
+	int w = rcWnd.right - rcWnd.left;
+	int h = rcWnd.bottom - rcWnd.top;
+	if (0 < nWidth)
+	{
+		w = nWidth;
+	}
+	if (0 < nHeight)
+	{
+		h = nHeight;
+	}
+
+	// 获取屏幕工作区（排除任务栏）或全屏尺寸
+	// 方法1：全屏尺寸（含任务栏）
+	int screenW = GetSystemMetrics(SM_CXSCREEN);
+	int screenH = GetSystemMetrics(SM_CYSCREEN);
+
+	// 方法2：工作区（不含任务栏）——推荐
+	// RECT rcWork;
+	// SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWork, 0);
+	// int screenW = rcWork.right - rcWork.left;
+	// int screenH = rcWork.bottom - rcWork.top;
+
+	int x = X;
+	int y = Y;
+	if (bCenter)
+	{
+		x = (screenW - w) / 2;
+		y = (screenH - h) / 2;
+	}
+
+	return ::MoveWindow(hWnd, x, y, w, h, bRepaint);
+}
 
 // 修改游戏窗口的客户区域的大小
-void CGraphicD3D::AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup)
+void CGraphicD3D::AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup, BOOL bCenter)
 {
 	if(bPopup)
 	{
 		SetWindowLong(hWnd,GWL_STYLE,WS_POPUP|WS_VISIBLE);
-		MoveWindow(hWnd,0,0,iW,iH,TRUE);
+		MoveWindow(hWnd,0,0,iW,iH,TRUE, bCenter);
 	}
 	else
 	{
 		if(g_pCallBack && g_pCallBack->GetParentHandle())
 		{
 			SetWindowLong(hWnd,GWL_STYLE,WS_CHILD|WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS);
-			MoveWindow(hWnd,0,0,iW,iH,TRUE);
+			MoveWindow(hWnd,0,0,iW,iH,TRUE, bCenter);
 		}
 		else
 		{
@@ -506,7 +526,7 @@ void CGraphicD3D::AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup)
 			// 设置窗口类型和位置
 			SetWindowLong(hWnd,GWL_STYLE,style);
 			GetWindowRect(hWnd,&rc1);
-			BOOL bRtn = MoveWindow(hWnd,rc1.left,rc1.top,rc.right - rc.left,rc.bottom - rc.top,TRUE);
+			BOOL bRtn = MoveWindow(hWnd,rc1.left,rc1.top,rc.right - rc.left,rc.bottom - rc.top,TRUE, bCenter);
 
 			if (!bRtn)
 			{
@@ -525,7 +545,7 @@ void CGraphicD3D::RecomputeWindowXY(int & iW, int & iH, int iOW, int iOH, Displa
 	iW = iOW;
 	iH = iOH;
 
-	POINT ptDis[3] = { {800,600},{1024,768},{1280,800} };
+	POINT ptDis[6] = { {800,600},{1024,768},{1280,800},{1600,900},{1920,1080},{2560,1440} };
 
 	int maxDisW = 0;
 	int maxDisH = 0;
@@ -594,7 +614,7 @@ void CGraphicD3D::RecomputeDesktopXY(int & iDskW, int & iDskH, int iWinW, int iW
 	// 窗口模式之所以也需要验证，是因为对方可能在1024*768的情况下打开一个
 	// 1280*800的窗口，而有些情况下玩家的显卡是支持的
 	int iSelWidth = (DM_WINDOWED == eWinMode) ? iCurDisWidth : min(iCurDisWidth, 1280);
-	int iSelHeight = (DM_WINDOWED == eWinMode) ? iCurDisHeight : min(iCurDisHeight, 800);
+	int iSelHeight = (DM_WINDOWED == eWinMode) ? iCurDisHeight : min(iCurDisHeight, 1440);
 
 	int iTempWidth;
 	int iTempHeight;
@@ -618,9 +638,9 @@ void CGraphicD3D::RecomputeDesktopXY(int & iDskW, int & iDskH, int iWinW, int iW
 
 		if (DM_WINDOWED == eWinMode &&
 			iTempWidth >= iWinW && iTempHeight >= iWinH &&
-			iTempWidth <= 1280 && iTempHeight <= 800 ||
+			iTempWidth <= 2560 && iTempHeight <= 1440 ||
 			DM_WINDOWED != eWinMode &&
-			iTempWidth <= min(iWinW, 1280) && iTempHeight <= min(iWinH, 800) &&
+			iTempWidth <= min(iWinW, 2560) && iTempHeight <= min(iWinH, 1440) &&
 			iTempWidth >= 800 && iTempHeight >= 600) // 最小的全屏支持到800*600
 		{
 			// 记录下可支持的最接近于设定分辨率的一个分辨率

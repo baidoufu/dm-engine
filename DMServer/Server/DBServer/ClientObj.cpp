@@ -111,34 +111,6 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 		}
 	}
 	break;
-	case DM_QUERYFENGHAO:
-	{
-		if (bAsync)
-		{
-			DWORD dwOwner = *(DWORD*)pMsg->data;
-			DWORD dwFlag = pMsg->dwFlag;
-			WORD wKey1 = pMsg->wParam[0], wKey2 = pMsg->wParam[1];
-
-			auto pResult = std::make_shared<FenghaoInfo>();
-			memcpy(pResult.get(), pMsg->data, sizeof(FenghaoInfo));
-
-			DBAsyncWork work;
-			work.queryFunc = [dwOwner, pResult](CAppDB& db) {
-				db.QueryFengHaoInfo(dwOwner, pResult.get());
-			};
-			work.resultFunc = [this, pResult, dwFlag, wKey1, wKey2, IsClientValid]() {
-				if (!IsClientValid()) return;
-				SendMsg(dwFlag, DM_QUERYFENGHAO, wKey1, wKey2, 0, (LPVOID)pResult.get(), sizeof(FenghaoInfo));
-			};
-			queryPool.SubmitWork(std::move(work));
-		}
-		else
-		{
-			pMsg->wParam[2] = appDB.QueryFengHaoInfo(*(DWORD*)pMsg->data, (FenghaoInfo*)pMsg->data);
-			SendMsg(pMsg, sizeof(FenghaoInfo));
-		}
-	}
-	break;
 	case DM_EXECSQL:
 	{
 		// DM_EXECSQL 比较复杂，涉及动态列定义，保持同步执行以保证正确性
@@ -738,26 +710,6 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 		else
 		{
 			appDB.UpdateTaskInfo(pMsg->dwFlag, (TASKINFO*)pMsg->data);
-		}
-	}
-	break;
-	case DM_UPDATEFENGHAO:
-	{
-		if (bAsync)
-		{
-			DWORD dwOwner = pMsg->dwFlag;
-			FenghaoInfo info;
-			memcpy(&info, pMsg->data, sizeof(FenghaoInfo));
-
-			DBAsyncWork work;
-			work.queryFunc = [dwOwner, info](CAppDB& db) {
-				db.UpdateFengHaoInfo(dwOwner, const_cast<FenghaoInfo*>(&info));
-			};
-			queryPool.SubmitWork(std::move(work));
-		}
-		else
-		{
-			appDB.UpdateFengHaoInfo(pMsg->dwFlag, (FenghaoInfo*)pMsg->data);
 		}
 	}
 	break;

@@ -1075,27 +1075,21 @@ bool CMainWnd::Msg_MainSystem(DWORD dwMsg, DWORD dwData, CControl * pControl)
 			case VK_F1:
 #ifdef _DEBUG
 				{
-
 					//g_pControl->PopupWindow(MSG_CTRL_SKILLWND,OPER_RECREATE);
-					g_pControl->PopupWindow(MSG_CTRL_BINDPTWND_WND,OPER_RECREATE);
+					//g_pControl->PopupWindow(MSG_CTRL_BINDPTWND_WND,OPER_RECREATE);
 					//g_pControl->MsgToWnd("EquipSoulWnd",MSG_CTRL_EQUIPSOUL_WND,101);
-
 					//g_pGameControl->SEND_APLogin_Req("2133code", "sign=cc3e6caca39fc3a73fe162742ab177d4&userid=6704153&time=1331882002;21");					
-
 				}
 				break;
 #endif
 			case VK_F2:
 #ifdef _DEBUG
 				{
-					
 					//g_pControl->PopupWindow(MSG_CTRL_CHARWND,OPER_RECREATE);
-
-					string url = g_pStreamMgr->GetWebsite("NewUser");
-					string str = "                        错  误\\";
-					str += "您输入的盛大通行证或密码有误，请重新输入或<注册新的盛大通行证/@@OpenUrl " + url + ">。";	
-					g_MsgBoxMgr.PopTagAlert(str.c_str());
-					
+					//string url = g_pStreamMgr->GetWebsite("NewUser");
+					//string str = "                        错  误\\";
+					//str += "您输入的盛大通行证或密码有误，请重新输入或<注册新的盛大通行证/@@OpenUrl " + url + ">。";	
+					//g_MsgBoxMgr.PopTagAlert(str.c_str());
 				}
 				break;
 #endif

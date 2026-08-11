@@ -204,7 +204,7 @@ public:
 	CTexManager(void);
 	~CTexManager(void);
 
-	//by json 处理sgl文件
+	// 处理sgl文件
 	bool        Init(const char* strDataDir);
 
 	LPTexture   LoadImage(const char* path);    // 导入其他格式文件，使用FreeImage

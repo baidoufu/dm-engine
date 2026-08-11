@@ -319,13 +319,6 @@
 //dword 2 = attacker
 //dword3 = ?
 #define SM_BEATTACK				0x1f
-// 立即死亡
-//cmd = 34
-//id
-//x,y
-//dir
-//dword0 = outview dword1 = 0x40000000 (dword1 = viewflag)
-#define SM_DIE					0x22
 // 消失
 //id at x,y,dir disappeared
 #define SM_DISAPPEAR			0x1e
@@ -529,7 +522,6 @@
 
 #define	MAX_LEVEL 99 //玩家最大等级
 #define	MAX_TASK 50 //最大任务数, 最大不能超过254
-#define	MAX_FENGHAO 58 //最大时长封号序号
 
 // 8方向判断斜率阈值: tan(22.5°) * 1000 和 tan(67.5°) * 1000
 constexpr int DIR8_SLOPE_LOW = 414;   // tan(22.5°) * 1000
@@ -644,28 +636,16 @@ typedef struct DELETED_CHAR_LIST
 
 #pragma pack(push)
 #pragma pack(1)
-typedef struct tagP2PServer //微端服务器消息
-{
-	tagP2PServer()
-	{
-		FILLSELF(0);
-	}
-	BYTE btRec;
-	int nIPAddr;
-	WORD wPort;
-}P2PServer;
-
 typedef struct tagPETINFO
 {
-	WORD btLevel;
-	CHAR sName[14];
-	DWORD wCurHp;
-	DWORD wMaxHp;
-	WORD dc1;
-	WORD dc2;
-	WORD ac;
-	WORD mac;
-	BYTE flag;
+	BYTE btLevel; //宠物等级
+	CHAR sName[15]; //宠物名称 (14字符 + 1字节'\0')
+	WORD wCurHp; //当前血量
+	WORD wMaxHp; //最大血量
+	BYTE dc1; //最小攻击
+	BYTE dc2; //最大攻击
+	BYTE ac; //最小防御
+	BYTE mac; //最大防御
 }PETINFO;
 
 typedef struct tagBASEITEM
@@ -749,9 +729,10 @@ typedef struct tagITEM
 	DWORD dwMakeIndex;
 	WORD wCurDura;
 	WORD wMaxDura;
-	BYTE btItemExt[360];
+	BYTE btItemExt[35];
 	DWORD dwParam[4]; //引擎判断使用 0 ItemLimit.txt中配置的限制物品ID, 1 未使用 2 物品位置POS, 3 物品使用的状态
 	CHAR szFullName[16]; //完整名字, 用于搜索ITEMCLASS对象绑定指针
+	CHAR szExternString[20]; // 物品扩展文字
 	size_t nItemClassPtr; // 指向ITEMCLASS的指针ID
 	BOOL operator == (const char* pszName)
 	{
@@ -771,8 +752,8 @@ typedef struct tagITEM
 	//设置客户端物品长度
 	VOID SetLen(BYTE btLen = 70, BYTE btNum = 1)
 	{
-		btItemExt[32] = btLen;
-		btItemExt[33] = btNum;
+		//btItemExt[32] = btLen;
+		//btItemExt[33] = btNum;
 	}
 	// 获取豹子喂养时间
 	DWORD GetPetTime() const
@@ -800,13 +781,14 @@ typedef struct tagITEM
 	// 获取物品扩展名字
 	const char* GetExName() const
 	{
-		return (char*)&btItemExt[122];
+		return szExternString;
 	}
 	// 设置物品扩展名字
 	VOID SetExName(const char* szName)
 	{
 		if (szName == NULL) return;
-		strncpy_s((char*)&btItemExt[122], 20, szName, _TRUNCATE);
+		strncpy(szExternString, szName, sizeof(szExternString) - 1);
+		szExternString[sizeof(szExternString) - 1] = '\0';
 	}
 }ITEM;
 
@@ -821,12 +803,12 @@ typedef struct tagITEMCLIENT
 	DWORD dwMakeIndex;
 	WORD wCurDura;
 	WORD wMaxDura;
-	BYTE btItemExt[360];
+	BYTE btItemExt[35];
 	//设置客户端物品长度
 	VOID SetLen(BYTE btLen = 70, BYTE btNum = 1)
 	{
-		btItemExt[32] = btLen;
-		btItemExt[33] = btNum;
+		//btItemExt[32] = btLen;
+		//btItemExt[33] = btNum;
 	}
 }ITEMCLIENT;
 
@@ -844,12 +826,12 @@ typedef struct tagPRIVATESHOPHEADER
 	{
 		FILLSELF(0);
 	}
-	WORD w1;
-	BYTE w2;
-	BYTE btFlag;
-	DWORD dw1;
-	WORD wCount;
-	CHAR szName[52];
+	WORD w1; // 摊位类型: 0=普通 1=租赁
+	BYTE w2; // 结果码 0 请求摆摊  0xFF 取消摆摊
+	BYTE btFlag; // 旗帜类型
+	DWORD dw1; // 旗帜颜色, 0→0xFFFFFFFF
+	WORD wCount; // 物品数量
+	CHAR szName[52]; // 摆摊名字
 }PRIVATESHOPHEADER;
 
 typedef struct tagPRIVATESHOPSHOW
@@ -864,14 +846,14 @@ typedef struct tagPRIVATESHOPSHOW
 
 typedef struct tagPrivateShopItemQuery
 {
-	DWORD dwMakeIndex;
-	DWORD dwPrice;
-	WORD wPriceType;
+	DWORD dwMakeIndex; // 物品ID
+	DWORD dwPrice; // 价格数值
+	WORD wPriceType; // 0=金币, 1=元宝
 }PS_ITEMQUERY;
 
 typedef struct tagPrivateShopQuery
 {
-	char szName[52];
+	CHAR szName[52]; // 摊位名
 	PS_ITEMQUERY items[1];
 }PRIVATESHOPQUERY;
 
@@ -911,13 +893,17 @@ typedef struct tagHUMANPROP // 人物属性 279字节
 	WORD btMaxMagAtk;		//魔法上限
 	WORD btMinSprAtk;		//道术下限
 	WORD btMaxSprAtk;		//道术上限
+
 	WORD wCurHp;			//生命值
 	WORD wCurMp;			//魔法值
 	WORD wMaxHp;			//最大生命值
 	WORD wMaxMp;			//最大魔法值
-	DWORD PKlevel;			//PK值
-	UINT64 dwCurexp;		//当前经验
-	UINT64 dwMaxexp;		//最大经验
+
+	WORD wLevelUpCount;		//当前拥有经验
+	WORD wNextLevelUpCount;	//下一级需要的经验
+
+	INT64 dwCurexp;			//当前经验值
+	INT64 dwMaxexp;			//升级所需经验	
 	WORD wCurBagWeight;		//当前背包重量
 	WORD wMaxBagWeight;		//最大背包重量
 	BYTE btCurBodyWeight;	//负重
@@ -943,47 +929,24 @@ typedef struct tagHUMANPROP // 人物属性 279字节
 	//[绑定金币元宝]
 	DWORD dwBindMoney;		//绑定金币
 	DWORD dwBindYuanBao;	//绑定元宝
-
-	WORD wFightValue;		//融合元神 战斗值
-	DWORD wSeaDemon;		//海魔值累计值总值2000, 1星200、2星400、3星600、4星800
-	CHAR szMemo[10];		//备注/签名信息
-	BYTE btVipNextLevel;	//VIP商行下一等级
-	DWORD dwVipNextExp;		//VIP商行下一等级经验值
-	DWORD dwActiveRate;		//活跃度
-	BYTE btVipLevel;		//VIP等级
-	DWORD dwPrizeBit;		//奖励领取情况
-	BYTE byWingColor;		//翅膀颜色
-	DWORD dwGC;				//妖力攻击？分上下限
-	DWORD dwHP;				//当前生命值
-	DWORD dwMaxHP;			//最大生命值
-	WORD wBaseDC1;			//基础物理攻击力下限
-	WORD wBaseDC2;			//基础物理攻击力上限
-	WORD wBaseMC1;			//基础魔法攻击力下限
-	WORD wBaseMC2;			//基础魔法攻击力上限
-	WORD wBaseSC1;			//基础道术攻击力下限
-	WORD wBaseSC2;			//基础道术攻击力上限
-	WORD wBaseGC1;			//基础妖力攻击力下限
-	WORD wBaseGC2;			//基础妖力攻击力上限
-	DWORD dwMP;				//当前魔法值
-	DWORD dwMaxMP;			//最大魔法值
-	DWORD dwElementForce;	//元力值(神、魔)
-	DWORD dwElementForceMax;//元力最大值(神、魔)
-	DWORD dwExtendAC1;		//物理防御力下限
-	DWORD dwExtendAC2;		//物理防御力上限
-	DWORD dwExtendMAC1;		//魔法魔御力下限
-	DWORD dwExtendMAC2;		//魔法魔御力上限
-	DWORD dwExtendDC1;		//物理攻击力下限
-	DWORD dwExtendDC2;		//物理攻击力上限
-	DWORD dwExtendMC1;		//魔法攻击力下限
-	DWORD dwExtendMC2;		//魔法攻击力上限
-	DWORD dwExtendSC1;		//道术攻击力下限
-	DWORD dwExtendSC2;		//道术攻击力上限
-	DWORD dwExtendGC1;		//妖力攻击力下限
-	DWORD dwExtendGC2;		//妖力攻击力上限
-	BYTE btMilitaryRank;	//军衔等级
-	WORD wPersonalCode;		//特殊封号-个性设置
-	BYTE btGuildMember;		//行会会员等级
-	BYTE unKownAbi[61];
+	// 群英阵谱
+	BYTE bySectionTrustee;	//允许区域模式
+	BYTE byFreeTrustee;		//允许自由模式
+	DWORD dwZhenBaoValue;	//珍宝值
+	BYTE btmemo[10];
+	//荣誉值
+	DWORD dwHonorValue;		//荣誉值
+	BYTE byVipTradeLevel;	//vip商行等级
+	//未知
+	DWORD LHGTime;
+	//[夺宝1.28][翅膀颜色]
+	BYTE byWingColor;//翅膀颜色
+	DWORD dwActiveRate;//活跃度
+	//未知
+	BYTE bt3;
+	DWORD dwPrizeBit;//奖励领取情况,第一位表示
+	//未知
+	BYTE btm;
 }HUMANPROP;
 
 typedef struct tagHUMANSUPROP
@@ -994,27 +957,43 @@ typedef struct tagHUMANSUPROP
 	}
 	WORD wHuoli;			//活力值
 	WORD wHuoliMax;			//最大活力值
-	BYTE bColor;			//颜色
-	DWORD dwForgePoint;		//极品值
+	BYTE bHuoli;			//开启活力条
+	DWORD dwForgePoint;		//极品修炼值
 	BYTE bLucky;			//幸运
 	BYTE bDawn;				//诅咒
 	BYTE btMagicNicety;		//魔法命中
 	BYTE btPoisonNicety;	//中毒命中
-	BYTE unKownAbil1[15];	//未知
-	BYTE btThump;			//暴击概率
-	BYTE unKownAbil2[54];	//未知
-	DWORD dwSpeedPoint;		//躲避
-	DWORD dwUnKnow;			//极品修炼值
-	WORD wThump;			//暴击等级
-	BYTE unKownAbil3[4];	//未知
-	DWORD dwHitPoint;		//命中
-	DWORD dwMagicNicety;	//魔法命中
-	DWORD dwAntiMagic;		//魔法躲避
-	DWORD dwPoisonNicety;	//中毒命中
-	DWORD dwAntiPoison;		//中毒躲避
-	BYTE unKownAbil4[8];	//未知
-	DWORD dwToughness;		//韧性
-	BYTE unKownAbil5[56];	//未知
+	// 以下未加功能
+	BYTE bJinAttack;		//金攻
+	BYTE bMuAttack;			//木攻
+	BYTE bTuAttack;			//土攻
+	BYTE bShuiAttack;		//水攻
+	BYTE bHuoAttack;		//火攻
+	BYTE bJinDefend;		//金防
+	BYTE bMuDefend;			//木防
+	BYTE bTuDefend;			//土防
+	BYTE bShuiDefend;		//水防
+	BYTE bHuoDefend;		//火防
+	BYTE bMeritoriousnessLevel; //当前功勋等级
+	DWORD dwMeritoriousnessValue; //功勋值
+	DWORD dwMeritoriousnessAddSpeed;//当前等级获取功勋值上限：XXX\小时
+	DWORD dwMeritoriousnessExp;//当前可兑换经验
+	WORD wJinAttack;		//金攻
+	WORD wMuAttack;			//木攻
+	WORD wTuAttack;			//土攻
+	WORD wShuiAttack;		//水攻
+	WORD wHuoAttack;		//火攻
+	WORD wCruelAttack;      //暴击
+	WORD wAbsordBlood;      //吸血
+	WORD wReboundHurt;      //反弹伤害
+	WORD wAbsDefend;        //绝对防御
+	WORD wDestroyDefend;    //破防
+	BYTE bBloody;           //嗜血 百分数
+	WORD wJinAttack_Low;	//金攻下限
+	WORD wMuAttack_Low;		//木攻下限
+	WORD wTuAttack_Low;		//土攻下限
+	WORD wShuiAttack_Low;	//水攻下限
+	WORD wHuoAttack_Low;	//火攻下限
 }HUMANSUPROP;
 
 typedef struct tagMAGIC
@@ -1051,8 +1030,10 @@ typedef struct tagMAGIC
 	BYTE wDefMaxPower;	//防御最大威力-未使用
 	BYTE btUnknow3;		//保留
 	//额外技能修炼
-	BYTE btNeedLevel2[7];//升级所需等级-未使用
-	DWORD iLevelupExp2[7];//升级所需技能值-未使用
+	BYTE btNeedLevel2[2];//升级所需等级-未使用
+	DWORD iLevelupExp2[2];//升级所需技能值-未使用
+	BYTE btNeedLevel3[3];//升级所需等级-未使用
+	DWORD iLevelupExp3[3];//升级所需技能值-未使用
 }MAGIC;
 
 typedef struct tagREGISTERACCOUNT
@@ -1289,35 +1270,6 @@ typedef struct tagTASKINFO
 	TASKNODE tasks[MAX_TASK];
 }TASKINFO;
 
-struct FengHaoRow
-{
-	BOOL  boActivation; //是否激活
-	DWORD dwLastDate; //持续时间(秒)
-};
-
-typedef struct tagFenghaoInfo // // 时长封号玩家信息
-{
-	tagFenghaoInfo()
-	{
-		FILLSELF(0);
-	}
-	BYTE btType1;//普通封号
-	BYTE btType2;//特殊封号
-	BYTE btType3;//节日封号
-	FengHaoRow mFengHaoRow[MAX_FENGHAO];
-	// 获取激活的称号数量
-	BYTE GetCount()const
-	{
-		BYTE btCount = 0;
-		for (int i = 0; i < MAX_FENGHAO; ++i)
-		{
-			if (mFengHaoRow[i].boActivation)
-				btCount++;
-		}
-		return btCount;
-	}
-}FenghaoInfo;
-
 ///////////////-=[数据服务器]=-///////////////////////////////
 enum dbmsg
 {
@@ -1519,16 +1471,6 @@ enum dbmsg
 	//	dwFlag = ownerdbid
 	//	data = TaskInfo
 	DM_UPDATETASKINFO,
-	//  查询时长封号
-	//	dwFlag = clientid
-	//	w1 w2 = clientkey
-	//	data = id
-	//	data = FenghaoInfo
-	DM_QUERYFENGHAO,
-	//  更新时长封号
-	//	dwFlag = ownerdbid
-	//	data = FenghaoInfo
-	DM_UPDATEFENGHAO,
 	DM_END,
 };
 

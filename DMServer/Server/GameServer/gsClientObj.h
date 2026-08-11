@@ -40,7 +40,6 @@ public:
 	VOID OnCreateItem(ITEM& item, int pos, BYTE btFlag);
 	int GetPacketQueueCount() { return m_xPacketQueue.getcount(); }
 private:
-	VOID SendClientNewMail(WORD Parm1, WORD Parm2, WORD Parm3);
 	VOID SendBagItems(DBITEM* pItems, int count);
 	VOID SendEquipments( /*DBITEM * pItems, int count*/);
 	VOID ProcClientMsg(PMIRMSG pMsg, int datasize);
@@ -93,14 +92,10 @@ public:
 	VOID HandleEditGuildNotice(PMIRMSG pMsg, int datasize);
 	VOID HandleViewGuildExp(PMIRMSG pMsg, int datasize);
 	VOID HandleRequestGroupPos(PMIRMSG pMsg, int datasize);
+	VOID HandleHeartBeat(PMIRMSG pMsg, int datasize);
 	VOID HandlePetBackExp(PMIRMSG pMsg, int datasize);
-	VOID HandleTimeAchieve(PMIRMSG pMsg, int datasize);
-	VOID HandleShortcutKey(PMIRMSG pMsg, int datasize);
-	VOID HandleNewMail(PMIRMSG pMsg, int datasize);
 	VOID HandleSocialInfo(PMIRMSG pMsg, int datasize);
-	VOID HandleFengHao(PMIRMSG pMsg, int datasize);
 	VOID HandleFuncCollection(PMIRMSG pMsg, int datasize);
-	VOID HandleAvatarFrame(PMIRMSG pMsg, int datasize);
 	VOID HandleGuildFengHao(PMIRMSG pMsg, int datasize);
 	VOID HandleReplyGuild(PMIRMSG pMsg, int datasize);
 	VOID HandleTrainHorse(PMIRMSG pMsg, int datasize);
@@ -109,6 +104,7 @@ public:
 	VOID HandleGetMeal(PMIRMSG pMsg, int datasize);
 	VOID HandleRun(PMIRMSG pMsg, int datasize);
 	VOID HandleAttack(PMIRMSG pMsg, int datasize);
+	VOID HandleForceAttack(PMIRMSG pMsg, int datasize);
 	VOID HandleMine(PMIRMSG pMsg, int datasize);
 	VOID HandleSpellSkill(PMIRMSG pMsg, int datasize);
 	VOID HandleSpecialHit(PMIRMSG pMsg, int datasize);
@@ -130,6 +126,7 @@ public:
 	VOID HandlePetWindow(PMIRMSG pMsg, int datasize);
 	VOID HandleHeroRank(PMIRMSG pMsg, int datasize);
 	VOID HandleQueryHeroRank(PMIRMSG pMsg, int datasize);
+	VOID HandleQuerySndaMark(PMIRMSG pMsg, int datasize);
 private:
 	ENTERGAMESERVER	m_EnterInfo;
 	gameserverusermode m_State;

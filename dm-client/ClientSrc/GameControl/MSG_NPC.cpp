@@ -56,8 +56,9 @@ void CGameControl::MSG_Exchange_Buy_Menu(const char * msg,int iLen)
 		int bNext = StringUtil::toInt(buf,nPos);
 		int price = StringUtil::toInt(buf,nPos);
 		int id    = StringUtil::toInt(buf,nPos);
-
+		int nDura = StringUtil::toInt(buf,nPos);
 		_SellData SellData(name.c_str(),bNext,price,id,byType);
+		SellData.nDura = nDura;
 
 		g_NPC.GetVectorSellData().push_back(SellData);
 	}
@@ -143,7 +144,7 @@ void CGameControl::MSG_Exchange_Second_Buy_Menu(const char * msg,int iLen)
 		g_NPC.GetGoodList().push_back(tempGood);
 
 		int nDura = tempGood.GetDura();
-		nDura = (nDura+500)/1000;
+		nDura = nDura/100;
 
 		_SellData SellData(tempGood.GetName(),nDura,tempGood.GetPrice(),tempGood.GetID(),byType);
 		g_NPC.GetVectorSellData().push_back(SellData);

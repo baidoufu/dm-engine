@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<ActivityRateCfg Ver="1">
+  <Tasks>
+    <!-- 顺序是:编号 时间  任务名称 NPC 等级  活跃度 -->
+    <!-- 如:1 全天 五色任务 中州官员 20  10-->
+    <Task id="1" time="全天"		name="幸运珍宝阁"	npc="快活仙人" 		needlevel="20" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    从幸运珍宝阁可以获取大量经验，\当然，前提是你的运气足够好	    \    点击下划线文字可快速前往"	/>
+    <Task id="2" time="全天"		name="安全答题"		npc="王城安全大使" 	needlevel="20" award="10" command="&lt;王城安全大使/@@goto HEROISLAND 王城安全大使 82,87&gt;" 	tips="    安全答题可以学到许多账号安全相\关的信息，同时可以获得大量经验     \    账号安全，远比经验来的重要"	/>
+    <Task id="3" time="全天"		name="王城答题"		npc="王城官员" 		needlevel="20" award="10" command="&lt;王城官员/@@goto HEROISLAND 王城官员 80,87&gt;" 		tips="    想要深入了解游戏，那么就来参与\王城答题吧			    \    从来没有人能够一直对下去..."	/>
+    <Task id="4" time="9:00-24:00"	name="五色任务"		npc="王城官员" 		needlevel="20" award="10" command="&lt;王城官员/@@goto HEROISLAND 王城官员 80,87&gt;" 		tips="    五色任务每天可以完成五次，累积\完成五次可以获得更多的经验	    \    完成绿色任务可以获得多倍经验"	/>
+    <Task id="5" time="全天"		name="勇士任务"		npc="王城诏令使者" 	needlevel="15" award="10" command="&lt;王城诏令使者/@@goto 0 王城诏令使者 474,151&gt;" 		tips="    有些任务，可并不是那么容易完成\的，比如说：勇士任务		    \    勇士，用行动来证明自己"	/>
+    <Task id="6" time="全天"		name="百宝园"		npc="快活仙人" 		needlevel="20" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    幸运符可以在商城试用绑定元宝购\买，百宝园每天最多参与40次	    \    经验、声望、金砖，尽在百宝园"	/>
+    <Task id="7" time="全天"		name="讨伐任务"		npc="讨伐使者" 		needlevel="20" award="10" command="&lt;讨伐使者/@@goto 0 讨伐使者 472,149&gt;"			tips="    讨伐任务一般位于海岛上，需要通\过老兵传送前往	    	    	    \    讨伐任务难度较大，请组队前往"	/>
+    <Task id="8" time="全天"		name="逆魔古冢"		npc="快活仙人" 		needlevel="30" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    你可以从活动日历中查看逆魔古冢\开放的时间			    \    队长携带圣武精华时可不限时进入"/>
+    <Task id="9" time="全天"		name="军机令任务"	npc="快活仙人" 		needlevel="30" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    军机令传送过程中危机四伏，更重\要的是不能遗忘了军机令内容         \    除了跑路，似乎还有更快捷的方法"/>
+    <Task id="10" time="全天"		name="三昧真火"		npc="宝儿"		needlevel="28" award="10" command="&lt;宝儿/@@goto FD01 宝儿 64,91&gt;" 			tips="    发布真火修炼任务的宝儿位于圣殿\浮岛上，请通过中州老兵前往	    \    高等级的真火可以炼制高级法宝"	/>      
+  </Tasks>
+  
+  <!-- 1.0 新区版本 -->
+	<Tasks1_1>
+	    <Task id="0" time="全天"		name="每日登录"	npc="" needlevel="0" award="5" command="" 		tips="    每天登陆即可获取">
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="1" time="全天"		name="幸运珍宝阁"	npc="快活仙人" needlevel="20" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    从幸运珍宝阁可以获取大量经\验，当然，前提是你的运气足够好	    \    点击下划线文字可快速前往">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward looks="7001" tips="金币"/>
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="2" time="全天"		name="安全答题"		npc="王城安全大使" needlevel="20" award="5" command="&lt;王城安全大使/@@goto HEROISLAND 王城安全大使 82,87&gt;" 	tips="    安全答题可以学到许多账号安\全相关的信息，同时可以获得大量\经验 ，账号安全远比经验来的重要">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="3" time="18:00-20:00"		name="王城答题"		npc="王城官员" needlevel="20" award="5" command="&lt;王城官员/@@goto HEROISLAND 王城官员 80,87&gt;" 		tips="    想要深入了解游戏，那么就来\参与王城答题吧			    \    从来没有人能够一直对下去...">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="4" time="09:00-24:00"	name="五色任务"		npc="王城官员" needlevel="20" award="2" command="&lt;王城官员/@@goto HEROISLAND 王城官员 80,87&gt;" 		tips="    王城官员五色任务每天可以完\成五次，任务颜色等级越高奖励越\丰厚，最高可刷新至橙色。">
+				<reward looks="7000" tips="大量经验奖励"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="5" time="全天"		name="勇士任务"		npc="王城诏令使者" needlevel="15" award="2" command="&lt;王城诏令使者/@@goto 0 王城诏令使者 474,151&gt;" 		tips="    有些任务，可并不是那么容易\完成的，比如说：勇士任务		    \    勇士，用行动来证明自己吧！">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+	    <Task id="6" time="全天"		name="百宝园"		npc="快活仙人" needlevel="35" award="2" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;"
+		tips="    进入百宝园后消耗幸运符，百\宝园每天最多参与40次，前10次可\获得活跃度奖励。进入后根据VIP\级别开启不同次数">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward looks="7001" tips="金币"/>
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="3" tips="奖励活跃度3点"/>
+		</Task>
+	    <Task id="7" time="全天"		name="讨伐任务"		npc="讨伐使者" needlevel="20" award="15" command="&lt;讨伐使者/@@goto 0 讨伐使者 472,149&gt;"			tips="    讨伐任务一般位于海岛上，需\要通过老兵传送前往	    	    	    \讨伐任务难度较大，请组队前往">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="8" time="每日一次"		name="逆魔古冢"		npc="快活仙人" needlevel="35" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    你可以从活动日历中查看逆魔\古冢开放的时间			    \队长携带圣武精华时可不限时进入">
+				<reward looks="7000" tips="大量经验"/>
+				<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+	    <Task id="9" time="全天"		name="军机令任务"	npc="快活仙人" needlevel="30" award="3" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    军机令传送过程中危机四伏，\更重要的是不能遗忘了军机令内容         \除了跑路，似乎还有更快捷的方法">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="3" tips="奖励活跃度3点"/>
+		</Task>
+	  	<Task id="10" time="全天"		name="珍宝珠"	npc="" needlevel="0" award="5" command="" tips="    每次点亮珍宝珠增加1点活跃\度，  最高增加5点">
+				<reward type="1" num="1" tips="奖励活跃度1点"/>
+		</Task>
+		<Task id="11" time="全天"		name="单人BOSS副本"	npc="" needlevel="0" award="5" command="&lt;单人挑战使者/@@goto MH001 单人挑战使者 122,73&gt;" tips="    完成boss挑战后可获得10点活\跃度.">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+		<Task id="12" time="全天"		name="通天旋塔"	npc="" needlevel="35" award="3" command="&lt;镇塔使者/@@goto MH001 镇塔使者 65,41&gt;" tips="    勇闯通天旋塔讨伐魔族首领，\完成后可获得10点活跃度">
+				<reward looks="7001" tips="大量金币"/>
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+		<Task id="13" time="全天"		name="在线奖励 最后一档次"	npc="" needlevel="0" award="5" command="" tips="    领取在线奖励最后一档可获\得10点活跃度">
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+		<Task id="14" time="14：00--18：00"		name="物资护送"	npc="" needlevel="0" award="5" command="&lt;药店掌柜/@@goto 0 药店掌柜 497,269&gt;" tips="    每次完成金币护送可获得1点\活跃度度，  最高增加5点">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="1" tips="奖励活跃度1点"/>
+		</Task>
+		<Task id="15" time="18：00--22：00"		name="金币护送"	npc="" needlevel="0" award="5" command="&lt;护送使者/@@goto 0 护送使者 470,147&gt;" tips="    每次完成金币护送可获得2点\活跃度度，  最高增加6点">
+				<reward looks="7001" tips="大量金币"/>
+				<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+		<Task id="16" time="全天"		name="进入宝地"	npc="" needlevel="40" award="2" command="&lt;宝地使者/@@goto 0 宝地使者 475,221&gt;" 		tips="    每天进入宝地地图可获得5点\活跃度 ">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+				<reward looks="7001" tips="大量金币"/>
+			<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+		<Task id="17" time="全天"		name="落霞夺宝"	npc="" needlevel="0" award="2" command="&lt;夺宝达人/@@goto 1 夺宝达人 250,250&gt;" 		tips="    每天进入落霞夺宝可获得2点\活跃度">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+		<Task id="18" time="全天"		name="每日仙子任务"	npc="" needlevel="35" award="2" command="&lt;每日任务仙子/@@goto 0 每日任务仙子 487,222&gt;" 		tips="    每次完成任务可获得5点活跃\度，每天最高获得15点">
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+		<Task id="19" time="全天"		name="开启经验宝玉(大)"	npc="" needlevel="0" award="10" command="" 		tips="    每次释放宝玉可获得5点活跃\度，每天最高获得10点">
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+		<Task id="20" time="全天"		name="开启群英宝鉴"	npc="" needlevel="0" award="4" command="" 		tips="    每次开启宝鉴可获得2点活跃\度，每天最高获得10点">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+		<Task id="21" time="全天"		name="悬赏任务发布"	npc="" needlevel="30" award="2" command="&lt;赏金任务使者/@@goto 0 赏金任务使者 489,224&gt;" 		tips="    每次发布悬赏任务可获得2点\活跃度，每天最高获得10点">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+		<Task id="22" time="全天"		name="新运镖"	npc="" needlevel="42" award="8" command="&lt;荣耀护送使者/@@goto 0 荣耀护送使者 410,263&gt;" 		tips="    每次发布镖车可获得10点活跃\度，每天最高获得10点">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+	</Tasks1_1>
+  <!-- 501 新区版本 -->
+	<Tasks1_2>
+	    <Task id="4" time="09:00-24:00"	name="五色任务"		npc="王城官员" needlevel="20" award="2" command="&lt;王城官员/@@goto HEROISLAND 王城官员 80,87&gt;" 		tips="    王城官员五色任务每天可以完\成五次，任务颜色等级越高奖励越\丰厚，最高可刷新至橙色。">
+				<reward looks="7000" tips="大量经验奖励"/>
+				<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+	    <Task id="5" time="全天"		name="勇士任务"		npc="王城诏令使者" needlevel="15" award="2" command="&lt;王城诏令使者/@@goto 0 王城诏令使者 474,151&gt;" 		tips="    有些任务，可并不是那么容易\完成的，比如说：勇士任务		    \    勇士，用行动来证明自己吧！">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+	    <Task id="6" time="全天"		name="百宝园"		npc="快活仙人" needlevel="35" award="2" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;"
+		tips="    进入百宝园后消耗幸运符，百\宝园每天最多参与40次，前10次可\获得活跃度奖励。进入后根据VIP\级别开启不同次数">
+				<reward looks="7000" tips="奖励经验"/>
+				<reward looks="7001" tips="金币"/>
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="3" tips="奖励活跃度3点"/>
+		</Task>
+	    <Task id="8" time="每日一次"		name="逆魔古冢"		npc="快活仙人" needlevel="35" award="10" command="&lt;快活仙人/@@goto HEROISLAND 快活仙人 86,96&gt;" 		tips="    你可以从活动日历中查看逆魔\古冢开放的时间			    \队长携带圣武精华时可不限时进入">
+				<reward looks="7000" tips="大量经验"/>
+				<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+		<Task id="12" time="全天"		name="通天旋塔"	npc="" needlevel="35" award="3" command="&lt;镇塔使者/@@goto MH001 镇塔使者 65,41&gt;" tips="    勇闯通天旋塔讨伐魔族首领，\完成后可获得10点活跃度">
+				<reward looks="7001" tips="大量金币"/>
+				<reward looks="7002" tips="物品奖励"/>
+				<reward type="1" num="10" tips="奖励活跃度10点"/>
+		</Task>
+		<Task id="16" time="全天"		name="进入宝地"	npc="" needlevel="40" award="2" command="&lt;宝地使者/@@goto 0 宝地使者 475,221&gt;" 		tips="    每天进入宝地地图可获得5点\活跃度 ">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+				<reward looks="7001" tips="大量金币"/>
+			<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+		<Task id="17" time="全天"		name="落霞夺宝"	npc="" needlevel="0" award="2" command="&lt;夺宝达人/@@goto 1 夺宝达人 250,250&gt;" 		tips="    每天进入落霞夺宝可获得2点\活跃度">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+		<Task id="19" time="全天"		name="开启经验宝玉(大)"	npc="" needlevel="0" award="10" command="" 		tips="    每次释放宝玉可获得5点活跃\度，每天最高获得10点">
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="5" tips="奖励活跃度5点"/>
+		</Task>
+		<Task id="20" time="全天"		name="开启群英宝鉴"	npc="" needlevel="0" award="4" command="" 		tips="    每次开启宝鉴可获得2点活跃\度，每天最高获得10点">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+		<Task id="22" time="全天"		name="新运镖"	npc="" needlevel="42" award="8" command="&lt;荣耀护送使者/@@goto 0 荣耀护送使者 410,263&gt;" 		tips="    每次发布镖车可获得2点活跃\度，每天最高获得10点">
+			<reward looks="7002" tips="物品奖励"/>
+			<reward looks="7000" tips="奖励经验"/>
+			<reward type="1" num="2" tips="奖励活跃度2点"/>
+		</Task>
+	</Tasks1_2>
+	<!--奖励的type 1代表正常物品 2代表经验 3代表绑定元宝 4代表真火 5代表骑术 6代表声望 7代表精力值-->
+	<FirstGift>
+		<Reward type="1" name="月光宝盒(大)" looks="907" num="1"/>
+		<Reward type="1" name="超级天山雪莲" looks="793" num="1"/>
+		<Reward type="1" name="超级深海灵礁" looks="794" num="1"/>
+		<Reward type="1" name="黄金宝马" looks="258" num="1"/>
+		<Reward type="1" name="双倍经验包天卡" looks="829" num="1"/>
+		<Reward type="1" name="本职业30级武器一把（裁决，骨玉，龙纹）" looks="24" num="1"/>
+	</FirstGift>
+	<SpecialOfferGift>
+		<Reward type="2" num="10000000"/>
+		<Reward type="3" num="10"/>
+		<Reward type="1" name="声望令牌(十)" looks="282" num="1"/>
+		<Reward type="1" name="骑兽进阶丹" looks="8039" num="10"/>
+		<Reward type="1" name="3级符石凭证" looks="296" num="1"/>
+	</SpecialOfferGift>
+	<RechargeForGift>
+		<FirstThree>
+			<Reward type="1" name="屠龙刀" looks="26" num="1"/>
+			<Reward type="1" name="倚天剑" looks="493" num="1"/>
+			<Reward type="1" name="嗜魂" looks="28" num="1"/>
+		</FirstThree>
+		<Vip num="50">
+			<Reward type="1" name="赠送VIP等级1" looks="824" num="1"/>
+			<Reward type="3" num="10"/>
+			<Reward type="1" name="本职业圣战级装备随机一件" looks="279" num="1"/>
+		</Vip>
+		<Vip num="100">
+			<Reward type="1" name="赠送VIP等级2" looks="824" num="1"/>
+			<Reward type="3" num="10"/>
+			<Reward type="7" num="1000"/>
+			<Reward type="1" name="本职业神武级装备随机一件" looks="742" num="1"/>
+		</Vip>
+			<Vip num="500">
+			<Reward type="1" name="赠送VIP等级3" looks="824" num="1"/>
+			<Reward type="3" num="50"/>
+			<Reward type="7" num="5000"/>
+			<Reward type="1" name="本职业战神级装备随机一件" looks="860" num="1"/>
+			<Reward type="1" name="本职业神武级装备随机一件" looks="742" num="1"/>
+		</Vip>
+			<Vip num="1000">
+			<Reward type="1" name="赠送VIP等级4" looks="824" num="1"/>
+			<Reward type="3" num="150"/>
+			<Reward type="7" num="15000"/>
+			<Reward type="1" name="本职业血煞级装备随机一件" looks="996" num="1"/>
+			<Reward type="1" name="月光宝盒(特大)" looks="907" num="2"/>
+			<Reward type="1" name="幸运符(捆)" looks="975" num="2"/>
+			<Reward type="1" name="群英令(捆)" looks="5185" num="2"/>
+			<Reward type="1" name="百兽王灵胚" looks="6669" num="1"/>
+		</Vip>
+			<Vip num="5000">
+			<Reward type="1" name="赠送VIP等级5" looks="824" num="1"/>
+			<Reward type="3" num="800"/>
+			<Reward type="7" num="99000"/>
+			<Reward type="1" name="本职业血煞级装备随机三件" looks="996" num="3"/>
+			<Reward type="1" name="月光宝盒(特大)" looks="907" num="4"/>
+			<Reward type="1" name="3级符石凭证" looks="296" num="10"/>
+			<Reward type="1" name="5级完美器魂结晶" looks="1500" num="10"/>
+			<Reward type="1" name="蟠龙金甲" looks="986" num="1"/>
+		</Vip>
+			<Vip num="10000">
+			<Reward type="1" name="赠送VIP等级6" looks="824" num="1"/>
+			<Reward type="1" name="王者宝石" looks="1021" num="1"/>
+			<Reward type="1" name="本职业圣殿技能(狂怒旋风，寒冰风暴，骷髅囚笼)一本" looks="887" num="1"/>
+			<Reward type="1" name="4级符石凭证" looks="296" num="10"/>
+		</Vip>
+			<Vip num="20000">
+			<Reward type="1" name="赠送VIP等级7" looks="824" num="1"/>
+			<Reward type="1" name="北辰灵胚" looks="6669" num="1"/>
+			<Reward type="1" name="麻痹戒指或魔道麻痹戒指任选" looks="62" num="1"/>
+			<Reward type="1" name="5级符石凭证" looks="296" num="10"/>
+		</Vip>
+	</RechargeForGift>
+	<DailyAttendance>
+		<Day id="1">		
+			<Reward type="1" name="超级深海灵礁" looks="793" num="1"/>
+			<Reward type="1" name="超级天山雪莲" looks="794" num="1"/>
+		</Day>
+		<Day id="2">
+			<Reward type="2" num="500000"/>
+		</Day>
+		<Day id="3">	
+			<Reward type="1" name="月光宝盒(大)" looks="907" num="1"/>
+			<Reward type="1" name="妖翎羽(绑定)" looks="1513" num="10"/>
+		</Day>
+		<Day id="4">
+			<Reward type="2" num="2000000"/>
+		</Day>
+		<Day id="5">
+			<Reward type="1" name="骑兽进阶丹(绑定)" looks="8039" num="20"/>
+		</Day>
+		<Day id="6">
+			<Reward type="1" name="符石镶嵌符(高级)绑定" looks="1411" num="1"/>
+		</Day>
+		<Day id="7">
+			<Reward type="2" num="10000000"/>
+			<Reward type="5" num="10000000"/>
+			<Reward type="4" num="10000000"/>
+			<Reward type="1" name="骑兽进阶丹(绑定)" looks="8039" num="30"/>
+		</Day>
+	</DailyAttendance>
+	<LevelUpGift>
+		<Range id="1">
+			<Reward type="1" name="重生戒指" looks="65" num="1"/>
+		</Range>
+		<Range id="2">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="3">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="4">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="5">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="6">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="7">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="8">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="9">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Range id="10">
+			<Reward type="1" name="本职业强化技能一本（移形换影，遁地，化身蝙蝠）" looks="197" num="1"/>
+		</Range>
+		<Level level="50">
+			<Reward type="1" name="3级完美器魂结晶(绑定)" looks="1500" num="1"/>
+			<Reward type="1" name="本职业圣战级装备随机一件" looks="279" num="1"/>
+			<Reward type="3" num="5"/>
+		</Level>
+		<Level level="55">
+			<Reward type="1" name="4级完美器魂结晶(绑定)" looks="1500" num="1"/>
+			<Reward type="1" name="本职业圣战级装备随机一件" looks="279" num="1"/>
+			<Reward type="3" num="10"/>
+		</Level>
+		<Level level="60">
+			<Reward type="1" name="3级符石凭证" looks="296" num="1"/>
+			<Reward type="1" name="本职业圣战级装备随机一件" looks="279" num="1"/>
+			<Reward type="3" num="15"/>
+		</Level>
+		<Level level="65">
+			<Reward type="1" name="妖翎羽" looks="1513" num="50"/>
+			<Reward type="1" name="本职业神武级装备随机一件" looks="742" num="1"/>
+			<Reward type="3" num="20"/>
+		</Level>
+		<Level level="80">
+			<Reward type="1" name="骑兽进阶丹" looks="8039" num="200"/>
+			<Reward type="1" name="本职业战神级装备随机一件" looks="860" num="1"/>
+			<Reward type="3" num="100"/>
+		</Level>
+		<Level level="100">
+			<Reward type="1" name="神武军特权凭证" looks="824" num="1"/>
+		</Level>
+	</LevelUpGift>
+	<LimitDraw>
+		<Reward type="1" name="圣殿精华" looks="1060" num="200"/>
+		<Reward type="1" name="五行精华" looks="739" num="200"/>
+		<Reward type="1" name="符石镶嵌符(高级)" looks="1411" num="1"/>
+		<Reward type="2" num="20000000"/>
+		<Reward type="4" num="300000"/>
+		<Reward type="5" num="300000"/>
+		<Reward type="1" name="2级符石凭证" looks="296" num="1"/>
+		<Reward type="1" name="3级符石凭证" looks="296" num="1"/>
+		<Reward type="1" name="冰泉圣水" looks="798" num="1"/>
+		<Reward type="1" name="4级符石凭证" looks="296" num="1"/>
+		<Reward type="1" name="3级完美器魂结晶" looks="1500" num="1"/>
+		<Reward type="1" name="4级完美器魂结晶" looks="1500" num="1"/>
+		<Reward type="1" name="屠龙刀" looks="26" num="1"/>
+		<Reward type="1" name="嗜魂" looks="28" num="1"/>
+		<Reward type="1" name="倚天剑" looks="493" num="1"/>
+		<Reward type="3" num="25"/>
+		<Reward type="1" name="强化攻杀剑法" looks="761" num="1"/>
+		<Reward type="1" name="强化施毒术" looks="761" num="1"/>
+		<Reward type="1" name="移形换影" looks="197" num="1"/>
+		<Reward type="1" name="化身蝙蝠" looks="197" num="1"/>
+		<Reward type="1" name="遁地术" looks="197" num="1"/>
+		<Reward type="1" name="强化火球术" looks="761" num="1"/>
+		<Reward type="1" name="血煞级兑换凭证" looks="824" num="1"/>
+		<Reward type="3" num="50"/>
+	</LimitDraw>
+	<TaoyuanTask>
+		<Task id="1" name="兄弟初识" target="结义的三位兄弟人物等级分别达到35级。达到等级的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!">
+			<Reward type="2" num="1500000"/>
+			<Reward type="1" name="经验宝玉(大)" looks="1520" num="1"/>
+			<Reward type="6" num="10"/>
+		</Task>
+		
+		<Task id="2" name="亲如手足" target="结义的三位兄弟人物等级分别达到60级且真火达到20级。达到要求的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，即可获得奖励!" limit="仅有七组名额，每三名结义兄弟为一组!先到先得，七组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="本职业战神级装备随机一件" looks="742" num="1"/>
+		</Task>
+		
+		<Task id="3" name="十指连心" target="结义的三位兄弟人物等级分别达到80级且真火达到30级。达到等级的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，即可获得奖励!" limit="仅有七组名额，每三名结义兄弟为一组!先到先得，七组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="法宝灵胚(玄阳)" looks="1552" num="30"/>
+		</Task>
+		
+		<Task id="4" name="义薄云天" target="结义的三位兄弟人物神翼等级分别达到5级，达到等级的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!" limit="仅有十四组名额，每三名结义兄弟为一组!先到先得，十四组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="妖翎羽" looks="1513" num="50"/>
+		</Task>
+		
+		<Task id="5" name="并驾齐驱" target="结义的三位兄弟人物神翼等级分别达到10级，达到等级的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，即可获得奖励!">
+			<Reward type="1" name="妖翎羽" looks="1513" num="150"/>
+			<Reward type="1" name="妖羽圣水" looks="813" num="5"/>
+		</Task>
+		
+		<Task id="6" name="兄弟情传世义" target="结义的三位兄弟人物神翼等级分别达到15级，达到等级的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!">
+			<Reward type="1" name="妖翎羽" looks="1513" num="300"/>
+			<Reward type="1" name="妖羽圣水" looks="813" num="10"/>
+		</Task>
+		
+		<Task id="7" name="腾空飞翔" target="结义的三位兄弟人物神翼强化等级全部为强化加五，达到该条件的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，即可获得奖励!">
+			<Reward type="1" name="妖翎羽" looks="1513" num="200"/>
+			<Reward type="1" name="妖羽圣水" looks="813" num="10"/>
+		</Task>
+		
+		<Task id="8" name="骑战风云" target="结义的三位兄弟人物骑战等级全部达到15级，达到该条件的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!" limit="仅有十四组名额，每三名结义兄弟为一组!先到先得，十四组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="骑战技能高级(第二档被动技能)任选一本"  looks="197" num="1"/>
+		</Task>
+		
+		<Task id="9" name="骑战天下" target="结义的三位兄弟人物骑战等级全部达到25级，达到该条件的玩家需要前往NPC桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!" limit="仅有十四组名额，每三名结义兄弟为一组!先到先得，十四组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="骑战技能高级(第三档被动技能)任选一本"  looks="197" num="1"/>
+		</Task>
+		
+		<Task id="10" name="神兽降临" target="结义兄弟三人都有骑兽，达到条件玩家的前往NPC处桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!">
+			<Reward type="5" num="500000"/>
+		</Task>
+		
+		<Task id="11" name="纹佩鉴定" target="结义兄弟中所携带的纹配古典值若含24，并且在NPC处鉴定则被判为成功，若三位兄弟的纹佩均鉴定成功，则可获得奖励!鉴定纹佩人物的等级需在35级以上!">
+			<Reward type="1" name="法宝灵胚(玄阳)" looks="1552" num="15"/>
+		</Task>
+		
+		<Task id="12" name="忠肝义胆" target="结义兄弟三人的武器都幸运+7及以上，达到条件玩家的前往NPC处桃园三结义记录，当结义的三位兄弟都满足条件后，可获得奖励!" limit="仅有七组名额，每三名结义兄弟为一组!先到先得，七组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="2" num="5000000"/>
+			<Reward type="4" num="500000"/>
+			<Reward type="5" num="100000"/>
+		</Task>
+		
+		<Task id="13" name="战无不胜" target="当成功结义后的玩家拥有圣殿盾牌后，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可获得奖励!">
+			<Reward type="1" name="五行精华" looks="739" num="1500"/>
+		</Task>
+		
+		<Task id="14" name="行会风云" target="当成功结义后的玩家加入行会后，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可奖励!且玩家的等级在60级以上。">
+			<Reward type="1" name="行会宝石" looks="1019" num="20"/>
+			<Reward type="1" name="骑战灵胚随机一个"  looks="6667" num="1"/>
+		</Task>
+		
+		<Task id="15" name="逆魔杀手" target="当成功结义的玩家拥有“逆魔杀手“的封号，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可获得奖励!">
+			<Reward type="2" num="1000000"/>
+			<Reward type="4" num="200000"/>
+		</Task>
+		
+		<Task id="16" name="禁地主宰" target="当成功结义的玩家拥有“禁地主宰“的封号，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可获得奖励!" limit="仅有十四组名额，每三名结义兄弟为一组!先到先得，十四组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="3级完美器魂结晶" looks="1500" num="1"/>
+			<Reward type="2" num="3000000"/>
+			<Reward type="4" num="100000"/>
+		</Task>
+		
+		<Task id="17" name="通天教主" target="当成功结义的玩家拥有“通天教主“的封号，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可获得奖励!" limit="仅有十四组名额，每三名结义兄弟为一组!先到先得，十四组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="3级完美器魂结晶" looks="1500" num="2"/>
+			<Reward type="2" num="3000000"/>
+			<Reward type="4" num="100000"/>
+		</Task>
+		
+		<Task id="18" name="铁血宫主" target="当成功结义的玩家拥有“铁血宫主 “的封号，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可获得奖励!" limit="仅有十四组名额，每三名结义兄弟为一组!先到先得，十四组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="3级完美器魂结晶" looks="296" num="2"/>
+			<Reward type="2" num="5000000"/>
+			<Reward type="4" num="200000"/>
+		</Task>
+		
+		<Task id="19" name="混沌女王" target="当成功结义的玩家拥有“混沌女王“的封号，可以前往NPC处桃园三结义记录，当结义的兄弟都满足条件后，可获得奖励!" limit="仅有三组名额，每三名结义兄弟为一组!先到先得，三组名额后达成的结义队伍，将无法再获得该项奖励。">
+			<Reward type="1" name="化身蝙蝠、遁地、移形换影随机一本"  looks="197" num="1"/>
+		</Task>
+	</TaoyuanTask>
+</ActivityRateCfg>

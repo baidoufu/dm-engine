@@ -181,7 +181,7 @@ VOID CMarketManager::QueryItemTips(CHumanPlayer* pPlayer, UINT nItemId)
 	}
 	else
 	{
-		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 4, 1, 0, (LPVOID)"该商城道具不存在");
+		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"该商城道具不存在");
 	}
 }
 
@@ -192,17 +192,17 @@ BOOL CMarketManager::QueryBuyItem(CHumanPlayer* pPlayer, UINT nItemId)
 	{
 		if (pItem->wPrice > pPlayer->GetMoney(MT_YUANBAO))
 		{
-			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"你身上的元宝不够!");
+			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"你身上的元宝不够!");
 			return FALSE;
 		}
 		if ((int)pItem->wCount > pPlayer->GetBag().GetFree())
 		{
-			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"你的背包没有足够空间!");
+			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"你的背包没有足够空间!");
 			return FALSE;
 		}
 		if (!pPlayer->CostMoney(MT_YUANBAO, pItem->wPrice))
 		{
-			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"你身上的元宝不够!");
+			pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"你身上的元宝不够!");
 			return FALSE;
 		}
 		for (UINT i = 0; i < pItem->wCount; i++)
@@ -213,11 +213,12 @@ BOOL CMarketManager::QueryBuyItem(CHumanPlayer* pPlayer, UINT nItemId)
 			pPlayer->AddBagItem(item, 0, 0, 0);
 		}
 		pPlayer->SendWeightChanged();
+		//pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"恭喜您购买成功!");
 		return TRUE;
 	}
 	else
 	{
-		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0x1b, 0, (LPVOID)"该商城道具不存在");
+		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"该商城道具不存在");
 		return FALSE;
 	}
 }
@@ -286,7 +287,7 @@ VOID CMarketManager::OnClientMsg(CHumanPlayer* pPlayer, WORD wCmd, WORD wParam1,
 				break;
 			}
 		}
-		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 3, 1, 0, (LPVOID)"该商城道具不存在");
+		pPlayer->SendMsg(pPlayer->GetId(), 0x1000, 5, 0, 0, (LPVOID)"该商城道具不存在");
 	}
 	break;
 	}

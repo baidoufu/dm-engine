@@ -73,6 +73,7 @@ VOID CAliveObject::Clean()
 	m_Id = 0;
 	m_Mapid = 0;
 	m_bPosLocked = FALSE;
+	m_bMonsterType = 0;
 	m_nVisibleObjectFlag = 0;
 	AddVisibleObjectType(OBJ_PLAYER);
 	m_bDead = FALSE;
@@ -150,7 +151,8 @@ BOOL CAliveObject::WalkXY(int x, int y, int dir, DWORD dwDelay)
 	if (!SetAction(AT_WALK, (e_direction)dir, x, y, dwTime))return FALSE;
 	CheckClearCloak();
 	DWORD dwView[2] = { GetFeather(), GetStatus() };
-	SendAroundMsg(GetId(), SM_WALK, x, y, dir, (LPVOID)dwView, sizeof(dwView));
+	WORD w3 = (GetSex() << 8) | dir;
+	SendAroundMsg(GetId(), SM_WALK, x, y, w3, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
 }
 
@@ -180,7 +182,8 @@ BOOL CAliveObject::RunXY(int x, int y, int dir, DWORD dwDelay)
 	if (!SetAction(AT_RUN, (e_direction)dir, x, y, dwTime))return FALSE;
 	CheckClearCloak();
 	DWORD dwView[2] = { GetFeather(), GetStatus() };
-	SendAroundMsg(GetId(), SM_RUN, x, y, dir, (LPVOID)dwView, sizeof(dwView));
+	WORD w3 = (GetSex() << 8) | dir;
+	SendAroundMsg(GetId(), SM_RUN, x, y, w3, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
 }
 
@@ -204,7 +207,8 @@ BOOL CAliveObject::Turn(int dir)
 	WORD w1 = 100;
 	WORD wd = (dwMaxHp > 0) ? (dwHp * 100 / dwMaxHp) : 0; // 百分比取整
 	DWORD dwView[3] = { GetFeather(), GetStatus(), static_cast<DWORD>(MAKELONG(w1, wd)) };
-	SendAroundMsg(GetId(), SM_APPEAR, m_wX, m_wY, dir, (LPVOID)dwView, sizeof(dwView));
+	WORD w3 = (GetSex() << 8) | dir;
+	SendAroundMsg(GetId(), SM_APPEAR, m_wX, m_wY, w3, (LPVOID)dwView, sizeof(dwView));
 	return TRUE;
 }
 
@@ -414,10 +418,10 @@ BOOL CAliveObject::BeAttack(CAliveObject* pAttacker, int nDamage, damage_type da
 	return TRUE;
 }
 
-BOOL CAliveObject::GetMeal(int dir)
+BOOL CAliveObject::GetMeal(int x, int y, int dir)
 {
 	if (!CanDoAction(AT_GETMEAL))return FALSE;
-	if (!SetAction(AT_GETMEAL, (e_direction)dir, getX(), getY(), 800))return FALSE;
+	if (!SetAction(AT_GETMEAL, (e_direction)dir, x, y, 800))return FALSE;
 	return TRUE;
 }
 
@@ -528,7 +532,7 @@ BOOL CAliveObject::SetAction(actiontype action, e_direction dir, WORD x, WORD y,
 	return TRUE;
 }
 
-BOOL CAliveObject::CompleteAction()
+BOOL CAliveObject::CompleteAction(BOOL bForceStop)
 {
 	if (m_pMap == nullptr)return FALSE;
 	if (m_ActionType == AT_STAND)return TRUE;
@@ -541,7 +545,8 @@ BOOL CAliveObject::CompleteAction()
 				m_pMap->MoveObject(this, m_wActionX, m_wActionY);
 		}
 	}
-	Stop(); //停止其他动作
+	// 仅强制打断时发送SM_STOP; 动作自然到期则不发, 让客户端动画平滑过渡
+	if (bForceStop) Stop();
 	m_ActionType = AT_STAND;
 	SetDirection(m_ActionDirection);
 	if (GetType() == OBJ_PLAYER)
@@ -587,7 +592,12 @@ BOOL CAliveObject::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 	// 在数据最后面插入15个空字节, 去过滤玩家、怪、宠物的一些独特封号
 	memcpy(szData + 16, szData + 16, static_cast<size_t>(len) + 15);
 	int totalLen = len + 15;
-	length = EncodeMsg(pszMsg, GetId(), wCmd, m_wX, m_wY, (GetSex() << 8) | m_Direction, (LPVOID)szData, 16 + totalLen);
+	WORD w3 = 0;
+	if (GetType() == OBJ_MONSTER)
+		w3 = (m_bMonsterType << 8) | m_Direction;
+	else
+		w3 = (GetSex() << 8) | m_Direction;
+	length = EncodeMsg(pszMsg, GetId(), wCmd, m_wX, m_wY, w3, (LPVOID)szData, 16 + totalLen);
 	if (GetType() == OBJ_PLAYER && pViewer && pViewer->GetType() == OBJ_PLAYER)
 		((CAliveObject*)pViewer)->SendFeatureChanged();
 	return TRUE;
@@ -597,7 +607,7 @@ BOOL CAliveObject::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 VOID CAliveObject::SendChangeName()
 {
 	if (CanRecvMsg())
-		SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, GetFenghaoType23(), (LPVOID)GetViewName());
+		SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, 0, (LPVOID)GetViewName());
 	if (CSandCity::GetInstance()->IsWarStarted())
 	{
 		if (m_pMap == nullptr)return;
@@ -610,14 +620,14 @@ VOID CAliveObject::SendChangeName()
 				if (pNode->getObject()->pObject->GetType() == OBJ_PLAYER)
 				{
 					CAliveObject* p = (CAliveObject*)pNode->getObject()->pObject;
-					p->SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(p), 0, p->GetFenghaoType23(), (LPVOID)GetViewName());
+					p->SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(p), 0, 0, (LPVOID)GetViewName());
 				}
 				pNode = pNode->getNext();
 			}
 		}
 	}
 	else
-		SendAroundMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, GetFenghaoType23(), (LPVOID)GetViewName());
+		SendAroundMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, 0, (LPVOID)GetViewName());
 }
 
 BOOL CAliveObject::CanDoAction(actiontype action)
@@ -776,7 +786,7 @@ VOID CAliveObject::Update()
 	if (m_ActionType != AT_STAND && m_dwActionCompleteTime != 0xffffffff)
 	{
 		if (m_ActionTimer.IsTimeOut(m_dwActionCompleteTime))
-			CompleteAction();
+			CompleteAction(FALSE); // 动作自然到期, 不发SM_STOP, 避免打断客户端动画
 	}
 	// 队列对象线程处理
 	OBJECTPROCESS* p = nullptr;
@@ -909,7 +919,7 @@ VOID CAliveObject::CleanVisibleList()
 
 VOID CAliveObject::OnEnterMap(CLogicMap* pMap)
 {
-	SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, GetFenghaoType23(), (LPVOID)GetViewName());
+	SendMsg(GetId(), SM_SETPLAYERNAME, GetNameColor(this), 0, 0, (LPVOID)GetViewName());
 	SendMsg(pMap->IsFlagSeted(MF_FIGHTMAP), 0x2c4, 0, 0, 0);//708 设置地图的属性 dwflag = 1 战斗,  dwflag = 0 非战斗
 	SendMsg(0, SM_SETMAPNAME, pMap->GetMusicId(), 0, 0, (LPVOID)pMap->GetTitle());//地图编号
 	CMapObject::OnEnterMap(pMap);
@@ -938,10 +948,10 @@ VOID CAliveObject::ItemToClient(ITEM& item)
 		*(BYTE*)&item.btItemExt[16] = 0; // 资质
 		*(BYTE*)&item.btItemExt[17] = 255; // 职业
 		*(WORD*)&item.btItemExt[18] = item.baseitem.wMc; // 显示的当前经验值
-		*(WORD*)&item.btItemExt[42] = item.baseitem.wDc; // 显示的等级
-		*(DWORD*)&item.btItemExt[73] = CItemManager::GetInstance()->GetPetLevelInfo(item.baseitem.wDc, 0); // 升级经验值
-		*(WORD*)&item.btItemExt[99] = item.baseitem.wDc; // 等级
-		*(WORD*)&item.btItemExt[107] = item.baseitem.wMc; // 当前经验
+		//*(WORD*)&item.btItemExt[42] = item.baseitem.wDc; // 显示的等级
+		//*(DWORD*)&item.btItemExt[73] = CItemManager::GetInstance()->GetPetLevelInfo(item.baseitem.wDc, 0); // 升级经验值
+		//*(WORD*)&item.btItemExt[99] = item.baseitem.wDc; // 等级
+		//*(WORD*)&item.btItemExt[107] = item.baseitem.wMc; // 当前经验
 	}
 }
 
@@ -1341,16 +1351,23 @@ VOID CAliveObject::ToDeath(DWORD dwKiller)
 {
 	if (!m_bDead)
 	{
+		m_bDead = TRUE;
 		SetTarget(nullptr);//死亡时, 设置目标为空
 		if (m_ActionType != AT_STAND)
-			CompleteAction();
+			CompleteAction(FALSE); // 死亡强制打断当前动作, 发SM_STOP通知客户端立即停止动画
 		if (m_bPosLocked)
 			m_pMap->UnLockPos(m_wX, m_wY);
-		m_bDead = TRUE;
+		WORD w1 = getX();
+		WORD w2 = getY();
 		DWORD dwArray[2] = { GetFeather(), GetStatus() };
-		SendAroundMsg(GetId(), SM_NOWDEATH, getX(), getY(), GetDirection(), (LPVOID)dwArray, sizeof(dwArray));
+		WORD w3 = 0;
+		if (GetType() == OBJ_PLAYER)
+			w3 = (5 << 8) | GetDirection(); // 5是高四位表示还魂神符的价格
+		else
+			w3 = GetDirection();
+		SendAroundMsg(GetId(), SM_NOWDEATH, w1, w2, w3, (LPVOID)dwArray, sizeof(dwArray));
 		if (CanRecvMsg())
-			SendMsg(GetId(), SM_NOWDEATH, getX(), getY(), GetDirection(), (LPVOID)dwArray, sizeof(dwArray));
+			SendMsg(GetId(), SM_NOWDEATH, w1, w2, w3, (LPVOID)dwArray, sizeof(dwArray));
 		OnDeath(dwKiller);
 	}
 }
@@ -1774,7 +1791,7 @@ BOOL CAliveObject::Damage(DWORD dwHitter, int value)
 	DecPropValue(PI_CURHP, value);
 	if (GetPropValue(PI_CURHP) == 0)
 	{
-		if (IsNoDead() || !WillDie()) return FALSE;
+		if (IsNoDead() || !WillDie() || IsDeath()) return FALSE; // 已死亡不再重复排队EP_DEAD，防止多次触发OnDeath
 		AddProcess(EP_DEAD, dwHitter, 0, 0, 0, 2);
 	}
 	return TRUE;

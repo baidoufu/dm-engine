@@ -1,0 +1,3294 @@
+<SkillHelper Ver="1">
+	<Skill name="初级剑法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级1级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级11级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级16级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的入门剑术，修炼完成后总计可提高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="9点命中。"/>
+		</line>
+	</Skill>
+	<Skill name="血影刀法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级12级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级15级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的低级刀法。修炼完成后总计可提高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="3点命中并可提升攻击威力。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="初级剑法"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与残影刀法、攻杀剑法同时修"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="炼"/>
+		</line>
+	</Skill>
+	<Skill name="残影刀法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级15级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级22级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的低级刀法。修炼完成后总计可提高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="3点命中并可提升攻击威力。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="初级剑法"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与攻杀剑法、血影刀法同时修"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="炼"/>
+		</line>
+	</Skill>
+	<Skill name="攻杀剑法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级22级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级24级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士向剑客迈进的进阶剑术。修炼完成后"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="总计可提高3点命中，物理攻击的破坏力"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="得到大幅提升。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="初级剑法"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与残影刀法、血影刀法同时修"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="炼"/>
+		</line>
+	</Skill>
+	<Skill name="护身真气">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的基本防御技能。真气凝聚后环绕身"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="体焕闪微光。在战斗中，护身真气可以持"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="续吸收敌人攻击真气，从而提高自身真气"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="等级，使防御能力和生命值得到更大幅度"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="提升。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="攻杀剑法/残影刀法/血影刀法"/>
+		</line>
+	</Skill>
+	<Skill name="刺杀剑术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级25级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级27级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士成为剑客的标志。它能大幅度提高攻"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="击的破坏力，隔位攻击效果更是法师的噩"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="梦，令对手闻风丧胆。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="护身真气"/>
+		</line>
+	</Skill>
+	<Skill name="抱月刀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级27级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级33级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的群体攻击技能。刀锋环扫360度，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="周身滴水不透，即使十面受袭也可刀刀攻"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="敌要害。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="刺杀剑术"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与半月弯刀同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="半月弯刀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级28级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级31级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的群体攻击技能。以气凝聚于刀身，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="随刀锋挥出，可伤及身前半圆内五名敌人"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="；因刀锋形似半月而得名，攻击效果十分"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="华丽。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="刺杀剑术"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与抱月刀同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="野蛮冲撞">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级39级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="天下至刚的外家功夫，凝聚全身的劲道，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="将敌人强行撞开。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="半月弯刀/抱月刀"/>
+		</line>
+	</Skill>
+	<Skill name="战魂真悟">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级30"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="按技能经验值升级技能等级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="此技能将使战士在打怪时有机会获得双倍"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="经验，并且获得双倍经验的几率将随技能"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="等级的提高而增长。"/>
+		</line>
+	</Skill>
+	<Skill name="烈火剑法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级35级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级37级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级40级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="到目前为止战士的最高级剑法。剑生烈焰"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，霸道无双，招发必取人命。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="野蛮冲撞"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与雷霆剑同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="雷霆剑">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级36级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级39级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士唯一的魔法攻击剑术，堪与烈火剑法"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="媲美。将全身真气聚于剑尖，雷霆万钧之"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="势横空劈出，剑身电光四射，有如雷裂长"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="空，见者无不动容。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="野蛮冲撞"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与烈火剑法同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="破击剑法">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级36"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级。按技能经验值升级技能等"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级，技能等级越高，消除对方防御加成效"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="果的几率越大。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的高级特效剑术。可以让神圣战甲、"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="幽灵盾的防御加成效果消失，护身真气消"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="失。攻击时刀光表现猛烈，在被击破防御"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的人身上还会出现盾被击碎的效果。"/>
+		</line>
+	</Skill>
+	<Skill name="突斩">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级37"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级。按技能经验值升级技能等"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级，技能等级越高，将对手撞开得越远。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的连击剑术。面对等级低于自己的对"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="手可以向前突进，同时进行连续攻击，刀"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="光剑影中将对手撞开并造成重创。"/>
+		</line>
+	</Skill>
+	<Skill name="破盾斩">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级39"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级。按技能经验值升级技能等"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级，技能等级越高，消除对方防御加成效"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="果的几率越大"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的高级特效剑术。可以无视对方的高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级防护魔法，破除魔法盾、风影盾、金刚"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="护体产生的防御加成效果。"/>
+		</line>
+	</Skill>
+	<Skill name="金刚护体">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级41"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级按技能经验值升级技能等级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的高级防护技能。损耗大量MP，一定"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="时间内大幅度增加自身的物理防御和魔法"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="防御能力，具有近乎于变态的防御效果。"/>
+		</line>
+	</Skill>
+	<Skill name="擒龙手">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级45级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级47级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的捕获技能。可将远处的怪物瞬间拉"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="到身边，然后挥刀攻击，怪物被拖拽之后"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="有一定的眩晕效果。擒龙手，顾名思义，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="连龙都可擒来，十分神奇。招手之间，怪"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="到身旁，不用再冒被围之险。"/>
+		</line>
+	</Skill>
+	<Skill name="移形换影">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级45级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级47级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的瞬移技能。可瞬间到达屏幕以内鼠"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="标所指的点。如果鼠标所指的点为障碍物"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="或已经被占，则技能使用失效。移形换位"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，神出鬼没。此技能攻可出其不意，退可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="留存实力，非常实用。"/>
+		</line>
+	</Skill>
+	<Skill name="治疗术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级1级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级11级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级16级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的入门基本技能。可施放出如星光闪"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="耀的温暖光线，为笼罩在其中的人类疗伤"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，可以说是人们在战场上最常见也最想见"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="到的光芒。"/>
+		</line>
+	</Skill>
+	<Skill name="精神战法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级9级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级13级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的物理攻击辅助技能。可以提高道士"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="物理攻击的命中率，总计提高9点。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="治疗术"/>
+		</line>
+	</Skill>
+	<Skill name="施毒术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级14级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级17级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="非常普通但是非常神奇的道士技能，可大"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="幅降低对手的防御或生命值。一个精通施"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="毒术的道士，可能会成为战场上的好搭档"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，也可能会成为令人恐怖的暗杀者。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="精神战法"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与诅咒术同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="诅咒术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级14级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级17级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="跟施毒术并列的技能。通过强大精神力量"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的影响，被施咒对象的防御与魔法值都将"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="同时降低。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="精神战法"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与施毒术同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="灵魂道符">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级18级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级21级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级24级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的基本魔法攻击技能。和火球术类似"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的远程法术，通过驱使护身符来攻击敌人"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，此法术不可绕开障碍物。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="施毒术/诅咒术"/>
+		</line>
+	</Skill>
+	<Skill name="骷髅召唤术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的基本召唤技能。通过强大的精神力"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，使用护身符召唤来自地狱的骷髅，召唤"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="出的骷髅将成为道士最忠实的随从，不死"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="不休。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="灵魂道符"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与赶尸同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="赶尸">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的基本召唤技能。在道士神秘咒语的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="召唤下，任何尸体，即使是生前拥有强大"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="力量的怪物，都难逃被驱使的命运。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="灵魂道符"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与骷髅召唤术同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="隐身术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的自我保护技能。隐身术使怪物无法"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="察觉你的存在。隐身后采用魔法远程攻击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，是一种非常理想的单对单战斗方法。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="骷髅召唤术/赶尸"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与替身法符同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="替身法符">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的自我保护技能。施法成功后，所有"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="集中在施术者身上的仇恨和追逐都将被转"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="嫁到法符所及之处。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="骷髅召唤术/赶尸"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与隐身术同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="集体隐身术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级21级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级25级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士保护同伴的技能。是一种大面积的隐"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="身术。与普通的隐身术作用类似，能将一"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="定范围内人类的气息隐藏，令怪物无法发"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="觉其存在。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="隐身术/替身法符"/>
+		</line>
+	</Skill>
+	<Skill name="幽灵盾">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级22级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级24级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的魔法防御技能。通过召唤“玄武”"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="神兽，为自己和周围的战友们增加抵抗魔"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法攻击的能力。道术越高，增加魔法防御"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的时间也就越长。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="集体隐身术"/>
+		</line>
+	</Skill>
+	<Skill name="神圣战甲术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级25级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级27级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的物理防御技能。通过召唤“青龙”"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="神兽，道士可以让自己和战友的肉体更加"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="强健，能抵御更强的物理攻击。对于使用"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="直接物理攻击的绝大多数怪物特别有效。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="幽灵盾"/>
+		</line>
+	</Skill>
+	<Skill name="狮子吼">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级35级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的防近身攻击技能。路见不平狮子吼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，用丹田真气将面前的敌人远远推开，使"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="敌人无法近身攻击。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="神圣战甲术"/>
+		</line>
+	</Skill>
+	<Skill name="困魔咒">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级28级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级32级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士强大精神力的杰作，群体技能，对低"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级怪物有效。被限制在咒语中的怪物无法"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="动弹。当怪物受到外界攻击时会醒来，困"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔效果消失。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="狮子吼"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与灵魂墙同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="灵魂墙">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级28级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级32级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士强大精神力的杰作，单体技能，对高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级怪物有效。一旦被冤魂所构成的墙壁所"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="包围，再高级的怪物都将无法行动。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="狮子吼"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与困魔咒同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="道心清明">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级30"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="按技能经验值升级技能等级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学会“道心清明”将使道士在打怪时有机"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="率获得双倍经验，并且获得双倍经验的几"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="率将随技能等级的提高而增长。"/>
+		</line>
+	</Skill>
+	<Skill name="群体治愈术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级33级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级35级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级38级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的高级治愈技能。能够恢复自己和周"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="围一定范围玩家的生命值，治疗效果随等"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级增长。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="困魔咒/灵魂墙"/>
+		</line>
+	</Skill>
+	<Skill name="召唤神兽">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级35级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级37级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级40级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的高级召唤技能。通过强大的精神力"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，能够召唤一只喷火攻击、法力强大的神"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="兽作自己的随从。逆魔和蛇魔谷中的怪物"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="有一定几率掉落这本技能书。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="群体治愈术"/>
+		</line>
+	</Skill>
+	<Skill name="神光术">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级36"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级。按技能经验值升级技能等"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级，技能等级越高，解除诅咒和石化的几"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="率越大。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的解救技能。可解除一些负面属性的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法，如敌对玩家的诅咒，怪物的石化。"/>
+		</line>
+	</Skill>
+	<Skill name="解毒术">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级38"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级。按技能经验值升级技能等"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级，技能等级越高，解除中毒状态的几率"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="越大。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的解救技能。可解除一些负面属性的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法，如一定范围内玩家的中毒状态。"/>
+		</line>
+	</Skill>
+	<Skill name="幽冥火咒">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级39级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级41级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的高级魔法攻击技能。作为魔法攻击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="和物理攻击都较弱的道士来说，学会此项"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="技能后，将拥有比灵魂道符更加强大的符"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="咒，魔法攻击力大幅提升，堪比魔法师强"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="大的狂龙紫电。"/>
+		</line>
+	</Skill>
+	<Skill name="强化骷髅术">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="3个技能等级。按技能经验值升级技能等"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的最高级召唤技能。修习“强化骷髅"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="”后，道士可同时召唤两个身穿重盔、佩"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="带腰刀的强化骷髅，打怪对敌，威力无比。"/>
+		</line>
+	</Skill>
+	<Skill name="心灵召唤">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级45级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级47级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的高级控制技能。能自由控制自己的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="召唤宠物，可以让宠物锁定攻击目标，也"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="能迅速将宠物召回到自己身边。心灵的力"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="量是无穷的，心灵召唤更能激发心灵潜在"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的力量，使你和你的宠物配合无间。"/>
+		</line>
+	</Skill>
+	<Skill name="遁地">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级45级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级47级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的瞬移技能。可瞬间遁入地下，然后"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="在屏幕之内鼠标所指的点出现。如果鼠标"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="所指的点为障碍物或已经被占，则技能使"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="用失效。古之奇术，借地遁形。练有此技"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="能的道士穿越魔山怪海，如履平地。"/>
+		</line>
+	</Skill>
+	<Skill name="小火球">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级1级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级11级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级16级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的入门基本魔法。杀伤力会随着训练"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="等级的提高而提升，但不能绕过障碍物进"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="行攻击。"/>
+		</line>
+	</Skill>
+	<Skill name="抗拒火环">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级12级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级15级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的防近身攻击魔法。利用自己最熟悉"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的火系魔法，把被烈火灼烧的炙热气团发"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="散出去，将所有接近自己的生物都远远"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="推开。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="小火球"/>
+		</line>
+	</Skill>
+	<Skill name="诱惑之光">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级13级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级18级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级24级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师用来驯服怪物的初级魔法。不过这个"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法既能让怪物变成乖巧的宠物，也能令"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="它们变成狂暴的恶魔。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="抗拒火环"/>
+		</line>
+	</Skill>
+	<Skill name="地狱火焰">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级16级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级21级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师可以学习的第一个大范围攻击魔法。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="向前挥出一堵火焰墙，同时攻击面前五格"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="内的敌人。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="诱惑之光"/>
+		</line>
+	</Skill>
+	<Skill name="雷电术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级17级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的初级电系攻击魔法。指尖发出微弱"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的电光，诱发天空落下一道巨大的闪电，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="直接劈向对手。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="地狱火焰"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与冰箭术同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="冰箭术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级17级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的初级冰系攻击魔法。战斗中可召唤"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="一柱冰箭从空中激射而下，坚冰贯穿敌人"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="躯体，而后冰融于水四散无踪。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="地狱火焰"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与雷电术同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="瞬间移动">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级22级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级25级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师穿梭时空的魔法。利用强大魔力打乱"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="空间，把自己随机传送到某个地点，但过"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="于频繁的使用会使自己陷入原地打转的不"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="利局面。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="雷电术/冰箭术"/>
+		</line>
+	</Skill>
+	<Skill name="火炎刀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级19级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级23级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级25级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="小火球加强后的魔法攻击技能。随训练等"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级的升高，火炎刀的杀伤力会大幅度加强"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="瞬间移动"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与风火轮同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="风火轮">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级21级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级25级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级28级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的基本防护魔法。风借火力，火乘风"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="行，风火交融后绕身体急速旋转，试图近"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="身攻击者将被风火之势重创而退。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="瞬间移动"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与火炎刀同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="爆裂火焰">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级22级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级27级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级31级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="超大范围的火系攻击魔法。除了灼伤外，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="急速膨胀爆炸的火焰可以在一瞬间将周围"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="空气燃尽，一定范围内的生物因窒息而无"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法躲避下一次的进攻。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="火炎刀/风火轮"/>
+		</line>
+	</Skill>
+	<Skill name="火墙">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级24级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级33级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的中级群体攻击魔法。在地面上产生"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="一道火墙，使踏入的敌人受到伤害。火墙"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="中的温度奇高，可以给所有受到攻击的生"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="物造成平常两到三倍强的伤害。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="爆裂火焰"/>
+		</line>
+	</Skill>
+	<Skill name="疾光电影">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级32级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的中级电系攻击魔法。高级法师可以"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="将隐藏在体内的电系元素召唤出来，向对"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="手发出一道强烈的电光，威力远胜雷电术"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="火墙"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与冰龙破同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="冰龙破">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级26级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级32级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的中级冰系攻击魔法。将法力阴凝成"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="冰，冰魂雪魄化为一道冰龙直冲而出，所"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="到之处，寸草不生。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="火墙"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与疾光电影同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="玄冰刃">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级31级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级33级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的中级冰系群体攻击魔法。在四面受"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="敌时召唤出玄冰刃，刹那间冰刃由地底刺"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="透而出，强大的穿透力将重创四周敌人。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="疾光电影/冰龙破"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与地狱雷光同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="地狱雷光">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级32级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的中级电系群体攻击魔法。这种魔法"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="能够召唤出一股强力的雷光风暴，伤害所"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="有围在身边的敌人，缺点是对单人伤害较"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="小且较耗MP。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="疾光电影/冰龙破"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与玄冰刃同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="法之魄">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级30"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="按技能经验值升级技能等级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学会全新技能“法之魄”将使法师在打怪"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="时有机率获得双倍经验。并且获得双倍经"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="验的几率将随技能等级的提高而增长。"/>
+		</line>
+	</Skill>
+	<Skill name="魔法盾">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级31级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级38级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级防御魔法，可降低物理和魔法"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="攻击的伤害。尸王殿的怪物有一定几率掉"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="落这本技能书。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="地狱雷光/玄冰刃"/>
+		</line>
+	</Skill>
+	<Skill name="圣言术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级32级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级35级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级39级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="继诱惑之光之后专门针对不死系怪物的高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级精神攻击魔法。虽然看似不如诱惑之光"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="激烈，但高级圣言术却可以对不死系怪物"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="一击必杀。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="魔法盾"/>
+		</line>
+	</Skill>
+	<Skill name="五雷轰">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级36级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级39级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级电系群体攻击魔法。飙举电至"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，无坚不摧，战斗时可召唤多道雷电同时"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="劈下，在群体战争中将发挥骇人的杀伤力"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="圣言术"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与冰咆哮同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="兽灵术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级34级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级38级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级41级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级召唤技能。学习该技能以后，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师随手即可召唤到4级宠物，而且宠物"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的最高等级可以练到9级。"/>
+		</line>
+	</Skill>
+	<Skill name="冰咆哮">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级35级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级37级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级40级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级冰系。攻击魔法3*3的范围内"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="所有生物都会受到漫天冰霜敲击所造成的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="伤害，并伴有冰冻的效果。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="圣言术"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与五雷轰同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="冰旋风">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级37级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级39级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级42级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级冰系攻击魔法。挥手而出的风"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="刀霜剑化为旋风对大范围敌人进行袭击，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="被卷入旋风的敌人会有短暂停滞，魔法师"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="随即可对敌人进行连续的群体攻击。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="五雷轰"/>
+		</line>
+	</Skill>
+	<Skill name="风影盾">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级39"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="按技能经验值升级技能等级，并且闪避能"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="力随着魔法力和技能等级的提高而增强。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级防御魔法。调动风的力量，让"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="气流围绕自己形成一个旋转的气场，从而"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="提高自身的魔法闪避和物理闪避。"/>
+		</line>
+	</Skill>
+	<Skill name="狂龙紫电">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级40级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级41级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的超级电系攻击魔法。催动强大的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法力，直指天际，召唤出紫龙环绕攻击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="对象，盘旋而下，然后霹雳电光从天而降"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="轰然炸裂，威力无比，号称独步中州大陆"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的最强魔法。"/>
+		</line>
+	</Skill>
+	<Skill name="化身蝙蝠">
+		<line>
+			<col color="0xFFFFFFFF" content="需要等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="按技能经验值升级技能等级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级变身魔法。施法者变化为蝙蝠"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，飞行一定距离到达指定的位置，怪物们"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的铁桶阵将不会再困你一刻伤你分毫。穿"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="越障碍，飞檐走壁，如履平地。"/>
+		</line>
+	</Skill>
+	<Skill name="流星火雨">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级45级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级47级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的超级群体攻击魔法。可向特定范围"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="施展，同时攻击多个目标，流星闪耀，火"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="雨天降，给敌人造成巨大伤害。绚丽的魔"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法效果是流星火雨的一大特色，它也是高"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="阶法师迅速获取经验值的利器，超级法师"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的标志。"/>
+		</line>
+	</Skill>
+	<Skill name="魔魂术">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 等级43级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 等级45级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 等级47级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的吸取性魔法。每杀死一个怪物，就"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="有一定概率吸收跟死亡怪物等级对应的MP"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="。灭魂吸魔，战意不绝。会魔魂术的法师"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，战斗力更持久，轻轻松松，胜人一筹。"/>
+		</line>
+	</Skill>
+	<Skill name="怒斩天下">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 需要神翼等级10级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 需要神翼等级20级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 需要神翼等级30级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需要神翼等级40级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="大师级: 需要神翼等级50级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="宗师级: 需要神翼等级60级,"/>
+			<col color="0xFFFF0000" content="每次释放消"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="        耗一根完美妖翎羽"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士神翼所带绝技。以神翼力量增幅怒气"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="驾驭武器，可以隔空攻击敌人，气势万千"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，睥睨天下，故名怒斩天下。此技能威力"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="巨大，隔空攻击效果更是令战士如虎添翼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="。"/>
+		</line>
+	</Skill>
+	<Skill name="天怒惊雷">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 需要神翼等级10级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 需要神翼等级20级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 需要神翼等级30级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需要神翼等级40级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="大师级: 需要神翼等级50级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="宗师级: 需要神翼等级60级,"/>
+			<col color="0xFFFF0000" content="每次释放消"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="        耗一根完美妖翎羽"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法师神翼所带绝技。以神翼力量增幅雷"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="电之力，引怒雷之闪电球从天而降，一旦"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="触碰地面则电光四射，威力无比，故名天"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="怒惊雷。此技能比独步群英大陆的流星火"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="雨更胜一筹，实为魔法师杀敌灭怪的最佳"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="技能。"/>
+		</line>
+	</Skill>
+	<Skill name="天女散花咒">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 需要分身等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 需要分身等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 需要分身等级45"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需要分身等级48"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士主体带道士分身的组合绝技。符咒飞"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="出之后，在命中第一个目标之后折射攻击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="多个目标，目标受到符咒伤害和超级绿毒"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="伤害。符咒划过天际如同天女散花，故而"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="得名。此技能弥补了道士无群体攻击技能"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的缺憾。"/>
+		</line>
+	</Skill>
+	<Skill name="迷光烈焰">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 需要分身等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 需要分身等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 需要分身等级45"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需要分身等级48"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士和魔法师的组合绝技。战士释放无边"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="气劲，成六道迷光压迫敌人的活动空间；"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师再以无上法力凭空爆出烈焰，给敌人"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="重创，故名迷光烈焰。此技能为物理攻击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="和魔法攻击的组合，被攻击者避无可避，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="如陷噩梦中。"/>
+		</line>
+	</Skill>
+	<Skill name="火毒攻心剑">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 需要神翼等级10级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 需要神翼等级20级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 需要神翼等级30级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需要神翼等级40级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="大师级: 需要神翼等级50级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="宗师级: 需要神翼等级60级,"/>
+			<col color="0xFFFF0000" content="每次释放消"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="        耗一根完美妖翎羽"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士神翼所带绝技。以神翼力量增幅精神"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="力量，引带着绿色毒焰的毒剑从天而降，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="地面炸裂开，毒雾弥漫，令敌人受到毒剑"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="物理攻击和毒雾毒咒的双重伤害。此技能"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="霸道无比，毒性之强令闻者变色。"/>
+		</line>
+	</Skill>
+	<Skill name="神之召唤">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 需要分身等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 需要分身等级42"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 需要分身等级45"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 需要分身等级48"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法师和道士的组合绝技。在魔法师诡异"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的诱惑法力和道士惊人的召唤力呼唤之下"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，破坏力惊人的魔王将现身战场，用强大"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的攻击力给周围的敌人以重创。此技能的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="召唤力几乎可以通神，故名“神之召唤”。"/>
+		</line>
+	</Skill>
+	<Skill name="斗转星移">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级29级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级30级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级31级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="召唤兽护主精神的集中体现，此技能可以"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="将道士受到的一部分伤害转移到附近的召"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="唤兽身上，随该技能等级的上升，转移的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="伤害越多。"/>
+		</line>
+	</Skill>
+	<Skill name="强化火球术">
+		<line>
+			<col color="0xFFFFFFFF" content="第一重 : 需要等级41"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第二重 : 需要等级44"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第三重 : 需要等级46"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第四重 : 需要等级47"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第五重 : 需要等级49"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师高级的伤害输出技能，出手便根据等"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级有多个火球连发，威力强大。"/>
+		</line>
+	</Skill>
+	<Skill name="强化攻杀剑法">
+		<line>
+			<col color="0xFFFFFFFF" content="第一重 : 需要等级41"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第二重 : 需要等级44"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第三重 : 需要等级46"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第四重 : 需要等级47"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第五重 : 需要等级49"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士高级的伤害输出技能，根据等级不同"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，会有不同的刀光，威猛无比。"/>
+		</line>
+	</Skill>
+	<Skill name="强化施毒术">
+		<line>
+			<col color="0xFFFFFFFF" content="第一重 : 需要等级41"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第二重 : 需要等级44"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第三重 : 需要等级46"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第四重 : 需要等级47"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="第五重 : 需要等级49"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士高级的施毒技能，根据等级的不同会"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="出现不同的毒咒效果，造成剧烈减血。"/>
+		</line>
+	</Skill>
+	<Skill name="挖矿">
+		<line>
+			<col color="0xFFFFFFFF" content="学习需要等级11级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级别越高，挖取到的矿石品质和种类就越"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="好。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="生产技能之采集技能。学习后，在矿场中"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="使用鹤嘴锄挖取，可从矿堆上获得到矿石。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="手拿鹤嘴锄，对着矿堆挖取就可获得矿石"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="或者宝石"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="伐木"/>
+		</line>
+	</Skill>
+	<Skill name="伐木">
+		<line>
+			<col color="0xFFFFFFFF" content="学习需要等级8级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级别越高，伐到的木材品质和种类就越好"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="生产技能之采集技能。学习后，使用伐木"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="斧在砍倒树木后，可从树木上收集到木材"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="手拿伐木斧头，砍到树木，鼠标移动到树"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="木上，按住ALT+鼠标左键就可获得木材。"/>
+		</line>
+	</Skill>
+	<Skill name="猎取">
+		<line>
+			<col color="0xFFFFFFFF" content="学习需要等级1级"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="级别越高，可猎取的怪物就越多，猎取到"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="的物品就越好。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="生产技能的入门技能。学习后，在杀死怪"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="物后，有机会从怪物尸体上猎取到物品。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标移动到尸体上，按住ALT+鼠标左键就"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="可进行猎取。"/>
+		</line>
+	</Skill>
+	<Skill name="拆卸">
+		<line>
+			<col color="0xFFFFFFFF" content="学习需要等级20级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学习后，可在铸造师那将装备和武器拆卸"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="成材料。级别越高，拆卸成功率就越高。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="铸造/制炼"/>
+		</line>
+	</Skill>
+	<Skill name="铸造">
+		<line>
+			<col color="0xFFFFFFFF" content="学习等级15级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学习后，可找寻铸造师，将材料按照图纸"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="铸造成装备或者武器。级别越高，铸造出"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="极品装备的概率和成功率就越高。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="挖矿"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与制炼技能同时修炼"/>
+		</line>
+	</Skill>
+	<Skill name="制炼">
+		<line>
+			<col color="0xFFFFFFFF" content="学习等级15级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学习后，可找寻玄玄老人，将材料按照配"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="方制炼成物品。级别越高，制炼成功率就"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="越高。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" type="1" content="挖矿"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="此技能不可与铸造技能同时学习"/>
+		</line>
+	</Skill>
+	<Skill name="狂怒旋风">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级50级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级51级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级52级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士释放金刚护体以及护身真气的效果，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="并以怒气在周身形成刀锋气旋并持续一段"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="时间，对所有靠近的敌人造成大量伤害，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="随该技能等级的上升，造成的伤害越多，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="持续时间越长。"/>
+		</line>
+	</Skill>
+	<Skill name="英勇咆哮">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级53级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级54级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级55级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士凝气为实，以震慑人心的咆哮使目标"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="受到强大的心理压迫而无法自如的行动。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="随该技能等级的上升，成功概率越高，持"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="续时间越长。"/>
+		</line>
+	</Skill>
+	<Skill name="寒冰风暴">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级50级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级51级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级52级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级冰系范围攻击魔法，经过一段"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="时间的吟唱后召唤大量的冰坠以及狂风对"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="范围内的目标造成大量伤害，吟唱时间越"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="长，技能伤害和范围越大。随该技能等级"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的上升，可吟唱的时间越长。"/>
+		</line>
+	</Skill>
+	<Skill name="电灵附体">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级53级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级54级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级55级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的高级电系辅助魔法，召唤一圈电球"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="围绕自身转动，这些电球将在法师催动强"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="大的魔法力量时自动冲向目标并造成伤害"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="，距离越远伤害越高。随该技能等级的上"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="升，电球持续时间越长。"/>
+		</line>
+	</Skill>
+	<Skill name="心灵爆破">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级50级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级51级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级52级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士以心灵力量将宠物召唤至目标周围并"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="使宠物自爆，对目标造成大量的伤害。随"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="该技能等级的上升，宠物自爆的伤害越高。"/>
+		</line>
+	</Skill>
+	<Skill name="骷髅囚笼">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级53级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级54级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级55级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士以强大的精神力量召唤出凶恶的锁链"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="骷髅将目标围困在内。随该技能等级的上"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="升，骷髅锁链围困的时间越长。"/>
+		</line>
+	</Skill>
+	<Skill name="八方分影斩">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级55级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级57级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级59级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士对武学的修炼达到极意之后领悟的技"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="能，能快速地接近对方并施展分身之术击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="杀敌人，横扫千军。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="分身可以继承本体一定的攻击力，技能等"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="级越高则可驾驭的分身数量也越多"/>
+		</line>
+	</Skill>
+	<Skill name="强袭烈焰盾">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级55级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级57级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级59级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师完全驾驭火元素之力而领悟的技能。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学习之后可以张开一张保护自己的护盾，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="免除自身所受的部分伤害。而当护盾吸收"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="伤害达到一定量之后更可以释放出强袭烈"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="焰，烧尽一切敌人！"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="技能等级提升之后可以增加伤害吸收的效"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="果以及强袭烈焰的威力。"/>
+		</line>
+	</Skill>
+	<Skill name="无量五行诀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级55级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级57级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级59级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士融合五行八卦之力而练成的技能。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="开启时需要献祭自己所召唤的宠物，之后"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="可以在短时间内大幅提高灵魂道符和幽冥"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="火咒所造成的伤害，给予敌人巨大打击。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="技能等级提升之后可以增加灵魂道符和幽"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="冥火咒的伤害倍率。"/>
+		</line>
+	</Skill>
+	<Skill name="剧毒沼泽">
+		<line>
+			<col color="0xFFFFFFFF" content="初级：等级14级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级：等级17级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级：等级20级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级：需技能等级高级练满"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的群体攻击技能。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="释放之后在一定范围内形成一片"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="剧毒沼泽，所有踏入其中的人均"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="会为剧毒所伤。"/>
+		</line>
+	</Skill>
+	<Skill name="连斩无双">
+		<line>
+			<col color="0xFFFFFFFF" content="等级1级时修得的被动技能。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="修得之后连续地斩杀怪物即可"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="产生连斩。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="当连斩到达一定数量之后会"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="触发大爆以及全屏秒杀。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="注：斩杀等级比你低很多的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="怪物将不会计算连斩数量。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="    秒杀对于精英怪物以及"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="部分特殊怪物无效。"/>
+		</line>
+	</Skill>
+	<Skill name="骑战训练">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术2级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术4级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术6级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术8级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士的初级骑战技能，通过基本的训练让"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="自己在骑兽上更容易命中目标。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升3点命中。"/>
+		</line>
+	</Skill>
+	<Skill name="驯服坐骑">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术12级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术14级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术16级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术18级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士通过驯服骑兽，增加自己与坐骑的协"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="调性，有效提升战场生存能力。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升40点血量和10点魔法。"/>
+		</line>
+	</Skill>
+	<Skill name="浴血奋战">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术22级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术24级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术26级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术28级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="英勇的战士无畏于死亡，一旦冲入敌阵就"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="要与敌人血战到底。该技能会提升战士的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="生命力和反击力。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升60点生命和10点反弹。"/>
+		</line>
+	</Skill>
+	<Skill name="势如破竹">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术32级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术34级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术36级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术38级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="熟练的骑手可以高速冲击敌人，其强大的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="冲击力无可阻挡。该技能提升战士的攻击"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="力和破防值。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升4点攻击和4点破防。"/>
+		</line>
+	</Skill>
+	<Skill name="迅疾如风">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术44级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术48级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术52级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术56级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="骑兽搭乘着主人在战场上快速移动，该技"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="能会提升玩家的魔法躲避和暴击。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升6点暴击和5点魔法躲避。"/>
+		</line>
+	</Skill>
+	<Skill name="骑兵冲击">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术64级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术68级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术72级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术76级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="骑兵不仅在战场生存力更强，更拥有着步"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="行无法比拟的冲击力和杀伤力。该技能提"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="升人物的暴击和破防。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升6点暴击和4点破防。"/>
+		</line>
+	</Skill>
+	<Skill name="人骑合一">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术85级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术90级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术95级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术100级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士在长年的骑战中积累了丰富的经验，"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="他与骑兽的配合，已经达到天衣无缝的境"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="界。每级提升10点攻击、5点暴击和5点"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="吸血。"/>
+		</line>
+	</Skill>
+	<Skill name="妖兽守护">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术2级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术4级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术6级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术8级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师的初级骑战技能，驯服后的骑兽会主"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="动把自己部分生命供给给主人。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升法师5点生命。"/>
+		</line>
+	</Skill>
+	<Skill name="骑兽灵性">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术12级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术14级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术16级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术18级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师在驯服骑兽后，通过魔法激发骑兽的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵性，让骑兽变得更加强壮和聪慧。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升10点生命和25点魔法值。"/>
+		</line>
+	</Skill>
+	<Skill name="魔力压缩">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术22级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术24级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术26级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术28级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师在骑兽的帮助下，进一步压缩自己的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔力，使得魔法击中敌人时更容易产生暴"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="击和破防。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升4点暴击和4点破防。"/>
+		</line>
+	</Skill>
+	<Skill name="法力复兴">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术32级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术34级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术36级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术38级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="经过训练骑兽可以帮助法师提升法力的利"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="用率，该技能会提升法师的魔法攻击和魔"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法值。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升5点魔法攻击和100点魔法值。"/>
+		</line>
+	</Skill>
+	<Skill name="汲取生命">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术44级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术48级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术52级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术56级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="在骑兽的帮助下，法师可以汲取目标的生"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="命为己用。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="每级提升15点生命和5点吸血。"/>
+		</line>
+	</Skill>
+	<Skill name="妖兽之心">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术64级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术68级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术72级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术76级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师通过强大的魔法让自己和骑兽一起进"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="入狂暴，狂暴将大幅度提升法师魔法的暴"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="击。每级提升10点暴击。"/>
+		</line>
+	</Skill>
+	<Skill name="双重施法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术85级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术90级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术95级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术100级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="经过长年的训练，法师让自己的骑兽可以"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="有效的辅助自己施法。法师与骑兽默契的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="双重施法。每级提升10点魔法攻击、5点"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法命中和5点暴击。"/>
+		</line>
+	</Skill>
+	<Skill name="骑兽沟通">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术2级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术4级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术6级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术8级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的初级骑战技能，道士通过与骑兽的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="沟通更有效的了解周围的情况。每级提"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="升5点魔法命中。"/>
+		</line>
+	</Skill>
+	<Skill name="灵力喂食">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术12级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术14级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术16级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术18级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士用自己的灵力来喂食骑兽，骑兽也相"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="应得将自己的灵力攻击给道士。每级将提"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="升15点生命和25点魔法。"/>
+		</line>
+	</Skill>
+	<Skill name="灵力虹吸">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术22级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术24级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术26级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术28级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士训练骑兽帮助自己汲取目标的生命和"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="活力，转而给养道士自己。每一级将提升"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士的8点吸血。"/>
+		</line>
+	</Skill>
+	<Skill name="鬼门秘法">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术32级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术34级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术36级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术38级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士通过灵符来强化自己的骑兽，使其可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="以帮助自己施展更神秘的道术。每一级可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="以提升4点道术和破防。"/>
+		</line>
+	</Skill>
+	<Skill name="原始秩序">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术44级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术48级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术52级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术56级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士在与骑兽的沟通中更加贴近自然，可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="以更容易将敌人的攻击或防御无效化。每"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="等级提升道士的6点抵抗和3点破防。"/>
+		</line>
+	</Skill>
+	<Skill name="傀儡师">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术64级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术68级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术72级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术76级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士将操纵傀儡的知识应用于骑乘中，使"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="得他与骑兽的默契进一步加深。每等级提"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="升道士30点生命、50点魔法和5点吸血。"/>
+		</line>
+	</Skill>
+	<Skill name="道法自然">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术85级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术90级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术95级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术100级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士在与骑兽的共同奋战中，愈加感受到"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="了贴近自然的神秘力量。每一级提升道士"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="10点道术、5点破防和5点抵抗。"/>
+		</line>
+	</Skill>
+	<Skill name="翱风斩">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术21级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术41级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术61级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术81级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士催动坐骑冲至目标面前，借助冲力砍"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="出迅猛的一击。此技能不但威力惊人，更"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="是战士贴近对手的不二招式。"/>
+		</line>
+	</Skill>
+	<Skill name="纵雷诀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术21级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术41级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术61级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术81级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="法师与骑兽合为一体，化为一道闪电，纵"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="横与战场之上。凡是触碰到闪电之人，必"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="定非死即伤。"/>
+		</line>
+	</Skill>
+	<Skill name="毒凌波">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 骑术21级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 骑术41级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 骑术61级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 骑术81级可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士催动坐骑，将在妖兽体内炼化的剧毒"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="喷射出来。此技能不但对目标造成即时伤"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="害，还会让目标因中毒而痛不欲生。"/>
+		</line>
+	</Skill>
+	<Skill name="龙啸九天">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 学习翱风斩后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 学习龙啸九天初级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 学习龙啸九天中级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 学习龙啸九天高级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="在释放翱风斩后，将积攒的怒气释放出来，可震慑周围的敌人，并使周围的目标无法释放技能，中者非伤即死。"/>
+		</line>
+	</Skill>
+	<Skill name="奔雷诀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 学习纵雷决初级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 学习奔雷诀初级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 学习奔雷诀中级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 学习奔雷诀高级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="在释放纵雷决后，借助闪电之力，可连续释放奔雷诀，可使被击中的玩家因雷电之力而无法跑动，玩弄对手于股掌之中。"/>
+		</line>
+	</Skill>
+	<Skill name="魔魂乱舞">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 学习毒凌波后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 学习魔魂乱舞初级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 学习魔魂乱舞中级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 学习魔魂乱舞高级级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="在释放毒凌波后，逆转中毒玩家血脉，向四周扩散毒凌波，同时使中毒玩家失去跑动能力。"/>
+		</line>
+	</Skill>
+	<Skill name="针锋相对">
+		<line>
+			<col color="0xFFFFFFFF" content="初级: 学习针锋相对后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级: 学习针锋相对初级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级: 学习针锋相对中级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家级: 学习针锋相对高级后可以修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学习针锋相对后，可减免主动骑战技能的伤害，等级越高，减免的伤害越多。"/>
+		</line>
+	</Skill>
+	<Skill name="绝处逢生">
+		<line>
+			<col color="0xFFFFFFFF" content="获取条件：骑乘特殊的高级骑兽后可以获得该技能"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="学习绝处逢生后，在玩家血量低于30%时，自动触发，瞬间回复玩家总血量的30%。"/>
+		</line>
+	</Skill>
+	<Skill name="涅槃重生诀">
+		<line>
+			<col color="0xFFFFFFFF" content="初级:神翼70级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级:神翼80级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级:神翼90级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家:神翼100级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="道士修炼至龙神境界之技能.可护佑勇士，拥有该状态的勇士在死亡后可以立即复活.技能等级越高冷却时间越短."/>
+		</line>
+	</Skill>
+	<Skill name="神兵困仙阵">
+		<line>
+			<col color="0xFFFFFFFF" content="初级:神翼70级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级:神翼80级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级:神翼90级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家:神翼100级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="战士修炼至龙神境界之技能.可召唤神兵将目标敌人围困在内(对怪物无效).技能等级越高神兵困仙阵的围困范围就越大、持续时间越长."/>
+		</line>
+	</Skill>
+	<Skill name="连锁闪电阵">
+		<line>
+			<col color="0xFFFFFFFF" content="初级:神翼70级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="中级:神翼80级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="高级:神翼90级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="专家:神翼100级开始修炼"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="魔法师修炼至龙神境界之技能.可召唤威力强大的连锁闪电释放入敌阵,造成强大伤害时几率将阵内所有敌人血量替换为最低人之血量.技能等级越高连锁闪电阵的伤害范围就越大、血量替换概率也越高."/>
+		</line>
+	</Skill>
+</SkillHelper>

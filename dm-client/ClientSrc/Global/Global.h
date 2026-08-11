@@ -154,7 +154,6 @@ extern BOOL			g_bSelfCursor;
 extern int          g_iDXVersion;
 extern char         *g_cBuf;
 extern int          g_iParamGameType;        //登录类型，0:普通，1,浩方，2:边锋，3:茶苑
-//extern DWORD		g_dwIgaLiveState;        //iga视频广告状态
 extern BYTE         g_byPwdEncode;           //密码加密后再和g_byPwdEncode做异或，g_byPwdEncode启动后随机产生
 extern char         g_strMac[36];//MAC地址
 extern DWORD        g_dwProStartCount;//程序启动时间

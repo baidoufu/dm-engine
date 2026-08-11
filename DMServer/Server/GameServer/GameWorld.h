@@ -114,7 +114,6 @@ public:
 	VOID LoadSafeArea();
 	VOID LoadStartPoint();
 	VOID LoadNotice();
-	VOID LoadClientKeyConfig();
 	BOOL Init();
 
 	VOID Update();
@@ -210,7 +209,6 @@ public:
 	VOID SetUpdateKey(DWORD dwKey) { m_dwUpdateKey = dwKey; }
 	BOOL CanSaveToDB() { if (m_DBUpdateTimer.IsTimeOut(GetVar(EVI_DBUPDATEDELAY)))return TRUE; return FALSE; }
 	VOID UpdateDBUpdateTimer() { m_DBUpdateTimer.Savetime(); }
-	ClientKeyState* GetClientKeyConfig() { return m_ClientKeyConfig.data(); }
 private:
 	FLOAT m_fExpFactor;
 	BOOL GetValidPointFromStartPoint(START_POINT* pPoint, int& map, int& x, int& y, int depth = 0);
@@ -240,8 +238,6 @@ private:
 	int	m_iNoticeLines;
 	std::atomic<int> m_iNoticePtr;
 	CServerTimer m_DBUpdateTimer;
-
-	std::array<ClientKeyState, 100> m_ClientKeyConfig{}; // 自定义快捷键
 
 	std::unique_ptr<CScriptObject> m_pSystemScriptObject; // 系统脚本对象
 

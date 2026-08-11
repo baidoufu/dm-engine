@@ -77,7 +77,7 @@ inline int CHumanPlayer::getskillpower(WORD id)
 	}
 }
 
-inline VOID CHumanPlayer::SendHpMpChanged(int damage, WORD wEffect)
+inline VOID CHumanPlayer::SendHpMpChanged(int damage, BYTE wEffect)
 {
 	int wHp = GetPropValue(PI_CURHP); // 当前生命值
 	int wMaxHp = GetPropValue(PI_MAXHP); // 最大生命值
@@ -86,13 +86,8 @@ inline VOID CHumanPlayer::SendHpMpChanged(int damage, WORD wEffect)
 	WORD heathHP = 100; // 血条长度按百分之显示
 	WORD WbiliHP = (wMaxHp > 0) ? (wHp * 100 / wMaxHp) : 0;// 百分比取整
 	HealthStatus healthStatus;
-	healthStatus.dwId = GetId();
-	healthStatus.nHPChange = -damage;
-	healthStatus.wEffect = wEffect;
-	healthStatus.dwHP = wHp;
-	healthStatus.dwMaxHP = wMaxHp;
-	healthStatus.dwMP = wMp;
-	healthStatus.dwMaxMP = wMaxMp;
+	healthStatus.iAddHp = -damage;
+	healthStatus.btCritFlag = wEffect;
 	SendAroundMsg(GetId(), SM_HPMPCHANGED, WbiliHP, wMp, heathHP, (LPVOID)&healthStatus, sizeof(HealthStatus));
 	if (CanRecvMsg())
 		SendMsg(GetId(), SM_HPMPCHANGED, wHp, wMp, wMaxHp, (LPVOID)&healthStatus, sizeof(HealthStatus));

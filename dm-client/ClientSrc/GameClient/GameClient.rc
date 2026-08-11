@@ -67,7 +67,7 @@ END
 
 IDD_ExceptionDlg DIALOGEX 0, 0, 252, 204
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "<<传奇世界>>异常报告"
+CAPTION "异常报告"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "发    送",IDOK,156,161,50,14
@@ -108,7 +108,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,0,6
+ FILEVERSION 1,0,0,0
  PRODUCTVERSION 1,1,0,1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -124,11 +124,11 @@ BEGIN
     BEGIN
         BLOCK "080404b0"
         BEGIN
-            VALUE "CompanyName", "ShandaGames"
-            VALUE "FileDescription", "WS Client"
-            VALUE "FileVersion", "0, 0, 0, 6"
+            VALUE "CompanyName", "Games"
+            VALUE "FileDescription", "Client"
+            VALUE "FileVersion", "1, 0, 0, 0"
             VALUE "InternalName", "GameClient.exe"
-            VALUE "LegalCopyright", "Copyright(C) 2011 ShandaGames.All rights reserved"
+            VALUE "LegalCopyright", "Copyright(C) 2026 PublicGames.All rights reserved"
             VALUE "OriginalFilename", "GameClient.exe"
             VALUE "ProductName", "GameClient.exe"
             VALUE "ProductVersion", "1, 1, 0, 1"

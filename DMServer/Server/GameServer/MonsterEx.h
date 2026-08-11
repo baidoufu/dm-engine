@@ -139,7 +139,7 @@ public:
 	// 清除豹子当前焦点物品
 	VOID SetCurFocusItem() { m_pCurFocusItem = nullptr; }
 	// 发送生命值魔法值变化消息
-	VOID SendHpMpChanged(int damage = 0, WORD wEffect = 57)
+	VOID SendHpMpChanged(int damage = 0, BYTE wEffect = 0)
 	{
 		if (m_pDesc == nullptr) return;
 		if (GetType() == OBJ_MONSTER && damage < 0)
@@ -151,23 +151,12 @@ public:
 		WORD heathHP = 100; // 血条长度按百分之显示
 		WORD WbiliHP = (wMaxHp > 0) ? MAX(1, wHp * 100 / wMaxHp) : 0;// 百分比取整
 		HealthStatus healthStatus;
-		healthStatus.dwId = GetId();
-		healthStatus.nHPChange = -damage;
-		healthStatus.wEffect = wEffect;
-		healthStatus.dwMP = wMp;
-		healthStatus.dwMaxMP = wMaxMp;
+		healthStatus.iAddHp = -damage;
+		healthStatus.btCritFlag = wEffect;
 		if (m_pDesc->base.btRace == MR_BOSS) // 如果是BOSS就显示具体血量
-		{
-			healthStatus.dwHP = wHp;
-			healthStatus.dwMaxHP = wMaxHp;
-			SendAroundMsg(GetId(), SM_HPMPCHANGED, wHp, 0, heathHP, (LPVOID)&healthStatus, sizeof(HealthStatus));
-		}
+			SendAroundMsg(GetId(), SM_HPMPCHANGED, wHp, wMp, wMaxHp, (LPVOID)&healthStatus, sizeof(HealthStatus));
 		else // 其他显示百分比血量
-		{
-			healthStatus.dwHP = WbiliHP;
-			healthStatus.dwMaxHP = heathHP;
-			SendAroundMsg(GetId(), SM_HPMPCHANGED, WbiliHP, 0, heathHP, (LPVOID)&healthStatus, sizeof(HealthStatus));
-		}
+			SendAroundMsg(GetId(), SM_HPMPCHANGED, WbiliHP, wMp, heathHP, (LPVOID)&healthStatus, sizeof(HealthStatus));
 	}
 	// 怪物的特殊魔法效果（治疗, 复活其他怪物）
 	VOID SendSkill(DWORD tId, WORD x, WORD y, WORD wMagicID);

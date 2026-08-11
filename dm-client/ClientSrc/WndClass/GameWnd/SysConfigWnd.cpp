@@ -44,6 +44,9 @@ CSysConfigWnd::CSysConfigWnd(void)
 	m_pRD1024 = NULL;
  	m_pRD800  = NULL; 
 	m_pRD1280 = NULL;
+	m_pRD1600 = NULL;
+	m_pRD1920 = NULL;
+	m_pRD2560 = NULL;
 	m_pRDWinMode = NULL;
 	m_pRDScreenMode = NULL;
 	m_pRDSpeed = NULL;
@@ -286,9 +289,9 @@ void CSysConfigWnd::Draw(void)
 		{
 			g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY,"分辨率",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
 		}
-		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 1,"窗口模式",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
-		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 2,"刷新速度",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
-		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 3,"界面设定：",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
+		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 2,"窗口模式",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
+		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 3,"刷新速度",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
+		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 4,"界面设定：",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
 		//g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + iStartY + iSPan * 3,"图像质量",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
 		
 		iStartY = 182;
@@ -299,6 +302,9 @@ void CSysConfigWnd::Draw(void)
 		g_pFont->DrawText(m_iScreenX + 55,m_iScreenY + 292,"窗口透明度",COLOR_TEXT_NORMAL,FONT_YAHEI,FONTSIZE_SMALL);
 
 		m_pRD1280->SetChecked(m_iWindowWidth == 1280);
+		m_pRD1600->SetChecked(m_iWindowWidth == 1600);
+		m_pRD1920->SetChecked(m_iWindowWidth == 1920);
+		m_pRD2560->SetChecked(m_iWindowWidth == 2560);
 		m_pRD1024->SetChecked(m_iWindowWidth == 1024);
  		m_pRD800->SetChecked(m_iWindowWidth == 800);
 		m_pRDWinMode->SetChecked(m_bAllWndMode);
@@ -578,6 +584,9 @@ bool CSysConfigWnd::DealPictureMsg(DWORD dwData,CControl* pControl)
 		//m_b1024 = true;
  		m_pRD800->SetChecked(false);
 		m_pRD1024->SetChecked(false);
+		m_pRD1600->SetChecked(false);
+		m_pRD1920->SetChecked(false);
+		m_pRD2560->SetChecked(false);
 		return true;
 	}
 	if(pControl == m_pRD1024)
@@ -586,6 +595,9 @@ bool CSysConfigWnd::DealPictureMsg(DWORD dwData,CControl* pControl)
 		//m_b1024 = true;
 		m_pRD1280->SetChecked(false);
  		m_pRD800->SetChecked(false);
+		m_pRD1600->SetChecked(false);
+		m_pRD1920->SetChecked(false);
+		m_pRD2560->SetChecked(false);
 		return true;
 	}
  	else if(pControl == m_pRD800)
@@ -594,6 +606,39 @@ bool CSysConfigWnd::DealPictureMsg(DWORD dwData,CControl* pControl)
  		m_iWindowWidth = 800;
  		m_pRD1280->SetChecked(false);
  		m_pRD1024->SetChecked(false);
+		m_pRD1600->SetChecked(false);
+		m_pRD1920->SetChecked(false);
+		m_pRD2560->SetChecked(false);
+ 		return true;
+ 	}
+ 	else if(pControl == m_pRD1600)
+ 	{
+ 		m_iWindowWidth = 1600;
+ 		m_pRD1280->SetChecked(false);
+ 		m_pRD1024->SetChecked(false);
+ 		m_pRD800->SetChecked(false);
+		m_pRD1920->SetChecked(false);
+		m_pRD2560->SetChecked(false);
+ 		return true;
+ 	}
+ 	else if(pControl == m_pRD1920)
+ 	{
+ 		m_iWindowWidth = 1920;
+ 		m_pRD1280->SetChecked(false);
+ 		m_pRD1024->SetChecked(false);
+ 		m_pRD800->SetChecked(false);
+		m_pRD1600->SetChecked(false);
+		m_pRD2560->SetChecked(false);
+ 		return true;
+ 	}
+ 	else if(pControl == m_pRD2560)
+ 	{
+ 		m_iWindowWidth = 2560;
+ 		m_pRD1280->SetChecked(false);
+ 		m_pRD1024->SetChecked(false);
+ 		m_pRD800->SetChecked(false);
+		m_pRD1600->SetChecked(false);
+		m_pRD1920->SetChecked(false);
  		return true;
  	}
 	else if(pControl == m_pRDWinMode)
@@ -1146,6 +1191,9 @@ void CSysConfigWnd::OnCreate()
 	SetMask(10125);
 
 	m_pRD1280 = NULL;
+	m_pRD1600 = NULL;
+	m_pRD1920 = NULL;
+	m_pRD2560 = NULL;
 	m_pRD1024 = NULL;
  	m_pRD800  = NULL; 
 	m_pRDWinMode = NULL;
@@ -1227,6 +1275,24 @@ void CSysConfigWnd::OnCreate()
 		m_pRD1280->SetText("1280*800",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 		m_pRD1280->SetTips("选择高分辨率在游戏中能看到更大的地图范围，\n但是会消耗很多的显示资源，请根据您的机器配\n置决定采用何种分辨率模式，推荐宽屏用户使用。");
 
+		m_pRD1600 = new CCtrlRadio();
+		AddControl(m_pRD1600);
+		m_pRD1600->Create(this,iX1,iY + iSPan,125,126,127,128,110,20);
+		m_pRD1600->SetText("1600*900",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
+		m_pRD1600->SetTips("选择高分辨率在游戏中能看到更大的地图范围，\n但是会消耗很多的显示资源，请根据您的机器配\n置决定采用何种分辨率模式。");
+
+		m_pRD1920 = new CCtrlRadio();
+		AddControl(m_pRD1920);
+		m_pRD1920->Create(this,iX2,iY + iSPan,125,126,127,128,110,20);
+		m_pRD1920->SetText("1920*1080",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
+		m_pRD1920->SetTips("选择高分辨率在游戏中能看到更大的地图范围，\n但是会消耗很多的显示资源，请根据您的机器配\n置决定采用何种分辨率模式。");
+
+		m_pRD2560 = new CCtrlRadio();
+		AddControl(m_pRD2560);
+		m_pRD2560->Create(this,iX2 + 90,iY + iSPan,125,126,127,128,110,20);
+		m_pRD2560->SetText("2560*1440",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
+		m_pRD2560->SetTips("选择高分辨率在游戏中能看到更大的地图范围，\n但是会消耗很多的显示资源，请根据您的机器配\n置决定采用何种分辨率模式。");
+
 		if (g_hParentWnd)
 		{
 			m_pRD800->SetEnable(false);
@@ -1235,42 +1301,48 @@ void CSysConfigWnd::OnCreate()
 			m_pRD1024->SetShow(false);
 			m_pRD1280->SetEnable(false);
 			m_pRD1280->SetShow(false);
+			m_pRD1600->SetEnable(false);
+			m_pRD1600->SetShow(false);
+			m_pRD1920->SetEnable(false);
+			m_pRD1920->SetShow(false);
+			m_pRD2560->SetEnable(false);
+			m_pRD2560->SetShow(false);
 		}
 
 		m_pRDWinMode = new CCtrlRadio();
 		AddControl(m_pRDWinMode);
-		m_pRDWinMode->Create(this,iX1,iY + iSPan*1,125,126,127,128,110,20);
+		m_pRDWinMode->Create(this,iX1,iY + iSPan*2,125,126,127,128,110,20);
 		m_pRDWinMode->SetText("窗口",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 		m_pRDWinMode->SetTips("窗口模式便于您在游戏的同时运行别的Windows\n程序，比如浏览器，QQ等等。");
 
 		m_pRDScreenMode = new CCtrlRadio();
 		AddControl(m_pRDScreenMode);
-		m_pRDScreenMode->Create(this,iX2,iY + iSPan*1,125,126,127,128,110,20);
+		m_pRDScreenMode->Create(this,iX2,iY + iSPan*2,125,126,127,128,110,20);
 		m_pRDScreenMode->SetText("全屏",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 		m_pRDScreenMode->SetTips("窗口模式便于您在游戏的同时运行别的Windows\n程序，比如浏览器，QQ等等。");
 
 
 		m_pRDSpeed = new CCtrlRadio();
 		AddControl(m_pRDSpeed);
-		m_pRDSpeed->Create(this,iX1,iY + iSPan*2,125,126,127,128,110,20);
+		m_pRDSpeed->Create(this,iX1,iY + iSPan*3,125,126,127,128,110,20);
 		m_pRDSpeed->SetText("快",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 
 		m_pRDSpeed->SetTips("打开此选项会降低游戏的刷新速度，对配置较差\n的机器能有效的避免跳帧的感觉。");
 
 		m_pRDHalfSpeed = new CCtrlRadio();
 		AddControl(m_pRDHalfSpeed);
-		m_pRDHalfSpeed->Create(this,iX2,iY + iSPan*2,125,126,127,128,110,20);
+		m_pRDHalfSpeed->Create(this,iX2,iY + iSPan*3,125,126,127,128,110,20);
 		m_pRDHalfSpeed->SetText("慢",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 		m_pRDHalfSpeed->SetTips("打开此选项会降低游戏的刷新速度，对配置较差\n的机器能有效的避免跳帧的感觉。");
 
 		m_pFashionUi = new CCtrlRadio();
 		AddControl(m_pFashionUi);
-		m_pFashionUi->Create(this,iX2,iY + iSPan*3,125,126,127,128,70,20);
+		m_pFashionUi->Create(this,iX2,iY + iSPan*4,125,126,127,128,70,20);
 		m_pFashionUi->SetText("时尚版界面",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 		
 		m_pClassicUI = new CCtrlRadio();
 		AddControl(m_pClassicUI);
-		m_pClassicUI->Create(this,iX1,iY + iSPan*3,125,126,127,128,70,20);
+		m_pClassicUI->Create(this,iX1,iY + iSPan*4,125,126,127,128,70,20);
 		m_pClassicUI->SetText("经典版界面",COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,COLOR_TEXT_NORMAL,FONTSIZE_SMALL,0,FONT_YAHEI,8);
 
 		//m_pRDHighQ = new CCtrlRadio();
@@ -1939,6 +2011,18 @@ bool CSysConfigWnd::OnclickOK()
 		else if (iWidth == 1280)
 		{
 			iHeight = 800;
+		}
+		else if (iWidth == 1600)
+		{
+			iHeight = 900;
+		}
+		else if (iWidth == 1920)
+		{
+			iHeight = 1080;
+		}
+		else if (iWidth == 2560)
+		{
+			iHeight = 1440;
 		}
 		else
 		{

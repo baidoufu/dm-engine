@@ -1,0 +1,3141 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<MapMonsterList Ver="1">
+	<Map id="0">
+		<Monster name="弓箭守卫" level="50级以上" youhuo="0"/>
+		<Monster name="猪" level="13" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="松树" level="5" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="1">
+		<Monster name="兔" level="5" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="桃树" level="5" youhuo="0"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="101">
+		<Monster name="兔" level="5" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="桃树" level="5" youhuo="0"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="201">
+		<Monster name="兔" level="5" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="桃树" level="5" youhuo="0"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="10">
+		<Monster name="弓箭守卫" level="50级以上" youhuo="0"/>
+		<Monster name="大土蛇" level="17" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="2">
+		<Monster name="弓箭守卫" level="50级以上" youhuo="0"/>
+		<Monster name="牛" level="13" youhuo="1"/>
+		<Monster name="沙雕" level="16" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="22" youhuo="1"/>
+		<Monster name="大土蛇" level="17" youhuo="1"/>
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="柚树" level="5" youhuo="0"/>
+		<Monster name="仙人掌" level="16" youhuo="0"/>
+		<Monster name="沙蝎" level="16" youhuo="1"/>
+		<Monster name="沙怪" level="16" youhuo="1"/>
+		<Monster name="沙鱼" level="16" youhuo="1"/>
+		<Monster name="沙鱼王" level="30" youhuo="1"/>
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+	</Map>
+	<Map id="3">
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="大土蛇" level="17" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="22" youhuo="1"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="沙雕" level="16" youhuo="1"/>
+		<Monster name="沙蝎" level="16" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="仙人掌" level="16" youhuo="0"/>
+		<Monster name="沙怪" level="16" youhuo="1"/>
+		<Monster name="沙鱼" level="16" youhuo="1"/>
+		<Monster name="沙鱼王" level="30" youhuo="1"/>
+		<Monster name="仙人掌·精" level="16" youhuo="0"/>
+		<Monster name="沙雕·精" level="16" youhuo="1"/>
+		<Monster name="沙蝎·精" level="16" youhuo="1"/>
+		<Monster name="沙鱼·精" level="16" youhuo="1"/>
+		<Monster name="土狼·精" level="16" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="4">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="弓箭守卫" level="50级以上" youhuo="0"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="大土蛇" level="17" youhuo="1"/>
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="巨猿" level="22" youhuo="1"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="桐树" level="5" youhuo="0"/>
+		<Monster name="巨猿·精" level="22" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="土狼·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="5">
+		<Monster name="弓箭守卫" level="50级以上" youhuo="0"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="巨猿" level="22" youhuo="1"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="沙蝎" level="16" youhuo="1"/>
+		<Monster name="沙雕" level="16" youhuo="1"/>
+		<Monster name="大土蛇" level="17" youhuo="1"/>
+		<Monster name="地狱奴" level="28" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="土狼·精" level="16" youhuo="1"/>
+		<Monster name="沙蝎·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="沙雕·精" level="16" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+		<Monster name="地狱奴·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="6">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+	</Map>
+	<Map id="7">
+		<Monster name="弓箭守卫" level="50级以上" youhuo="0"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="狼妖" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="鬼方火卒·精" level="35" youhuo="0"/>
+		<Monster name="幽魂·精" level="42" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="AS001">
+		<Monster name="暗影修罗" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="暗影雷电" level="50级以上" youhuo="0"/>
+		<Monster name="暗影修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="AS002">
+		<Monster name="暗影修罗" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="暗影雷电" level="50级以上" youhuo="0"/>
+		<Monster name="暗影修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="AS003">
+		<Monster name="暗影修罗" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="暗影雷电" level="50级以上" youhuo="0"/>
+		<Monster name="暗影修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="AS004">
+		<Monster name="暗影雷电" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗长老" level="50级以上" youhuo="0"/>
+		<Monster name="暗影修罗" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗" level="50级以上" youhuo="0"/>
+		<Monster name="阿修罗神" level="50级以上" youhuo="0"/>
+		<Monster name="暗影修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗·精" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="BBC">
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="樟树" level="5" youhuo="0"/>
+		<Monster name="猪" level="13" youhuo="1"/>
+		<Monster name="牛" level="13" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+	</Map>
+	<Map id="BLC">
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="樟树" level="5" youhuo="0"/>
+		<Monster name="猪" level="13" youhuo="1"/>
+		<Monster name="牛" level="13" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+	</Map>
+	<Map id="BT001">
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+	</Map>
+	<Map id="BT002">
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="冰锥" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="BT003">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+	</Map>
+	<Map id="BT004">
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="冰锥" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="BT005">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+	</Map>
+	<Map id="BT006">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="冰锥" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="BTC">
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="樟树" level="5" youhuo="0"/>
+		<Monster name="猪" level="13" youhuo="1"/>
+		<Monster name="牛" level="13" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+	</Map>
+	<Map id="E001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="E002">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="E003">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+	</Map>
+	<Map id="E004">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="H071">
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="蝎子·精" level="18" youhuo="1"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="H072">
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="H073">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+	</Map>
+	<Map id="H074">
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="H081">
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="蝎子·精" level="18" youhuo="1"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="H082">
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+	</Map>
+	<Map id="H083">
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="H084">
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="H085">
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+	</Map>
+	<Map id="H086">
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+	</Map>
+	<Map id="HD001">
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="铜锤手" level="50级以上" youhuo="1"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="HD003">
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="调皮小鬼" level="50级以上" youhuo="1"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="HX001">
+		<Monster name="啸天猛虎" level="50级以上" youhuo="1"/>
+		<Monster name="啸天虎妖" level="50级以上" youhuo="1"/>
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="28" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J001">
+		<Monster name="铁翼魔" level="50级以上" youhuo="1"/>
+		<Monster name="毒妖" level="50级以上" youhuo="1"/>
+		<Monster name="血魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="1"/>
+		<Monster name="地狱奴" level="50级以上" youhuo="0"/>
+		<Monster name="地狱奴·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="J002">
+		<Monster name="铁翼魔" level="50级以上" youhuo="1"/>
+		<Monster name="毒妖" level="50级以上" youhuo="1"/>
+		<Monster name="血魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="1"/>
+		<Monster name="刺魔" level="50级以上" youhuo="1"/>
+		<Monster name="地狱奴" level="50级以上" youhuo="0"/>
+		<Monster name="地狱奴·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="J003">
+		<Monster name="铁翼魔" level="50级以上" youhuo="1"/>
+		<Monster name="毒妖" level="50级以上" youhuo="1"/>
+		<Monster name="血魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="1"/>
+		<Monster name="刺魔" level="50级以上" youhuo="1"/>
+		<Monster name="地狱奴" level="50级以上" youhuo="0"/>
+		<Monster name="铁翼魔·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J004">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="28" youhuo="1"/>
+		<Monster name="铁翼魔·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J005">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="28" youhuo="1"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J007">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J008">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="利爪魔" level="50级以上" youhuo="0"/>
+		<Monster name="闪电魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J009">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J010">
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J011">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="J012">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="28" youhuo="1"/>
+		<Monster name="毒妖·精" level="43" youhuo="0"/>
+		<Monster name="血妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="L001">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="L003">
+		<Monster name="鹿" level="50级以上" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="沙鱼王" level="50级以上" youhuo="1"/>
+		<Monster name="沙鱼王" level="30" youhuo="1"/>
+		<Monster name="巨猿" level="50级以上" youhuo="1"/>
+		<Monster name="巨猿" level="28" youhuo="1"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="L004">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="M001">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M002">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M003">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M004">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M005">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M006">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M007">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+	</Map>
+	<Map id="M008">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+	</Map>
+	<Map id="M009">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+	</Map>
+	<Map id="M010">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M011">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M012">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M013">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M014">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+	</Map>
+	<Map id="M015">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+	</Map>
+	<Map id="M018">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M020">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+	</Map>
+	<Map id="M021">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M022">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+	</Map>
+	<Map id="M023">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="M024">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+	</Map>
+	<Map id="M025">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+	</Map>
+	<Map id="M026">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="M027">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="M028">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M029">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M030">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+	</Map>
+	<Map id="M031">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="M032">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+	</Map>
+	<Map id="MC001">
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="MC002">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="MC003">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟" level="36" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目·精" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="MC004">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="火烈鸟" level="36" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="MC005">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟" level="36" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MC006">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="火烈鸟" level="36" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MC007">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟" level="36" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MC008">
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟" level="36" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MC009">
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+		<Monster name="利爪魔" level="50级以上" youhuo="0"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="闪电魔" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MC011">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MC014">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="魇" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MG001">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼·精" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MG002">
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="魔斗士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MH001">
+		<Monster name="猪" level="13" youhuo="1"/>
+		<Monster name="兔" level="5" youhuo="1"/>
+		<Monster name="鹿" level="12" youhuo="1"/>
+		<Monster name="牛" level="13" youhuo="1"/>
+		<Monster name="癞蛤蟆" level="5" youhuo="1"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+	</Map>
+	<Map id="MH002">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="洞蛆·精" level="21" youhuo="1"/>
+		<Monster name="蝎子·精" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠·精" level="20" youhuo="1"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+	</Map>
+	<Map id="MH003">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="洞蛆·精" level="21" youhuo="1"/>
+		<Monster name="蝎子·精" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠·精" level="20" youhuo="1"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH004">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="蝎子" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠" level="20" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="洞蛆·精" level="21" youhuo="1"/>
+		<Monster name="蝎子·精" level="18" youhuo="1"/>
+		<Monster name="山洞蝙蝠·精" level="20" youhuo="1"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+	</Map>
+	<Map id="MH005">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH006">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH007">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH008">
+		<Monster name="稻草人" level="10" youhuo="0"/>
+		<Monster name="鱼人" level="15" youhuo="1"/>
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="稻草人·精" level="10" youhuo="0"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="鱼人·精" level="15" youhuo="1"/>
+		<Monster name="食人花·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="MH009">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="MH010">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="MH011">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="MH012">
+		<Monster name="刀犬" level="13" youhuo="1"/>
+		<Monster name="棍犬" level="13" youhuo="1"/>
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="刀犬·精" level="13" youhuo="1"/>
+		<Monster name="棍犬·精" level="13" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="食人花·精" level="20" youhuo="0"/>
+		<Monster name="土狼·精" level="16" youhuo="1"/>
+	</Map>
+	<Map id="MH013">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="MH014">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="MH015">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="MH016">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="MH017">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="MH018">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+	</Map>
+	<Map id="MH019">
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="食人花" level="20" youhuo="0"/>
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="沙蝎" level="16" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="食人花·精" level="20" youhuo="0"/>
+		<Monster name="土狼·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="沙蝎·精" level="16" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+	</Map>
+	<Map id="MH020">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="MH021">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="MH022">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+	</Map>
+	<Map id="MH023">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH024">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH025">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="MH026">
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="沙雕" level="16" youhuo="1"/>
+		<Monster name="土狼" level="16" youhuo="1"/>
+		<Monster name="蟒" level="16" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="沙雕·精" level="16" youhuo="1"/>
+		<Monster name="土狼·精" level="16" youhuo="1"/>
+		<Monster name="蟒·精" level="16" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+		<Monster name="地狱奴·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="MH027">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+	</Map>
+	<Map id="MH028">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+	</Map>
+	<Map id="MH029">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+	</Map>
+	<Map id="MH030">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="MH031">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="MH032">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="MH033">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="MH034">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="MH035">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="MH036">
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="沙蝎" level="16" youhuo="1"/>
+		<Monster name="沙雕" level="16" youhuo="1"/>
+		<Monster name="巨猿" level="22" youhuo="1"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="沙蝎·精" level="16" youhuo="1"/>
+		<Monster name="沙雕·精" level="16" youhuo="1"/>
+		<Monster name="大土蛇·精" level="17" youhuo="1"/>
+		<Monster name="巨猿·精" level="22" youhuo="1"/>
+		<Monster name="地狱奴·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="MH037">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="地下小鬼·精" level="24" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="MH038">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="MH039">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="守护者" level="43" youhuo="1"/>
+		<Monster name="守护者" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="MH040">
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="MH041">
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="MH042">
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="MH054">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="50级以上" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="幽灵虫母" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="MH055">
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="狼妖" level="42" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒·精" level="35" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目·精" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="MH056">
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="狼妖" level="42" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒·精" level="35" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目·精" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="MH057">
+		<Monster name="毒蜘蛛" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="狼妖" level="42" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="毒蜘蛛·精" level="16" youhuo="1"/>
+		<Monster name="鬼方火卒·精" level="35" youhuo="0"/>
+		<Monster name="猛魔刀斧手·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒·精" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔头目·精" level="50级以上" youhuo="1"/>
+		<Monster name="幽魂·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="N001">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="N002">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="黑蛇妖·精" level="35" youhuo="0"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+	</Map>
+	<Map id="N003">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="圣甲虫·精" level="28" youhuo="1"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+	</Map>
+	<Map id="N004">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖·精" level="35" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+		<Monster name="白蛇妖·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="N005">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+	</Map>
+	<Map id="N006">
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+		<Monster name="白蛇妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="N007">
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+		<Monster name="白蛇妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="N008">
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+		<Monster name="白蛇妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="NB001">
+		<Monster name="逆魔之王" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+	</Map>
+	<Map id="NB002">
+		<Monster name="狂尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+	</Map>
+	<Map id="NB003">
+		<Monster name="蛇妖王" level="50级以上" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL001">
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="NL002">
+		<Monster name="尸卫" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="26" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫·精" level="18" youhuo="0"/>
+		<Monster name="尸卫勇士·精" level="19" youhuo="0"/>
+		<Monster name="尸卫战将·精" level="20" youhuo="0"/>
+		<Monster name="掷枪尸卫·精" level="18" youhuo="0"/>
+	</Map>
+	<Map id="NL003">
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铜人·精" level="26" youhuo="0"/>
+		<Monster name="铜锤手·精" level="35" youhuo="1"/>
+		<Monster name="青铜兽·精" level="26" youhuo="1"/>
+		<Monster name="滚刀手·精" level="28" youhuo="1"/>
+		<Monster name="石人·精" level="31" youhuo="1"/>
+		<Monster name="金刚人·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="NL004">
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="红蛇妖" level="40" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="黑蛇妖" level="40" youhuo="0"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="三头蛇" level="40" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="蚁巢" level="30" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="魔甲虫·精" level="32" youhuo="1"/>
+		<Monster name="红蛇妖·精" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖·精" level="35" youhuo="0"/>
+		<Monster name="三头蛇·精" level="35" youhuo="0"/>
+	</Map>
+	<Map id="NL005">
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="鬼方火卒·精" level="35" youhuo="0"/>
+		<Monster name="幽魂·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="NL006">
+		<Monster name="宝藏守护者" level="50级以上" youhuo="0"/>
+		<Monster name="通天教主" level="16" youhuo="1"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔" level="25" youhuo="1"/>
+		<Monster name="尸霸" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="NL007">
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔卫士" level="50级以上" youhuo="0"/>
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="幸运雪人" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗长老" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="调皮小鬼" level="50级以上" youhuo="1"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="NL008">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="利爪魔" level="50级以上" youhuo="0"/>
+		<Monster name="闪电魔" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+		<Monster name="幸运雪人" level="50级以上" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗长老" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+		<Monster name="调皮小鬼" level="50级以上" youhuo="1"/>
+		<Monster name="刺魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="铁翼魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖·精" level="50级以上" youhuo="0"/>
+		<Monster name="血魔·精" level="43" youhuo="0"/>
+		<Monster name="妖力士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL009">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+		<Monster name="幸运雪人" level="50级以上" youhuo="0"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使·精" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="NL010">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="炼狱魔君" level="50级以上" youhuo="0"/>
+		<Monster name="幸运雪人" level="50级以上" youhuo="0"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="地火兽骑将·精" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔·精" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士·精" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL011">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL012">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL013">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL014">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL015">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL016">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL017">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL018">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL019">
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="神衣使者" level="50级以上" youhuo="0"/>
+		<Monster name="幽魂" level="42" youhuo="0"/>
+		<Monster name="鬼方火卒" level="35" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="NL020">
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+	</Map>
+	<Map id="NL021">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+	</Map>
+	<Map id="NL022">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+	</Map>
+	<Map id="NL023">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+	</Map>
+	<Map id="NL024">
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+	</Map>
+	<Map id="NL025">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+	</Map>
+	<Map id="NL026">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+	</Map>
+	<Map id="NL027">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX0007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX0008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX1007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX1008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX2007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX2008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX3007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX3008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX4007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX4008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX5007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX5008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6001">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6002">
+		<Monster name="尸卫勇士" level="19" youhuo="0"/>
+		<Monster name="掷枪尸卫" level="18" youhuo="0"/>
+		<Monster name="尸卫战将" level="20" youhuo="0"/>
+		<Monster name="尸卫" level="18" youhuo="0"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6003">
+		<Monster name="滚刀手" level="28" youhuo="1"/>
+		<Monster name="铜人" level="26" youhuo="0"/>
+		<Monster name="石人" level="31" youhuo="1"/>
+		<Monster name="铜锤手" level="35" youhuo="1"/>
+		<Monster name="青铜兽" level="26" youhuo="1"/>
+		<Monster name="机关巨兽" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6004">
+		<Monster name="红蛇妖" level="32" youhuo="0"/>
+		<Monster name="黑蛇妖" level="35" youhuo="0"/>
+		<Monster name="魔甲虫" level="32" youhuo="1"/>
+		<Monster name="圣甲虫" level="28" youhuo="1"/>
+		<Monster name="三头蛇" level="35" youhuo="0"/>
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="三头蛇王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6005">
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6006">
+		<Monster name="铁翼魔" level="50级以上" youhuo="0"/>
+		<Monster name="藤妖" level="50级以上" youhuo="0"/>
+		<Monster name="血妖" level="50级以上" youhuo="0"/>
+		<Monster name="毒妖" level="43" youhuo="0"/>
+		<Monster name="刺魔" level="50级以上" youhuo="0"/>
+		<Monster name="妖力士" level="50级以上" youhuo="0"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="RTSQX6007">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="RTSQX6008">
+		<Monster name="地火兽弓箭手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="炎魔" level="50级以上" youhuo="0"/>
+		<Monster name="幽影武士" level="50级以上" youhuo="0"/>
+		<Monster name="猛魔头目" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔刀斧手" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔枪卒" level="50级以上" youhuo="1"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="魔眼" level="50级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="铁血魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="S011">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="地下小鬼·精" level="24" youhuo="0"/>
+	</Map>
+	<Map id="S012">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="地下小鬼·精" level="24" youhuo="0"/>
+	</Map>
+	<Map id="S013">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+	</Map>
+	<Map id="S014">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S015">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S016">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S017">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S018">
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔卫士" level="50级以上" youhuo="0"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S019">
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="S020">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S021">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S022">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S023">
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔卫士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S024">
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔卫士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+	</Map>
+	<Map id="S026">
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="43" youhuo="0"/>
+		<Monster name="逆魔卫士" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔侍卫·精" level="42" youhuo="0"/>
+		<Monster name="逆魔卫士·精" level="43" youhuo="0"/>
+		<Monster name="逆魔雕像·精" level="42" youhuo="0"/>
+		<Monster name="逆魔弓箭手·精" level="40" youhuo="0"/>
+	</Map>
+	<Map id="SH006">
+		<Monster name="练功师" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="SH037">
+		<Monster name="地下小鬼" level="24" youhuo="0"/>
+		<Monster name="血魔" level="43" youhuo="0"/>
+	</Map>
+	<Map id="T011">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="洞蛆·精" level="21" youhuo="1"/>
+	</Map>
+	<Map id="T012">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="洞蛆·精" level="21" youhuo="1"/>
+	</Map>
+	<Map id="T013">
+		<Monster name="洞蛆" level="21" youhuo="1"/>
+		<Monster name="僵尸" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T014">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T015">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="尸王" level="40" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T016">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T017">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T018">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T019">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="尸王" level="50级以上" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T020">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T021">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="骷髅" level="25" youhuo="0"/>
+		<Monster name="骷髅·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T022">
+		<Monster name="僵尸" level="25" youhuo="0"/>
+		<Monster name="僵尸·精" level="25" youhuo="0"/>
+	</Map>
+	<Map id="T023">
+		<Monster name="幽魂" level="42" youhuo="0"/>
+	</Map>
+	<Map id="TT001">
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT002">
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="黄金怪物" level="50级以上" youhuo="0"/>
+		<Monster name="火烈鸟·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT003">
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵·精" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT004">
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT005">
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵·精" level="50级以上" youhuo="1"/>
+		<Monster name="火烈鸟·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT006">
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT007">
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT008">
+		<Monster name="兽骑兵" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑兵·精" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="TT009">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使" level="50级以上" youhuo="0"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+		<Monster name="黄金魔斗士" level="50级以上" youhuo="0"/>
+		<Monster name="兽骑统领·精" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使·精" level="50级以上" youhuo="1"/>
+		<Monster name="烈焰使·精" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="WC001">
+		<Monster name="魔斗士" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="WC001F">
+		<Monster name="魔斗士" level="50级以上" youhuo="1"/>
+	</Map>
+	<Map id="WC004">
+		<Monster name="松树" level="5" youhuo="0"/>
+		<Monster name="桃树" level="5" youhuo="0"/>
+		<Monster name="樟树" level="5" youhuo="0"/>
+		<Monster name="桐树" level="5" youhuo="0"/>
+		<Monster name="柚树" level="5" youhuo="0"/>
+	</Map>
+	<Map id="WC004F">
+		<Monster name="松树" level="5" youhuo="0"/>
+		<Monster name="桃树" level="5" youhuo="0"/>
+		<Monster name="樟树" level="5" youhuo="0"/>
+		<Monster name="桐树" level="5" youhuo="0"/>
+		<Monster name="柚树" level="5" youhuo="0"/>
+	</Map>
+	<Map id="WC006">
+		<Monster name="白蛇妖" level="50级以上" youhuo="0"/>
+		<Monster name="尸卫战将" level="30" youhuo="0"/>
+		<Monster name="尸卫勇士" level="30" youhuo="0"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="40" youhuo="0"/>
+		<Monster name="火烈鸟" level="50级以上" youhuo="1"/>
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="逆魔" level="50级以上" youhuo="0"/>
+		<Monster name="通天教主" level="50级以上" youhuo="1"/>
+		<Monster name="禁地魔王" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="XLXG">
+		<Monster name="暗影修罗" level="50级以上" youhuo="0"/>
+		<Monster name="魔神修罗" level="50级以上" youhuo="0"/>
+		<Monster name="黑袍修罗" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="XY007">
+		<Monster name="烈焰使" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="XY008">
+		<Monster name="兽骑统领" level="50级以上" youhuo="1"/>
+		<Monster name="召魂使" level="50级以上" youhuo="1"/>
+		<Monster name="尸霸" level="50级以上" youhuo="0"/>
+		<Monster name="地火兽骑将" level="50级以上" youhuo="1"/>
+		<Monster name="逆魔卫士" level="43" youhuo="0"/>
+		<Monster name="猛魔统领" level="50级以上" youhuo="1"/>
+		<Monster name="金刚人" level="50级以上" youhuo="1"/>
+		<Monster name="雪人" level="50级以上" youhuo="0"/>
+	</Map>
+	<Map id="SZBD1">
+		<Monster name="铜锤手" level="44级以上" youhuo="1"/>
+		<Monster name="青铜兽" level="44级以上" youhuo="1"/>
+		<Monster name="铜人" level="44级以上" youhuo="1"/>
+		<Monster name="滚刀手" level="44级以上" youhuo="1"/>
+		<Monster name="石人" level="44" youhuo="1"/>
+	</Map>
+	<Map id="SZBD2">
+		<Monster name="魔甲虫" level="47级以上" youhuo="1"/>
+		<Monster name="圣甲虫" level="47级以上" youhuo="1"/>
+		<Monster name="白蛇妖" level="47级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="47级以上" youhuo="0"/>
+		<Monster name="黑蛇妖" level="47" youhuo="0"/>
+		<Monster name="三头蛇" level="47" youhuo="0"/>
+	</Map>
+	<Map id="SWBD1">
+		<Monster name="铁翼魔" level="49级以上" youhuo="0"/>
+		<Monster name="毒妖" level="49级以上" youhuo="0"/>
+		<Monster name="血魔" level="49级以上" youhuo="0"/>
+		<Monster name="藤妖" level="49级以上" youhuo="0"/>
+		<Monster name="刺魔" level="49级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="49级以上" youhuo="0"/>
+		<Monster name="妖力士" level="49级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="49级以上" youhuo="0"/>
+	</Map>
+	<Map id="SWBD2">
+		<Monster name="火烈鸟" level="51级以上" youhuo="0"/>
+		<Monster name="兽骑兵" level="51级以上" youhuo="0"/>
+		<Monster name="兽骑统领" level="51级以上" youhuo="0"/>
+		<Monster name="召魂使" level="51级以上" youhuo="0"/>
+		<Monster name="烈焰使" level="51级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="51级以上" youhuo="0"/>
+		<Monster name="妖力士" level="51级以上" youhuo="0"/>
+		<Monster name="红蛇妖" level="51级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZSBD1">
+		<Monster name="地火兽骑将" level="55级以上" youhuo="0"/>
+		<Monster name="地火兽弓箭手" level="55级以上" youhuo="0"/>
+		<Monster name="魔斗士" level="55级以上" youhuo="0"/>
+		<Monster name="魔眼" level="55级以上" youhuo="0"/>
+		<Monster name="炎魔" level="55级以上" youhuo="0"/>
+		<Monster name="猛魔刀斧手" level="55级以上" youhuo="0"/>
+		<Monster name="猛魔枪卒" level="55级以上" youhuo="0"/>
+		<Monster name="猛魔统领" level="55级以上" youhuo="0"/>
+		<Monster name="地火兽投矛手" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZSBD2">
+		<Monster name="圣武刀兵" level="55级以上" youhuo="0"/>
+		<Monster name="圣武盾兵" level="55级以上" youhuo="0"/>
+		<Monster name="圣武弓兵" level="55级以上" youhuo="0"/>
+		<Monster name="圣武弓骑" level="55级以上" youhuo="0"/>
+		<Monster name="圣武枪兵" level="55级以上" youhuo="0"/>
+		<Monster name="圣武枪骑" level="55级以上" youhuo="0"/>
+		<Monster name="圣武双刀" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZH01">
+		<Monster name="刺魔" level="55级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="55级以上" youhuo="0"/>
+		<Monster name="毒妖" level="55级以上" youhuo="0"/>
+		<Monster name="藤妖" level="55级以上" youhuo="0"/>
+		<Monster name="血魔" level="55级以上" youhuo="0"/>
+		<Monster name="血妖" level="55级以上" youhuo="0"/>
+		<Monster name="妖力士" level="55级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZH101">
+		<Monster name="刺魔" level="55级以上" youhuo="0"/>
+		<Monster name="地狱奴" level="55级以上" youhuo="0"/>
+		<Monster name="毒妖" level="55级以上" youhuo="0"/>
+		<Monster name="藤妖" level="55级以上" youhuo="0"/>
+		<Monster name="血魔" level="55级以上" youhuo="0"/>
+		<Monster name="血妖" level="55级以上" youhuo="0"/>
+		<Monster name="妖力士" level="55级以上" youhuo="0"/>
+		<Monster name="幽灵虫母" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZH02">
+		<Monster name="地下小鬼" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔雕像" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔卫士" level="55级以上" youhuo="0"/>
+		<Monster name="石人" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZH102">
+		<Monster name="地下小鬼" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔雕像" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔弓箭手" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔侍卫" level="55级以上" youhuo="0"/>
+		<Monster name="逆魔卫士" level="55级以上" youhuo="0"/>
+		<Monster name="石人" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZH03">
+		<Monster name="火烈鸟" level="55级以上" youhuo="0"/>
+		<Monster name="烈焰使" level="55级以上" youhuo="0"/>
+		<Monster name="兽骑兵" level="55级以上" youhuo="0"/>
+		<Monster name="兽骑统领" level="55级以上" youhuo="0"/>
+		<Monster name="召魂使" level="55级以上" youhuo="0"/>
+		<Monster name="鬼方火卒" level="55级以上" youhuo="0"/>
+		<Monster name="幽魂" level="55级以上" youhuo="0"/>
+		<Monster name="炎魔" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="ZH103">
+		<Monster name="火烈鸟" level="55级以上" youhuo="0"/>
+		<Monster name="烈焰使" level="55级以上" youhuo="0"/>
+		<Monster name="兽骑兵" level="55级以上" youhuo="0"/>
+		<Monster name="兽骑统领" level="55级以上" youhuo="0"/>
+		<Monster name="召魂使" level="55级以上" youhuo="0"/>
+		<Monster name="鬼方火卒" level="55级以上" youhuo="0"/>
+		<Monster name="幽魂" level="55级以上" youhuo="0"/>
+		<Monster name="炎魔" level="55级以上" youhuo="0"/>
+	</Map>
+	<Map id="HJ101">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ101">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ101">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ102">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ103">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ104">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ201">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ202">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ203">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ204">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ301">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ302">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ303">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+	<Map id="HJ304">
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+		<Monster name="幻化怪物" level="??级以上"/>
+	</Map>
+</MapMonsterList>

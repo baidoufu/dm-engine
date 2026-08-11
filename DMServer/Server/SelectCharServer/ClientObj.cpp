@@ -95,7 +95,7 @@ VOID CClientObj::OnMASMsg(WORD wCmd, WORD wType, WORD wIndex, const char* pszDat
 				char szData[200];
 				sprintf_s(szData, sizeof(szData), "%s/%u", m_GameServerAddr.addr.addr.data(),
 					m_GameServerAddr.addr.nPort);
-				SendMsg(static_cast<DWORD>(strlen(szData)), SM_SELECTCHAROK, 0, 0, 0, (LPVOID)szData);
+				SendMsg(0, SM_SELECTCHAROK, 0, 0, 0, (LPVOID)szData);
 				PRINT(SUCCESS_GREEN, "%s\n", szData);
 			}
 			else if (pEnterInfo->result == SE_SERVERFULL)

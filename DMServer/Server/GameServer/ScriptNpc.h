@@ -78,9 +78,6 @@ public:
 	BOOL IsSandCityMerchant()const { return m_fSandCityMerchant; }
 
 	VOID SendMerChantJsonMsg(CScriptTarget* pTarget, const char* pWords, UINT nType);
-	VOID SendDayExpMain(CHumanPlayer* pPlayer, const char* pWords);
-	VOID SendDayExpHelp(CHumanPlayer* pPlayer, const char* pWords);
-	VOID SendActivityMain(CHumanPlayer* pPlayer, const char* pWords);
 	VOID SendCreateGuildHelp(CHumanPlayer* pPlayer, const char* pWords);
 	VOID SendCustomUIWnd(CHumanPlayer* pPlayer, const char* pWords);
 protected:

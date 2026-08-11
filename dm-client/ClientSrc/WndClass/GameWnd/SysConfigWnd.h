@@ -68,6 +68,9 @@ private:
 	//LPTexture m_p3D;
 
 	CCtrlRadio*          m_pRD1280;
+	CCtrlRadio*          m_pRD1600;
+	CCtrlRadio*          m_pRD1920;
+	CCtrlRadio*          m_pRD2560;
 	CCtrlRadio*          m_pRD1024;
 	CCtrlRadio*          m_pRD800;
 	CCtrlRadio*          m_pRDWinMode;

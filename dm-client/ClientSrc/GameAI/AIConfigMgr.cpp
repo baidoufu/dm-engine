@@ -182,7 +182,7 @@ void CAIConfigMgr::LoadConfigBeforeEnter()
 {
 	SetConfigPath();
 	m_bShowNewHandPrompt = ReadConfigBoolean("ShowNewHandPrompt",true);
-	m_bAutoShowActLog    = ReadConfigBoolean("AutoShowActLog",true);
+	m_bAutoShowActLog    = ReadConfigBoolean("AutoShowActLog",false);
 }
 
 void CAIConfigMgr::LoadConfig()

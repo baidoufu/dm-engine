@@ -76,6 +76,7 @@ void CStringLine::remove(int begin,int end)
 		if(m_words[i])
 		{
 			delete m_words[i];
+			m_words[i] = NULL;
 		}
 	}
 	m_words.erase(m_words.begin()+begin,m_words.begin()+end);

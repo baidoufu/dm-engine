@@ -16,18 +16,6 @@ int main(int argc, char* argv[])
 	}
 	g_Form.Create(SERVER_NAME, cmdLine.data());
 	g_Form.SetArenaReserve(128 * 1024);
-	//检测 -make 参数
-	if (_stricmp(cmdLine.data(), "-make") == 0)
-	{
-		CSettingFile sf;
-		if (!sf.Open("Config.ini"))
-		{
-			fprintf(stderr, "错误：找不到配置文件Config.ini!\n");
-			return 1;
-		}
-		g_pServer = CResourceServer::GetInstance();
-		return g_pServer->MakeIndex(sf);
-	}
 	g_pServer = CResourceServer::GetInstance();
 	g_pServer->SetServerName(SERVER_NAME);
 	g_pServer->SetIoConsole(&g_Form);

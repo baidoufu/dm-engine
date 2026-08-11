@@ -2,7 +2,7 @@
 #include "gsClientObj.h"
 
 constexpr UINT BLOCK_SIZE = 0x100; // 256 per block
-constexpr UINT MAX_MSG_ID = 0xA000; //消息wCmd最大值
+constexpr UINT MAX_MSG_ID = 0xF000; //消息wCmd最大值
 constexpr UINT BLOCK_COUNT = (MAX_MSG_ID + BLOCK_SIZE - 1) / BLOCK_SIZE; // 块数量
 
 class HandlerTable
@@ -68,14 +68,10 @@ public:
 		setHandler(0x0410, &CClientObj::HandleEditGuildNotice);//编辑行会公告
 		setHandler(0x0412, &CClientObj::HandleViewGuildExp);//察看行会经验值
 		setHandler(0x041f, &CClientObj::HandleRequestGroupPos);//查询队员位置信息
+		setHandler(0x04a5, &CClientObj::HandleHeartBeat);//心跳包
 		setHandler(0x0892, &CClientObj::HandlePetBackExp);//灵兽返回经验
-		setHandler(0x0959, &CClientObj::HandleTimeAchieve);//成就系统
-		setHandler(0x097a, &CClientObj::HandleShortcutKey);//自定义快捷键
-		setHandler(0x09a2, &CClientObj::HandleNewMail);//新邮件系统
 		setHandler(0x09a6, &CClientObj::HandleSocialInfo);//社交信息
-		setHandler(0x09b0, &CClientObj::HandleFengHao);//时长封号系统
 		setHandler(0x0a02, &CClientObj::HandleFuncCollection);//功能集合
-		setHandler(0x0a06, &CClientObj::HandleAvatarFrame);//头像圈
 		setHandler(0x0a11, &CClientObj::HandleGuildFengHao);//行会封号
 		setHandler(0x0aaa, &CClientObj::HandleReplyGuild);//行会-回复邀请
 		setHandler(0x0ba0, &CClientObj::HandleTrainHorse);//驯马
@@ -84,7 +80,8 @@ public:
 		setHandler(0x0bc4, &CClientObj::HandleGetMeal);//蹲(Alt+鼠标左键)
 		setHandler(0x0bc5, &CClientObj::HandleRun);//跑步
 		setHandler(0x0bc6, &CClientObj::HandleAttack);//一般攻击(左键点击)
-		setHandler(0x0bc7, &CClientObj::HandleMine);//挖矿
+		setHandler(0x0bc7, &CClientObj::HandleForceAttack);//强行攻击(shift+左健)
+		setHandler(0x0bc8, &CClientObj::HandleMine);//挖矿
 		setHandler(0x0bc9, &CClientObj::HandleSpellSkill);//魔法攻击
 		setHandler(0x0bca, &CClientObj::HandleSpecialHit);//攻杀剑术
 		setHandler(0x0bcb, &CClientObj::HandleSpecialHit);//刺杀剑术
@@ -101,14 +98,15 @@ public:
 		setHandler(0x1000, &CClientObj::HandleOpenMarket);//游戏商城
 		setHandler(0x5eb1, &CClientObj::HandlePrivateShop);//摆摊请求
 		setHandler(0x5eb2, &CClientObj::HandleDeleteTask);//放弃任务
-		setHandler(0x5eb3, &CClientObj::HandleRequestPrivateShop);//请求守摊/请求取回金币元宝/请求取回物品
+		setHandler(0x5eb3, &CClientObj::HandleRequestPrivateShop);//豹子摆摊-请求守摊/请求取回金币元宝/请求取回物品-客户端未实现
 		setHandler(0x6891, &CClientObj::HandleCreateGuild);//向服务端发送一段NPC信息
 		setHandler(0x6893, &CClientObj::HandlePersonSetting);//个性化签名和临时封号
 		setHandler(0x8810, &CClientObj::HandlePutItem);//提交某项物品
 		setHandler(0x8897, &CClientObj::HandleShowPetInfo);//宠物状态
-		setHandler(0x88a6, &CClientObj::HandlePetWindow);//请求宠物相关信息（例如血量信息）
+		setHandler(0x88a6, &CClientObj::HandlePetWindow);//请求宠物相关信息（例如血量信息） - 比较复杂-要与客户端匹配完善
 		setHandler(0x9701, &CClientObj::HandleHeroRank);//排名报名或请求更新自己数据
 		setHandler(0x9703, &CClientObj::HandleQueryHeroRank);//请求自己或玩家排名数据
+		setHandler(0xe67a, &CClientObj::HandleQuerySndaMark);//盛大积分反馈
 	}
 
 	VOID setHandler(UINT msgId, MsgHandler handler)

@@ -308,7 +308,8 @@ inline int AI_GoTile(int nRows,int nCols,DWORD *pBlock,int sx,int sy,int dx,int 
 
 void UserPathFindingInfo_t::SetValue(int _sx,int _sy,int _dx,int _dy)
 {
-	MapID.assign(g_pGameMap->GetMapName());
+	strncpy(MapID, g_pGameMap->GetMapName(), sizeof(MapID) - 1);
+	MapID[sizeof(MapID) - 1] = '\0';
 	pBlock= SELF.GetOppBlock();
 	SELF.GetOppStartXY(iStartX,iStartY);
 	nRows= MAPARR_WIDTH;
@@ -321,7 +322,7 @@ void UserPathFindingInfo_t::SetValue(int _sx,int _sy,int _dx,int _dy)
 
 bool UserPathFindingInfo_t::IsOnPath(UserPathFindingInfo_t &ui,SPoint &begin,SPoint &end)
 {
-	if(ui.MapID==MapID)
+	if(strcmp(ui.MapID, MapID) == 0)
 	{
 		if((begin.x + iStartX) == (ui.sx + ui.iStartX) 
 			&& (begin.y + iStartY) == (ui.sy + ui.iStartY)

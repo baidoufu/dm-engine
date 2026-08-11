@@ -214,13 +214,3 @@ VOID CDBClientObj::QueryTaskInfo(UINT id, DWORD dwKey, DWORD dwOwner)
 {
 	SendMsg(id, DM_QUERYTASKINFO, dwKey & 0xffff, (dwKey & 0xffff0000) >> 16, 0, &dwOwner, sizeof(DWORD));
 }
-
-VOID CDBClientObj::UpdateFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
-{
-	SendMsg(dwOwner, DM_UPDATEFENGHAO, 0, 0, 0, (LPVOID)pInfo, sizeof(FenghaoInfo));
-}
-
-VOID CDBClientObj::QueryFengHaoInfo(UINT id, DWORD dwKey, DWORD dwOwner)
-{
-	SendMsg(id, DM_QUERYFENGHAO, dwKey & 0xffff, (dwKey & 0xffff0000) >> 16, 0, &dwOwner, sizeof(DWORD));
-}

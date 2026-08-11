@@ -1395,8 +1395,8 @@ int CWooolStoreWnd::FindFocusButton(IN CControl* pControl, OUT CWooolStoreItem**
 					iReturn = 1;
 
 				if (m_ItemGroupCtrl.iActiveIndex != i)
-				{// 
-					//	iReturn = 0;	// 先置焦点,有这一句，置焦点但不购买，没有这一句置焦点，并且购买
+				{
+					iReturn = 0;	// 先置焦点,有这一句，置焦点但不购买，没有这一句置焦点，并且购买
 					m_ItemGroupCtrl.iActiveIndex = i;
 					OnLeftButtonUp(-1, -1);
 				}

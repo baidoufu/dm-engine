@@ -160,7 +160,8 @@ void CGameControl::MSG_Game_Greeting(const char * msg,int iLen)
 	{
 		g_pControl->Msg(MSG_CTRL_GAMEWND,OPER_CREATE);
 		g_pControl->PopupWindow(MSG_CTRL_GREETING_MSG_WND,OPER_CREATE);
-		g_pControl->PopupWindow(MSG_CTRL_TODAYACTIVITY_WND,OPER_CREATE);
+		// 屏蔽今日活动窗口
+		//g_pControl->PopupWindow(MSG_CTRL_TODAYACTIVITY_WND,OPER_CREATE);
 	}
 
 	BYTE byType = *((BYTE *)(msg + 6));
@@ -254,6 +255,24 @@ TRY_BEGIN;
 	ASSIGN_BYTE(6,bySign);
 	ASSIGN_BYTE(7,g_iParamGameType);//从什么地方登录的
 
+	int iWidth = g_pGfx->GetWidth();
+	int iHeight = g_pGfx->GetHeight();
+	BYTE byWH = 0;
+	if (iWidth == 800 && iHeight == 600)
+		byWH = 0;
+	else if (iWidth == 1024 && iHeight == 768)
+		byWH = 1;
+	else if (iWidth == 1280 && iHeight == 800)
+		byWH = 2;
+	else if (iWidth == 1600 && iHeight == 900)
+		byWH = 3;
+	else if (iWidth == 1920 && iHeight == 1080)
+		byWH = 4;
+	else if (iWidth == 2560 && iHeight == 1440)
+		byWH = 5;
+
+	ASSIGN_BYTE(8, byWH); // 分辨率类型序号
+
 	m_dwJumpTime = GetTickCount();
 	g_Login.SetAutoLoginInType(0);
 
@@ -283,7 +302,7 @@ TRY_BEGIN;
 
 	SEND_Get_Medal_Exp();
 
-	SEND_Mac_To_GS();
+	//SEND_Mac_To_GS();
 
 TRY_END
 	return true;
@@ -755,9 +774,20 @@ void CGameControl::MSG_Package_Add_Object(const char * msg,int iLen)
 
 		return;
 	}
+
+	// 临时增加—去重检查
+	DWORD dwMakeIndex = addGood.GetID();
+	int iExistPos = SELF.PackageGood().FindGoodPos(dwMakeIndex);
+	if (iExistPos >= 0)
+	{
+		// 物品已存在，做更新而非新增
+		CGood& existGood = SELF.GetPackageGood(iExistPos);
+		existGood.FromBuffer(msg + 12, false, iLen - 12);
+		existGood.SetExternString(g_pGameData->GetExternString(dwMakeIndex));
+		return;
+	}
 	
 	WORD wLooks = addGood.GetLooks();
-
 
 	if(g_AIGoodMgr.IsFitBelt(addGood))//药品类在腰带上找个位置放
 	{
@@ -1589,7 +1619,7 @@ void CGameControl:: SEND_Message_Send(CStringLine* pLine,const char * szHeader)
 		g_DirtyWords.ClearWords(pLine);//替换掉内部的字符
 	}
 
-	//by json 发送聊天信息
+	// 发送聊天信息
 	//fnMakeDefMessage(&DefMsg, CS_MESSAGE_SEND, 0, 0, 0, 0);
 	//g_pNet->SendPacket(&DefMsg, (char*)pLine->getBuf());
 
@@ -1662,7 +1692,6 @@ void CGameControl::SEND_Message_Send(const char * str,int iLen)
 	if(i == iLen) return;  // 全是空格
 
 
-	// by json
 	//fnMakeDefMessage(&DefMsg, CS_MESSAGE_SEND, 0, 0, 0, 0);
 	//g_pNet->SendPacket(&DefMsg, (char*)str);
 	
@@ -2265,7 +2294,7 @@ void CGameControl::MSG_Map_Change(const char * msg,int iLen)
 	g_OtherData.SetLastMovePosTime(GetTickCount());
 }
 
-//by json 地图描述
+// 地图描述
 void CGameControl::MSG_Map_Desc(const char * msg,int iLen)
 {
 
@@ -2736,7 +2765,7 @@ void CGameControl::MSG_Object_Dura(const char * msg,int iLen)
 	}
 }
 
-//by json 跳转地图后的刷新
+// 跳转地图后的刷新
 void CGameControl::MSG_Jump_Refresh(const char * msg,int iLen)
 {
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
@@ -4408,6 +4437,11 @@ void CGameControl::MSG_Open_Attack_Kill(const char * msg,int iLen)
 	SELF.AddMagicState(MS_ATTACKKILL);
 }
 
+void CGameControl::MSG_Close_Attack_Kill(const char* msg, int iLen)
+{
+	SELF.RemoveMagicState(MS_ATTACKKILL);
+}
+
 void CGameControl::MSG_Open_Attack_Stick(const char * msg,int iLen)
 {
 	SELF.AddMagicState(MS_ATTACKSTICK);
@@ -5481,7 +5515,7 @@ void CGameControl::MSG_KickOff_NTF(const char * msg,int iLen)
 
 void CGameControl::MSG_Package_Update_Object(const char * msg,int iLen)
 {
-	DWORD dwGoodID = *((DWORD*)(msg + 66));
+	DWORD dwGoodID = *((DWORD*)(msg + 56)); // 是物品数据上的 dwMakeIndex 值
 	if(dwGoodID == 0)
 		return;
 	
@@ -8062,7 +8096,7 @@ void  CGameControl::MSG_Deal_Special_Obj(const char* strMsg,int iLen)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//by json 小退 重新请求角色
+// 小退 重新请求角色
 void CGameControl::SEND_ReselRole_Req(const char* ptID, const char* roleName)
 {
 	PKG_CLI_GG_ReselRole_REQ stReq;

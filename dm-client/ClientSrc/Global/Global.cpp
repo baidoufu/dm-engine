@@ -1,16 +1,8 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-///////////////////////////////////////////////////////////////////////
-
 #include "Global.h"
 #include "DebugTry.h"
 
 #include <stdio.h>
+#include <io.h>
 #include <math.h>
 #include <new>
 #include "tchar.h"
@@ -371,7 +363,6 @@ BOOL		g_bSelfCursor		= FALSE;
 int			g_iDXVersion		= 0x888888;
 char*		g_cBuf				= NULL;
 int         g_iParamGameType    = 0;//登录类型，0:普通，1,浩方，2:边锋，3:茶苑
-//DWORD		g_dwIgaLiveState    = 0;//iga视频广告状态
 BYTE        g_byPwdEncode       = 0x7B;
 char        g_strMac[36]        = "00-00-00-00-00-00";		//获得MAC地址
 DWORD       g_dwProStartCount = 0;
@@ -424,14 +415,19 @@ inline const char *GetGameDataDir()
 	if (!sDataDir[0])
 	{
 		char strPath[MAX_PATH]={0};
-		//GetCurrentDirectory(MAX_PATH,strPath);//有的时候外部CreateProcess可能传入不正确的参数
-		GetModuleFileName(NULL,strPath,sizeof(strPath));
+		GetCurrentDirectory(MAX_PATH,strPath);//有的时候外部CreateProcess可能传入不正确的参数
+		std::string filename = std::string(strPath) + "\\Texture3.wpf";
+        if (_access(filename.c_str(), 0) != 0) // 如果当前目录下没有Texture3.wpf文件，则尝试获取程序所在目录
+		{
+			GetModuleFileName(NULL, strPath, sizeof(strPath));
+			filename = std::string(strPath) + "\\Texture3.wpf";
+		}
 
 		string strTemp = strPath;
 		int iPos = strTemp.find_last_of('\\');
 		if (iPos != string::npos)
 		{
-			if (iPos < strTemp.size() - 1)
+            if (iPos < strTemp.size() - 1 && _access(filename.c_str(), 0) != 0) // 当前就在Data目录下，不能再往上找了
 			{
 				strTemp = strTemp.substr(0,iPos);
 			}
@@ -663,7 +659,6 @@ BOOL InitGlobalObject(HWND hWnd)
 	//}
 
 
-	//g_dwIgaLiveState	= 0;
 
 
 	int iEnableDownLoadFile = 0;
@@ -795,7 +790,7 @@ BOOL InitGlobalObject(HWND hWnd)
 
 	g_pMinMap       = new CMinMap();
 
-	g_pClientInfoCollect = new CClientInfoCollect;
+	//g_pClientInfoCollect = new CClientInfoCollect; //信息采集，屏蔽可以阻止加载 cliqos.dll
 	
 
 	if(iEnableDownLoadFile && !g_ReplayManager.IsInReplay())
@@ -830,7 +825,7 @@ BOOL InitGlobalObject(HWND hWnd)
 
 
 
-	if (g_pMagicCtrl->GetMagicRoot(MAGICID_ENABLE_SAMPLER))
+	if (false && g_pMagicCtrl->GetMagicRoot(MAGICID_ENABLE_SAMPLER)) // 加上false 跳过，不去加载 SDSampler.dll
 	{
 		if(!a_hSDSamplerDLL)
 		{
@@ -1372,13 +1367,13 @@ void AssignLooks(LOOKS& Looks,__int64 iLooks)
 
 	if(type == 0 || type == 254)
 	{
-		//fixed by json 修正角色不显示
+		// 修正角色不显示
 		Looks.Player.byType = CHARACTER_HUMAN;
 		Looks.Char.byType = CHARACTER_HUMAN;
 
 		// 服务端 btRaceImg, btDress, btWeapon, btHair: Byte
 		WORD wShape = LOWORD(iLooks);	//(btRaceImg, btWeapon)
-		WORD wAppr = HIWORD(iLooks);		//wAppr
+		WORD wAppr = HIWORD(iLooks);		//byHairType，wBody
 		BYTE btRaceImg  = LOBYTE(wShape);
 		BYTE btWeapon = HIBYTE(wShape);
 		BYTE byHairType = LOBYTE(wAppr);
@@ -1403,7 +1398,7 @@ void AssignLooks(LOOKS& Looks,__int64 iLooks)
 	{
 		if(type == 0x32)	//50
 		{
-			//fixed by json 这里只有look里面的类型改变了
+			// 这里只有look里面的类型改变了
 			Looks.Char.byType = CHARACTER_NPC;// NPC
 			Looks.Player.byType = CHARACTER_NPC;
 			WORD wShape = LOWORD(iLooks);	//(btRaceImg, btWeapon)

@@ -940,7 +940,7 @@ BOOL CHumanPlayer::Damage(DWORD dwHitter, int value)
 		DecPropValue(PI_CURHP, value);
 		if (GetPropValue(PI_CURHP) == 0)
 		{
-			if (IsNoDead() || !WillDie()) return FALSE;
+			if (IsNoDead() || !WillDie() || IsDeath()) return FALSE; // 已死亡不再重复排队EP_DEAD
 			AddProcess(EP_DEAD, dwHitter, 0, 0, 0, 2);
 		}
 	}
@@ -1671,7 +1671,7 @@ VOID CHumanPlayer::ShowPetInfo()
 {
 	PETINFO info[6] = { 0 };
 	int count = this->m_iPetCount > 5 ? 5 : this->m_iPetCount;
-	char szFullName[64] = { 0 };
+	char szFullName[15] = { 0 };
 	int i = 0;
 	for (i = 0; i < count; i++)
 	{
@@ -1691,7 +1691,6 @@ VOID CHumanPlayer::ShowPetInfo()
 			info[i].dc2 = m_pPets[i]->GetPropValue(PI_MAXDC);
 			info[i].ac = m_pPets[i]->GetPropValue(PI_MAXAC);
 			info[i].mac = m_pPets[i]->GetPropValue(PI_MAXMAC);
-			info[i].flag = 0x2f;
 		}
 	}
 	if (m_pPet && count < 6)
@@ -1711,7 +1710,6 @@ VOID CHumanPlayer::ShowPetInfo()
 		info[i].dc2 = m_pPet->GetPropValue(PI_MAXDC);
 		info[i].ac = m_pPet->GetPropValue(PI_MAXAC);
 		info[i].mac = m_pPet->GetPropValue(PI_MAXMAC);
-		info[i].flag = 0x2f;
 		count++;
 	}
 	SendMsg(0, 0x6858, 0, 0, 0, (LPVOID)info, sizeof(PETINFO) * count);
@@ -1918,11 +1916,11 @@ VOID CHumanPlayer::SetBagItemPos(BAGITEMPOS* pPosArray, int count)
 	}
 }
 
-static thread_local std::array<ITEM, 100> items_t1{};
+static thread_local std::array<ITEM, BIGBAG_SLOT> items_t1{};
 WORD CHumanPlayer::GetBagItemPos(DWORD dwMakeIndex)
 {
 	int count = 0;
-	count = m_ItemBox.GetItems(items_t1.data(), 100);
+	count = m_ItemBox.GetItems(items_t1.data(), BIGBAG_SLOT);
 	ITEM* pItem = nullptr;
 	for(int i = 0;i < count;i ++ )
 	{
@@ -1935,12 +1933,12 @@ WORD CHumanPlayer::GetBagItemPos(DWORD dwMakeIndex)
 	return 0;
 }
 
-static thread_local std::array<DBITEM, 100> items_t2{};
-static thread_local std::array<BAGITEMPOS, 100> itemspos_t1{};
+static thread_local std::array<DBITEM, BIGBAG_SLOT> items_t2{};
+static thread_local std::array<BAGITEMPOS, BIGBAG_SLOT> itemspos_t1{};
 VOID CHumanPlayer::UpdateItemsToDB()
 {
 	int count = 0;
-	count = m_ItemBox.GetItems(items_t1.data(), 100);
+	count = m_ItemBox.GetItems(items_t1.data(), BIGBAG_SLOT);
 	int updatecount = 0;
 	int uposcount = 0;
 	for (int i = 0; i < count; i++)
@@ -1984,7 +1982,7 @@ VOID CHumanPlayer::UpdateItemsToDB()
 	if (uposcount > 0)
 		CItemManager::GetInstance()->UpdateItemPos(IDF_BAG, itemspos_t1.data(), uposcount);
 	//仓库数据
-	count = m_ItemBank.GetItems(items_t1.data(), 100);
+	count = m_ItemBank.GetItems(items_t1.data(), STOREAGE_SLOT);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
@@ -2012,7 +2010,7 @@ VOID CHumanPlayer::UpdateItemsToDB()
 	if (updatecount > 0)
 		CItemManager::GetInstance()->UpdateItems(GetDBId(), IDF_BANK, items_t2.data(), updatecount);
 	//	宠物背包
-	count = m_ItemPetBag.GetItems(items_t1.data(), 100);
+	count = m_ItemPetBag.GetItems(items_t1.data(), PETBAG_SLOT);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
@@ -2190,7 +2188,7 @@ BOOL CHumanPlayer::TakeBankItem(DWORD dwMakeIndex)
 
 VOID CHumanPlayer::SendBank(DWORD dwNpcId)
 {
-	static thread_local std::array<ITEMCLIENT, 100> items{};
-	int count = m_ItemBank.GetClientItems(items.data(), 100);
-	SendMsg(dwNpcId, 0x2c0, 0, 0, count, (LPVOID)items.data(), sizeof(ITEMCLIENT) * count);
+	static thread_local std::array<ITEMCLIENT, STOREAGE_SLOT> items{};
+	int count = m_ItemBank.GetClientItems(items.data(), STOREAGE_SLOT);
+	SendMsg(dwNpcId, 0x2c0, 0, STOREAGE_SLOT, count, (LPVOID)items.data(), sizeof(ITEMCLIENT) * count);
 }

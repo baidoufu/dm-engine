@@ -53,12 +53,6 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 			m_pPlayer->OnTaskInfo((TASKINFO*)pMsg->data);
 	}
 	break;
-	case DM_QUERYFENGHAO:
-	{
-		if (m_pPlayer)
-			m_pPlayer->OnFengHaoInfo((FenghaoInfo*)pMsg->data);
-	}
-	break;
 	case DM_QUERYUPGRADEITEM:
 	{
 		DWORD dwKey = *(DWORD*)&pMsg->wParam[0];
@@ -85,7 +79,6 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 	case DM_QUERYITEMS:
 	{
 		DWORD* pdwArray = (DWORD*)pMsg->data;
-		ITEM item;
 		if (pMsg->wParam[0] == SE_OK && pdwArray[0] == m_dwClientKey)
 		{
 			DBITEM* pItems = (DBITEM*)(pMsg->data + sizeof(DWORD));
@@ -133,7 +126,6 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 			pDI->SendQueryItem(getId(), m_dwClientKey, m_pPlayer->GetDBId(), IDF_BANK, 100);
 			pDI->SendQueryItem(getId(), m_dwClientKey, m_pPlayer->GetDBId(), IDF_PETBANK, 10);
 			pDI->QueryTaskInfo(getId(), m_dwClientKey, m_pPlayer->GetDBId());
-			pDI->QueryFengHaoInfo(getId(), m_dwClientKey, m_pPlayer->GetDBId());
 		}
 		else
 		{
@@ -173,6 +165,7 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::OnCreateItem(ITEM& item, int pos, BYTE btFlag)
 {
+	if (m_pPlayer == nullptr) return;
 	if (btFlag == IDF_BAG)
 		m_pPlayer->AddBagItem(item);
 	else
@@ -281,12 +274,10 @@ VOID CClientObj::OnCodedMsg(xClientObject* pObject, PMIRMSG pMsg, int datasize)
 VOID CClientObj::SendActionResult(BOOL bSuccess)
 {
 	if (m_pPlayer == nullptr) return;
-	char szMsg[32];
-	if (bSuccess)
-		snprintf(szMsg, sizeof(szMsg), "#+G/%d/%d!", m_pPlayer->getX(), m_pPlayer->getY());
-	else
-		snprintf(szMsg, sizeof(szMsg), "#+FL/%d/%d!", m_pPlayer->getX(), m_pPlayer->getY());
-	PostMsg(szMsg, (int)strlen(szMsg));
+	if (bSuccess) // 动作成功
+		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xFFFF, m_pPlayer->getX(), m_pPlayer->getY(), 0);
+	else // 动作失败
+		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xFFFE, m_pPlayer->getX(), m_pPlayer->getY(), 0);
 }
 
 VOID CClientObj::OnDisconnect()
@@ -322,7 +313,6 @@ VOID CClientObj::OnDisconnect()
 		m_pPlayer->SaveVars();//保存变量
 		m_pPlayer->UpdateToDB();//更新到数据库
 		m_pPlayer->UpdateTaskToDB();//更新任务到数据库
-		m_pPlayer->UpdateFengHaoToDB();//更新时长封号到数据库
 		m_pPlayer->UpdateItemsToDB();//更新物品到数据库
 		CGameWorld::GetInstance()->RemoveMapObject(m_pPlayer);//从地图中移除玩家
 		CHumanPlayerMgr::GetInstance()->DeletePlayer(m_pPlayer);//释放玩家, 
@@ -410,39 +400,6 @@ VOID CClientObj::SendUnEquipItemResult(BOOL bSuccess, int pos, DWORD dwMakeIndex
 	CItemManager::GetInstance()->UpdateItemPos(dwMakeIndex, IDF_BAG, pos);
 }
 
-VOID CClientObj::SendClientNewMail(WORD Parm1, WORD Parm2, WORD Parm3)
-{
-	xPacketPool::ScopedPacket packet(65535);
-	switch (Parm2)
-	{
-	case 0:
-	{
-	}
-	break;
-	case 1:
-	{
-	}
-	break;
-	case 2:
-	{
-	}
-	break;
-	case 3:
-	{
-	}
-	break;
-	case 4:
-	{
-	}
-	break;
-	case 5:
-	{
-	}
-	break;
-	}
-	m_pPlayer->SendMsg(m_pPlayer->GetId(), 0x9A2, Parm1, Parm2, Parm3, (LPVOID)packet->getbuf(), packet->getsize());
-}
-
 VOID CClientObj::SendBagItems(DBITEM* pItems, int count)
 {
 	// 背包物品数据
@@ -468,7 +425,7 @@ VOID CClientObj::SendEquipments()
 {
 	EQUIPMENT equipments[_U_MAX];
 	int count = m_pPlayer->GetEquipments(equipments);
-	m_pPlayer->SendMsg(0, SM_EQUIPMENTS, 0, 0, 0, (LPVOID)equipments, sizeof(EQUIPMENT) * count);
+	m_pPlayer->SendMsg(count, SM_EQUIPMENTS, 0, 0, 0, (LPVOID)equipments, sizeof(EQUIPMENT) * count);
 	m_pPlayer->SendFeatureChanged();
 	m_pPlayer->UpdateProp();
 	m_pPlayer->UpdateSubProp();
@@ -484,6 +441,7 @@ static int qsort_comp_dbitem(const DBITEM* p1, const DBITEM* p2)
 
 VOID CClientObj::OnDBItem(DBITEM* pItemArray, int nCount, BYTE btFlag)
 {
+	if (m_pPlayer == nullptr) return;
 	ITEM item;
 	if (nCount > 1)
 	{

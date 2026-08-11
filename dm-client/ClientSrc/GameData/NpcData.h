@@ -1,17 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-//
-//
-//
-//
-//
-//
-///////////////////////////////////////////////////////////////////////
 #pragma once
 #pragma warning (disable:4018)
 
@@ -68,6 +54,7 @@ struct _SellData
 		id		= i;
 		byType  = type;
 		strId.clear();
+		nDura   = 0;
 	}
 	_SellData(const char * str,const char* ptid,int pr,BYTE type = 0)
 	{
@@ -77,6 +64,7 @@ struct _SellData
 		bNext	= 0;
 		id		= 0;
 		byType  = type;
+		nDura   = 0;
 	}
 	inline bool operator ==(const _SellData & t)
 	{
@@ -98,6 +86,7 @@ struct _SellData
 	int				bNext; //在二级列表中表示持久力
 	BYTE            byType;//0:普通金币或元宝购买物品，1：绑定金币或绑定元宝购买的物品
 	string     strId; //PT物品购买Id
+	int        nDura; //一级购买列表中的持久值
 };
 
 struct _ACTIVITY

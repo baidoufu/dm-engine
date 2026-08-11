@@ -201,7 +201,6 @@ enum e_varindex	//变量索引
 	EVI_ONCEPKPOINT,			//一次PK点
 	EVI_ONEPKPOINTTIME,			//一次PK点时间
 	EVI_BODYTIME,				//尸体时间
-	EVI_STOREAGESIZE,			//仓库大小
 	EVI_SANDCITYTAKETIME,		//沙城占领时间
 	EVI_WARENEMYCOLOR,			//敌对行会颜色
 	EVI_WARALLYCOLOR,			//联盟行会颜色
@@ -292,6 +291,7 @@ typedef struct tagNpcGoodsList //NPC物品列表
 	tagNpcGoodsList* pNext{};
 	std::array<char, 32> szTemplate{};	//名字
 	int	defaultcount{};		//0
+	int defaultDura{};		//默认持久值
 	int currentcount{};		//金币数
 	int refreshtime{};		//刷新时间
 	DWORD dwTemplatePrice{};
@@ -305,12 +305,13 @@ typedef struct tagNpcGoodsList //NPC物品列表
 typedef struct tagViewDetail //观察其他角色信息
 {
 	DWORD dwFeature{};			//外观特征 LOOKS (RaceImg+武器+头发+衣服)
-	BYTE btNamelen{};
+	DWORD dwStatus{};
+	BYTE btNamelen{};			//玩家姓名长度
 	CHAR szName[15]{};			//玩家姓名
 	DWORD dwNameColor{};		//名字颜色
-	BYTE btGuildNamelen{};
+	BYTE btGuildNamelen{};		//行会名字长度
 	CHAR szGuildName[14]{};		//行会名字
-	BYTE btTitleNameLen{};
+	BYTE btTitleNameLen{};		//称号长度
 	CHAR szTitleName[15]{};		//称号
 	BYTE btSex{};				//性别
 	ITEMCLIENT items[_U_MAX]{}; // 装备槽位
@@ -318,14 +319,28 @@ typedef struct tagViewDetail //观察其他角色信息
 
 typedef struct tagViewDetailEx //观察其他角色扩展信息
 {
-	BYTE btExt[10]{}; //扩展数据
+	BYTE btVipTradeLevel; //VIP交易等级
 	BYTE btJob{}; //职业
 	BYTE btRideStatus{}; // 骑战状态
-	BYTE btKown[86]{}; //未知属性
-	WORD wLevel{}; // 玩家等级-凡人最高71级、72开始是天人1重-最高99重、171开始是天仙1重-最高99重、270开始是上仙1重-最高99重
-	BYTE btExtKown[17]{}; // 未知数据
-	DWORD btFunc{}; //功能-开启(用位计算开启：本体、魔器、骑术、境界、万兽谱、天书 等等...)
+	BYTE btGuildTowerLevel; //行会塔等级
+	BYTE btGuildTowerSwitch; //行会塔是否开启
+	BYTE mGuildBuffer[28]; //行会Buff加成
+	WORD wSelfGuildTowerSwitch; //行会Buff对自己是否有效
+	CHAR szOfficer[32]; //行会官职名称
+	BYTE btGuildPhyle; //行会神魔属性 (0=凡人, 1=修神, 2=修魔)
+	BYTE mGuildBufferPhyle; //神魔属性加成 (本体+元神)
+	CHAR szPhyleName; //宗族名称
 }VIEWDETAIL_EX;
+
+struct tag_PlaySkillEffect //技能特效
+{
+	DWORD dwTid{};
+	DWORD dwColor{};
+	BYTE byMagicLevel1;
+	WORD wMagicID;
+	BYTE byMagicLevel2;
+	BYTE byFlyType;
+};
 #pragma pack(pop)
 
 enum e_maptype //地图类型
@@ -528,7 +543,7 @@ enum status_index //状态索引 0 - 31
 	SI_FENGHUOLUN = 16,		// 风火轮
 	SI_HUSHENZHENQI = 17,	// 护身真气
 	SI_SPIRITWALL = 18,		// 灵魂墙
-	SI_ITEMTRACED = 19,		// 夺宝追踪
+	SI_ITEMTRACED = 19,		// 特殊道具
 	SI_BUBBLEDEFENCEUP = 20,// 魔法盾
 	SI_DEFENCEUP = 21,		// 幽灵盾
 	SI_MAGDEFENCEUP = 22,	// 神圣战甲
@@ -680,68 +695,18 @@ typedef struct tagGuildmgr // 行会管理-时长区
 	int nType{};
 }Guildmgr;
 
-typedef struct tagGameTimeMgr // 充值游戏时长-时长区
+typedef struct tagHealthStatus // 健康状态
 {
-	char szTite[12]{};
-	BYTE btCode{};
-	BYTE btUnknow{};
-	int nValue[3]{};
-}GameTimeMgr;
-
-typedef struct tagExpBack // 每日经验-时长区
-{
-	char szTite[12]{};
-	BYTE btCode{};
-	int nType{};
-}ExpBack;
-
-typedef struct tagActivityScore2014 // 活动-时长区
-{
-	char szTite[19]{};
-	BYTE btCode{};
-}ActivityScore2014;
-
-typedef struct tagMapJump // 服务器阶段-时长区
-{
-	char szTite[19]{};
-	BYTE btCode{};
-	int nType{};
-	char szPage[21]{};
-}MapJump;
-
-typedef struct tagBossTJ // BOSS图解-时长区
-{
-	char szTite[9]{};
-	BYTE btCode{};
-	int nNum{};
-	char sName[21]{};
-	int btUnKnow{};
-}BossTJ;
-
-typedef struct tagClientKeyState // 自定义快捷键-时长区
-{
-	BYTE Key1{};
-	BYTE Key2{};
-	WORD unknow{};
-}ClientKeyState;
-
-typedef struct tagHealthStatus // 健康状态-时长区
-{
-	DWORD dwId{};
-	int nHPChange{};
-	WORD wEffect{};
-	DWORD dwHP{};
-	DWORD dwMaxHP{};
-	DWORD dwMP{};
-	DWORD dwMaxMP{};
+	WORD wSpiritPower{}; // 灵力值（客户端已注释，标记 [协议要修改]）
+	WORD wSpiritPowerMax{}; // 最大灵力值（客户端已注释）
+	int iAddHp{}; // 血量变化量（正=回血绿色，负=扣血红色），用于飘字特效
+	BYTE btCritFlag{}; // 暴击标记：1 = 暴击，其他 = 非暴击
 }HealthStatus;
 
 typedef struct tagPersonSetting // 个性化设置
 {
-	char szSetBan[20]{}; // 个性封号设置
 	char szPersonSign[20]{}; // 个性化签名
-	char szTempBan[60]{}; //
-	
+	char szTempBan[80]{}; // 临时封号
 }PersonSetting;
 
 typedef struct tagTreasureBoxItem // 宝箱开启物品
@@ -759,14 +724,17 @@ struct tag_batfly_header //化身蝙蝠-头信息
 {
 	DWORD dwFeature{};
 	DWORD dwStatus{};
+	BYTE AttackSpeed;
+	BYTE unkown;
+	WORD wStatus;
 	WORD wCurHp{};
-	WORD wMaxHp{};
+	BYTE unkown2;
+	BYTE btFlags; // 是否有翅膀
 	WORD wX{};
 	WORD wY{};
-	BYTE bt1{};
+	CHAR cGrid{}; // 格子编号
 	BYTE btColor{};
-	BYTE btSm{};
-	BYTE btSm2{};
+	WORD wMagicID{};
 };
 
 struct tag_batfly //飞行移动技能-信息
@@ -851,7 +819,9 @@ enum e_visible_event //可见事件
 };
 
 constexpr int SMALLBAG_SLOT = 46;	//小背包格子数
-constexpr int BIGBAG_SLOT = 66;		//大背包格子数
+constexpr int BIGBAG_SLOT = 180;	//大背包格子数
+constexpr int STOREAGE_SLOT = 100;		//仓库格子数
+constexpr int PETBAG_SLOT = 10;		//宠物背包格子数
 constexpr DWORD TYPEFLAG_TARGETOBJECT = ((DWORD)((1 << OBJ_PLAYER) | (1 << OBJ_MONSTER)) | (1 << OBJ_PET));	//可被攻击的对象
 constexpr UINT DISTANCE(int x1, int y1, int x2, int y2) { return (UINT)(MAX(abs(x1 - x2), abs(y1 - y2))); } // 切比雪夫距离
 

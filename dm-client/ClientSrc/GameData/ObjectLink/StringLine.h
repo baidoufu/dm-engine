@@ -36,6 +36,10 @@ public:
 	int      getWidth(int begin,int end);
 	bool     equal(CStringLine* tmp);
 private:
+	// ½ûÖ¹¿½±´£¨·ÀÖ¹ vector<CGlyph*> ÂãÖ¸Õë±»Ç³¿½±´µ¼ÖÂË«ÖØÊÍ·Å£©
+	CStringLine(const CStringLine&);
+	CStringLine& operator=(const CStringLine&);
+
 	vector<CGlyph *> m_words;
 	int      m_iFontSize;
 	int      m_iFontType;

@@ -457,6 +457,7 @@ public:
 
 	void MSG_Open_Super_Attack_Kill		(const char * msg,int iLen);
 	void MSG_Open_Attack_Kill 			(const char * msg,int iLen);
+	void MSG_Close_Attack_Kill			(const char* msg, int iLen);
 	void MSG_Open_Attack_Stick 			(const char * msg,int iLen);
 	void MSG_Close_Attack_Stick			(const char * msg,int iLen);
 	void MSG_Open_Attack_Moon 			(const char * msg,int iLen);
@@ -1042,7 +1043,7 @@ public:
 	void SEND_HasWaiGua(bool bHas);
 	void MSG_HasWaiGua(const char * msg,int iLen);
 
-	void SEND_Mac_To_GS();
+	//void SEND_Mac_To_GS();
 
 	void MSG_Player_ConSkillBuff(const char * msg,int iLen);
 

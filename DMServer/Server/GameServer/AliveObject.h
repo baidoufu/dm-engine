@@ -104,7 +104,7 @@ public:
 	BOOL Attack(int dir, DWORD dwDelay = 0, e_humanattackmode mode = HAM_ALL, damage_type curAttackType = DT_PHYSICS);
 	BOOL BeAttack(CAliveObject* pAttacker, int nDamage, damage_type damagetype = DT_PHYSICS, DWORD dwFlag = 0, damage_ReType damageReType = DRT_NONE);
 	virtual int  getdir() { return 0; }
-	BOOL GetMeal(int dir);
+	BOOL GetMeal(int x, int y, int dir);
 	BOOL Backward(int dir);
 	VOID Say(const char* pszMsg, ...);
 	VOID SaySystem(const char* pszMsg, ...);
@@ -164,7 +164,9 @@ public:
 
 	BOOL SetAction(actiontype action, e_direction dir, WORD x, WORD y, DWORD dwActionTime);
 
-	BOOL CompleteAction();
+	// bForceStop=TRUE: 强制打断当前动作(如死亡/被击退), 发送SM_STOP通知客户端立即停止动画
+	// bForceStop=FALSE: 动作自然到期完成, 不发SM_STOP, 让客户端动画自然播完过渡, 避免动画抽搐
+	BOOL CompleteAction(BOOL bForceStop = FALSE);
 
 	BOOL GetOutViewmsg(char* pszMsg, int& length, CMapObject* pViewer = nullptr);
 	virtual BOOL GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer = nullptr);
@@ -328,8 +330,8 @@ public:
 	virtual int GetAutoRecoverMp() { return 0; }
 	virtual int GetAutoRecoverHptime() { return 0; }
 	virtual int GetAutoRecoverMptime() { return 0; }
-	// 发送生命值魔法值变化消息
-	virtual VOID SendHpMpChanged(int damage = 0, WORD wEffect = 57) {}
+	// 发送生命值魔法值变化消息, wEffect标示是否为暴击1为暴击，0为其他
+	virtual VOID SendHpMpChanged(int damage = 0, BYTE wEffect = 0) {}
 	VOID DropGold(DWORD dwCount, int x, int y, DWORD dwOwner = 0);
 	virtual BOOL AddPet(CAliveObject* pObject) { return TRUE; }
 	virtual BOOL DelPet(CAliveObject* pObject) { return TRUE; }
@@ -543,7 +545,6 @@ public:
 	VOID ForceMove(int x, int y);
 
 	virtual BYTE GetNameColor(CMapObject* pViewer) { return 255; }
-	virtual BYTE GetFenghaoType23() { return 0; }
 
 	VOID SendChangeName();
 
@@ -614,6 +615,8 @@ protected:
 
 	BOOL m_bDead;
 	BOOL m_bPosLocked;
+
+	BYTE m_bMonsterType; // 怪物类型 0x10 标示可以挖肉
 
 	static xObjectPool<VISIBLE_OBJECT>	m_xVisibleObjectPool;
 	std::array<int, PI_PROP_COUNT> m_AddProp;

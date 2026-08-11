@@ -6,7 +6,6 @@
 #include "guildex.h"
 #include "SystemScript.h"
 #include "ItemManager.h"
-#include "BossTJ.h"
 
 static std::array<char, 65536> g_szTempString{};
 static std::array<ITEM, 100> g_items{};
@@ -413,8 +412,6 @@ VOID CHumanPlayer::OnEnterMap(CLogicMap* pMap)
 
 VOID CHumanPlayer::OnLevelUp(int level)
 {
-	if (level == 7) // 升级到 7 发送加载BOSS图鉴列表数据
-		CBossTJ::GetInstance()->SendBossList(this);
 	if (level > 45) // 46级开始才有封号判断
 		CheckAndUpgradeTitle();
 	CSystemScript::GetInstance()->Execute(GetScriptTarget(), "LevelUpEnv.LevelUp", FALSE);

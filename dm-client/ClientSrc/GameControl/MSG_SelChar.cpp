@@ -263,7 +263,7 @@ void CGameControl::MSG_CreateRole_Ack(const char * msg, int iLen)
 	g_OtherData.GetDelCharList().clear();
 
 	Sleep(100); 
-	char szPacket[32];
+	char szPacket[64];
 	wsprintf(szPacket, "%s/%d", g_Login.GetLoginID(), g_Login.GetSessionID());
 	g_pNet->SendBuf(SERVER_GAME, (char*)&szPacket, 0, 100, false);		//CM_QUERYCHR
 
@@ -323,8 +323,8 @@ void CGameControl::SEND_SelRole_Req(const char* ptID, const char* roleName)
 
 	//传世方法选择角色
 	g_OtherData.CopyToSelf();
-	char szPacket[32];
-	wsprintf( szPacket, "%s/%s", ptID, roleName );
+	char szPacket[64];
+	wsprintf(szPacket, "%s/%s", ptID, roleName);
 	g_pNet->SendBuf(SERVER_GAME, (char*)&szPacket, 0, CM_SELCHR, false);
 }
 

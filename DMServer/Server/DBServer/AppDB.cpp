@@ -853,34 +853,37 @@ SERVER_ERROR CAppDB::UpgradeItem(DWORD dwMakeIndex, DWORD dwUpgrade)
 	return ret;
 }
 
+constexpr int ExtHex_LEN = 35;
 SERVER_ERROR CAppDB::CreateItem(DWORD dwOwner, BYTE	btFlag, WORD wPos, ITEM* pItem)
 {
 	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 	char szName[32];
 	char szFullName[32];
+	char szExternString[32];
 	DWORD FindKey = static_cast<DWORD>(Getrand(0x7fffffff)) | CFrameTime::GetFrameTime();
 	o_strncpy(szName, pItem->baseitem.szName, 14);
 	o_strncpy(szFullName, pItem->szFullName, 16);
+	o_strncpy(szExternString, pItem->szExternString, 20);
 	// 将 btItemExt 转换为 HEX 字符串
-	char szExtHex[721] = ""; // 360 * 2 + 1
-	for (int i = 0; i < 360; i++)
+	char szExtHex[ExtHex_LEN * 2 + 1] = ""; // 35 * 2 + 1
+	for (int i = 0; i < ExtHex_LEN; i++)
 	{
 		sprintf_s(&szExtHex[i * 2], 3, "%02X", (unsigned char)pItem->btItemExt[i]);
 	}
 	// 转义物品名称
 	std::string sName = Escape(szName);
 	std::string sFullName = Escape(szFullName);
-
+	std::string sExternString = Escape(szExternString);
 	SERVER_ERROR ret = pDataUnit->Operation("insert into TBL_CHARACTER_ITEM( "
-		"OWNERID,NAME,FULLNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
+		"OWNERID,NAME,FULLNAME,EXNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
 		"MINMAC,MAXMAC,DURA,CURDURA,MAXDURA,NEEDTYPE,NEEDLEVEL,SPECIALPOWER,NEEDIDENTIFY,"
 		"WEIGHT,STDMODE,SHAPE,PRICE,UNKNOWN_1,UNKNOWN_2,FLAG,POS,FINDKEY,IMAGEINDEX,EXT,CREATEDATE)"
 		" VALUES("
-		"%u,'%s','%s',%u,%u,%u,%u,%u,%u,%u,%u,"
+		"%u,'%s','%s','%s',%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,UNHEX('%s'),CURRENT_TIMESTAMP)",
-		dwOwner, sName.c_str(), sFullName.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
+		dwOwner, sName.c_str(), sFullName.c_str(), sExternString.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
 		pItem->baseitem.btMinSouAtk, pItem->baseitem.btMaxSouAtk, pItem->baseitem.btMinDef, pItem->baseitem.btMaxDef,
 		pItem->baseitem.btMinMagDef, pItem->baseitem.btMaxMagDef, pItem->baseitem.wMaxDura, pItem->wCurDura, pItem->wMaxDura, pItem->baseitem.needtype,
 		pItem->baseitem.needvalue, pItem->baseitem.btSpecialpower, pItem->baseitem.bNeedIdentify, pItem->baseitem.btWeight,
@@ -899,27 +902,31 @@ SERVER_ERROR CAppDB::CreateItemEx(DWORD dwOwner, BYTE btFlag, WORD wPos, ITEM* p
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 	char szName[32];
 	char szFullName[32];
+	char szExternString[32];
+
 	o_strncpy(szName, pItem->baseitem.szName, 14);
 	o_strncpy(szFullName, pItem->szFullName, 16);
+	o_strncpy(szExternString, pItem->szExternString, 20);
 	// 将 btItemExt 转换为 HEX 字符串
-	char szExtHex[721] = ""; // 360 * 2 + 1
-	for (int i = 0; i < 360; i++)
+	char szExtHex[ExtHex_LEN * 2 + 1] = ""; // 35 * 2 + 1
+	for (int i = 0; i < ExtHex_LEN; i++)
 	{
 		sprintf_s(&szExtHex[i * 2], 3, "%02X", (unsigned char)pItem->btItemExt[i]);
 	}
 	// 转义物品名称
-	std::string sName2 = Escape(szName);
-	std::string sFullName2 = Escape(szFullName);
+	std::string sName = Escape(szName);
+	std::string sFullName = Escape(szFullName);
+	std::string sExternString = Escape(szExternString);
 
 	SERVER_ERROR ret = pDataUnit->Operation("insert into TBL_CHARACTER_ITEM("
-		"OWNERID,NAME,FULLNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
+		"OWNERID,NAME,FULLNAME,EXNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
 		"MINMAC,MAXMAC,DURA,CURDURA,MAXDURA,NEEDTYPE,NEEDLEVEL,SPECIALPOWER,NEEDIDENTIFY,"
 		"WEIGHT,STDMODE,SHAPE,PRICE,UNKNOWN_1,UNKNOWN_2,FLAG,POS,FINDKEY,IMAGEINDEX,EXT,CREATEDATE)"
 		" VALUES("
-		"%u,'%s','%s',%u,%u,%u,%u,%u,%u,%u,%u,"
+		"%u,'%s','%s','%s',%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,"
 		"%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,UNHEX('%s'),CURRENT_TIMESTAMP)",
-		dwOwner, sName2.c_str(), sFullName2.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
+		dwOwner, sName.c_str(), sFullName.c_str(), sExternString.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
 		pItem->baseitem.btMinSouAtk, pItem->baseitem.btMaxSouAtk, pItem->baseitem.btMinDef, pItem->baseitem.btMaxDef,
 		pItem->baseitem.btMinMagDef, pItem->baseitem.btMaxMagDef, pItem->baseitem.wMaxDura, pItem->wCurDura, pItem->wMaxDura, pItem->baseitem.needtype,
 		pItem->baseitem.needvalue, pItem->baseitem.btSpecialpower, pItem->baseitem.bNeedIdentify, pItem->baseitem.btWeight,
@@ -936,11 +943,14 @@ SERVER_ERROR CAppDB::UpdateItem(DWORD	dwOwner, BYTE	btFlag, WORD wPos, ITEM* pIt
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 	char szName[32];
 	char szFullName[32];
+	char szExternString[32];
+
 	o_strncpy(szName, pItem->baseitem.szName, 14);
 	o_strncpy(szFullName, pItem->szFullName, 16);
+	o_strncpy(szExternString, pItem->szExternString, 20);
 	// 将 btItemExt 转换为 HEX 字符串
-	char szExtHex[721] = ""; // 360 * 2 + 1
-	for (int i = 0; i < 360; i++)
+	char szExtHex[ExtHex_LEN * 2 + 1] = ""; // 35 * 2 + 1
+	for (int i = 0; i < ExtHex_LEN; i++)
 	{
 		sprintf_s(&szExtHex[i * 2], 3, "%02X", (unsigned char)pItem->btItemExt[i]);
 	}
@@ -948,14 +958,15 @@ SERVER_ERROR CAppDB::UpdateItem(DWORD	dwOwner, BYTE	btFlag, WORD wPos, ITEM* pIt
 	// 转义物品名称
 	std::string sName = Escape(szName);
 	std::string sFullName = Escape(szFullName);
+	std::string sExternString = Escape(szExternString);
 
 	char szSQL[4096];
 	sprintf_s(szSQL, sizeof(szSQL), "update TBL_CHARACTER_ITEM "
-		"set OWNERID = %u, NAME = '%s', FULLNAME = '%s', MINDC = %u, MAXDC = %u, MINMC = %u, MAXMC = %u, MINSC = %u, MAXSC = %u, MINAC = %u, MAXAC = %u, "
+		"set OWNERID = %u, NAME = '%s', FULLNAME = '%s', EXNAME = '%s',MINDC = %u, MAXDC = %u, MINMC = %u, MAXMC = %u, MINSC = %u, MAXSC = %u, MINAC = %u, MAXAC = %u, "
 		"MINMAC = %u, MAXMAC = %u, DURA = %u, CURDURA = %u, MAXDURA = %u, NEEDTYPE = %u, NEEDLEVEL = %u, SPECIALPOWER = %u, NEEDIDENTIFY = %u, "
 		"WEIGHT = %u, STDMODE = %d, SHAPE = %u, PRICE = %u, UNKNOWN_1 = %u, UNKNOWN_2 = %u, FLAG = %u, POS = %u, FINDKEY = %u, IMAGEINDEX = %u, EXT = UNHEX('%s'), DELFLAG = 0 "
 		"where ID = %u",
-		dwOwner, sName.c_str(), sFullName.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
+		dwOwner, sName.c_str(), sFullName.c_str(), sExternString.c_str(), pItem->baseitem.btMinAtk, pItem->baseitem.btMaxAtk, pItem->baseitem.btMinMagAtk, pItem->baseitem.btMaxMagAtk,
 		pItem->baseitem.btMinSouAtk, pItem->baseitem.btMaxSouAtk, pItem->baseitem.btMinDef, pItem->baseitem.btMaxDef,
 		pItem->baseitem.btMinMagDef, pItem->baseitem.btMaxMagDef, pItem->baseitem.wMaxDura, pItem->wCurDura, pItem->wMaxDura, pItem->baseitem.needtype,
 		pItem->baseitem.needvalue, pItem->baseitem.btSpecialpower, pItem->baseitem.bNeedIdentify, pItem->baseitem.btWeight,
@@ -1053,7 +1064,7 @@ SERVER_ERROR CAppDB::QueryItems(DWORD dwOwner, BYTE	btFlag, DBITEM* pItemBuffer,
 	int getcount = 0;
 	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
 	SERVER_ERROR ret = pDataUnit->Operation("select "
-		"ID,NAME,FULLNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
+		"ID,NAME,FULLNAME,EXNAME,MINDC,MAXDC,MINMC,MAXMC,MINSC,MAXSC,MINAC,MAXAC,"
 		"MINMAC,MAXMAC,DURA,CURDURA,MAXDURA,NEEDTYPE,NEEDLEVEL,SPECIALPOWER,NEEDIDENTIFY,"
 		"WEIGHT,STDMODE,SHAPE,PRICE,UNKNOWN_1,UNKNOWN_2,POS,FINDKEY,IMAGEINDEX,HEX(EXT) "
 		"from TBL_CHARACTER_ITEM "
@@ -1066,10 +1077,12 @@ SERVER_ERROR CAppDB::QueryItems(DWORD dwOwner, BYTE	btFlag, DBITEM* pItemBuffer,
 			DBITEM* p = &pItemBuffer[getcount];
 			char szName[32];
 			char szFullName[32];
-			char szExtHex[721] = "";  // 360 * 2 + 1
+			char szExternString[32];
+			char szExtHex[ExtHex_LEN * 2 + 1] = "";  // 35 * 2 + 1
 			pDataUnit->GetValue(p->item.dwMakeIndex);
 			pDataUnit->GetValue(szName, 32);
 			pDataUnit->GetValue(szFullName, 32);
+			pDataUnit->GetValue(szExternString, 32);
 			pDataUnit->GetValue(p->item.baseitem.btMinAtk);
 			pDataUnit->GetValue(p->item.baseitem.btMaxAtk);
 			pDataUnit->GetValue(p->item.baseitem.btMinMagAtk);
@@ -1096,9 +1109,9 @@ SERVER_ERROR CAppDB::QueryItems(DWORD dwOwner, BYTE	btFlag, DBITEM* pItemBuffer,
 			pDataUnit->GetValue(p->pos);
 			pDataUnit->GetValue(p->item.dwParam[0]);
 			pDataUnit->GetValue(p->item.baseitem.wImageIndex);
-			pDataUnit->GetValue(szExtHex, 721);
+			pDataUnit->GetValue(szExtHex, ExtHex_LEN * 2 + 1);
 			// 将 HEX 字符串转换回二进制数据
-			int extLen = 360; // btItemExt数组大小
+			int extLen = ExtHex_LEN; // btItemExt数组大小
 			for (int i = 0; i < extLen && szExtHex[i * 2] != '\0' && szExtHex[i * 2 + 1] != '\0'; i++)
 			{
 				char high = szExtHex[i * 2];
@@ -1128,6 +1141,7 @@ SERVER_ERROR CAppDB::QueryItems(DWORD dwOwner, BYTE	btFlag, DBITEM* pItemBuffer,
 			p->item.baseitem.btNameLength = static_cast<BYTE>(strlen(szName));
 			strncpy(p->item.baseitem.szName, szName, 14);
 			strncpy(p->item.szFullName, szFullName, 16);
+			strncpy(p->item.szExternString, szExternString, 16);
 			getcount++;
 		} while (pDataUnit->MoveNext() == SE_OK && getcount < count);
 	}
@@ -1848,113 +1862,5 @@ SERVER_ERROR CAppDB::UpdateTaskInfo(DWORD dwOwner, TASKINFO* pInfo)
 
 	if (ret != SE_OK)
 		return InstertTaskInfo(dwOwner, pInfo);
-	return ret;
-}
-
-static VOID SerializeFengHaoGrowsBinary(FenghaoInfo* pInfo, BYTE* pBuffer, int bufferSize)
-{
-	memset(pBuffer, 0, bufferSize);
-	int offset = 0;
-	for (int i = 0; i < MAX_FENGHAO; i++)
-	{
-		memcpy(pBuffer + offset, &pInfo->mFengHaoRow[i].boActivation, sizeof(BOOL));
-		offset += sizeof(BOOL);
-		memcpy(pBuffer + offset, &pInfo->mFengHaoRow[i].dwLastDate, sizeof(DWORD));
-		offset += sizeof(DWORD);
-	}
-}
-
-static VOID DeserializeFengHaoGrowsBinary(const BYTE* pData, int dataSize, FenghaoInfo* pInfo)
-{
-	int offset = 0;
-	for (int i = 0; i < MAX_FENGHAO; i++)
-	{
-		memcpy(&pInfo->mFengHaoRow[i].boActivation, pData + offset, sizeof(BOOL));
-		offset += sizeof(BOOL);
-		memcpy(&pInfo->mFengHaoRow[i].dwLastDate, pData + offset, sizeof(DWORD));
-		offset += sizeof(DWORD);
-	}
-}
-
-static constexpr int FENGHAOGROW_BINARY_SIZE = sizeof(FengHaoRow) * MAX_FENGHAO;
-static thread_local BYTE s_szFengHaoGrowsBinary[FENGHAOGROW_BINARY_SIZE];
-SERVER_ERROR CAppDB::QueryFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
-{
-	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
-	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-
-	SERVER_ERROR ret = pDataUnit->Operation("select Type1, Type2, Type3, FengHaoRow "
-		"FROM TBL_CHARACTER_FENGHAO "
-		"WHERE CharId = %u", dwOwner);
-
-	if (ret == SE_OK)
-	{
-		pDataUnit->GetValue(pInfo->btType1);
-		pDataUnit->GetValue(pInfo->btType2);
-		pDataUnit->GetValue(pInfo->btType3);
-
-		memset(s_szFengHaoGrowsBinary, 0, sizeof(s_szFengHaoGrowsBinary));
-		int binarySize = sizeof(s_szFengHaoGrowsBinary);
-		pDataUnit->GetData(4, SQL_C_BINARY, s_szFengHaoGrowsBinary, binarySize);
-		DeserializeFengHaoGrowsBinary(s_szFengHaoGrowsBinary, binarySize, pInfo);
-	}
-	else if (ret == SE_DB_NOMOREDATA)
-	{
-		pInfo->btType1 = 0;
-		pInfo->btType2 = 0;
-		pInfo->btType3 = 0;
-		ret = InstertFengHaoInfo(dwOwner, pInfo);
-	}
-
-	m_pDBConnection->DelDataUnit(pDataUnit);
-	return ret;
-}
-
-SERVER_ERROR CAppDB::InstertFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
-{
-	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
-	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-
-	SerializeFengHaoGrowsBinary(pInfo, s_szFengHaoGrowsBinary, sizeof(s_szFengHaoGrowsBinary));
-
-	std::string hexString;
-	hexString.resize(FENGHAOGROW_BINARY_SIZE * 2);
-	for (int i = 0; i < FENGHAOGROW_BINARY_SIZE; i++)
-	{
-		BYTE b = s_szFengHaoGrowsBinary[i];
-		hexString[i * 2] = HEX_TABLE[b >> 4];
-		hexString[i * 2 + 1] = HEX_TABLE[b & 0xF];
-	}
-
-	SERVER_ERROR ret = pDataUnit->Operation("insert into TBL_CHARACTER_FENGHAO(CharId, Type1, Type2, Type3, FengHaoRow) values(%u, %u, %u, %u, UNHEX('%s'))",
-		dwOwner, pInfo->btType1, pInfo->btType2, pInfo->btType3, hexString.c_str());
-
-	m_pDBConnection->DelDataUnit(pDataUnit);
-	return ret;
-}
-
-SERVER_ERROR CAppDB::UpdateFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo)
-{
-	CVirtualDataUnit* pDataUnit = m_pDBConnection->GetDataUnit();
-	if (pDataUnit == nullptr) return SE_ALLOCMEMORYFAIL;
-
-	SerializeFengHaoGrowsBinary(pInfo, s_szFengHaoGrowsBinary, sizeof(s_szFengHaoGrowsBinary));
-
-	std::string hexString;
-	hexString.resize(FENGHAOGROW_BINARY_SIZE * 2);
-	for (int i = 0; i < FENGHAOGROW_BINARY_SIZE; i++)
-	{
-		BYTE b = s_szFengHaoGrowsBinary[i];
-		hexString[i * 2] = HEX_TABLE[b >> 4];
-		hexString[i * 2 + 1] = HEX_TABLE[b & 0xF];
-	}
-
-	SERVER_ERROR ret = pDataUnit->Operation("update TBL_CHARACTER_FENGHAO set Type1 = %u, Type2 = %u, Type3 = %u, FengHaoRow = UNHEX('%s') where CharId = %u",
-		pInfo->btType1, pInfo->btType2, pInfo->btType3, hexString.c_str(), dwOwner);
-
-	m_pDBConnection->DelDataUnit(pDataUnit);
-
-	if (ret != SE_OK)
-		return InstertFengHaoInfo(dwOwner, pInfo);
 	return ret;
 }

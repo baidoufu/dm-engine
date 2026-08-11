@@ -1,5 +1,7 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.12009.203
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Global", "..\Global\Global.vcxproj", "{2BC6EF05-6F69-48F9-B171-6584704E84D0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{44548346-AC9D-465E-A91F-496291120F01} = {44548346-AC9D-465E-A91F-496291120F01}
@@ -40,11 +42,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compress", "..\BaseClass\Co
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DXTn", "..\BaseClass\DXTn\DXTn.vcxproj", "{E49702F8-9457-42AA-BC3F-BB5CC3BE361A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dumpgood", "..\dumpgood\dumpgood.vcxproj", "{D604EEA0-1FE8-4CAA-B020-0C15FB40D3F5}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FreeType", "..\FreeTypeDLL\FreeTypeDLL.vcxproj", "{E945BAAB-6BCB-4279-8078-F599E83DEA0C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "..\Engine\Engine.vcxproj", "{BE2D4BE8-373B-4289-BD98-06CB3D22AED5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mimalloc-lib", "..\mimalloc\ide\vs2022\mimalloc-lib.vcxproj", "{ABB5EAE7-B3E6-432E-B636-333449892EA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,10 +122,6 @@ Global
 		{E49702F8-9457-42AA-BC3F-BB5CC3BE361A}.Debug|Win32.Build.0 = Debug|Win32
 		{E49702F8-9457-42AA-BC3F-BB5CC3BE361A}.Release|Win32.ActiveCfg = Release|Win32
 		{E49702F8-9457-42AA-BC3F-BB5CC3BE361A}.Release|Win32.Build.0 = Release|Win32
-		{D604EEA0-1FE8-4CAA-B020-0C15FB40D3F5}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D604EEA0-1FE8-4CAA-B020-0C15FB40D3F5}.Debug|Win32.Build.0 = Debug|Win32
-		{D604EEA0-1FE8-4CAA-B020-0C15FB40D3F5}.Release|Win32.ActiveCfg = Release|Win32
-		{D604EEA0-1FE8-4CAA-B020-0C15FB40D3F5}.Release|Win32.Build.0 = Release|Win32
 		{E945BAAB-6BCB-4279-8078-F599E83DEA0C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{E945BAAB-6BCB-4279-8078-F599E83DEA0C}.Debug|Win32.Build.0 = Debug|Win32
 		{E945BAAB-6BCB-4279-8078-F599E83DEA0C}.Release|Win32.ActiveCfg = Release|Win32
@@ -132,6 +130,10 @@ Global
 		{BE2D4BE8-373B-4289-BD98-06CB3D22AED5}.Debug|Win32.Build.0 = Debug|Win32
 		{BE2D4BE8-373B-4289-BD98-06CB3D22AED5}.Release|Win32.ActiveCfg = Release|Win32
 		{BE2D4BE8-373B-4289-BD98-06CB3D22AED5}.Release|Win32.Build.0 = Release|Win32
+		{ABB5EAE7-B3E6-432E-B636-333449892EA6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ABB5EAE7-B3E6-432E-B636-333449892EA6}.Debug|Win32.Build.0 = Debug|Win32
+		{ABB5EAE7-B3E6-432E-B636-333449892EA6}.Release|Win32.ActiveCfg = Release|Win32
+		{ABB5EAE7-B3E6-432E-B636-333449892EA6}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

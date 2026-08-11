@@ -247,7 +247,7 @@
 #define SC_MAP_CHANGE						0x0279 		// 地图跳转。 
 #define SC_MAP_JUMP							0x0322		// 地图跳转。 
 #define SC_JUMP_REFRESH						0x0321		// 由于地图跳转产生的更新外观指令.
-#define SC_MAP_DESCRIPTION				0x0054		// by json 地图介绍, 暂时无用
+#define SC_MAP_DESCRIPTION					0x0054		// 地图介绍, 暂时无用
 
 //魔法相关消息
 //      消息命令							消息值      消息注释
@@ -396,7 +396,8 @@
 
 #define SC_PLAYER_SUCCESS					0xFFFF      // 动作成功
 #define SC_PLAYER_FAIL						0xFFFE      // 动作失败
-#define SC_OPEN_ATTACK_KILL					0xFFFC		// 攻杀剑术开启
+#define SC_OPEN_ATTACK_KILL					0xFFFD		// 攻杀剑术开启
+#define SC_CLOSE_ATTACK_KILL				0xFFFC		// 攻杀剑术关闭
 #define SC_OPEN_ATTACK_STICK				0xFFFB		// 刺杀剑术开启
 #define SC_CLOSE_ATTACK_STICK				0xFFFA		// 刺杀剑术关闭
 #define SC_OPEN_ATTACK_MOON					0xFFF9		// 半月开启
@@ -410,8 +411,8 @@
 #define SC_CLOSE_REMAIN_SHADE				0xFFF1		// 残影关闭(保留)
 #define SC_OPEN_BLOOD_SHADE					0xFFF0		// 血影开启
 #define SC_CLOSE_BLOOD_SHADE				0xFFEF		// 血影关闭(保留)
-#define SC_OPEN_WHOLE_MOON					0xFFEE		// 园月开启
-#define SC_CLOSE_WHOLE_MOON					0xFFED		// 园月关闭
+#define SC_OPEN_WHOLE_MOON					0xFFEE		// 抱月开启
+#define SC_CLOSE_WHOLE_MOON					0xFFED		// 抱月关闭
 #define SC_OPEN_THUNDER_FIRE				0xFFEC		// 雷烈开启
 #define SC_CLOSE_THUNDER_FIRE				0xFFEB		// 雷烈关闭
 #define SC_OPEN_DESTROY_WEAPON				0xFFEA		// 击破开启
@@ -542,7 +543,7 @@
 //      消息命令							消息值      消息注释
 #define CS_OPEN_MAPVIEW						0x0409 		// 打开小地图
 #define CS_LOOK_PLAYER_INFO					0x0052 		// 察看其他玩家信息
-#define CS_QUIT_GAME						0x03F1		// 退出游戏
+#define CS_QUIT_GAME						0x03F1		// 小退出游戏
 #define CS_REAL_QUIT_GAME					0x006A		// 退出游戏
 #define CS_ADD_FRIEND						0x0042		// 添加好友
 #define CS_DEL_FRIEND						0x0043		// 删除好友

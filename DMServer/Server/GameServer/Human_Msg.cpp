@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "FengHaoGrowManager.h"
 #include "humanplayer.h"
 #include "itemmanager.h"
 #include "scriptshell.h"
@@ -13,7 +12,7 @@ VOID CHumanPlayer::SendUpdateItem(ITEM& item)
 	ItemToClient(item);
 	ITEMCLIENT clientItem;
 	memcpy(&clientItem, &item, sizeof(ITEMCLIENT));
-	SendMsg(GetId(), 0xcb, 0, 0, 1, &clientItem, sizeof(ITEMCLIENT));
+	SendMsg(GetId(), 0xcb, 0, 0, 0, &clientItem, sizeof(ITEMCLIENT));
 }
 
 VOID CHumanPlayer::SendWeaponBroken()
@@ -70,102 +69,27 @@ VOID CHumanPlayer::SendEatFail()
 	SendMsg(0, SM_EAT_FAIL, 0, 0, 0, 0, 0);
 }
 
+VOID CHumanPlayer::SendExName(ITEM* pItem)
+{
+	xPacketPool::ScopedPacket packet;
+	packet->push((LPVOID)&pItem->dwMakeIndex, 4); // 物品ID
+	const char* szName = pItem->GetExName(); // 物品名字
+	BYTE bLen = static_cast<BYTE>(strlen(szName)); // 物品名字长度
+	packet->push((LPVOID)&bLen, 1);
+	packet->push((LPVOID)szName, bLen);
+	SendMsg(GetId(), 206, static_cast<WORD>(pItem->dwMakeIndex), 0, 1, (LPVOID)packet->getbuf(), packet->getsize());
+}
+
 VOID CHumanPlayer::SendScrollText(const char* pszText)
 {
 	SendMsg(0, SM_SCROLLTEXT, 0, 0, 0, (LPVOID)pszText);
 }
 
-VOID CHumanPlayer::SendClientKeyConfig()
-{
-	xPacketPool::ScopedPacket packet;
-	int nValue = 0x64;
-	packet->push(&nValue, 4);
-	ClientKeyState* clientKeyConfig = CGameWorld::GetInstance()->GetClientKeyConfig();
-	packet->push(clientKeyConfig, sizeof(ClientKeyState) * 100);
-	SendMsg(GetId(), 0x97a, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-}
-
-VOID CHumanPlayer::SendClientPluginInfo()
-{
-	xPacketPool::ScopedPacket packet;
-	//位运算，开启客户端插件功能：
-	//开特权大包裹
-	//内挂持续使用
-	//挂机绑金上限
-	//时长充值按钮
-	//玄武炉无限制
-	//开启物品来源
-	//开启无限刀
-	//整理包裹触发
-	int nValue = 255;
-	packet->push(&nValue, 4);
-	//插入包裹名称
-	const char* sBagName = "VIP包裹";
-	packet->push((LPVOID)sBagName, 15);
-	packet->push(1);
-	//插入充值网址
-	const char* sPayWeb = "https://www.jiangjiali.com";
-	packet->push((LPVOID)sPayWeb, 254);
-	packet->push(1);
-	SendMsg(GetId(), 0xa02, 0, 10086, 0, (LPVOID)packet->getbuf(), packet->getsize());
-}
-
 VOID CHumanPlayer::Sendfirstdlg(const char* pszString)
 {
 	xPacketPool::ScopedPacket packet;
-	//packet->push((LPVOID)&m_Humandesc.dbinfo.nGameTime, 4);
-	//packet->push((LPVOID)&m_Humandesc.dbinfo.wLevel, 2);
 	packet->push(pszString);
-	SendMsg(GetId(), SM_FIRSTDIALOG, 257, 1101, 1, (LPVOID)packet->getbuf(), packet->getsize());
-	//SendMsg(m_Humandesc.dbinfo.dwYuanbao, 0xe679, 0, 0, 0); // 发送元宝数量
-}
-
-VOID CHumanPlayer::SendOpenGameTimeInfo()
-{
-	xPacketPool::ScopedPacket packet;
-	const char* s1C = "GameTimeMgr";
-	packet->push(s1C);
-	packet->push(1);
-	int nValue = 0x01;
-	packet->push((LPVOID)&nValue, 4);
-	packet->push(1);
-	nValue = 0x02;
-	packet->push((LPVOID)&nValue, 4);
-	packet->push((LPVOID)&m_Humandesc.dbinfo.nGameTime, 4);
-	packet->push(16);
-	nValue = 0x02;
-	packet->push((LPVOID)&nValue, 4);
-	packet->push((LPVOID)&m_Humandesc.dbinfo.nGameTime, 4);
-	packet->push(12);
-	SendMsg(GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-}
-
-VOID CHumanPlayer::SendClientfunction()
-{
-	xPacketPool::ScopedPacket packet;
-	DWORD nValue = 0x00;
-	packet->push((LPVOID)&nValue, 4);
-	nValue = 0x00;
-	packet->push((LPVOID)&nValue, 4);
-	WORD LoParam1{}, HiParam1{};
-	LoParam1 += 1 << 6; // 新邮件
-	//LoParam1 += 1 << 7; // 开启2.4内容, 包括友好度、结婚、结义
-	LoParam1 += 1 << 10; // 2019版活跃度
-	LoParam1 += 1 << 13; // 资源服务器重新连接
-	BYTE LoParam2{}, HiParam2{};
-	LoParam2 += 1 << 0; // 豹子摆摊功能
-	LoParam2 += 1 << 2; // 新彩虹精灵
-	LoParam2 += 1 << 4; // 快捷消费使用功能
-	HiParam2 += 1 << 1; // 主线任务删除按钮
-	HiParam2 += 1 << 2; // 开启IGW
-	HiParam2 += 1 << 7; // 安全区穿人
-	BYTE LoParam3{}, HiParam3{};
-	LoParam3 += 1 << 1; // 元宝拍卖行和现金拍卖行是否合并
-	LoParam3 += 1 << 3; // 打开宝石系统
-	LoParam3 += 1 << 5; // 关闭彩虹网弹框
-	HiParam3 += 1 << 6; // 开启自定义快捷键功能
-	SendMsg(static_cast<DWORD>(MAKELONG(LoParam1, HiParam1)), 0x330, MAKEWORD(LoParam2, HiParam2), MAKEWORD(LoParam3, HiParam3),
-		0, (LPVOID)packet->getbuf(), packet->getsize());
+	SendMsg(GetId(), SM_FIRSTDIALOG, 257, 1101, 0, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CHumanPlayer::SendZhenBao(DWORD dwZhenBaoExp, DWORD dwZhenBaoExpMax, DWORD dwZhenBaoStar)
@@ -254,7 +178,7 @@ VOID CHumanPlayer::SendTakeBagItem(ITEM* pItem)
 VOID CHumanPlayer::SendMoneyChanged(money_type type)
 {
 	WORD wMsg = (type == MT_GOLD ? SM_GOLDCHANGED : SM_SETSUPERGOLD);
-	SendMsg(GetMoney(type), wMsg, 0, 0, 0);
+	SendMsg(GetMoney(type), wMsg, 0, 0, 0); // 以后可以扩展绑定元宝、绑定金币
 }
 
 VOID CHumanPlayer::SendMagicExpChg(USERMAGIC* pMagic)
@@ -303,9 +227,9 @@ VOID CHumanPlayer::SendTimeWeatherChanged()
 	SendMsg(m_pMap->GetWeather().dwBGColor, SM_SETGAMEDATETIME, wTime, wWeather, wFlag, &dwWeatherColor, sizeof(DWORD));
 }
 
-static thread_local std::array<DBITEM, 100> s_dbPacketDst{};
-static thread_local std::array<ITEM, 100> s_dbPacketItems{};
-static thread_local std::array<BAGITEMPOS, 100> s_dbPacketPos{};
+static thread_local std::array<DBITEM, 180> s_dbPacketDst{};
+static thread_local std::array<ITEM, 180> s_dbPacketItems{};
+static thread_local std::array<BAGITEMPOS, 180> s_dbPacketPos{};
 VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 {
 	CHARDBINFO info;
@@ -351,12 +275,9 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 	// 任务信息
 	length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATETASKINFO, 0, 0, 0, (LPVOID)&m_TaskInfo, sizeof(m_TaskInfo));
 	packet.addsize(length);
-	// 时长封号信息
-	length = EncodeMsg((char*)packet.getfreebuf(), info.dwDBId, DM_UPDATEFENGHAO, 0, 0, 0, (LPVOID)&m_FenghaoInfo, sizeof(m_FenghaoInfo));
-	packet.addsize(length);
 	// 背包数据
 	int count = 0;
-	count = m_ItemBox.GetItems(s_dbPacketItems.data(), 100);
+	count = m_ItemBox.GetItems(s_dbPacketItems.data(), BIGBAG_SLOT);
 	int updatecount = 0;
 	int uposcount = 0;
 	for (int i = 0; i < count; i++)
@@ -399,7 +320,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		packet.addsize(length);
 	}
 	// 仓库物品数据
-	count = m_ItemBank.GetItems(s_dbPacketItems.data(), 100);
+	count = m_ItemBank.GetItems(s_dbPacketItems.data(), STOREAGE_SLOT);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{
@@ -429,7 +350,7 @@ VOID CHumanPlayer::GetDBInfoPacket(xPacket& packet)
 		packet.addsize(length);
 	}
 	// 宠物背包数据
-	count = m_ItemPetBag.GetItems(s_dbPacketItems.data(), 100);
+	count = m_ItemPetBag.GetItems(s_dbPacketItems.data(), PETBAG_SLOT);
 	updatecount = 0;
 	for (int i = 0; i < count; i++)
 	{

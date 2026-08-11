@@ -951,7 +951,7 @@ DWORD CActionInf::GetNPCTex(DrawCharInf* pDrawInf)
 	return GetNPCTex(pDrawInf->pLooks->Char.wShape,pDrawInf->iAction,pDrawInf->iFrame,pDrawInf->iDir);
 }
 
-//by json 获取NPC贴图
+// 获取NPC贴图
 DWORD CActionInf::GetNPCTex(int iNPC,int iAction,int iFrame,char cDir)
 {
 	ActionMap::iterator itr = m_vNpc.find(iAction);

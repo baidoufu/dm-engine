@@ -95,12 +95,6 @@
     <Filter Include="功能处理\功能\任务">
       <UniqueIdentifier>{c5c0bfd2-715f-4ca7-a1ac-15ceeb14fc49}</UniqueIdentifier>
     </Filter>
-    <Filter Include="功能处理\功能\活动">
-      <UniqueIdentifier>{58da1cb7-f61c-4aec-8978-288431f501fa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="功能处理\功能\封号时长">
-      <UniqueIdentifier>{fb4d8f15-db27-4627-a34a-4e004156a873}</UniqueIdentifier>
-    </Filter>
     <Filter Include="功能处理\功能\封号">
       <UniqueIdentifier>{0eef0f05-6a47-461e-a4bb-e2a07c986277}</UniqueIdentifier>
     </Filter>
@@ -429,32 +423,11 @@
     <ClCompile Include="TriggerEvent.cpp">
       <Filter>功能处理\功能\事件</Filter>
     </ClCompile>
-    <ClCompile Include="BossTJ.cpp">
-      <Filter>功能处理\功能\活动</Filter>
-    </ClCompile>
-    <ClCompile Include="TimeAchieve.cpp">
-      <Filter>功能处理\功能\活动</Filter>
-    </ClCompile>
     <ClCompile Include="MonsterAttack.cpp">
       <Filter>功能处理\怪物</Filter>
     </ClCompile>
     <ClCompile Include="BlueFireEvent.cpp">
       <Filter>功能处理\功能\事件</Filter>
-    </ClCompile>
-    <ClCompile Include="GameStage.cpp">
-      <Filter>功能处理\功能\活动</Filter>
-    </ClCompile>
-    <ClCompile Include="FengHaoGrowManager.cpp">
-      <Filter>功能处理\功能\封号时长</Filter>
-    </ClCompile>
-    <ClCompile Include="Human_FengHao.cpp">
-      <Filter>功能处理\玩家</Filter>
-    </ClCompile>
-    <ClCompile Include="Human_Achieve.cpp">
-      <Filter>功能处理\玩家</Filter>
-    </ClCompile>
-    <ClCompile Include="Variable_Achieve.cpp">
-      <Filter>架构相关\脚本变量</Filter>
     </ClCompile>
     <ClCompile Include="gsClientMsgHandler.cpp">
       <Filter>功能处理\玩家\客户端消息</Filter>
@@ -773,26 +746,14 @@
     <ClInclude Include="TriggerEvent.h">
       <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
-    <ClInclude Include="BossTJ.h">
-      <Filter>功能处理\功能\活动</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeAchieve.h">
-      <Filter>功能处理\功能\活动</Filter>
-    </ClInclude>
     <ClInclude Include="MonsterAttack.h">
       <Filter>功能处理\怪物</Filter>
     </ClInclude>
     <ClInclude Include="BlueFireEvent.h">
       <Filter>功能处理\功能\事件</Filter>
     </ClInclude>
-    <ClInclude Include="GameStage.h">
-      <Filter>功能处理\功能\活动</Filter>
-    </ClInclude>
     <ClInclude Include="EventsBus.h">
       <Filter>架构基础</Filter>
-    </ClInclude>
-    <ClInclude Include="FengHaoGrowManager.h">
-      <Filter>功能处理\功能\封号时长</Filter>
     </ClInclude>
     <ClInclude Include="gsClientObj.h">
       <Filter>功能处理\玩家\客户端消息</Filter>

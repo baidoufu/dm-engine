@@ -1,17 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-//
-//
-//
-//
-//
-//
-///////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "Global/Global.h"
@@ -46,13 +32,13 @@ protected:
 	DWORD       m_dwCoverTime; //开始绘制版权信息的时间
 	DWORD       m_dwSndaTime;  //盛大LOGO的开始时间
 
-	//bool        m_bDrawIga;
-	//LPDIRECT3DTEXTURE9 m_pIgaTex;//320*240iga纹理
 	DWORD       m_dwAutoLoginGsFrame;//自动登录gs的过场动画帧控制
 	bool        m_bAutoLgoinStartCartoon;//是否已经登录了,如果正在登录则不显示"正在登录，请稍候..."
 
 	std::string m_strHomeUrl;
 
-	//static void _stdcall IGALiveVideoNotify( void * pParameters);
+	// 延迟创建选择服务器窗口（等资源服下载完背景纹理后再创建）
+	DWORD       m_dwSelectServerTexID;          // SelectServerWnd背景纹理ID
+	bool        m_bPendingCreateSelectServerWnd; // 是否等待纹理就绪后创建
 
 };

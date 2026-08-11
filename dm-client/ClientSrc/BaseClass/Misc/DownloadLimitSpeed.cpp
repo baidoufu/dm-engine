@@ -1,11 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-///////////////////////////////////////////////////////////////////////
 #include "Net.h"
 #include "Global/DebugTry.h"
 #include "Global/PerfCheck.h"
@@ -52,7 +44,7 @@ CDownloadLimitSpeed::CDownloadLimitSpeed(HWND hWnd,DWORD dwMsg,long lEvent)
 	//SetThreadPriority(m_hThread,THREAD_PRIORITY_ABOVE_NORMAL);
 
 	m_iDlVersion = (int)GetPrivateProfileInt("Common","Version",0,"./DlVersion.dat");
-	m_dlSpeed = (int)GetPrivateProfileInt("Config","BgDlSpeed",10,"./Config.ini");
+	m_dlSpeed = (int)GetPrivateProfileInt("Config","BgDlSpeed",512,"./Config.ini");
 
 }
 

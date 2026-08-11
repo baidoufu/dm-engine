@@ -7,10 +7,12 @@
 
 
 
+#ifndef WITHOUT_SD_INTERFACE
 #ifdef _DEBUG
 #pragma comment(lib, "OpenLoginClient.lib")
 #else
 #pragma comment(lib, "OpenLoginClient.lib")
+#endif
 #endif
 
 
@@ -26,14 +28,18 @@ COpenLoginClient::~COpenLoginClient()
 		m_pOpenLogin->SetEventHandler(0);
 		//m_pOpenLogin->RecoverYYUI();
 		m_pOpenLogin->DestroyAllWnd();
+#ifndef WITHOUT_SD_INTERFACE
 		ReleaseHandle();
+#endif
 		m_pOpenLogin = NULL;
 	}
 }
 
 bool COpenLoginClient::Open(HWND hWnd, void* device)
 {
+#ifndef WITHOUT_SD_INTERFACE
 	m_pOpenLogin = OpenLogin::GetOpenLoginModule();
+#endif
 	if (m_pOpenLogin == NULL)
 		return false;
 
@@ -102,7 +108,8 @@ void SDAPI COpenLoginClient::OnReceiveAuthCode(TCHAR** szAuthCode, TCHAR** login
 	{
 		g_pGameControl->SEND_APLogin_Req((g_strChannelName + "code").c_str(), buf);
 
-		m_pOpenLogin->ShowSpecifyWindow(OpenLogin::IOpenLogin::WindowType::OAUTHWINDOW, SW_HIDE);
+		if (m_pOpenLogin != NULL)
+			m_pOpenLogin->ShowSpecifyWindow(OpenLogin::IOpenLogin::WindowType::OAUTHWINDOW, SW_HIDE);
 	}
 }
 

@@ -15,7 +15,7 @@
 typedef struct tagPlayerProperty42		//TMYOAbility 服务端
 {
 	WORD	wLevel;
-	WORD  wAC1;// 物理防御下限
+	WORD	wAC1;// 物理防御下限
 	WORD	wAC2;// 物理防御上限
 	WORD	wMAC1;// 魔法防御下限
 	WORD	wMAC2;// 魔法防御下限
@@ -31,49 +31,43 @@ typedef struct tagPlayerProperty42		//TMYOAbility 服务端
 	WORD	wMaxHP;//生命最大值
 	WORD	wMaxMP;//魔法最大值
 
-	//add by json 
+	// 添加
 	WORD wLevelUpCount;	//当前拥有经验
 	WORD wNextLevelUpCount;	//下一级需要的经验
 
-	//deleted by json 传世不需要
+	// 删除 传世不需要
 	//BYTE	byMove;// 移动
 	//BYTE	byHPRenew;// 体力恢复
 	//BYTE	byMPRenew;//魔法恢复
 	//BYTE	byReserved;
 
-	INT64	i64CurExp;// 经验值
+	INT64	i64CurExp;// 当前经验值
 	INT64	i64MaxExp;// 升级所需经验	
 	WORD	wPackageWeight;// 包裹重量
 	WORD	wMaxPackageWeight;// 包裹重量
-	BYTE	byEquipWeight;// 重量 
-	BYTE	byMaxEquipWeight;// 重量最大值
+	BYTE	byEquipWeight;// 负重
+	BYTE	byMaxEquipWeight;// 最大负重
 	BYTE	byWristWeight;// 腕力
-	BYTE	byMaxWristWeight;// 腕力最大
+	BYTE	byMaxWristWeight;// 最大腕力
 	WORD	wManito;//灵力值
 	WORD	wEnergy;//元气最大值
 	//[1.978][飞升版本][飞升属性]
-	WORD	wCurGodHP;			//元力
-	WORD	wMaxGodHP;		//元力最大值
-
-	BYTE	byGodRenew;		//未知
-	BYTE    byGodType;		//天人圣殿分类（0=无圣殿、3=神殿、4=魔殿）???
-	BYTE    byGodLevel;		//天人境界?
-
-	//未知
-	BYTE m_wHUMCQL;
-	DWORD	m_wHUMCQX;		//
-	DWORD	m_wHUMCQM;
-
-	//[1.979][装备分拆]
-	WORD    wStamina;//精力值     
-	WORD    wMaxStamina;//最大精力值  
-
+	WORD	wCurGodHP;		//元力(神、魔)
+	WORD	wMaxGodHP;		//元力最大值(神、魔)
+	BYTE	byGodRenew;		//元力恢复(神、魔)
+	BYTE    byGodType;		//天人圣殿分类 (0=无, 3=天人神, 4=天人魔, 5=天仙神, 6=天仙魔, 7=上仙神、8=上仙魔)
+	BYTE    byGodLevel;		//天人境界重数
+	//[1.979装备分拆]
+	BYTE	m_wHUMCQL;		//拆卸等级
+	DWORD	m_wHUMCQX;		//拆卸经验
+	DWORD	m_wHUMCQM;		//拆卸最大经验
+	WORD    wStamina;		//精力值     
+	WORD    wMaxStamina;	//最大精力值  
 	//[1.979][VIP机制]
-	BYTE    byVIPState;//0:不是vip,1:银卡,2:金卡
-
+	BYTE    byVIPState;		//0:不是vip,1:银卡,2:金卡
 	//[绑定金币元宝]
-	DWORD   dwBindMoney;//绑定金币数目		//nBDCount
-	DWORD   dwBindYuanBao;//邦定元宝数目	//nBDGOLD
+	DWORD   dwBindMoney;	//绑定金币数目	//nBDCount
+	DWORD   dwBindYuanBao;	//邦定元宝数目	//nBDGOLD
 
 	// 群英阵谱 unKnow1
 	BYTE    bySectionTrustee;//允许区域模式
@@ -515,8 +509,8 @@ private:
 	DWORD			m_nPrecision;	// 精确
 	DWORD			m_nSmartness;	// 敏捷
 
-	BYTE            m_LifeRes;
-	BYTE            m_MagicRes;
+	BYTE            m_LifeRes;		// 生命恢复
+	BYTE            m_MagicRes;		// 魔法恢复
 
 	BYTE		    m_MagicDef;    //魔法躲避
 	BYTE		    m_PoisonDef;   //中毒躲避

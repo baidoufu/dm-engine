@@ -1,0 +1,2103 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<TipsList Ver="1">
+	<!--Tips配置示例
+	<tip name = "1" maxwidth = "150">
+  	<line>    
+			<col font = "FONT_SONGTI" fontsize = "12" color = "0xFFFFCF63" flag = "4" backcolor = "-1" framecolor = "0" offx = "1" offy = "0" content = "作用：将账号作用：将账号B"/>       
+			<col font = "FONT_YAHEI"  fontsize = "26" color = "0xFFFF0000" flag = "4" framecolor = "0xFF000000" content = "升A级为至尊账号或兑换奖励。"/>       
+		</line> 
+		<line>
+			<col picpackage = "3" picidx = "71" />       
+			<col color = "0xFF0000FF" ix = "61" content = "勋章上面有"/>
+		</line>
+		<line>
+			<col font = "FONT_SONGTI" fontsize = "14" color = "0xFFFFFF00" ix = "61" iy = "145" content = "暗沉的光"/>
+		</line>
+		<line>
+			<col picpackage = "3" picidx = "73" />       
+			<col color = "0xFF00FF00" AutoCutByLeftWidth = "true" content = "位于炼狱地图中与任意地点老兵对话可以"/>
+			<col color = "0xFF0000FF" AutoCutByLeftWidth = "false" content = "aaaaaaaaaaaaaaaaaa"/>
+		</line>        
+		<line>    
+			<col font = "FONT_YAHEI"  fontsize = "12" color = "0xFFFFCF63" flag = "0" framecolor = "0xFF000000" content = "升级为至尊账号或兑换奖励。"/>       
+		</line>   
+	</tip>    	
+-->
+	<tip name="1" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="将军坟东一层"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：20-25级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：蝎子、山洞蝙蝠、洞蛆、尸卫、尸卫勇士、尸卫战将"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：掉落物品：三职业初级首饰、衣服、武器等均有掉落（掉率对应海岛炼狱魔境1层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="2" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="将军坟南一层"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：25-30级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：蝎子、山洞蝙蝠、洞蛆、尸卫、尸卫勇士、尸卫战将、尸霸"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：三职业初级装备、战斗号角、35级以下技能书（BOSS掉落）（掉率对应海岛炼狱魔境1层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="3" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="矿洞"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：15-20级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：洞蛆、骷髅、尸王等"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：三职业初级首饰、20级以下技能书"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="4" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="蛇穴"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：30-35级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：水"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：圣甲虫、魔甲虫、红蛇妖、黑蛇妖、白蛇妖、三头蛇、三头蛇王、蚁巢"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：圣战套装、法神套装、天尊套装、35级以上技能书（掉率对应海岛炼狱魔境3层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="5" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="逆魔古刹"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：35-40级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：地下小鬼、黄金魔斗士、逆魔雕像、逆魔侍卫、逆魔卫士、逆魔弓箭手、逆魔"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：圣战套装、法神套装、天尊套装、35级以上技能书（掉率对应海岛炼狱魔境7层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="6" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="禁地魔穴"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：40-45级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：木、土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：铁翼魔、毒妖、血魔、血妖、地狱奴、刺魔、幽灵虫母、妖力士、利爪魔、闪电魔、禁地魔王"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：圣战套装、法神套装、天尊套装；神武套装、幻魔套装、天玄套装、35级以上技能书、35级以上武器等（掉率对应海岛炼狱魔境8层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="7" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="通天塔"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：50-55级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：火"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：火烈鸟、兽骑兵、兽骑统领、召魂使、烈焰使、通天教主"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：圣战套装、法神套装、天尊套装；神武套装、幻魔套装、天玄套装；战神套装、魔神套装、道神套装、35级以上技能书、35级以上武器等（掉率对应海岛炼狱魔境9层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="8" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="地下魔域"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：55-60级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：火、土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：鬼方火卒、幽魂、地火弓箭手、猛魔枪卒、猛魔头目、猛魔统领、猛魔刀斧手、地火兽骑将、地火兽投矛手、炎魔、幽影武士、铁血魔王"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：圣战套装、法神套装、天尊套装；神武套装、幻魔套装、天玄套装；战神套装、魔神套装、道神套装；血煞套装、魔雷套装、幽泉套装、35级以上技能书、35级以上武器等（掉率对应海岛炼狱魔境10层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="9" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="铁血魔城"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：55-60级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：火、土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：鬼方火卒、幽魂、地火弓箭手、猛魔枪卒、猛魔头目、猛魔统领、猛魔刀斧手、地火兽骑将、地火兽投矛手、炎魔、幽影武士、铁血魔王"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：圣战套装、法神套装、天尊套装；神武套装、幻魔套装、天玄套装；战神套装、魔神套装、道神套装；血煞套装、魔雷套装、幽泉套装、35级以上技能书、35级以上武器等（掉率对应海岛炼狱魔境10层）"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="10" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="炼狱魔境"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：20-70级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：金、木、水、火、土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：每层分别对应一种地下城的怪物，从“机关洞－－铁血魔城”一一包含。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：每层怪物掉落所对应地下城怪物的暴落物品，但暴率较之高出数倍"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="11" maxwidth="200">
+		<line>
+			<col color="0xFFFF8000" fontsize="14" content="海岛"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="推荐等级：20-70级"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="怪物属性：金、木、水、火、土"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="怪物种类：内有炼狱魔境，共分10层。每层分别对应一种地下城的怪物，从“机关洞－－铁血魔城”一一包含。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="掉落物品：每层怪物掉落所对应地下城怪物的暴落物品，但暴率较之高出数倍"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="101" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="死水沼泽"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="魔王过处，寸草不生。"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="万里焦土，尸横遍野。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="铁血魔王盘踞在地下的魔城。而无边的魔气却将这里变成了一片死水的沼泽。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="除非你足够强大，否则不要闯入！"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="102" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="热荒沙漠"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="沙漠将与海洋并存，"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="机关会与文明同在。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="又被称为“土城”的热荒沙漠上，有着中州大陆最美丽的海洋与最神奇的机关洞。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="土城里有唯一一个隐藏在城内的地下城"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="103" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="魔隐村"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="地如其名，众魔归隐。"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="形形色色，迷迷茫茫。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="如果你的实力不足以挑战高级的妖魔，那么来这里瞻仰一下他们也不错。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="虽然放下了屠刀，但魔性仍在，小心！"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="104" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="禁地"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="妖界之门，妖魂游荡，"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="器魂觉醒，妖兽降世！"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="这里有很多让你逞目结舌的妖魔，而且他们都很强大！"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="这里镇压的妖魂可以觉醒装备器魂"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="105" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="蛇魔谷"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="白蛇、红蛇、黑蛇、三头蛇，"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="除了蛇，这里你几乎看不到其它的。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="传说蛇死后，可以转化为蛇妖担当神在人间行走的仆人。他们不知道是不是这样来的。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="它会告诉你，强壮与实力是不成正比的"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="106" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="跃马平原"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="凭君莫话封候事，"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="一将功成万骨枯。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="谁拥有沙城，谁就是最强的人。而他的兄弟们，必将与他共享此荣耀"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="请向沙城成员行注目礼"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="107" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="中州"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="三圣王会护佑所有的勇士，"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="不管此时此刻你在哪里。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="站在中州的土地上，微风里有记忆中淡淡的桂花香。谁能不拼了性命来保护自己的国家？"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="有心人，快乐事，莫问是缘还是劫。"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="108" maxwidth="200">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="西域奇境"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="英俊的王子化身通天教主被永世镇压，"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="古老的楼兰国，就这样的灭亡。"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="如果他不曾被诱惑戴上那枚致命的魔戒，结果或许会完全不同吧。"/>
+		</line>
+		<line>
+			<col color="0xFFFFC000" content="通天的烈火，诉说着无尽的悔意。"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="鼠标单击自动寻路至地城入口"/>
+		</line>
+	</tip>
+	<tip name="109" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="1级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="打怪经验+10%"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="额外开启2个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="直接完成2个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="部分勇士任务地图传送"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="+5格仓库"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：0"/>
+		</line>
+	</tip>
+	<tip name="110" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="2级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="打怪经验+20%"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="额外开启4个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="直接完成4个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="部分勇士任务地图传送"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+10格仓库"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="+5格包裹"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="每日逆魔古冢副本进入次数+1"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：300"/>
+		</line>
+	</tip>
+	<tip name="111" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="3级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="打怪经验+30%"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="额外开启6个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="直接完成6个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="部分勇士任务地图传送"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+15格仓库"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+10格包裹"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日逆魔古冢副本进入次数+1"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="每日不限时进入逆魔古冢副本"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="可魂锁1件装备(可在江湖百晓生处购买魂锁令)"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="可在交易行内寄售2件物品"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：900"/>
+		</line>
+	</tip>
+	<tip name="112" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="4级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="打怪经验+40%"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="额外开启8个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="直接完成8个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="部分勇士任务地图+部分地下城地图传送"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+20格仓库"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+15格包裹"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日逆魔古冢副本进入次数+1"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日不限时进入逆魔古冢副本"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="可魂锁1件装备(可在江湖百晓生处购买魂锁令)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="可在交易行内寄售4件物品"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：1800"/>
+		</line>
+	</tip>
+	<tip name="113" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="5级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="打怪经验+50%"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="额外开启10个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="直接完成10个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="部分勇士任务地图+部分地下城地图传送"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+30格仓库"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+20格包裹"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日逆魔古冢副本进入次数+1"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日不限时进入逆魔古冢副本"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="可魂锁2件装备(可在江湖百晓生处购买魂锁令)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="可在交易行内寄售6件物品"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：3600"/>
+		</line>
+	</tip>
+	<tip name="114" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="6级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="打怪经验+60%"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="额外开启12个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="直接完成10个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="部分勇士任务地图+部分地下城地图传送"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+40格仓库"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+30格包裹"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日逆魔古冢副本进入次数+1"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日不限时进入逆魔古冢副本"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="可魂锁2件装备(可在江湖百晓生处购买魂锁令)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="可在交易行内寄售8件物品"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：6000"/>
+		</line>
+	</tip>
+	<tip name="115" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" fontsize="14" content="7级神武殿特权"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="打怪经验+70%"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="额外开启14个宝玉"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="直接完成10个每日任务"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="部分勇士任务地图+部分地下城地图传送"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+50格仓库"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="+40格包裹"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日逆魔古冢副本进入次数+1"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="每日不限时进入逆魔古冢副本"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="可魂锁3件装备(可在江湖百晓生处购买魂锁令)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="可在交易行内寄售10件物品"/>
+		</line>
+		<line>
+			
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="所需神武殿积分：10800"/>
+		</line>
+	</tip>
+	<tip name="116" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" content="10元宝体验"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="持续时间：30天"/>
+		</line>
+		<line>
+
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="赠送5点神武殿积分"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="赠送体验会员礼包"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="(内含精力药水(中)*1，打宝神佑*1，超级天山雪莲*1，超级深海灵礁*1)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="神武殿积分成长速度：+2点/天"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="价格：10元宝"/>
+		</line>
+		<line>
+			<col color="0xFFFF0055" content="注：使用10元宝体验开通神武殿会员后再勾选自动续费则默认以按月支付方式进行续费"/>
+		</line>
+	</tip>
+	<tip name="117" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" content="按月支付"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="持续时间：30天"/>
+		</line>
+		<line>
+
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="赠送25点神武殿积分"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="赠送月费会员礼包"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="(内含精力药水(大)*1，打宝神佑*1，超级天山雪莲*1，超级深海灵礁*1)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="神武殿积分成长速度：+5点/天"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="价格：30元宝"/>
+		</line>
+	</tip>
+	<tip name="118" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" content="按季支付"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="持续时间：90天"/>
+		</line>
+		<line>
+
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="赠送75点神武殿积分"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="赠送季费会员礼包"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="(内含精力药水(特大)*1，传音号角*2，幸运符(捆)*1)"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="神武殿积分成长速度：+10点/天"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="价格：90元宝"/>
+		</line>
+	</tip>
+	<tip name="119" maxwidth="160">
+		<line>
+			<col color="0xFFFFFF00" content="按年支付"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="持续时间：360天"/>
+		</line>
+		<line>
+
+		</line>
+		<line>
+			<col color="0xFFFF8000" content="赠送300点神武殿积分"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="赠送年费会员礼包"/>
+		</line>
+		<line>
+			<col color="0xFF5AA0A0" content="(内含神武殿会员3级直升令、精力药水(特大)*2，传音号角*2，幸运符(捆)*2，群英令(捆)*2，黄榜大旗(3天))"/>
+		</line>
+		<line>
+			<col color="0xFF87C23A" content="神武殿积分成长速度：+15点/天"/>
+		</line>
+		<line>
+			<col color="0xFFFFFF00" content="价格：360元宝"/>
+		</line>
+	</tip>
+	<tip name="修炼场-1">
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="    修炼场中可进行"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="各种各样不同的修炼"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="，是传世无双中获得"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="优质装备、提高等级"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="的最佳途径之一"/>
+		</line>
+	</tip>
+	<tip name="修炼场-2">
+		<line>
+			<col color="0xFF000000" content="    选中地图中相应的修"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="炼场后点击立即前往，同"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="相关NPC进行对话即可进入"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="相应的修行场"/>
+		</line>
+	</tip>
+	<tip name="修炼场1-1">
+		<line>
+			<col color="0xFF000000" content="    孟虎国王为了抵抗强大"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的怪物攻击中州，特别开设"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="神秘的宝地提供广大的中州"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="勇士进行实力提升，修炼场"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="中更是存在许多持有宝物的"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="怪物等待勇士的涉猎。"/>
+		</line>
+	</tip>
+	<tip name="修炼场1-2">
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="20"/>
+			<col color="0xFF000000" content="级，根"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  据不同宝地等级，所需的"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  人物等级均不相同"/>
+		</line>
+	</tip>
+	<tip name="修炼场2-1">
+		<line>
+			<col color="0xFF000000" content="    孟虎国王为了抵抗强大"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的怪物攻击中州，特别开设"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="神秘的宝地提供广大的中州"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="勇士进行实力提升，修炼场"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="中更是存在许多持有宝物的"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="怪物等待勇士的涉猎。"/>
+		</line>
+		<line>
+		</line>
+		<line>
+			<col color="0xFF930000" content="★炼狱宝地中击杀怪物的经"/>
+		</line>
+		<line>
+			<col color="0xFF930000" content="验以及怪物爆率均为免费宝"/>
+		</line>
+		<line>
+			<col color="0xFF930000" content="地的2倍"/>
+		</line>
+	</tip>
+	<tip name="修炼场2-2">
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="20"/>
+			<col color="0xFF000000" content="级，根"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  据不同宝地等级，所需的"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  人物等级均不相同"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.进入炼狱宝地需要消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间，当炼狱时间不足"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  系统会自动扣除一元宝以"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  时换取相应的炼狱时间"/>
+		</line>
+	</tip>
+	<tip name="修炼场3-1">
+		<line>
+			<col color="0xFF000000" content="    三昧真火纯净的力量，"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="吸引了大量的妖物。受到真"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="火的影响，这些怪物身上携"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="带有大量的宝物，但是只有"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="真火修炼到一定境界的勇士"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="方能不受真火的影响。"/>
+		</line>
+	</tip>
+	<tip name="修炼场3-2">
+		<line>
+			<col color="0xFF000000" content="1.真火境界需要满足石火境"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  下阶"/>
+			<col flag="2" color="0xFF000000" content="(真火28级)"/>
+			<col color="0xFF000000" content="方可进入"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  最低等级的真火宝地"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.达到不同真火境界可进入"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  不同等级的真火宝地"/>
+		</line>
+	</tip>
+	<tip name="修炼场4-1">
+		<line>
+			<col color="0xFF000000" content="    三昧真火纯净的力量，"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="吸引了大量的妖物。受到真"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="火的影响，这些怪物身上附"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="带有大量的真火，但是只有"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="真火修炼到一定境界的勇士"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="方能不受真火的影响。"/>
+		</line>
+	</tip>
+	<tip name="修炼场4-2">
+		<line>
+			<col color="0xFF000000" content="1.达到不同真火境界可进入"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  不同等级的真火宝地，等"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  级越高的真火修炼场中击"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  杀怪物所获的真火越高"/>
+		</line>
+	</tip>
+	<tip name="修炼场5-1">
+		<line>
+			<col color="0xFF000000" content="    仙灵密室之中灵气充沛"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="，在其中修炼所得的好处众"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="多。进入仙灵密室需要仙灵"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="玉或者仙灵宝玉，因为只有"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="在这 2件宝物的帮助下才能"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="完全吸收仙灵之气。"/>
+		</line>
+	</tip>
+	<tip name="修炼场5-2">
+		<line>
+			<col flag="2" color="0xFF642100" content="修炼时间"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  00:00--09:00"/>
+		</line>
+		<line>
+			<col flag="2" color="0xFF642100" content="修炼限制"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="1.仙灵玉:二倍的速度消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间获得经验"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.仙灵宝玉:五倍的速度消耗"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  炼狱时间获得经验"/>
+		</line>
+	</tip>
+	<tip name="修炼场6-1">
+		<line>
+			<col color="0xFF000000" content="    孟虎国王为了抵抗强大"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的怪物攻击中州，特别开设"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="炼狱魔境提供广大的中州勇"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="士进行实力提升，魔境共10"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="层，怪物所能带来的经验也"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="依次递增。"/>
+		</line>
+	</tip>
+	<tip name="修炼场6-2">
+		<line>
+			<col color="0xFF000000" content="1.探索炼狱魔境需要消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间，当炼狱时间不足"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  时会被传送出副本"/>
+		</line>
+	</tip>
+	<tip name="修炼场7-1">
+		<line>
+			<col color="0xFF000000" content="    中州的东南方出现了一"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="大块独具仙气的区域，这片"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="区域不同于以往的所有修炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="场，其中充满了云雾弥漫，"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="这使得进入的勇士无法看清"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="部分怪物的模样，不知击杀"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="这些怪物会得到什么样的宝"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="贝呢？"/>
+		</line>
+		<line>
+			<col color="0xFF930000" content="★在幻境中玩家死亡将不会"/>
+		</line>
+		<line>
+			<col color="0xFF930000" content="掉落装备"/>
+		</line>
+	</tip>
+	<tip name="修炼场7-2">
+		<line>
+			<col color="0xFF000000" content="1.可以根据不同需求(经验/"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  真火/骑术)进入不同的修"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  炼场所"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.进入炼狱幻境需要消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间，当炼狱时间不足"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  时会被传送出幻境"/>
+		</line>
+	</tip>
+	<tip name="修炼场8-1">
+		<line>
+			<col color="0xFF000000" content="    海岛的炼狱修炼场中拥"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="有一些独特的区域，里面物"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="产丰富，各种木材、矿产、"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="怪物应有尽有。是采集大师"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的主要修行场。"/>
+		</line>
+	</tip>
+	<tip name="修炼场8-2">
+		<line>
+			<col color="0xFF000000" content="1.炼狱时间不少于4000秒，"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  当炼狱时间结束后将会被"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  传送出淘金场"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.淘金场中拥有各种极速地 "/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  图，在这些地图中获取的"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  效率为一般淘金场的五倍"/>
+		</line>
+	</tip>
+	<tip name="修炼场9-1">
+		<line>
+			<col color="0xFF000000" content="    妖羽禁地的妖兽实力强"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="悍，单打独斗很难取胜，不"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="过最近玄玄老人制炼出了可"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="以克制这些妖兽的独门利器"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="：轰天雷。妖羽禁地的任何"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="妖兽一旦进入轰天雷的爆炸"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="范围内就必定难逃一死。"/>
+		</line>
+	</tip>
+	<tip name="修炼场9-2">
+		<line>
+			<col color="0xFF000000" content="1.包裹中必须拥有轰天雷或"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  者霸极轰天雷"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.每日每人拥有"/>
+			<col flag="2" color="0xFF000000" content="10"/>
+			<col color="0xFF000000" content="次进入妖"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  羽禁地底层（炸死妖兽可"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  获得经验值）的机会"/>
+		</line>
+	</tip>
+	<tip name="副本-1">
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="    副本中可以进行"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="各种不同的修炼，是"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="传世无双中获得优质"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="装备、提高等级、获"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="取极品技能书的最佳"/>
+		</line>
+		<line>
+			<col font="FONT_LISHU" fontsize="16" color="0xFF000000" content="途径之一"/>
+		</line>
+	</tip>
+	<tip name="副本-2">
+		<line>
+			<col color="0xFF000000" content="    选中地图中相应的副"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="本后点击立即前往，同相"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="关NPC进行对话即可进入相"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="应的副本"/>
+		</line>
+	</tip>
+	<tip name="副本1-1">
+		<line>
+			<col color="0xFF000000" content="    强大的逆魔带着它的军"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="队沉睡在古冢里，只要打败"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="它们，就可以获得巨额经验"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的奖励。但里面的怪物十分"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的危险，所以请勇士们选择"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="适合自己的等级进入。"/>
+		</line>
+	</tip>
+	<tip name="副本1-2">
+		<line>
+			<col flag="2" color="0xFF642100" content="挑战时间"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  00:00--01:30"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  12:00--13:30"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  19:00--20:30"/>
+		</line>
+		<line>
+			<col flag="2" color="0xFF642100" content="挑战限制"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="30"/>
+			<col color="0xFF000000" content="级"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.队伍人数不能超过"/>
+			<col flag="2" color="0xFF000000" content="5"/>
+			<col color="0xFF000000" content="人"/>
+		</line>
+	</tip>
+	<tip name="副本2-1">
+		<line>
+			<col color="0xFF000000" content="    奉孟虎国王之命率部剿"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="灭藏于机关迷城中的神工遗"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="族，但不想神工机关巨兽如"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="此凶猛，它们不畏刀枪、不"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="惧痛苦、力大无穷、冷血迅"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="猛，这些机关兽设计初始就"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="为杀人而服务的。不知阁下"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="是否身怀绝学能否助我除去"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="“机关巨兽”？当然作为报"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="答，迷城中所有宝物也任由"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="勇士拿取！"/>
+		</line>
+	</tip>
+	<tip name="副本2-2">
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="30"/>
+			<col color="0xFF000000" content="级"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.队伍人数不能超过"/>
+			<col flag="2" color="0xFF000000" content="5"/>
+			<col color="0xFF000000" content="人"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="3.挑战机关迷城需要消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间，当炼狱时间不足"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  时会被传送出副本"/>
+		</line>
+	</tip>
+	<tip name="副本3-1">
+		<line>
+			<col color="0xFF000000" content="    世人眼中的中州，是那"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="样的详和平静。以坚强的城"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="墙守卫着人们的生活。殊不"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="知，有多少的勇士们为了这"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="份安宁付出了生命的代价。"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="    万恶的妖魔以血肉为食"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="，安能让它们进入我们的家"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="园，残害我们的子民！请勇"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="士们拿起武器，保卫中州！"/>
+		</line>
+	</tip>
+	<tip name="副本3-2">
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="50"/>
+			<col color="0xFF000000" content="级"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.队伍人数不能超过"/>
+			<col flag="2" color="0xFF000000" content="5"/>
+			<col color="0xFF000000" content="人"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="3.挑战保卫中州需要消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间，当炼狱时间不足"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  时会被传送出副本"/>
+		</line>
+	</tip>
+	<tip name="副本4-1">
+		<line>
+			<col color="0xFF000000" content="    贪婪的恶魔窃取了军师"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的兵书，在此处摆下三道关"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="卡耀武扬威，它们狂妄的叫"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="嚣着，宣称没有人能够击破"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="这铁桶般的迷阵，并愿意接"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="受所有英雄的挑战！"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="    怪物在关卡前暗伏了剧"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="毒的瘴气，一定要带上两块"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="玉水晶和两块紫水晶方可驱"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="散毒气。"/>
+		</line>
+	</tip>
+	<tip name="副本4-2">
+		<line>
+			<col flag="2" color="0xFF642100" content="挑战时间"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  02:00-03:30"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  19:30-20:30"/>
+		</line>
+		<line>
+			<col flag="2" color="0xFF642100" content="挑战限制"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="1.保证"/>
+			<col flag="2" color="0xFF000000" content="3-11"/>
+			<col color="0xFF000000" content="队伍人数"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.60分钟内未得到四把钥匙"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  并进入劫杀大厅则视为挑"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  战失败"/>
+		</line>
+	</tip>
+	<tip name="副本5-1">
+		<line>
+			<col color="0xFF000000" content="    迷仙阵乃灵犀仙人遗留"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="的法阵，内藏无数珍宝。法"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="阵千变万化，由无数小岛组"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="成，其中机关重重，没有绝"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="对的出口，阵法由带灵力的"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="石碑组成，入阵者可以通过"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="贡献出金币激活石碑，有可"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="能发生很多意想不到的事情。"/>
+		</line>
+	</tip>
+	<tip name="副本5-2">
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="30"/>
+			<col color="0xFF000000" content="级"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.每个小道的石碑中能获得"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  开启机关的迷仙路引"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="3.向石碑里面投入2万或5万"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  金币能够激活随机事件"/>
+		</line>
+	</tip>
+	<tip name="副本6-1">
+		<line>
+			<col color="0xFF000000" content="    通天旋塔是封锁通天教"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="主的一座高塔，塔内有众多"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="魔族爪牙与通天教主的守卫"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="，塔中有众多楼兰国毁灭后"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="遗留下的财宝。没有人知道"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="通天教主在塔中的哪一层。"/>
+		</line>
+	</tip>
+	<tip name="副本6-2">
+		<line>
+			<col color="0xFF000000" content="1.人物等级需达到"/>
+			<col flag="2" color="0xFF000000" content="20"/>
+			<col color="0xFF000000" content="级"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.队伍人数不能超过"/>
+			<col flag="2" color="0xFF000000" content="5"/>
+			<col color="0xFF000000" content="人"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="3.进入通天旋塔需要消耗炼"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  狱时间，当炼狱时间不足"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  时会被传送出通天旋塔"/>
+		</line>
+	</tip>
+	<tip name="副本7-1">
+		<line>
+			<col color="0xFF000000" content="    试炼谷中可挑战试炼妖"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="兽，成功挑战妖兽且有机缘"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="者可获得神卫令一枚。使用"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="神卫令可淬炼体质晋升神卫"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="一列，从而突破80级等级瓶"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="颈，继续修炼。"/>
+		</line>
+	</tip>
+	<tip name="副本7-2">
+		<line>
+			<col color="0xFF000000" content="1.需等级"/>
+			<col flag="2" color="0xFF000000" content="80"/>
+			<col color="0xFF000000" content="级、三昧真火"/>
+			<col flag="2" color="0xFF000000" content="15"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="  级、神翼"/>
+			<col flag="2" color="0xFF000000" content="5"/>
+			<col color="0xFF000000" content="级"/>
+		</line>
+		<line>
+			<col color="0xFF000000" content="2.试炼谷中最多停留"/>
+			<col flag="2" color="0xFF000000" content="5"/>
+			<col color="0xFF000000" content="分钟"/>
+		</line>
+	</tip>
+		<tip name="魂骨1孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(胸部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="胸部魂骨孔为修炼魂骨中最基础并最重"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="要的部分，它结合着魂骨核心技能“圣"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="盾术”的激发效果，以此来减免部分的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="伤害。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="需要达到真火10级"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨2孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(头部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="头部魂骨主要配合胸部魂骨，可对身体"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的基本防御进行强化，亦可增强圣盾术"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的恢复速率。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="需要达到真火20级"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨3孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(臂部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="臂部为发力的重点，可灵活加强所有关"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="需要达到真火25级"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨4孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(臂部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="臂部为发力的重点，可灵活加强所有关"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="需要达到真火30级"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨5孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="需要达到真火35级"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨6孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="需要达到真火40级"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨7孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="开启条件:"/>
+			<col color="0xFFFF0000" content="机密"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨8孔未开启">
+		<line>
+			<col fontsize="12" color="0xFFF9F900" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+		<line>
+			<col color="0xFFFF0000" content="开启条件:"/>
+			<col color="0xFFFF0000" content="机密"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="达到开启条件后可前往圣殿浮岛的猎魂"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="师处获得魂骨开魂诀。"/>
+		</line>
+	</tip>
+	<tip name="魂骨1孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(胸部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入圆形魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="胸部魂骨孔为修炼魂骨中最基础并最重"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="要的部分，它结合着魂骨核心技能“圣"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="盾术”的激发效果，以此来减免部分的"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="伤害。"/>
+		</line>
+	</tip>
+	<tip name="魂骨2孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(头部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入圆形魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="头部魂骨主要配合胸部魂骨，可对身体"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的基本防御进行强化，亦可增强圣盾术"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="的恢复速率。"/>
+		</line>
+	</tip>
+	<tip name="魂骨3孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(臂部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入三角魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="臂部为发力的重点，可灵活加强所有关"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="于基础属性的魂骨。"/>
+		</line>
+	</tip>
+	<tip name="魂骨4孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(臂部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入三角魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="臂部为发力的重点，可灵活加强所有关"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="于基础属性的魂骨。"/>
+		</line>
+	</tip>
+	<tip name="魂骨5孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+	</tip>
+	<tip name="魂骨6孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入方形魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+	</tip>
+	<tip name="魂骨7孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入方形魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+	</tip>
+	<tip name="魂骨8孔开启">
+		<line>
+			<col fontsize="12" color="0xFFFFFF37" content="魂骨孔(腿部)"/>
+		</line>
+		<line>
+			<col color="0xFFFF5809" content="请放入方形魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="腿部奠定了新体魄的基础，该部位可"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="灵活加强所有关于基础属性的魂骨。"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="屹立于无限激战中。"/>
+		</line>
+	</tip>
+	<tip name="圣盾术">
+		<line>
+			<col color="0xFFDEAA52" content="针对于全职业的防御技能，根据魂骨中"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="所提炼的精华所孕育出能够抵抗强大伤"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="害的技能。"/>
+		</line>
+		<line>
+			<col color="0xFFFF00FF" content="圣盾值只能通过圣盾恢复率进行恢复"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="请于魂骨中放入附带圣盾值的魂骨方可"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="激活圣盾术效果"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物1激活">
+		<line>
+			<col fontsize="14" color="0xFFFFFF37" content="逆魔(一层)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="点击后可对怪物进行猎魂，猎魂逆魔有几率得到中品魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="需要消耗1000000金币"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="二级以上神武殿会员每日可免费进行猎魂逆魔5次"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物2激活">
+		<line>
+			<col fontsize="14" color="0xFFFFFF37" content="禁地魔王(二层)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="点击后可对怪物进行猎魂，猎魂禁地魔王几率得到上品魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="需要消耗2个绑定元宝"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物2未激活">
+		<line>
+			<col fontsize="12" color="0xFFFF0000" content="禁地魔王(二层)"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="猎魂逆魔后有几率可开启禁地魔王，猎魂禁地魔王有几率得到上品魂骨"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物3激活">
+		<line>
+			<col fontsize="14" color="0xFFFFFF37" content="通天教主(三层)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="点击后可对怪物进行猎魂，猎魂通天教主有更大几率得到上品魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="需要消耗3个绑定元宝"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物3未激活">
+		<line>
+			<col fontsize="12" color="0xFFFF0000" content="通天教主(三层)"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="猎魂禁地魔王后有几率可开启通天教主，猎魂通天教主有更大几率得到上品魂骨"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物4激活">
+		<line>
+			<col fontsize="14" color="0xFFFFFF37" content="铁血魔王(四层)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="点击后可对怪物进行猎魂，猎魂铁血魔王有几率得到极品魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="需要消耗4个绑定元宝"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物4未激活">
+		<line>
+			<col fontsize="12" color="0xFFFF0000" content="铁血魔王(四层)"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="猎魂通天教主后有几率可开启铁血魔王，猎魂铁血魔王有几率得到极品魂骨"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物5激活">
+		<line>
+			<col fontsize="14" color="0xFFFFFF37" content="阿修罗神(五层)"/>
+		</line>
+		<line>
+			<col color="0xFFDEAA52" content="点击后可对怪物进行猎魂，猎魂阿修罗神有几率得到圣品魂骨"/>
+		</line>
+		<line>
+			<col color="0xFFFFFFFF" content="需要消耗5个绑定元宝"/>
+		</line>
+	</tip>
+	<tip name="猎魂怪物5未激活">
+		<line>
+			<col fontsize="12" color="0xFFFF0000" content="阿修罗神(五层)"/>
+		</line>
+		<line>
+			<col color="0xFF408080" content="猎魂铁血魔王后有几率可开启阿修罗神，猎魂阿修罗神有几率得到圣品魂骨"/>
+		</line>
+	</tip>
+</TipsList>

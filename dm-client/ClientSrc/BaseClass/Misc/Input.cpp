@@ -1,10 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
 //文件名：Input.cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：yuanyuliang
-//E-mail:yuanyuliang@snda.com
-//创建日期：
-//版本：
 //文件说明：I/O键盘、鼠标
 //暂时不使用dinput因为不方便处理DClick消息
 ///////////////////////////////////////////////////////////////////////
@@ -22,8 +17,8 @@
 #define TIMER_INPUTCHECK			1
 #define INPUTCHECK_TIME				500
 
-#define MAX_WINDOW_WIDTH            1280
-#define MAX_WINDOW_HEIGHT           800
+#define MAX_WINDOW_WIDTH            2560
+#define MAX_WINDOW_HEIGHT           1440
 
 //////////////////////////////////////////////////////////////////////
 // 结构析构函数

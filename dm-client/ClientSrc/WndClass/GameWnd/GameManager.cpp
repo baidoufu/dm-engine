@@ -2214,7 +2214,7 @@ bool CGameManager::PlayerMove(SNextAction &Next,int iSelfX,int iSelfY,int iStep,
 	}
 }
 
-//by json 角色移动
+// 角色移动
 bool CGameManager::PlayerMoveImmediate(SNextAction& Next,int iSelfX,int iSelfY)
 {
 	if(!g_AIMgr.IsCanMove())

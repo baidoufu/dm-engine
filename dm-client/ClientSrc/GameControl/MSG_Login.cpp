@@ -1480,14 +1480,14 @@ void CGameControl::SEND_Quit_Game(bool bSendQuit)
 			g_pSDOAInterface->SetTaskBarPosition(&pt);
 		}
 
-		//SET_COMMAND(CS_REAL_QUIT_GAME,CMD_SIZE);
-		////ASSIGN_ID(g_Login.GetSessionID());
-		//SEND_GAME_SERVER();
+		SET_COMMAND(CS_REAL_QUIT_GAME,CMD_SIZE);
+		ASSIGN_ID(g_Login.GetSessionID());
+		SEND_GAME_SERVER();
 
-		if (bSendQuit)
-		{
-			SEND_Logout_Ntf(SELF.GetName());
-		}
+		//if (bSendQuit)
+		//{
+		//	SEND_Logout_Ntf(SELF.GetName());
+		//}
 	}
 
    g_pNet->Reset();
@@ -1554,9 +1554,9 @@ void CGameControl::SEND_Out_Game(bool bOpenSelCharWnd)
     g_AIAutoMgr.SetEnalbeWaiGua(false);
 
 
-    //发送退出信息
-    //SET_COMMAND(CS_QUIT_GAME,12);
-    //SEND_GAME_SERVER();
+    //发送小退出信息
+    SET_COMMAND(CS_QUIT_GAME,12);
+    SEND_GAME_SERVER();
 
 	// 断开游戏服，连接角色服
 	g_pNet->Close(SERVER_GAME);
@@ -1573,7 +1573,7 @@ void CGameControl::SEND_Out_Game(bool bOpenSelCharWnd)
 		g_pControl->Msg(MSG_CTRL_SELECTCHARWND,OPER_CREATE);
 	}
 
-	char szPacket[32];
+	char szPacket[64];
 	wsprintf(szPacket, "%s/%d", g_Login.GetLoginID(), g_Login.GetSessionID());
 	g_pNet->SendBuf(SERVER_GAME, (char*)&szPacket, 0, 100, false);		//CM_QUERYCHR
 }
@@ -1807,7 +1807,7 @@ void CGameControl::MSG_SelGroup_Ack(const char * msg, int iLen)
 		g_pControl->Msg(MSG_CTRL_SELECTCHARWND,OPER_CREATE);
 
 		//请求角色列表
-		char szPacket[32];
+		char szPacket[64];
 		wsprintf(szPacket, "%s/%d", g_Login.GetLoginID(), g_Login.GetSessionID());
 		g_pNet->SendBuf(SERVER_GAME, (char*)&szPacket, 0, 100, false);		//CM_QUERYCHR
 
@@ -2327,8 +2327,10 @@ void CGameControl::MSG_Login_Ack(const char * msg,int iLen)
 		g_Login.SetInHaoFangJingJi(true);
 	}		
 
-
-	g_pControl->Msg(MSG_CTRL_LICENSE2WND_WND,OPER_RECREATE);
+	if (iLen <= 0)	//小于等于0 说明没有创建角色，第一次登陆，弹自由对战窗口
+	{
+		g_pControl->Msg(MSG_CTRL_LICENSE2WND_WND, OPER_RECREATE);//弹窗口操作
+	}
 
 	WIN32_FIND_DATA ffd;
 	string strFileName = GetGameDataDir();
@@ -2355,7 +2357,7 @@ void CGameControl::MSG_Login_Ack(const char * msg,int iLen)
 			//g_pControl->MsgToWnd(MSG_CTRL_LICENSEWND_WND,MSG_CTRL_LICENSEWND_WND,1,(CControl*)(szMsg.c_str()));
 		}
 	}
-	output_debug("end SDError::RuntimeData");
+	//output_debug("end SDError::RuntimeData");
 }
 
 

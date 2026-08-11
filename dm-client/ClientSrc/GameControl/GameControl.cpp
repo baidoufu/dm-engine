@@ -322,6 +322,7 @@ CGameControl::CGameControl(void)
 	m_callback[SC_NPC_MSGBOX] =                     &CGameControl::MSG_Npc_Msgbox;
 
 	m_callback[SC_OPEN_ATTACK_KILL] =               &CGameControl::MSG_Open_Attack_Kill;
+	m_callback[SC_CLOSE_ATTACK_KILL] =				&CGameControl::MSG_Close_Attack_Kill;
 	m_callback[SC_OPEN_ATTACK_STICK] =              &CGameControl::MSG_Open_Attack_Stick;
 	m_callback[SC_CLOSE_ATTACK_STICK] =             &CGameControl::MSG_Close_Attack_Stick;
 	m_callback[SC_OPEN_ATTACK_MOON] =               &CGameControl::MSG_Open_Attack_Moon;

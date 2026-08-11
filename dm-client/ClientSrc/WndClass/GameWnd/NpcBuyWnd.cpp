@@ -252,24 +252,24 @@ void CNpcBuyWnd::Draw(void)
 					dwColor = 0xFFFFFF00;
 
 				g_pFont->DrawText(m_iScreenX + 58,iPrintY,Sell.name.c_str(),dwColor, FONT_YAHEI);
-				//if(Sell.bNext)
-				//	g_pFont->DrawText(m_iScreenX + 200,iPrintY,"o",dwColor, FONT_YAHEI);
 
 				sprintf(temp,"%d元宝",Sell.price);
-
 				g_pFont->DrawText(m_iScreenX +213,iPrintY,temp,dwColor);
+
+				sprintf(temp,"%d/%d",Sell.nDura, Sell.nDura); //持久值
+				g_pFont->DrawText(m_iScreenX +301,iPrintY,temp,dwColor, FONT_YAHEI);
 			}
 			else
 			{
 				_SellData& Sell = g_NPC.GetVectorSellData().at(i + m_iDisLine - iSize);
 
 				g_pFont->DrawText(m_iScreenX + 58,iPrintY,Sell.name.c_str(),dwColor, FONT_YAHEI);
-				//if(Sell.bNext)
-				//	g_pFont->DrawText(m_iScreenX + 200,iPrintY,"o",dwColor, FONT_YAHEI);
 
 				sprintf(temp,"%d金币",Sell.price);
-
 				g_pFont->DrawText(m_iScreenX +213,iPrintY,temp,dwColor, FONT_YAHEI);
+
+				sprintf(temp,"%d/%d",Sell.nDura, Sell.nDura); //持久值
+				g_pFont->DrawText(m_iScreenX +301,iPrintY,temp,dwColor, FONT_YAHEI);
 			}
 		}
 		else if(m_iBuy == 3)
@@ -305,6 +305,10 @@ void CNpcBuyWnd::Draw(void)
 					dwColor = 0xFFFFFF00;
 				g_pFont->DrawText(m_iScreenX +301,iPrintY,"封/锁",dwColor, FONT_YAHEI);
 			}
+			else
+			{
+				g_pFont->DrawText(m_iScreenX +301,iPrintY,"无",dwColor, FONT_YAHEI);
+			}
 
 			g_pFont->DrawText(m_iScreenX + 58,iPrintY,Storage.name.c_str(),dwColor, FONT_YAHEI);
 			sprintf(temp,"%d/%d",Storage.durSmall,Storage.durBig);
@@ -317,7 +321,7 @@ void CNpcBuyWnd::Draw(void)
 			g_pFont->DrawText(m_iScreenX + 58,iPrintY,Sell.name.c_str(),dwColor, FONT_YAHEI);
 			sprintf(temp,"%d金币",Sell.price);
 			g_pFont->DrawText(m_iScreenX +213,iPrintY,temp,dwColor, FONT_YAHEI);
-			sprintf(temp,"%d",Sell.bNext); //持久值
+			sprintf(temp,"%d/%d",Sell.bNext, Sell.bNext); //持久值
 			g_pFont->DrawText(m_iScreenX +301,iPrintY,temp,dwColor, FONT_YAHEI);
 		}
 	}

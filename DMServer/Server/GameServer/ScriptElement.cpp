@@ -32,13 +32,13 @@ BOOL CSe_Goods::Parse(CScriptFile& file)
 		if (goods[0] == nullptr || goods[0][0] == 0)
 			continue;
 		auto pGoods = std::make_unique<Goods>();
-		o_strncpy(pGoods->szName.data(), goods[0], 30);
+		o_strncpy(pGoods->szName.data(), goods[0], 30); // 物品名字
 		if (goods[1])
-			pGoods->wCount = (WORD)StringToInteger(goods[1]);
+			pGoods->wCount = (WORD)StringToInteger(goods[1]); // 物品数量
 		else
 			pGoods->wCount = 0;
 		if (goods[2])
-			pGoods->wRefreshTime = (WORD)StringToInteger(goods[2]);
+			pGoods->wRefreshTime = (WORD)StringToInteger(goods[2]); // 刷新时间
 		else
 			pGoods->wRefreshTime = 5;
 		AddGoods(std::move(pGoods));

@@ -4,20 +4,6 @@
 #include <vector>
 
 #pragma pack(push, 1)
-// 二进制索引文件头
-struct FileIndexHeader
-{
-    uint64_t magic;      // 魔数 FIDX = 0x46494458
-    uint64_t count;      // 文件数量
-};
-// 二进制索引条目（固定大小，便于mmap后直接数组访问）
-struct FileIndexEntry
-{
-    uint64_t hash;       // 路径Hash
-    uint32_t size;       // 文件大小
-    uint32_t pathOffset; // 路径字符串在文件中的偏移
-    uint16_t pathLen;    // 路径字符串长度
-};
 // 服务器响应消息头
 struct STDlNetMsgHeader
 {

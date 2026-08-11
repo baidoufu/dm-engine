@@ -241,7 +241,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			pMagic->dwFlag |= USERMAGICFLAG_ACTIVED;
 			pMagic->useTimer.Savetime();
 			SaySystemAttrib(CC_MAGICTIPS, "你的武器因精神火球而炙热");
-			if (m_pClientObj)m_pClientObj->PostMsg("#+FIR!", 6);
+			SendMsg(0, 0xFFF7, 0, 0, 0);
 			return TRUE;
 		}
 		break;
@@ -292,7 +292,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			pMagic->dwFlag |= USERMAGICFLAG_ACTIVED;
 			pMagic->useTimer.Savetime();
 			SaySystemAttrib(CC_MAGICTIPS, "你被赋予雷电的力量");
-			if (m_pClientObj)m_pClientObj->PostMsg("#+THU!", 6);
+			SendMsg(0, 0xFFEC, 0, 0, 0);
 			return TRUE;
 		}
 		break;
@@ -392,23 +392,48 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			if (dwClassFlag & MAGICFLAG_ACTIVED)
 			{
 				pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
-				if (pMagic->pClass->szSpecial[0] != 0)
-				{
-					char szMsg[200];
-					if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
-						_snprintf(szMsg, sizeof(szMsg) - 1, "#+%s!", pMagic->pClass->szSpecial);
-					else
-						_snprintf(szMsg, sizeof(szMsg) - 1, "#+U%s!", pMagic->pClass->szSpecial);
-					if (m_pClientObj)m_pClientObj->PostMsg(szMsg, (int)strlen(szMsg));
-				}
 				if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
+				{
 					SaySystemAttrib(CC_GREENS, "开启%s", szName);
+					if (wMagicId == 60) // 破盾
+						SendMsg(0, 0xFFE6, 0, 0, 0);
+					else if (wMagicId == 59) // 破击剑法
+						SendMsg(0, 0xFFE8, 0, 0, 0);
+					else if (wMagicId == 7) // 攻杀剑法
+						SendMsg(0, 0xFFFD, 0, 0, 0);
+					else if (wMagicId == 12) // 刺杀剑术
+						SendMsg(0, 0xFFFB, 0, 0, 0);
+					else if (wMagicId == 25) // 半月
+						SendMsg(0, 0xFFF9, 0, 0, 0);
+					else if (wMagicId == 40) // 残影
+						SendMsg(0, 0xFFF2, 0, 0, 0);
+					else if (wMagicId == 41) // 血影
+						SendMsg(0, 0xFFF0, 0, 0, 0);
+					else if (wMagicId == 43) // 抱月
+						SendMsg(0, 0xFFEE, 0, 0, 0);
+				}
 				else
+				{ 
 					SaySystemAttrib(CC_GREENS, "关闭%s", szName);
+					if (wMagicId == 60) // 破盾
+						SendMsg(0, 0xFFE5, 0, 0, 0);
+					else if (wMagicId == 59) // 破击剑法
+						SendMsg(0, 0xFFE7, 0, 0, 0);
+					else if (wMagicId == 7) // 攻杀剑法
+						SendMsg(0, 0xFFFC, 0, 0, 0);
+					else if (wMagicId == 12) // 刺杀剑术
+						SendMsg(0, 0xFFFA, 0, 0, 0);
+					else if (wMagicId == 25) // 半月
+						SendMsg(0, 0xFFF8, 0, 0, 0);
+					else if (wMagicId == 40) // 残影
+						SendMsg(0, 0xFFF1, 0, 0, 0);
+					else if (wMagicId == 41) // 血影
+						SendMsg(0, 0xFFEF, 0, 0, 0);
+					else if (wMagicId == 43) // 抱月
+						SendMsg(0, 0xFFED, 0, 0, 0);
+				}
 				return TRUE;
 			}
-			else
-				DPRINT(ERROR_RED, "未处理的技能 %u \n", wMagicId);
 		}
 		break;
 		}
@@ -653,7 +678,8 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				(((CMonsterEx*)pObject)->GetDesc()->sprop.pFlag & SF_HOLYWORD) != 0 &&
 				Getrand(100) < value2)
 			{
-				pObject->ToDeath(GetId());
+				// 改为通过EP_DEAD延迟队列统一死亡路径，避免主线程直接调用工作线程拥有的怪物ToDeath()
+				pObject->AddProcess(EP_DEAD, GetId(), 0, 0, 0, 2);
 				bTrain = TRUE;
 			}
 			else
@@ -792,18 +818,9 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		default:
 		{
-			if (pMagic->pClass->dwFlag & MAGICFLAG_ACTIVED)
+			if (dwClassFlag & MAGICFLAG_ACTIVED)
 			{
 				pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
-				if (pMagic->pClass->szSpecial[0] != 0)
-				{
-					char szMsg[200];
-					if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
-						_snprintf(szMsg, sizeof(szMsg) - 1, "#+%s!", pMagic->pClass->szSpecial);
-					else
-						_snprintf(szMsg, sizeof(szMsg) - 1, "#+U%s!", pMagic->pClass->szSpecial);
-					if (m_pClientObj)m_pClientObj->PostMsg(szMsg, (int)strlen(szMsg));
-				}
 				if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
 					SaySystemAttrib(CC_GREENS, "开启%s", szName);
 				else
@@ -891,7 +908,7 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			SaySystem("神圣战甲术 时间 %d 秒", nPower + pow);
 #endif
 			int nDis = DISTANCE(pObject->getX(), pObject->getY(), nSrcX, nSrcY);
-			bTrain = AddProcess(EP_DEFENCEUP, MAKEDWORD2W(x, y), value2, nPower + pow, SI_MAGDEFENCEUP, 120 * nDis + 500);
+			bTrain = AddProcess(EP_MAGDEFENCEUP, MAKEDWORD2W(x, y), value2, nPower + pow, SI_MAGDEFENCEUP, 120 * nDis + 500);
 		}
 		break;
 		case 16: // 困魔咒
@@ -1321,18 +1338,9 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		default:
 		{
-			if (pMagic->pClass->dwFlag & MAGICFLAG_ACTIVED)
+			if (dwClassFlag & MAGICFLAG_ACTIVED)
 			{
 				pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
-				if (pMagic->pClass->szSpecial[0] != 0)
-				{
-					char szMsg[200];
-					if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
-						_snprintf(szMsg, sizeof(szMsg) - 1, "#+%s!", pMagic->pClass->szSpecial);
-					else
-						_snprintf(szMsg, sizeof(szMsg) - 1, "#+U%s!", pMagic->pClass->szSpecial);
-					if (m_pClientObj)m_pClientObj->PostMsg(szMsg, (int)strlen(szMsg));
-				}
 				if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
 					SaySystemAttrib(CC_GREENS, "开启%s", szName);
 				else
@@ -1382,11 +1390,17 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		{
 			char szmagicid[20];
 			sprintf(szmagicid, "%u", wMagicId);
-			SendAroundMsg(GetId(), SM_SPELLSKILL, 0, 0, wMagicId, szmagicid);
-			const std::array<DWORD, 2> dwArray = { nTarget, pMagic->dwColor };
+			SendAroundMsg(GetId(), SM_SPELLSKILL, nSrcX, nSrcY, wMagicId, szmagicid);
+
+			tag_PlaySkillEffect playSkill;
+			playSkill.dwTid = nTarget;
+			playSkill.dwColor = pMagic->dwColor;
+			playSkill.byMagicLevel1 = pMagic->magic.btLevel;
+			playSkill.wMagicID = wMagicId;
+			playSkill.byMagicLevel2 = pMagic->magic.btLevel;
 			WORD wEffect = (((int)pMagic->pClass->btEffectType) << 8) | pMagic->pClass->btEffectValue;
-			SendAroundMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, (LPVOID)dwArray.data(), sizeof(dwArray));
-			SendMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, (LPVOID)dwArray.data(), sizeof(dwArray));
+			SendAroundMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, &playSkill, sizeof(playSkill));
+			SendMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, &playSkill, sizeof(playSkill));
 		}
 		if (bTrain) TrainMagic(pMagic);
 		return TRUE;
@@ -1398,30 +1412,30 @@ BOOL CHumanPlayer::SpellFly(int x, int y, WORD wMagicId)
 {
 	constexpr BYTE bt1Value = 0x0c;
 	constexpr BYTE btColorValue = 0xff;
-	constexpr BYTE btSm2Value = 0;
 
 	const int nSrcX = getX();
 	const int nSrcY = getY();
 	const DWORD dwFeature = GetFeather();
 	const DWORD dwStatus = GetStatus();
 	const WORD wCurHp = static_cast<WORD>(GetPropValue(PI_CURHP));
-	const WORD wMaxHp = static_cast<WORD>(GetPropValue(PI_MAXHP));
 	const WORD w3 = GetSex() << 8 | GetDirection();
 	const char* pszName = GetName();
 	const size_t nNameLen = strlen(pszName);
 	const size_t nMsgSize = sizeof(tag_batfly_header) + nNameLen;
 
 	tag_batfly batfly;
-	batfly.header.wX = nSrcX;
-	batfly.header.wY = nSrcY;
-	batfly.header.bt1 = bt1Value;
-	batfly.header.btColor = btColorValue;
-	batfly.header.btSm = static_cast<BYTE>(wMagicId);
-	batfly.header.btSm2 = btSm2Value;
 	batfly.header.dwFeature = dwFeature;
 	batfly.header.dwStatus = dwStatus;
+	batfly.header.AttackSpeed = 0;
+	batfly.header.wStatus = 0;
 	batfly.header.wCurHp = wCurHp;
-	batfly.header.wMaxHp = wMaxHp;
+	batfly.header.btFlags = 1;
+	batfly.header.wX = nSrcX;
+	batfly.header.wY = nSrcY;
+	batfly.header.cGrid = bt1Value;
+	batfly.header.btColor = btColorValue;
+	batfly.header.wMagicID = wMagicId;
+
 	strncpy(batfly.szName, pszName, sizeof(batfly.szName) - 1);
 	batfly.szName[sizeof(batfly.szName) - 1] = '\0';
 	
@@ -1517,8 +1531,6 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	case 7: // 攻杀剑法
 	{
 		wMsg = 0x12;
-		if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
-			pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
 		if (SendBUF)
 			pObject->AddProcess(EP_BEATTACKED, nPower, GetId(), dwType, dwFlag, 200);
 	}
@@ -1569,9 +1581,12 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	{
 		wMsg = 0x8;
 		if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
+		{
 			pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
-		if (m_pClientObj)
-			m_pClientObj->PostMsg("#+UFIR!", 7);
+			SendMsg(0, 0xFFF6, 0, 0, 0);
+		}
+		else
+			break;
 		nPower += CalculateBonusDamage(nPower, wSkillId);
 		dwFlag = DF_TARGETEFFECT | TE_FIRE;
 		bSaveSkillTime = FALSE;
@@ -1582,8 +1597,6 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	case 40: // 残影刀法
 	{
 		wMsg = 0x19;
-		if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
-			pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
 		if (SendBUF)
 			pObject->AddProcess(EP_BEATTACKED, nPower, GetId(), dwType, dwFlag, 200);
 	}
@@ -1591,8 +1604,6 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	case 41: // 血影刀法
 	{
 		wMsg = 0x19;
-		if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
-			pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
 		if (SendBUF)
 			pObject->AddProcess(EP_BEATTACKED, nPower, GetId(), dwType, dwFlag, 200);
 	}
@@ -1629,9 +1640,12 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	{
 		wMsg = 0x19;
 		if (pMagic->dwFlag & USERMAGICFLAG_ACTIVED)
+		{
 			pMagic->dwFlag ^= USERMAGICFLAG_ACTIVED;
-		if (m_pClientObj)
-			m_pClientObj->PostMsg("#+UTHU!", 7);
+			SendMsg(0, 0xFFEB, 0, 0, 0);
+		}
+		else
+			break;
 		nPower += CalculateBonusDamage(nPower, wSkillId);
 		dwFlag = DF_TARGETEFFECT | TE_THU;
 		dwType = DT_MAGIC;

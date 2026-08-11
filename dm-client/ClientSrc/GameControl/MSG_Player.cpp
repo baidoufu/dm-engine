@@ -212,7 +212,7 @@ void CGameControl::MSG_Player_Position(const char * msg,int iLen)
 
 void CGameControl::MSG_Player_Refresh(const char * msg,int iLen)
 {
-	//fixed by json 角色外观更新
+	// 角色外观更新
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
 	int x = lpPacketMsg->stDefMsg.wParam;
 	int y = lpPacketMsg->stDefMsg.wTag;
@@ -253,33 +253,33 @@ void CGameControl::MSG_Player_Attribute(const char * msg,int iLen)
 
 void CGameControl::MSG_Player_Info2(const char * msg,int iLen)
 {
-	SELF.SetMagicDef(msg[0]);
-    SELF.SetFame(Conv_WORD(msg + 1));
-	SELF.SetPrecision(msg[6]);
-	SELF.SetSmartness(msg[7]);
-	SELF.SetPoisonDef(msg[8]);
-	SELF.SetLifeRes(msg[10]);
-	SELF.SetMagicRes(msg[11]);
+	SELF.SetMagicDef(msg[0]); // 魔法躲避
+    SELF.SetFame(msg[1]); // 声望
+	SELF.SetPrecision(msg[6]); // 命中
+	SELF.SetSmartness(msg[7]); // 躲避
+	SELF.SetPoisonDef(msg[8]); // 中毒恢复
+	SELF.SetMagicRes(msg[10]); // 魔法恢复
+	SELF.SetLifeRes(msg[11]);  // 生命恢复
 
 	if(iLen > 12)
 	{
-		SELF.SetEnergy(Conv_WORD(msg+12));
-		SELF.SetEnergyMax(Conv_WORD(msg+14));
-		SELF.SetEnergyEnable(msg[16]);
+		SELF.SetEnergy(Conv_WORD(msg+12)); // 活力值
+		SELF.SetEnergyMax(Conv_WORD(msg+14)); // 最大活力值
+		SELF.SetEnergyEnable(msg[16]); // 是否开启活力条
 	}
 	if(iLen >= 21)
 	{
-		SELF.SetBestItemValue(Conv_DWORD(msg + 17));
+		SELF.SetBestItemValue(Conv_DWORD(msg + 17)); // 极品修炼值
 	}
 	if(iLen >= 23)
 	{
-		SELF.SetLuckyValue(*(BYTE*)(msg + 21));
-		SELF.SetCurseValue(*(BYTE*)(msg + 22));
+		SELF.SetLuckyValue(*(BYTE*)(msg + 21)); // 幸运
+		SELF.SetCurseValue(*(BYTE*)(msg + 22)); // 诅咒
 	}
 	if (iLen >= 25)
 	{
-		SELF.SetMagicRate(*(BYTE*)(msg + 23));
-		SELF.SetPoisonRate(*(BYTE*)(msg + 24));
+		SELF.SetMagicRate(*(BYTE*)(msg + 23)); // 魔法命中
+		SELF.SetPoisonRate(*(BYTE*)(msg + 24)); // 中毒命中
 	}
 	//[协议要修改]
 	//if (iLen >= 26)
@@ -288,12 +288,13 @@ void CGameControl::MSG_Player_Info2(const char * msg,int iLen)
 	//}
 	if(iLen > 35)
 	{
+		// 五行 攻
 		SELF.SetJinAttack((BYTE)msg[26]);
 		SELF.SetMuAttack((BYTE)msg[27]);
 		SELF.SetTuAttack((BYTE)msg[28]);
 		SELF.SetShuiAttack((BYTE)msg[29]);
 		SELF.SetHuoAttack((BYTE)msg[30]);
-
+		// 五行 防御 百分比
 		SELF.SetJinDef((BYTE)msg[31]);
 		SELF.SetMuDef((BYTE)msg[32]);
 		SELF.SetTuDef((BYTE)msg[33]);
@@ -303,14 +304,15 @@ void CGameControl::MSG_Player_Info2(const char * msg,int iLen)
 
 	if(iLen >= 49)
 	{
-		SELF.SetMeritoriousnessLevel((BYTE)msg[36]);
-		SELF.SetMeritoriousnessValue(Conv_DWORD(msg + 37));
-		SELF.SetMeritoriousnessAddSpeed(Conv_DWORD(msg + 41));
-		SELF.SetMeritoriousnessExp(Conv_DWORD(msg + 45));
+		SELF.SetMeritoriousnessLevel((BYTE)msg[36]); // 当前功勋等级
+		SELF.SetMeritoriousnessValue(Conv_DWORD(msg + 37)); // 功勋值
+		SELF.SetMeritoriousnessAddSpeed(Conv_DWORD(msg + 41)); // 当前等级获取功勋值上限：XXX\小时
+		SELF.SetMeritoriousnessExp(Conv_DWORD(msg + 45)); // 当前可兑换经验
 	}
 
 	if(iLen >= 59)
 	{
+		// 五行 攻
 		SELF.SetJinAttack(Conv_WORD(msg + 49));
 		SELF.SetMuAttack(Conv_WORD(msg + 51));
 		SELF.SetTuAttack(Conv_WORD(msg + 53));
@@ -320,16 +322,17 @@ void CGameControl::MSG_Player_Info2(const char * msg,int iLen)
 
 	if (iLen >= 70)
 	{
-		SELF.SetCruelAttack(Conv_WORD(msg + 59));
-		SELF.SetAbsordBlood(Conv_WORD(msg + 61));
-		SELF.SetReboundHurt(Conv_WORD(msg + 63));
-		SELF.SetAbsDefend(Conv_WORD(msg + 65));
-		SELF.SetDestroyDefend(Conv_WORD(msg + 67));
-		SELF.SetBloody((BYTE)msg[69]);
+		SELF.SetCruelAttack(Conv_WORD(msg + 59)); // 暴击
+		SELF.SetAbsordBlood(Conv_WORD(msg + 61)); // 吸血
+		SELF.SetReboundHurt(Conv_WORD(msg + 63)); // 反弹伤害
+		SELF.SetAbsDefend(Conv_WORD(msg + 65)); // 绝对防御
+		SELF.SetDestroyDefend(Conv_WORD(msg + 67)); // 破防
+		SELF.SetBloody((BYTE)msg[69]); // 嗜血 百分数
 	}
 
 	if (iLen >= 80)
 	{
+		// 五行 攻 下限
 		SELF.SetJinAttack_Low(Conv_WORD(msg + 70));
 		SELF.SetMuAttack_Low(Conv_WORD(msg + 72));
 		SELF.SetTuAttack_Low(Conv_WORD(msg + 74));
@@ -383,19 +386,18 @@ void CGameControl::MSG_Player_Info2(const char * msg,int iLen)
 
 }
 
-//by json 玩家身上装备
+// 玩家身上装备
 //ii, btCompress,  iii, SizeOf(TClientItem2));
 // ii 个数,  btCompress 是否压缩, iii 总大小, 结构大小
 void CGameControl::MSG_Player_Arm_Info(const char * msg,int iLen)
 {
-	//fixed by json
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
 
 	string buf;
 	int iCount = lpPacketMsg->stDefMsg.nRecog;		//个数 ii
 	int iSize = lpPacketMsg->stDefMsg.wTag;			//总大小
 	WORD byGoodLen = lpPacketMsg->stDefMsg.wSeries;		//单个物品长度
-	WORD wHasenc = lpPacketMsg->stDefMsg.wParam;
+	WORD wHasenc = lpPacketMsg->stDefMsg.wParam; // 是否hash加密数据
 
 	//BYTE byGoodLen = BYTE(msg[7]);//单个物品的长度
 	if (byGoodLen == 0)
@@ -403,7 +405,7 @@ void CGameControl::MSG_Player_Arm_Info(const char * msg,int iLen)
 		byGoodLen = CGood::PKLength();
 	}
 
-	//by json 没有物品返回
+	//没有物品返回
 	if(iCount == 0){
 		output_debug("角色无穿戴装备\n");
 		return;
@@ -412,18 +414,18 @@ void CGameControl::MSG_Player_Arm_Info(const char * msg,int iLen)
 	//(msg[6] == 1)		//消息体进过压缩
 	if(wHasenc == 1 && iCount > 0)
 	{
-		//DWORD size = 128 * 1024;
-		//Uncompress((byte *)g_cBuf,&size,(byte *)(msg + CMD_SIZE),iLen - CMD_SIZE);
-		//buf.assign(g_cBuf,size);		
-
 		DWORD size = 128 * 1024;
-		Uncompress((byte *)g_cBuf,&size,(byte *)lpPacketMsg->szEncodeData,iSize);
+		Uncompress((byte *)g_cBuf,&size,(byte *)(msg + CMD_SIZE),iLen - CMD_SIZE);
 		buf.assign(g_cBuf,size);		
+
+		//DWORD size = 128 * 1024;
+		//Uncompress((byte *)g_cBuf,&size,(byte *)lpPacketMsg->szEncodeData,iSize);
+		//buf.assign(g_cBuf,size);		
 	}
 	else
 	{
-		//buf.assign(msg + CMD_SIZE,iLen - CMD_SIZE);
-		buf.assign(lpPacketMsg->szEncodeData,iSize);
+		buf.assign(msg + CMD_SIZE,iLen - CMD_SIZE);
+		//buf.assign(lpPacketMsg->szEncodeData,iSize);
 	}	
 
 	int i = 0;
@@ -434,11 +436,11 @@ void CGameControl::MSG_Player_Arm_Info(const char * msg,int iLen)
 		CGood* pGood = NULL;
 		if (j == 16)
 		{
-			pGood = SELF.EquipGood().GetPtr(ITEM_POS_WING);
+			pGood = SELF.EquipGood().GetPtr(ITEM_POS_WENPEI);
 		}
 		else if (j == 17)
 		{
-			pGood = SELF.EquipGood().GetPtr(ITEM_POS_WENPEI);
+			pGood = SELF.EquipGood().GetPtr(ITEM_POS_WING);
 		}
 		else
 		{
@@ -449,19 +451,21 @@ void CGameControl::MSG_Player_Arm_Info(const char * msg,int iLen)
 		if(pGood == NULL)
 		{
 #ifdef _DEBUG
-			output_debug("服务器装备数据有误\n");
+			output_debug("服务器装备数据有误，装备位置在 %d \n", j);
 #endif
-			break;
+			i += (2 + byGoodLen);
+			continue;
 		}
 
-		//by json 偏移两个字节因为有个ID
+		// 偏移两个字节因为有个ID
 		pGood->FromBuffer(buf.c_str() + i + 2,false,byGoodLen);
 		i+= (2 + byGoodLen);
 	}
 
-	if(SELF.EquipGood().Get(ITEM_POS_SHIELD).GetID() != 0 && SELF.EquipGood().Get(ITEM_POS_SHIELD).GetShape() > 0)
+	CGood& shield = SELF.EquipGood().Get(ITEM_POS_SHIELD);
+	if(shield.GetID() != 0 && shield.GetShape() > 0)
 	{
-		SELF.SetShield(SELF.EquipGood().Get(ITEM_POS_SHIELD).GetShape());		
+		SELF.SetShield(shield.GetShape());
 	}
 	else
 	{
@@ -565,7 +569,7 @@ void CGameControl::MSG_Player_Life(const char * msg,int iLen)
 		}
 		else
 		{
-			pChar->SetHPMax(100);
+			pChar->SetHPMax(wTemp);
 		}
 
 		pChar->SetHP(Conv_WORD(msg + 6));
@@ -647,13 +651,8 @@ void CGameControl::MSG_Player_Experience_Up(const char * msg,int iLen)
 
 void CGameControl::MSG_Player_Rank_Up(const char * msg,int iLen)
 {
-	//fix by json 传世只有经验和等级
-	_LPTDEFAULTMESSAGE	tdm = (_LPTDEFAULTMESSAGE)((char*)msg);	//正确.只有头结构
-	UINT64 exp  = tdm->nRecog;
-	WORD level = tdm->wParam;
-
-	//WORD level = Conv_WORD(msg+6);
-	//UINT64 exp = Conv_INT64(msg + 12);
+	WORD level = Conv_WORD(msg+6);
+	UINT64 exp = Conv_INT64(msg+12);
 	DWORD uID = Conv_DWORD(msg+8);
 
 	if(uID == 0 || uID == SELF.GetID())
@@ -1002,7 +1001,6 @@ void CGameControl::SEND_Player_Normal_Attack(char dir,UINT uID)
 	{	
 		ASSIGN_WORD(0,SELF.GetX());
 		ASSIGN_WORD(2,SELF.GetY());
-		ASSIGN_BYTE(8,dir);
 	}
 	else
 	{
@@ -1581,7 +1579,7 @@ void CGameControl::MSG_Player_Pet_State(const char * msg,int iLen)
 {
 	g_PetData.GetPetStatus().clear();
 
-	PET_STATUS temp;
+	PET_STATUS temp{};
 	char *p = (char*)(msg + 12);
 	int iPets = (iLen - 12)/24;
 	if(iPets > 0)
@@ -1590,12 +1588,12 @@ void CGameControl::MSG_Player_Pet_State(const char * msg,int iLen)
 		{
 			temp.cPetLevel =p[i * 24];
 			memcpy(&temp.cPetName	,p + i * 24 + 1,14);
-			temp.wHp = Conv_WORD(p + i * 24 + 15);
-			temp.wHpMax	= Conv_WORD(p + i * 24 + 17);
-			temp.cDc = p[i * 24 + 19];
-			temp.cDcMax	= p[i * 24 + 20];
-			temp.cAc =	p[i * 24 + 21];
-			temp.cAcMax	= p[i * 24 + 22];
+			temp.wHp = Conv_WORD(p + i * 24 + 16);
+			temp.wHpMax	= Conv_WORD(p + i * 24 + 18);
+			temp.cDc = p[i * 24 + 20];
+			temp.cDcMax	= p[i * 24 + 21];
+			temp.cAc =	p[i * 24 + 22];
+			temp.cAcMax	= p[i * 24 + 23];
 			temp.cPetName[14] = 0;
 			g_PetData.GetPetStatus().push_back(temp);
 		}
@@ -3205,14 +3203,14 @@ void CGameControl::SEND_WenPeiSub_TiQu(int iSubId, int dwId)
 	SEND_GAME_SERVER();	
 }
 
-void CGameControl::SEND_Mac_To_GS()
-{
-	SET_COMMAND(CS_MAC,64);
-
-	ADD_STR(g_strMac);
-
-	SEND_GAME_SERVER();	
-}
+//void CGameControl::SEND_Mac_To_GS()
+//{
+//	SET_COMMAND(CS_MAC,64);
+//
+//	ADD_STR(g_strMac);
+//
+//	SEND_GAME_SERVER();	
+//}
 
 void CGameControl::SEND_HasWaiGua(bool bHas)
 {

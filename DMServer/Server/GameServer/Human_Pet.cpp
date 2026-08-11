@@ -30,16 +30,16 @@ BOOL CHumanPlayer::GetItemFromPetBag(DWORD dwMakeIndex)
 		item = *pItem;
 		if (m_ItemBox.AddItem(item))
 		{
-			SendMsg(dwMakeIndex, 0x9605, 0, 0, 1);
+			SendMsg(dwMakeIndex, 0x9605, 0, 0, 1); //宠物包裹拿走一个东西成功
 			m_ItemPetBag.RemoveItem(dwMakeIndex);
-			SendMsg(GetId(), SM_ADDBAGITEM, 0, 0, 1, &item, sizeof(ITEMCLIENT));
+			SendMsg(GetId(), SM_ADDBAGITEM, 0, 0, 0, &item, sizeof(ITEMCLIENT));
 			CItemManager::GetInstance()->UpdateItemPos(dwMakeIndex, IDF_BAG, 0);
 			SendMsg(dwMakeIndex, 0x2c1, 0, 0, 1);
 			SendWeightChanged();
 			return TRUE;
 		}
 	}
-	SendMsg(dwMakeIndex, 0x9605, 0, 0, 0);
+	SendMsg(dwMakeIndex, 0x9605, 0, 0, 0); //宠物包裹拿走一个东西成功
 	return FALSE;
 }
 
@@ -53,24 +53,15 @@ BOOL CHumanPlayer::PutItemToPetBag(DWORD dwMakeIndex)
 		if (m_ItemPetBag.AddItem(item))
 		{
 			m_ItemBox.RemoveItem(dwMakeIndex);
-			SendMsg(dwMakeIndex, 0x9604, 0, 0, 1);
+			SendMsg(dwMakeIndex, 0x9604, 0, 0, 1); // 保存到宠物包裹成功
 			CItemManager::GetInstance()->UpdateItemPos(item.dwMakeIndex, IDF_PETBANK, 0);
 			SendMsg(GetId(), 0x9603, 0, 0, 1, &item, sizeof(ITEMCLIENT));
 			SendWeightChanged();
 			return TRUE;
 		}
 	}
-	SendMsg(dwMakeIndex, 0x9604, 0, 0, 0);
+	SendMsg(dwMakeIndex, 0x9604, 0, 0, 0); // 保存到宠物包裹失败
 	return FALSE;
-}
-
-VOID CHumanPlayer::SendPetName(ITEM* pItem)
-{
-	xPacketPool::ScopedPacket packet;
-	packet->push((LPVOID)&pItem->dwMakeIndex, 4);
-	packet->push(pItem->GetExName());
-	packet->push(1);
-	SendMsg(GetId(), 206, static_cast<WORD>(pItem->dwMakeIndex), 0, 1, (LPVOID)packet->getbuf(), packet->getsize());
 }
 
 VOID CHumanPlayer::SendOutPetInfo(ITEM* pItem, BYTE Type)

@@ -12,12 +12,11 @@
 #include "scripttarget.h"
 #include "marketmanager.h"
 #include "systemscript.h"
-#include "BossTJ.h"
-#include "TimeAchieve.h"
-#include "GameStage.h"
 
 VOID CClientObj::HandleRideHorse(PMIRMSG pMsg, int datasize)
 {
+	//DWORD dwID = MAKELONG(pMsg->wParam[1], pMsg->wParam[2]); // 马的ID
+	//BYTE iType = HIBYTE(pMsg->wParam[0]); // 马的类型
 	if (m_pPlayer->RideHorse())
 		m_pPlayer->SendMsg(1, 0xcd, 0, 0, 0);
 	else
@@ -49,6 +48,9 @@ VOID CClientObj::HandleSetItemPosition(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleViewEquipment(PMIRMSG pMsg, int datasize)
 {
+	//pMsg->wParam[0];// x
+	//pMsg->wParam[1];// y
+	//pMsg->wParam[2];// dir方向
 	CHumanPlayer* pPlayer = CHumanPlayerMgr::GetInstance()->FindbyId(pMsg->dwFlag);
 	if (pPlayer != nullptr)
 	{
@@ -60,6 +62,7 @@ VOID CClientObj::HandleViewEquipment(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleLeaveServer(PMIRMSG pMsg, int datasize)
 {
+	//pMsg->data; // SessionID
 	m_bCompetlyQuit = TRUE;
 }
 
@@ -76,10 +79,22 @@ VOID CClientObj::HandleRecordHomeStone(PMIRMSG pMsg, int datasize)
 		szName = "中州";
 		break;
 	case 2:
-		szName = "热砂荒漠";
+		szName = "土城";
 		break;
 	case 3:
 		szName = "禁地";
+		break;
+	case 4:
+		szName = "西域奇境";
+		break;
+	case 5:
+		szName = "死水沼泽";
+		break;
+	case 6:
+		szName = "桃花岛";
+		break;
+	case 7:
+		szName = "夕霞岛";
 		break;
 	default:
 		szName = "落霞岛";
@@ -98,10 +113,20 @@ VOID CClientObj::HandleMasterApprentice(PMIRMSG pMsg, int datasize)
 	CAliveObject* pAliveObj = CGameWorld::GetInstance()->GetAliveObjectById(pMsg->dwFlag);
 	if (pAliveObj == nullptr || pAliveObj->GetType() != OBJ_PLAYER) return;
 	CHumanPlayer* pObject = (CHumanPlayer*)pAliveObj;
-	switch (pMsg->wParam[0])
+	switch (LOBYTE(pMsg->wParam[0]))
 	{
-	case 1:
+	case 1: //请求收徒
 	{
+		if (HIBYTE(pMsg->wParam[0]) == 3)
+		{
+			pObject->SendMsg(m_pPlayer->GetId(), 0x310, 258, 16, 0, "对方拒绝收你为徒");
+			break;
+		}
+		else if (HIBYTE(pMsg->wParam[0]) == 4)
+		{
+			pObject->SendMsg(m_pPlayer->GetId(), 0x310, 258, 18, 0, "对方拒绝拜你为师傅");
+			break;
+		}
 		if (m_pPlayer->GetStudentCount() == 3)
 			m_pPlayer->SaySystem("你已收满徒弟!");
 		else if (m_pPlayer->GetPropValue(PI_LEVEL) < 28)
@@ -114,7 +139,7 @@ VOID CClientObj::HandleMasterApprentice(PMIRMSG pMsg, int datasize)
 			pObject->SendMsg(m_pPlayer->GetId(), 0x310, 4, 0, 0);
 	}
 	break;
-	case 2:
+	case 2: //请求拜师
 	{
 		if (pObject->GetStudentCount() == 3)
 			m_pPlayer->SaySystem("对方已收满徒弟!");
@@ -128,30 +153,30 @@ VOID CClientObj::HandleMasterApprentice(PMIRMSG pMsg, int datasize)
 			pObject->SendMsg(m_pPlayer->GetId(), 0x310, 3, 0, 0);
 	}
 	break;
-	case 3:
+	case 3: // 是否确认 请求拜师
 	{
-		if (m_pPlayer->GetStudentCount() < 3 && m_pPlayer->GetPropValue(PI_LEVEL) >= 28 && pObject->GetPropValue(PI_LEVEL) < 28)
+		if (HIBYTE(pMsg->wParam[0]) == 0) // 高位是，0确认与1取消
 		{
-			if (m_pPlayer->AddStudent(pObject))
-				pObject->SetMaster(m_pPlayer);
+			if (m_pPlayer->GetStudentCount() < 3 && m_pPlayer->GetPropValue(PI_LEVEL) >= 28 && pObject->GetPropValue(PI_LEVEL) < 28)
+			{
+				if (m_pPlayer->AddStudent(pObject))
+					pObject->SetMaster(m_pPlayer);
+			}
 		}
 	}
 	break;
-	case 4:
+	case 4: // 是否确认 请求收徒
 	{
-		if (pObject->GetStudentCount() < 3 && pObject->GetPropValue(PI_LEVEL) >= 28 && m_pPlayer->GetPropValue(PI_LEVEL) < 28)
+		if (HIBYTE(pMsg->wParam[0]) == 0) // 高位是，0确认与1取消
 		{
-			if (pObject->AddStudent(m_pPlayer))
-				m_pPlayer->SetMaster(pObject);
+			if (pObject->GetStudentCount() < 3 && pObject->GetPropValue(PI_LEVEL) >= 28 && m_pPlayer->GetPropValue(PI_LEVEL) < 28)
+			{
+				if (pObject->AddStudent(m_pPlayer))
+					m_pPlayer->SetMaster(pObject);
+			}
 		}
 	}
 	break;
-	case 259:
-		pObject->SendMsg(m_pPlayer->GetId(), 0x312, 258, 16, 0, "对方拒绝收你为徒");
-		break;
-	case 260:
-		pObject->SendMsg(m_pPlayer->GetId(), 0x312, 258, 18, 0, "对方拒绝拜你为师傅");
-		break;
 	}
 }
 
@@ -206,11 +231,11 @@ VOID CClientObj::HandleDropItem(PMIRMSG pMsg, int datasize)
 	if (m_pPlayer->DropBagItem(pMsg->dwFlag))
 	{
 		m_pPlayer->SaveDropItemTime();
-		m_pPlayer->SendMsg(pMsg->dwFlag, 0x258, 0, 0, 0);
 		m_pPlayer->SendWeightChanged();
+		m_pPlayer->SendMsg(pMsg->dwFlag, 0x258, 1, 0, 0);
 	}
 	else
-		m_pPlayer->SendMsg(pMsg->dwFlag, 0x259, 0, 0, 0);
+		m_pPlayer->SendMsg(pMsg->dwFlag, 0x259, 1, 0, 0);
 }
 
 VOID CClientObj::HandlePickupItem(PMIRMSG pMsg, int datasize)
@@ -223,8 +248,13 @@ VOID CClientObj::HandlePickupItem(PMIRMSG pMsg, int datasize)
 		{
 			m_pPlayer->SavePickupItemTime();
 			m_pPlayer->SendWeightChanged();
+			m_pPlayer->SendMsg(pMsg->dwFlag, 0x258, 1, 0, 0);
 		}
+		else
+			m_pPlayer->SendMsg(pMsg->dwFlag, 0x259, 1, 0, 0);
 	}
+	else
+		m_pPlayer->SendMsg(pMsg->dwFlag, 0x259, 2, 0, 0);
 }
 
 VOID CClientObj::HandleTakeOnItem(PMIRMSG pMsg, int datasize)
@@ -252,7 +282,7 @@ VOID CClientObj::HandleUseItem(PMIRMSG pMsg, int datasize)
 VOID CClientObj::HandleDigCorpse(PMIRMSG pMsg, int datasize)
 {
 	if (m_pPlayer->CutBody(pMsg->dwFlag, pMsg->wParam[0], pMsg->wParam[1], pMsg->wParam[2]))
-		m_pPlayer->SendAroundMsg(m_pPlayer->GetId(), 0x27d, m_pPlayer->getX(), m_pPlayer->getY(), pMsg->wParam[2]);
+		m_pPlayer->SendAroundMsg(m_pPlayer->GetId(), 0x27d, m_pPlayer->getX(), m_pPlayer->getY(), m_pPlayer->GetDirection());
 }
 
 VOID CClientObj::HandleSkillShortcut(PMIRMSG pMsg, int datasize)
@@ -349,7 +379,7 @@ VOID CClientObj::HandleBuyShopItem(PMIRMSG pMsg, int datasize)
 	{
 		CScriptNpc* pNpc = (CScriptNpc*)pObject;
 		DWORD dwError = 0;
-		if (pNpc != nullptr && pNpc->BuyItem(m_pPlayer, (char*)&pMsg->data[4], *(DWORD*)&pMsg->wParam[0], dwError))
+		if (pNpc != nullptr && pNpc->BuyItem(m_pPlayer, (char*)&pMsg->data[0], *(DWORD*)&pMsg->wParam[0], dwError))
 			m_pPlayer->SendMsg(m_pPlayer->GetMoney(MT_GOLD), 0x28a, pMsg->wParam[0], pMsg->wParam[1], 0);
 		else
 			m_pPlayer->SendMsg(dwError, 0x28b, 0, 0, 0);
@@ -381,11 +411,18 @@ VOID CClientObj::HandleNpcSellList(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleDropGold(PMIRMSG pMsg, int datasize)
 {
+	if (!m_pPlayer->CanDropItem()) return;
+	if (m_pPlayer->GetActionType() != AT_STAND) return;
+	if (m_pPlayer->IsDeath()) return;
+	if (pMsg->dwFlag == 0) return;
 	m_pPlayer->DropGold(pMsg->dwFlag);
+	m_pPlayer->SaveDropItemTime();
 }
 
 VOID CClientObj::HandleConfirmFirstDialog(PMIRMSG pMsg, int datasize)
 {
+	BYTE btWH = LOBYTE(pMsg->wParam[1]); // 客户端分辨率类型，用于设置玩家视觉范围大小
+	
 	CDBClientObj* pDI = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 	if (pDI)
 	{
@@ -410,9 +447,6 @@ VOID CClientObj::HandleConfirmFirstDialog(PMIRMSG pMsg, int datasize)
 	else
 		CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "LoginEnv.Login", FALSE);
 	m_pPlayer->SendMsg(m_pPlayer->GetId(), 0x9609, 0, 0, 0, (LPVOID)m_pPlayer->GetName());
-	m_pPlayer->SendClientPluginInfo();
-	m_pPlayer->SendClientKeyConfig();
-	CBossTJ::GetInstance()->SendBossList(m_pPlayer);
 	m_State = GSUM_VERIFIED;
 }
 
@@ -607,26 +641,14 @@ VOID CClientObj::HandleRequestGroupPos(PMIRMSG pMsg, int datasize)
 	m_pPlayer->UpdateGroupPosition();
 }
 
+VOID CClientObj::HandleHeartBeat(PMIRMSG pMsg, int datasize)
+{
+	// 客户端的心跳包 后续做其他判断
+}
+
 VOID CClientObj::HandlePetBackExp(PMIRMSG pMsg, int datasize)
 {
 	CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "灵兽.BackExp");
-}
-
-VOID CClientObj::HandleTimeAchieve(PMIRMSG pMsg, int datasize)
-{
-	CTimeAchieve::GetInstance()->SendAchieveData(m_pPlayer);
-}
-
-VOID CClientObj::HandleShortcutKey(PMIRMSG pMsg, int datasize)
-{
-	if (pMsg->wParam[0] == 1)
-		return;
-	m_pPlayer->SendClientKeyConfig();
-}
-
-VOID CClientObj::HandleNewMail(PMIRMSG pMsg, int datasize)
-{
-	SendClientNewMail(pMsg->wParam[0], pMsg->wParam[1], pMsg->wParam[2]);
 }
 
 VOID CClientObj::HandleSocialInfo(PMIRMSG pMsg, int datasize)
@@ -641,41 +663,9 @@ VOID CClientObj::HandleSocialInfo(PMIRMSG pMsg, int datasize)
 	}
 }
 
-VOID CClientObj::HandleFengHao(PMIRMSG pMsg, int datasize)
-{
-	if (pMsg->wParam[0] == 0)
-		m_pPlayer->SendFengHaoGrowInfo();
-	else
-		m_pPlayer->SendFengHaoEquip(pMsg->wParam[1]);
-}
-
 VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 {
-	if (_stricmp(pMsg->data, "GameTimeMgr") == 0)
-	{
-		GameTimeMgr* pGameTimeMgr = (GameTimeMgr*)pMsg->data;
-		switch (pGameTimeMgr->btCode)
-		{
-		case 1:
-		{
-			CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "游戏时长.Open");
-		}
-		break;
-		case 2:
-		{
-			m_pPlayer->setVParam(0, pGameTimeMgr->nValue[2]);
-			CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "游戏时长.Refill");
-		}
-		break;
-		case 3:
-		{
-			m_pPlayer->setVParam(0, pGameTimeMgr->nValue[2]);
-			CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "游戏时长.Renewal");
-		}
-		break;
-		}
-	}
-	else if (_stricmp(pMsg->data, "guildmgr") == 0)
+	if (_stricmp(pMsg->data, "guildmgr") == 0)
 	{
 		Guildmgr* pGuildmgr = (Guildmgr*)pMsg->data;
 		switch (pGuildmgr->btCode)
@@ -845,65 +835,6 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		break;
 		}
 	}
-	else if (_stricmp(pMsg->data, "expback2020") == 0)
-	{
-		ExpBack* pExpBack = (ExpBack*)pMsg->data;
-		switch (pExpBack->btCode)
-		{
-		case 0:
-		{
-			CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "每日经验.Main");
-		}
-		break;
-		case 2:
-		{
-			CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "每日经验.Help");
-		}
-		break;
-		}
-	}
-	else if (_stricmp(pMsg->data, "ActivityScore2014") == 0)
-	{
-		ActivityScore2014* pActivityScore2014 = (ActivityScore2014*)pMsg->data;
-		switch (pActivityScore2014->btCode)
-		{
-		case 1:
-		{
-			if (m_pPlayer->GetPropValue(PI_LEVEL) >= 7)
-			{
-				CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "活动日历.Main");
-			}
-		}
-		break;
-		}
-	}
-	else if (_stricmp(pMsg->data, "CheckPlayerMapJump") == 0)
-	{
-		MapJump* pMapJump = (MapJump*)pMsg->data;
-		switch (pMapJump->btCode)
-		{
-		case 0x62:
-		{
-			CGameStage::GetInstance()->SendPlayerMapJumpPage(m_pPlayer, pMapJump->szPage);
-		}
-		break;
-		case 0x63:
-		{
-			CGameStage::GetInstance()->SendPlayerMapJumpHome(m_pPlayer);
-		}
-		break;
-		}
-	}
-	else if (_stricmp(pMsg->data, "LianYu18") == 0)
-	{
-		BossTJ* pBossTJ = (BossTJ*)pMsg->data;
-		if (pBossTJ->btCode == 2 && pBossTJ->nNum == 1)
-			CBossTJ::GetInstance()->SendBoss(m_pPlayer, pBossTJ->sName);
-	}
-	else if (_stricmp(pMsg->data, "chatglog2023") == 0)
-	{
-
-	}
 	else
 	{
 		char szPage[64];
@@ -984,29 +915,6 @@ VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
 		}
 		CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), szPage);
 	}
-}
-
-VOID CClientObj::HandleAvatarFrame(PMIRMSG pMsg, int datasize)
-{
-	if (pMsg->wParam[0] == 0)
-	{
-		xPacketPool::ScopedPacket packet;
-		int nValue = 1;
-		packet->push((LPVOID)&nValue, 4);
-		nValue = 0;
-		packet->push((LPVOID)&nValue, 4);
-		nValue = 0;
-		packet->push((LPVOID)&nValue, 4);
-		nValue = 1;
-		packet->push((LPVOID)&nValue, 4);
-		nValue = 0;
-		packet->push((LPVOID)&nValue, 4);
-		nValue = 1;
-		packet->push((LPVOID)&nValue, 4);
-		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xa06, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-	}
-	else
-		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xa06, pMsg->wParam[0], 0, 0);
 }
 
 VOID CClientObj::HandleGuildFengHao(PMIRMSG pMsg, int datasize)
@@ -1113,7 +1021,10 @@ VOID CClientObj::HandleWalk(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleGetMeal(PMIRMSG pMsg, int datasize)
 {
-	SendActionResult(m_pPlayer->GetMeal(pMsg->wParam[1] & 0xff));
+	int	x = pMsg->dwFlag & 0xffff;
+	int	y = (pMsg->dwFlag & 0xffff0000) >> 16;
+	int dir = pMsg->wParam[1] & 0xff;
+	SendActionResult(m_pPlayer->GetMeal(x, y, dir));
 }
 
 VOID CClientObj::HandleRun(PMIRMSG pMsg, int datasize)
@@ -1139,6 +1050,15 @@ VOID CClientObj::HandleAttack(PMIRMSG pMsg, int datasize)
 		curAttackType = DT_CUTTREE;
 	e_humanattackmode mode = m_pPlayer->GetAttackMode();
 	SendActionResult(m_pPlayer->Attack(pMsg->wParam[1] & 0xff, 0, mode, curAttackType));
+}
+
+VOID CClientObj::HandleForceAttack(PMIRMSG pMsg, int datasize)
+{
+	damage_type curAttackType = DT_PHYSICS;
+	if (m_pPlayer->CheckItemInfo(_U_WEAPON, 5, 7))
+		curAttackType = DT_CUTTREE;
+	// 强行攻击就用全体模式
+	SendActionResult(m_pPlayer->Attack(pMsg->wParam[1] & 0xff, 0, HAM_ALL, curAttackType));
 }
 
 VOID CClientObj::HandleMine(PMIRMSG pMsg, int datasize)
@@ -1296,7 +1216,7 @@ VOID CClientObj::HandlePrivateShop(PMIRMSG pMsg, int datasize)
 {
 	PRIVATESHOPQUERY* pQuery = (PRIVATESHOPQUERY*)pMsg->data;
 	BOOL bStarted = FALSE;
-	if (pMsg->wParam[0] > 0)
+	if (pMsg->wParam[0] > 0) // 如果商品条目数大于0
 	{
 		if (m_pPlayer->GetActionType() == AT_PRIVATESHOP)
 			bStarted = TRUE;
@@ -1333,6 +1253,7 @@ VOID CClientObj::HandleRequestPrivateShop(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleCreateGuild(PMIRMSG pMsg, int datasize)
 {
+	pMsg->dwFlag; // dwNpcID NPC的ID
 	m_pPlayer->GetScriptTarget()->OnInputConfirm(pMsg->data);
 }
 
@@ -1345,12 +1266,12 @@ VOID CClientObj::HandlePersonSetting(PMIRMSG pMsg, int datasize)
 		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0x9593, 3, 1, 0);
 	}
 	PersonSetting* pPersonSetting = (PersonSetting*)pMsg->data;
-	if (pPersonSetting->szPersonSign[0] != 0)
+	if (pPersonSetting->szPersonSign[0] != 0) // 个人开关和个人签名
 	{
 		m_pPlayer->SetPersonSign(pPersonSetting->szPersonSign);
 		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0x9593, 1, 0, wPersonCode, pPersonSetting->szPersonSign);
 	}
-	if (pPersonSetting->szTempBan[0] != 0)
+	if (pPersonSetting->szTempBan[0] != 0) // 临时封号
 	{
 		m_pPlayer->SetTempRank(pPersonSetting->szTempBan);
 		m_pPlayer->SendMsg(m_pPlayer->GetId(), 0x9593, 2, 0, 0, pPersonSetting->szTempBan);
@@ -1389,4 +1310,9 @@ VOID CClientObj::HandleHeroRank(PMIRMSG pMsg, int datasize)
 VOID CClientObj::HandleQueryHeroRank(PMIRMSG pMsg, int datasize)
 {
 	CTopManager::GetInstance()->SendRank(m_pPlayer, pMsg->wParam[0], pMsg->wParam[2]);
+}
+
+VOID CClientObj::HandleQuerySndaMark(PMIRMSG pMsg, int datasize)
+{
+	m_pPlayer->SendMsg(999, 0xE67A, 0, 0, 0); // 999 是盛大积分数
 }

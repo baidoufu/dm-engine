@@ -12,7 +12,7 @@
 #define new DEBUG_NEW
 #endif
 
-INIT_WND_POS(CSelectServerWnd,POS_VARIABLE,POS_VARIABLE)
+INIT_WND_POS(CSelectServerWnd, POS_AUTO, POS_AUTO)
 
 CSelectServerWnd::CSelectServerWnd(void)
 {

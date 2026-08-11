@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<QiShouEquipCfg Ver="1">
+<!--
+	通过 @reloadxmlcfg 重载此文件
+-->
+	<SuitName>
+		<Suit name="凶蛮" suitNum="1">
+			<part name="凶蛮头铠"/>
+			<part name="凶蛮颈铠"/>
+			<part name="凶蛮胸铠"/>
+			<part name="凶蛮背铠"/>
+			<part name="凶蛮肢铠"/>
+			<part name="凶蛮尾铠"/>
+		</Suit>
+		<Suit name="咆哮" suitNum="2">
+			<part name="咆哮头铠"/>
+			<part name="咆哮颈铠"/>
+			<part name="咆哮胸铠"/>
+			<part name="咆哮背铠"/>
+			<part name="咆哮肢铠"/>
+			<part name="咆哮尾铠"/>
+		</Suit>
+		<Suit name="地狱" suitNum="3">
+			<part name="地狱头铠"/>
+			<part name="地狱颈铠"/>
+			<part name="地狱胸铠"/>
+			<part name="地狱背铠"/>
+			<part name="地狱肢铠"/>
+			<part name="地狱尾铠"/>
+		</Suit>
+		<Suit name="龙鳞" suitNum="4">
+			<part name="龙鳞头铠"/>
+			<part name="龙鳞颈铠"/>
+			<part name="龙鳞胸铠"/>
+			<part name="龙鳞背铠"/>
+			<part name="龙鳞肢铠"/>
+			<part name="龙鳞尾铠"/>
+		</Suit>
+		<Suit name="龙腾" suitNum="5">
+			<part name="龙腾头铠"/>
+			<part name="龙腾颈铠"/>
+			<part name="龙腾胸铠"/>
+			<part name="龙腾背铠"/>
+			<part name="龙腾肢铠"/>
+			<part name="龙腾尾铠"/>
+		</Suit>
+		<Suit name="贪狼" suitNum="6">
+			<part name="贪狼头铠"/>
+			<part name="贪狼颈铠"/>
+			<part name="贪狼胸铠"/>
+			<part name="贪狼背铠"/>
+			<part name="贪狼肢铠"/>
+			<part name="贪狼尾铠"/>
+		</Suit>
+
+	</SuitName>
+	<ShouHunMerge>		
+		<equip partequip="凶蛮头铠" star="1" effect="(1/3) 生命值上限增加:5点"/>
+		<equip partequip="凶蛮头铠" star="2" effect="(2/3) 生命值上限增加:8点"/>
+		<equip partequip="凶蛮头铠" star="3" effect="(3/3) 生命值上限增加:10点"/>
+		<equip partequip="凶蛮头铠" star="4" effect="(4/6) 破防增加:2点"/>
+		<equip partequip="凶蛮头铠" star="5" effect="(5/6) 破防增加:3点"/>
+		<equip partequip="凶蛮头铠" star="6" effect="(6/6) 破防增加:5点"/>
+		<equip partequip="凶蛮头铠" star="7" effect="(7/7) 躲避增加:5点"/>
+		<equip partequip="凶蛮颈铠" star="1" effect="(1/3) 生命值上限增加:5点"/>
+		<equip partequip="凶蛮颈铠" star="2" effect="(2/3) 生命值上限增加:8点"/>
+		<equip partequip="凶蛮颈铠" star="3" effect="(3/3) 生命值上限增加:10点"/>
+		<equip partequip="凶蛮颈铠" star="4" effect="(4/6) 破防增加:2点"/>
+		<equip partequip="凶蛮颈铠" star="5" effect="(5/6) 破防增加:3点"/>
+		<equip partequip="凶蛮颈铠" star="6" effect="(6/6) 破防增加:5点"/>
+		<equip partequip="凶蛮颈铠" star="7" effect="(7/7) 魔法躲避增加:5%%"/>
+		<equip partequip="凶蛮胸铠" star="1" effect="(1/3) 生命值上限增加:5点"/>
+		<equip partequip="凶蛮胸铠" star="2" effect="(2/3) 生命值上限增加:8点"/>
+		<equip partequip="凶蛮胸铠" star="3" effect="(3/3) 生命值上限增加:10点"/>
+		<equip partequip="凶蛮胸铠" star="4" effect="(4/6) 暴击增加:2点"/>
+		<equip partequip="凶蛮胸铠" star="5" effect="(5/6) 暴击增加:3点"/>
+		<equip partequip="凶蛮胸铠" star="6" effect="(6/6) 暴击增加:5点"/>
+		<equip partequip="凶蛮胸铠" star="7" effect="(7/7) 抵抗增加:5点"/>
+		<equip partequip="凶蛮背铠" star="1" effect="(1/3) 生命值上限增加:5点"/>
+		<equip partequip="凶蛮背铠" star="2" effect="(2/3) 生命值上限增加:8点"/>
+		<equip partequip="凶蛮背铠" star="3" effect="(3/3) 生命值上限增加:10点"/>
+		<equip partequip="凶蛮背铠" star="4" effect="(4/6) 暴击增加:2点"/>
+		<equip partequip="凶蛮背铠" star="5" effect="(5/6) 暴击增加:3点"/>
+		<equip partequip="凶蛮背铠" star="6" effect="(6/6) 暴击增加:5点"/>
+		<equip partequip="凶蛮背铠" star="7" effect="(7/7) 抵抗增加:5点"/>
+		<equip partequip="凶蛮肢铠" star="1" effect="(1/3) 生命值上限增加:5点"/>
+		<equip partequip="凶蛮肢铠" star="2" effect="(2/3) 生命值上限增加:8点"/>
+		<equip partequip="凶蛮肢铠" star="3" effect="(3/3) 生命值上限增加:10点"/>
+		<equip partequip="凶蛮肢铠" star="4" effect="(4/6) 命中增加:2点" career="0"/>
+		<equip partequip="凶蛮肢铠" star="4" effect="(4/6) 魔法命中增加:2%%" career="1"/>
+		<equip partequip="凶蛮肢铠" star="4" effect="(4/6) 魔法命中增加:2%%" career="2"/>
+		<equip partequip="凶蛮肢铠" star="5" effect="(5/6) 命中增加:3点" career="0"/>
+		<equip partequip="凶蛮肢铠" star="5" effect="(5/6) 魔法命中增加:3%%" career="1"/>
+		<equip partequip="凶蛮肢铠" star="5" effect="(5/6) 魔法命中增加:3%%" career="2"/>
+		<equip partequip="凶蛮肢铠" star="6" effect="(6/6) 命中增加:5点" career="0"/>
+		<equip partequip="凶蛮肢铠" star="6" effect="(6/6) 魔法命中增加:5%%" career="1"/>
+		<equip partequip="凶蛮肢铠" star="6" effect="(6/6) 魔法命中增加:5%%" career="2"/>
+		<equip partequip="凶蛮肢铠" star="7" effect="(7/7) 躲避增加:5%%"/>
+		<equip partequip="凶蛮尾铠" star="1" effect="(1/3) 生命值上限增加:5点"/>
+		<equip partequip="凶蛮尾铠" star="2" effect="(2/3) 生命值上限增加:8点"/>
+		<equip partequip="凶蛮尾铠" star="3" effect="(3/3) 生命值上限增加:10点"/>
+		<equip partequip="凶蛮尾铠" star="4" effect="(4/6) 命中增加:2点" career="0"/>
+		<equip partequip="凶蛮尾铠" star="4" effect="(4/6) 魔法命中增加:2%%" career="1"/>
+		<equip partequip="凶蛮尾铠" star="4" effect="(4/6) 魔法命中增加:2%%" career="2"/>
+		<equip partequip="凶蛮尾铠" star="5" effect="(5/6) 命中增加:3点" career="0"/>
+		<equip partequip="凶蛮尾铠" star="5" effect="(5/6) 魔法命中增加:3%%" career="1"/>
+		<equip partequip="凶蛮尾铠" star="5" effect="(5/6) 魔法命中增加:3%%" career="2"/>
+		<equip partequip="凶蛮尾铠" star="6" effect="(6/6) 命中增加:5点" career="0"/>
+		<equip partequip="凶蛮尾铠" star="6" effect="(6/6) 魔法命中增加:5%%" career="1"/>
+		<equip partequip="凶蛮尾铠" star="6" effect="(6/6) 魔法命中增加:5%%" career="2"/>
+		<equip partequip="凶蛮尾铠" star="7" effect="(7/7) 魔法躲避增加:5%%"/>
+		<equip partequip="咆哮头铠" star="1" effect="(1/3) 生命值上限增加:10点"/>
+		<equip partequip="咆哮头铠" star="2" effect="(2/3) 生命值上限增加:12点"/>
+		<equip partequip="咆哮头铠" star="3" effect="(3/3) 生命值上限增加:15点"/>
+		<equip partequip="咆哮头铠" star="4" effect="(4/6) 破防增加:5点"/>
+		<equip partequip="咆哮头铠" star="5" effect="(5/6) 破防增加:6点"/>
+		<equip partequip="咆哮头铠" star="6" effect="(6/6) 破防增加:8点"/>
+		<equip partequip="咆哮头铠" star="7" effect="(7/7) 躲避增加:8点"/>
+		<equip partequip="咆哮颈铠" star="1" effect="(1/3) 生命值上限增加:10点"/>
+		<equip partequip="咆哮颈铠" star="2" effect="(2/3) 生命值上限增加:12点"/>
+		<equip partequip="咆哮颈铠" star="3" effect="(3/3) 生命值上限增加:15点"/>
+		<equip partequip="咆哮颈铠" star="4" effect="(4/6) 破防增加:5点"/>
+		<equip partequip="咆哮颈铠" star="5" effect="(5/6) 破防增加:6点"/>
+		<equip partequip="咆哮颈铠" star="6" effect="(6/6) 破防增加:8点"/>
+		<equip partequip="咆哮颈铠" star="7" effect="(7/7) 魔法躲避增加:8%%"/>
+		<equip partequip="咆哮胸铠" star="1" effect="(1/3) 生命值上限增加:10点"/>
+		<equip partequip="咆哮胸铠" star="2" effect="(2/3) 生命值上限增加:12点"/>
+		<equip partequip="咆哮胸铠" star="3" effect="(3/3) 生命值上限增加:15点"/>
+		<equip partequip="咆哮胸铠" star="4" effect="(4/6) 暴击增加:5点"/>
+		<equip partequip="咆哮胸铠" star="5" effect="(5/6) 暴击增加:6点"/>
+		<equip partequip="咆哮胸铠" star="6" effect="(6/6) 暴击增加:8点"/>
+		<equip partequip="咆哮胸铠" star="7" effect="(7/7) 抵抗增加:8点"/>
+		<equip partequip="咆哮背铠" star="1" effect="(1/3) 生命值上限增加:10点"/>
+		<equip partequip="咆哮背铠" star="2" effect="(2/3) 生命值上限增加:12点"/>
+		<equip partequip="咆哮背铠" star="3" effect="(3/3) 生命值上限增加:15点"/>
+		<equip partequip="咆哮背铠" star="4" effect="(4/6) 暴击增加:5点"/>
+		<equip partequip="咆哮背铠" star="5" effect="(5/6) 暴击增加:6点"/>
+		<equip partequip="咆哮背铠" star="6" effect="(6/6) 暴击增加:8点"/>
+		<equip partequip="咆哮背铠" star="7" effect="(7/7) 抵抗增加:8点"/>
+		<equip partequip="咆哮肢铠" star="1" effect="(1/3) 生命值上限增加:10点"/>
+		<equip partequip="咆哮肢铠" star="2" effect="(2/3) 生命值上限增加:12点"/>
+		<equip partequip="咆哮肢铠" star="3" effect="(3/3) 生命值上限增加:15点"/>
+		<equip partequip="咆哮肢铠" star="4" effect="(4/6) 命中增加:5点" career="0"/>
+		<equip partequip="咆哮肢铠" star="4" effect="(4/6) 魔法命中增加:5%%" career="1"/>
+		<equip partequip="咆哮肢铠" star="4" effect="(4/6) 魔法命中增加:5%%" career="2"/>
+		<equip partequip="咆哮肢铠" star="5" effect="(5/6) 命中增加:6点" career="0"/>
+		<equip partequip="咆哮肢铠" star="5" effect="(5/6) 魔法命中增加:6%%" career="1"/>
+		<equip partequip="咆哮肢铠" star="5" effect="(5/6) 魔法命中增加:6%%" career="2"/>
+		<equip partequip="咆哮肢铠" star="6" effect="(6/6) 命中增加:8点" career="0"/>
+		<equip partequip="咆哮肢铠" star="6" effect="(6/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="咆哮肢铠" star="6" effect="(6/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="咆哮肢铠" star="7" effect="(7/7) 躲避增加:8点"/>
+		<equip partequip="咆哮尾铠" star="1" effect="(1/3) 生命值上限增加:10点"/>
+		<equip partequip="咆哮尾铠" star="2" effect="(2/3) 生命值上限增加:12点"/>
+		<equip partequip="咆哮尾铠" star="3" effect="(3/3) 生命值上限增加:15点"/>
+		<equip partequip="咆哮尾铠" star="4" effect="(4/6) 命中增加:5点" career="0"/>
+		<equip partequip="咆哮尾铠" star="4" effect="(4/6) 魔法命中增加:5%%" career="1"/>
+		<equip partequip="咆哮尾铠" star="4" effect="(4/6) 魔法命中增加:5%%" career="2"/>
+		<equip partequip="咆哮尾铠" star="5" effect="(5/6) 命中增加:6点" career="0"/>
+		<equip partequip="咆哮尾铠" star="5" effect="(5/6) 魔法命中增加:6%%" career="1"/>
+		<equip partequip="咆哮尾铠" star="5" effect="(5/6) 魔法命中增加:6%%" career="2"/>
+		<equip partequip="咆哮尾铠" star="6" effect="(6/6) 命中增加:8点" career="0"/>
+		<equip partequip="咆哮尾铠" star="6" effect="(6/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="咆哮尾铠" star="6" effect="(6/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="咆哮尾铠" star="7" effect="(7/7) 魔法躲避增加:8%%"/>
+		<equip partequip="地狱头铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="地狱头铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="地狱头铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="地狱头铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="地狱头铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="地狱头铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="地狱头铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="地狱颈铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="地狱颈铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="地狱颈铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="地狱颈铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="地狱颈铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="地狱颈铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="地狱颈铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="地狱胸铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="地狱胸铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="地狱胸铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="地狱胸铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="地狱胸铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="地狱胸铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="地狱胸铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="地狱背铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="地狱背铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="地狱背铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="地狱背铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="地狱背铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="地狱背铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="地狱背铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="地狱肢铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="地狱肢铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="地狱肢铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="地狱肢铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="地狱肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="地狱肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="地狱肢铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="地狱肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="地狱肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="地狱肢铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="地狱肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="地狱肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="地狱肢铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="地狱尾铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="地狱尾铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="地狱尾铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="地狱尾铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="地狱尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="地狱尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="地狱尾铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="地狱尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="地狱尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="地狱尾铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="地狱尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="地狱尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="地狱尾铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="龙腾头铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙腾头铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙腾头铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙腾头铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="龙腾头铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="龙腾头铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="龙腾头铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="龙腾颈铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙腾颈铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙腾颈铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙腾颈铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="龙腾颈铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="龙腾颈铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="龙腾颈铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="龙腾胸铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙腾胸铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙腾胸铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙腾胸铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="龙腾胸铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="龙腾胸铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="龙腾胸铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="龙腾背铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙腾背铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙腾背铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙腾背铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="龙腾背铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="龙腾背铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="龙腾背铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="龙腾肢铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙腾肢铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙腾肢铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙腾肢铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="龙腾肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="龙腾肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="龙腾肢铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="龙腾肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="龙腾肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="龙腾肢铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="龙腾肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="龙腾肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="龙腾肢铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="龙腾尾铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙腾尾铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙腾尾铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙腾尾铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="龙腾尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="龙腾尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="龙腾尾铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="龙腾尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="龙腾尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="龙腾尾铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="龙腾尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="龙腾尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="龙腾尾铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="龙鳞头铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙鳞头铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙鳞头铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙鳞头铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="龙鳞头铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="龙鳞头铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="龙鳞头铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="龙鳞颈铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙鳞颈铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙鳞颈铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙鳞颈铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="龙鳞颈铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="龙鳞颈铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="龙鳞颈铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="龙鳞胸铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙鳞胸铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙鳞胸铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙鳞胸铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="龙鳞胸铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="龙鳞胸铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="龙鳞胸铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="龙鳞背铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙鳞背铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙鳞背铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙鳞背铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="龙鳞背铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="龙鳞背铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="龙鳞背铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="龙鳞肢铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙鳞肢铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙鳞肢铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙鳞肢铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="龙鳞肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="龙鳞肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="龙鳞肢铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="龙鳞肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="龙鳞肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="龙鳞肢铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="龙鳞肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="龙鳞肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="龙鳞肢铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="龙鳞尾铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="龙鳞尾铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="龙鳞尾铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="龙鳞尾铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="龙鳞尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="龙鳞尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="龙鳞尾铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="龙鳞尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="龙鳞尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="龙鳞尾铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="龙鳞尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="龙鳞尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="龙鳞尾铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="贪狼头铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="贪狼头铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="贪狼头铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="贪狼头铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="贪狼头铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="贪狼头铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="贪狼头铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="贪狼颈铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="贪狼颈铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="贪狼颈铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="贪狼颈铠" star="4" effect="(4/6) 破防增加:8点"/>
+		<equip partequip="贪狼颈铠" star="5" effect="(5/6) 破防增加:10点"/>
+		<equip partequip="贪狼颈铠" star="6" effect="(6/6) 破防增加:12点"/>
+		<equip partequip="贪狼颈铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+		<equip partequip="贪狼胸铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="贪狼胸铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="贪狼胸铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="贪狼胸铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="贪狼胸铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="贪狼胸铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="贪狼胸铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="贪狼背铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="贪狼背铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="贪狼背铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="贪狼背铠" star="4" effect="(4/6) 暴击增加:8点"/>
+		<equip partequip="贪狼背铠" star="5" effect="(5/6) 暴击增加:10点"/>
+		<equip partequip="贪狼背铠" star="6" effect="(6/6) 暴击增加:12点"/>
+		<equip partequip="贪狼背铠" star="7" effect="(7/7) 抵抗增加:12点"/>
+		<equip partequip="贪狼肢铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="贪狼肢铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="贪狼肢铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="贪狼肢铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="贪狼肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="贪狼肢铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="贪狼肢铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="贪狼肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="贪狼肢铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="贪狼肢铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="贪狼肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="贪狼肢铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="贪狼肢铠" star="7" effect="(7/7) 躲避增加:12点"/>
+		<equip partequip="贪狼尾铠" star="1" effect="(1/3) 生命值上限增加:15点"/>
+		<equip partequip="贪狼尾铠" star="2" effect="(2/3) 生命值上限增加:18点"/>
+		<equip partequip="贪狼尾铠" star="3" effect="(3/3) 生命值上限增加:20点"/>
+		<equip partequip="贪狼尾铠" star="4" effect="(4/6) 命中增加:8点" career="0"/>
+		<equip partequip="贪狼尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="1"/>
+		<equip partequip="贪狼尾铠" star="4" effect="(4/6) 魔法命中增加:8%%" career="2"/>
+		<equip partequip="贪狼尾铠" star="5" effect="(5/6) 命中增加:10点" career="0"/>
+		<equip partequip="贪狼尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="1"/>
+		<equip partequip="贪狼尾铠" star="5" effect="(5/6) 魔法命中增加:10%%" career="2"/>
+		<equip partequip="贪狼尾铠" star="6" effect="(6/6) 命中增加:12点" career="0"/>
+		<equip partequip="贪狼尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="1"/>
+		<equip partequip="贪狼尾铠" star="6" effect="(6/6) 魔法命中增加:12%%" career="2"/>
+		<equip partequip="贪狼尾铠" star="7" effect="(7/7) 魔法躲避增加:12%%"/>
+
+	</ShouHunMerge>
+	
+	<QiShouSuitEffect>
+		<suit name="凶蛮" num="4" effect="(4/4) 吸血增加:15点"/>
+		<suit name="凶蛮" num="6" effect="(6/6) 骑战技能减免伤害:5%%"/>
+		<suit name="咆哮" num="4" effect="(4/4) 吸血增加:20点"/>
+		<suit name="咆哮" num="6" effect="(6/6) 骑战技能减免伤害:10%%"/>
+		<suit name="地狱" num="4" effect="(4/4) 吸血增加:30点"/>
+		<suit name="地狱" num="6" effect="(6/6) 骑战技能减免伤害:15%%"/>
+		<suit name="龙鳞" num="4" effect="(4/4) 吸血增加:30点"/>
+		<suit name="龙鳞" num="6" effect="(6/6) 骑战技能减免伤害:20%%"/>
+		<suit name="龙腾" num="4" effect="(4/4) 吸血增加:30点"/>
+		<suit name="龙腾" num="6" effect="(6/6) 骑战技能减免伤害:25%%"/>
+		<suit name="贪狼" num="4" effect="(4/4) 吸血增加:30点"/>
+		<suit name="贪狼" num="6" effect="(6/6) 骑战技能减免伤害:25%%"/>
+
+	</QiShouSuitEffect>
+	
+	<QiShouMergeEffect>
+		<suit name="凶蛮套装" career="100" star="3" effect="(三星套) 反弹伤害增加:20点"/>
+		<suit name="凶蛮套装" career="0" star="5" effect="(五星套) 翱风斩冷却时间减少:2秒"/>
+		<suit name="凶蛮套装" career="0" star="7" effect="(七星套) 翱风斩威力提高:10%%   使用翱风斩时10%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="凶蛮套装" career="1" star="5" effect="(五星套) 纵雷诀冷却时间减少:2秒"/>
+		<suit name="凶蛮套装" career="1" star="7" effect="(七星套) 纵雷诀威力提高:10%%   使用纵雷诀时10%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="凶蛮套装" career="2" star="5" effect="(五星套) 毒凌波冷却时间减少:2秒"/>
+		<suit name="凶蛮套装" career="2" star="7" effect="(七星套) 毒凌波威力提高:10%%   使用毒凌波时10%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="咆哮套装" career="100" star="3" effect="(三星套) 反弹伤害增加:30点"/>
+		<suit name="咆哮套装" career="0" star="5" effect="(五星套) 翱风斩冷却时间减少:3秒"/>
+		<suit name="咆哮套装" career="0" star="7" effect="(七星套) 翱风斩威力提高:15%%   使用翱风斩时30%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="咆哮套装" career="1" star="5" effect="(五星套) 纵雷诀冷却时间减少:3秒"/>
+		<suit name="咆哮套装" career="1" star="7" effect="(七星套) 纵雷诀威力提高:15%%   使用纵雷诀时30%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="咆哮套装" career="2" star="5" effect="(五星套) 毒凌波冷却时间减少:3秒"/>
+		<suit name="咆哮套装" career="2" star="7" effect="(七星套) 毒凌波威力提高:15%%   使用毒凌波时30%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="地狱套装" career="100" star="3" effect="(三星套) 反弹伤害增加:40点"/>
+		<suit name="地狱套装" career="0" star="5" effect="(五星套) 翱风斩冷却时间减少:5秒"/>
+		<suit name="地狱套装" career="0" star="7" effect="(七星套) 翱风斩威力提高:20%%   使用翱风斩时50%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="地狱套装" career="1" star="5" effect="(五星套) 纵雷诀冷却时间减少:5秒"/>
+		<suit name="地狱套装" career="1" star="7" effect="(七星套) 纵雷诀威力提高:20%%   使用纵雷诀时50%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="地狱套装" career="2" star="5" effect="(五星套) 毒凌波冷却时间减少:5秒"/>
+		<suit name="地狱套装" career="2" star="7" effect="(七星套) 毒凌波威力提高:20%%   使用毒凌波时50%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="龙鳞套装" career="100" star="3" effect="(三星套) 反弹伤害增加:50点"/>
+		<suit name="龙鳞套装" career="0" star="5" effect="(五星套) 翱风斩冷却时间减少:5秒"/>
+		<suit name="龙鳞套装" career="0" star="7" effect="(七星套) 翱风斩威力提高:25%%   使用翱风斩时55%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="龙鳞套装" career="1" star="5" effect="(五星套) 纵雷诀冷却时间减少:5秒"/>
+		<suit name="龙鳞套装" career="1" star="7" effect="(七星套) 纵雷诀威力提高:25%%   使用纵雷诀时55%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="龙鳞套装" career="2" star="5" effect="(五星套) 毒凌波冷却时间减少:5秒"/>
+		<suit name="龙鳞套装" career="2" star="7" effect="(七星套) 毒凌波威力提高:25%%   使用毒凌波时55%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="龙腾套装" career="100" star="3" effect="(三星套) 反弹伤害增加:60点"/>
+		<suit name="龙腾套装" career="0" star="5" effect="(五星套) 翱风斩冷却时间减少:5秒"/>
+		<suit name="龙腾套装" career="0" star="7" effect="(七星套) 翱风斩威力提高:30%%   使用翱风斩时60%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="龙腾套装" career="1" star="5" effect="(五星套) 纵雷诀冷却时间减少:5秒"/>
+		<suit name="龙腾套装" career="1" star="7" effect="(七星套) 纵雷诀威力提高:30%%   使用纵雷诀时60%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="龙腾套装" career="2" star="5" effect="(五星套) 毒凌波冷却时间减少:5秒"/>
+		<suit name="龙腾套装" career="2" star="7" effect="(七星套) 毒凌波威力提高:30%%   使用毒凌波时60%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="贪狼套装" career="100" star="3" effect="(三星套) 反弹伤害增加:70点"/>
+		<suit name="贪狼套装" career="0" star="5" effect="(五星套) 翱风斩冷却时间减少:5秒"/>
+		<suit name="贪狼套装" career="0" star="7" effect="(七星套) 翱风斩威力提高:35%%   使用翱风斩时65%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="贪狼套装" career="1" star="5" effect="(五星套) 纵雷诀冷却时间减少:5秒"/>
+		<suit name="贪狼套装" career="1" star="7" effect="(七星套) 纵雷诀威力提高:35%%   使用纵雷诀时65%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+		<suit name="贪狼套装" career="2" star="5" effect="(五星套) 毒凌波冷却时间减少:5秒"/>
+		<suit name="贪狼套装" career="2" star="7" effect="(七星套) 毒凌波威力提高:35%%   使用毒凌波时65%%概率召唤出五行灵兽触发群体技能协助战斗"/>
+
+	</QiShouMergeEffect>
+</QiShouEquipCfg>

@@ -354,7 +354,7 @@ int GetLineDirect(int x1,int y1,int x2,int y2)
 	return iDir;
 }
 
-//by json 角色转方向
+// 角色转方向
 void GetDirStep(int iDir,int &iX,int &iY)
 {
 	switch( iDir )

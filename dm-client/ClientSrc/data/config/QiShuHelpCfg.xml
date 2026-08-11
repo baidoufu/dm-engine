@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<!--
+	通过 @reloadhelpcfg 重载此文件
+-->
+<HelpCfg Ver="1">  
+  <Helps>
+    <Help name="@@main" value="&lt;骑术系统概述/@@qishuquest&gt;    &lt;骑术成长/@@qishulevel&gt;    &lt;非值守成长/@@qishusoi&gt;
+    \&lt;骑战技能/@@qishuskill&gt;     
+"/>
+    
+    <Help name="@@qishuquest" value="\
+    \
+    \  &lt;color=00B050 骑术概述：&gt;
+      \      &lt;color=white 中州的驯兽师经过常年的研究实践，掌&gt;
+      \  &lt;color=white 握了驯服妖兽来当做坐骑的秘诀。他现在要&gt;
+      \  &lt;color=white 这份骑术传授给中州的勇士们。掌握了骑术&gt;
+      \  &lt;color=white 的勇士可以驾驭骑兽为己所用，不但大幅度&gt;
+      \  &lt;color=white 提升自己的战斗力，还能配合骑兽施展出强&gt;
+      \  &lt;color=white 大的骑战技能。&gt;
+      \\      &lt;返回/@@main&gt;"/>
+    <Help name="@@qishulevel" value="\
+    \
+    \  &lt;color=00B050 骑术成长：&gt;
+      \&lt;color=E36C0A     1）普通打怪获得&gt;
+      \&lt;color=white 当玩家骑乘骑兽作战时，会按怪物经验值的一&gt;
+      \&lt;color=white 定比率换算为骑术经验。&gt;
+      \&lt;color=E36C0A     2）阅读骑乘宝典获得&gt;
+      \&lt;color=white 当玩家打怪获得了骑乘相关教程之后，可以通&gt;
+      \&lt;color=white 过阅读教程来获取骑乘经验。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@qishusoi" value="\
+    \
+    \  &lt;color=00B050 非值守成长：&gt;
+      \&lt;color=white 玩家可以在驯兽师处进行免费得骑术训练，&gt;
+      \&lt;color=white 每人每天八小时。如果玩家使用驭兽修炼书&gt;
+      \&lt;color=white 和驭兽修炼卡得话，还可以获取额外的骑术&gt;
+      \&lt;color=white 经验。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@qishuskill" value="\
+    \
+    \ &lt;color=00B050 骑战技能：&gt;
+      \&lt;color=white     当玩家拥有熟练的骑术之后，就可以学习强&gt;
+      \&lt;color=white 大的骑战技能了。大多数骑战技能是被动技能，&gt;
+      \&lt;color=white 玩家学习后只要处于骑乘状态就能享受技能的加&gt;
+      \&lt;color=white 成。每个职业还拥有一种强大的主动骑战技能，&gt;
+      \&lt;color=white 它需要拖到技能栏中，在玩家处于骑乘时方可使&gt;
+      \&lt;color=white 用。&gt;
+      \\    &lt;返回/@@main&gt;"/>
+    <Help name="@@samadhifireexp2" value="&lt;color=00B050 火凝丹详述：&gt;
+      \&lt;color=E36C0A     火凝丹的使用：&gt;
+      \&lt;color=white     但是人物只能使用等于或&gt;
+      \&lt;color=white 者高于当前人物三昧真火重数&gt;
+      \&lt;color=white 的火凝丹，而不可使用低级的&gt;
+      \&lt;color=white 的火凝丹。&gt;
+      \&lt;color=white 例：中阶石火境的人物可以使&gt;
+      \&lt;color=white 用中阶石火凝丹及所有更高等&gt;
+      \&lt;color=white 级的火凝丹，但当人物三昧真&gt;
+      \&lt;color=white 火重数提升至上阶石火境之后&gt;
+      \&lt;color=white 将不可再使用中阶石火凝丹。&gt;
+      \&lt;color=E36C0A      火凝丹的产出&gt;
+      \&lt;color=white     火凝丹的产出对应人物的&gt;
+      \&lt;color=white 三昧真火重数，当玩家修炼到&gt;
+      \&lt;color=white 一定重数之后即可在打怪过程&gt;
+      \&lt;color=white 中获得相应等级的火凝丹。并&gt;
+      \&lt;color=white 有概率获得高等级的火凝丹。&gt;
+      \&lt;color=white 例：中阶石火境的玩家打怪时&gt;
+      \&lt;color=white 有较大概率打出中阶石火凝丹&gt;
+      \&lt;color=white 同时有较小概率打出上阶石火&gt;
+      \&lt;color=white 凝丹及下阶天火凝丹。&gt;
+      \     &lt;上一页/@@samadhifireexp1&gt;
+      \\    &lt;返回/@@main&gt;"/>
+
+    
+  </Helps>
+</HelpCfg>

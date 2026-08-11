@@ -1,11 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-//文件名：   .cpp
-//版权：上海盛大网络有限公司版权所有
-//作者：
-//创建日期：
-//版本：
-//文件说明：
-///////////////////////////////////////////////////////////////////////
 #include "Net.h"
 #include "Global/DebugTry.h"
 #include "Global/PerfCheck.h"
@@ -41,7 +33,7 @@ CDownloadNet::CDownloadNet(HWND hWnd,DWORD dwMsg,bool bBgLimitedDownload,long lE
 	m_hThread = CreateThread(NULL,0,ProcessBuffer,this,0,&m_dwThreadID);
 	SetThreadPriority(m_hThread,THREAD_PRIORITY_ABOVE_NORMAL);
 
-	m_dlSpeed = (int)GetPrivateProfileInt("Config","BgDlSpeed",10,"./Config.ini");
+	m_dlSpeed = (int)GetPrivateProfileInt("Config","BgDlSpeed",512,"./Config.ini");
 
 }
 
@@ -309,6 +301,7 @@ DWORD WINAPI CDownloadNet::ProcessBuffer(LPVOID lpData)
 
 			if (wMsgID != 3001)//非法包
 			{
+				output_debug("CDownloadNet: wMsgID错误=%04X, dwDataLen=%u", wMsgID, dwDataLen);
 				pThis->m_bNeedReConnect = true;
 				break;
 			}
@@ -440,7 +433,7 @@ void CDownloadNet::SendAsynBuf()
 		{
 			Sleep(3000);
 		}
-		else if (SocketInfo->dwLastConnectTime != 0 && GetTickCount() - SocketInfo->dwLastConnectTime > 10000)
+		else if (SocketInfo->dwLastConnectTime != 0 && GetTickCount() - SocketInfo->dwLastConnectTime > 3000)
 		{
 			if (SocketInfo->iReConnectTimes < 18)
 			{
@@ -695,10 +688,9 @@ void CDownloadNet::OnClose(DWORD wParam,DWORD lParam)
 
 	g_pStreamMgr->ClearDownloadingFilesList();
 	g_pTexMgr->ClearAllNullTex();
-	return;
+	//return;
 
 	//重连
-
 	if (bConnected)
 	{
 		Sleep(200);
@@ -799,7 +791,7 @@ bool CDownloadNet::DealRead()
 	SocketInfo->DataBuf.buf = m_pRecBuf;
 	if(m_bBgLimitedDownload)
 	{
-		SocketInfo->DataBuf.len = min(MAX_RECBUF_LENJ_DOWNLOADFILE - m_dwAllRecDataBufLen_SaveToDisk,10000);
+		SocketInfo->DataBuf.len = min(MAX_RECBUF_LENJ_DOWNLOADFILE - m_dwAllRecDataBufLen_SaveToDisk, 256 * 1024);
 	}
 	else
 	{

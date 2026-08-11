@@ -1603,6 +1603,27 @@ void CStreamManager::ClearDownloadingFilesList()
 }
 
 
+// 根据下载优先级获取超时时间(毫秒)
+// 高优先级资源(地图/UI/地表)快速重试，低优先级资源可容忍较长等待
+static DWORD GetTimeoutByPrior(BYTE byPrior)
+{
+	switch (byPrior)
+	{
+	case EP_MOST_HIGH:	return 2000;	// 最高优先级(地图等):2秒
+	case EP_UI:			return 3000;	// UI纹理:3秒
+	case EP_TILES:		return 5000;	// 大地表:5秒
+	case EP_NPC:
+	case EP_MONSTER:
+	case EP_CHARACTER:	return 7000;	// NPC/怪物/角色:7秒
+	case EP_SMTILES:
+	case EP_OBJECT:		return 9000;	// 小地表/物体:9秒
+	case EP_SKILL:
+	case EP_MAGIC:		return 10000;	// 技能/魔法特效:10秒
+	case EP_AUDIO:		return 20000;	// 音效:20秒
+	default:			return 30000;	// 一般/未知:30秒
+	}
+}
+
 int CStreamManager::CheckDownLoadList()
 {
 	int iRtn = 0;
@@ -1615,7 +1636,8 @@ int CStreamManager::CheckDownLoadList()
 
 	CLock lock(&m_DlFileCriSect);
 	DWORD dwTime = GetTickCount();
-	//30分钟之内没有请求到的,认为是服务器不存在的
+	// 按优先级分级超时：高优先级快速重试，低优先级可容忍较长等待
+	// byRev[0]记录重试次数，超过最大重试次数(3次)放弃，避免对服务器不存在的文件无限请求
 	for (map<__int64,DlProtocalBody>::iterator itr = m_MInDownloadFile.begin();itr != m_MInDownloadFile.end();)
 	{
 		if (itr->second.byPrior <= EP_TILES)
@@ -1623,20 +1645,30 @@ int CStreamManager::CheckDownLoadList()
 			iRtn = 1;
 		}
 
-		if (dwTime - itr->second.dwTickCount > 1800000)
+		DWORD dwTimeout = GetTimeoutByPrior(itr->second.byPrior);
+		const BYTE byMaxRetry = 5; // 最大重试5次
+
+		if (dwTime - itr->second.dwTickCount > dwTimeout)
 		{
-			itr->second.dwTickCount = dwTime;
-			VBody.push_back(itr->second);
+			// 超过最大重试次数，放弃该文件，不再请求
+			if (itr->second.byRev[0] >= byMaxRetry)
+			{
+				output_debug("放弃下载[%d次超时]: %I64d Prior=%d\r\n",
+					itr->second.byRev[0], itr->second.i64Hash, itr->second.byPrior);
+				itr = m_MInDownloadFile.erase(itr);
+			}
+			else
+			{
+				itr->second.dwTickCount = dwTime;
+				itr->second.byRev[0] ++;
+				VBody.push_back(itr->second);
 
-			output_debug("Send_1800000: %I64d \r\n",itr->second.i64Hash);
+				output_debug("重试下载[%d/%d]: %I64d Prior=%d Timeout=%dms\r\n",
+					itr->second.byRev[0], byMaxRetry,
+					itr->second.i64Hash, itr->second.byPrior, dwTimeout);
 
-			itr = m_MInDownloadFile.erase(itr);
-
-			////每次最多请求10个
-			//if (VBody.size() >= 10)
-			//{
-			//	break;
-			//}
+				itr = m_MInDownloadFile.erase(itr);
+			}
 		}
 		else
 		{
@@ -1644,16 +1676,17 @@ int CStreamManager::CheckDownLoadList()
 		}
 	}
 
-	////太长时间没有回应的重新请求下载
-	//if (VBody.size() > 0)
-	//{
-	//	SendDownloadFile(VBody);
-	//}
+	// 超时未响应的重新请求下载
+	if (VBody.size() > 0)
+	{
+		SendDownloadFile(VBody);
+		// 重试请求需重新加入追踪列表，否则OnDownloadedFile中查找不到hash会丢弃响应
+		for (size_t i = 0; i < VBody.size(); i++)
+		{
+			m_MInDownloadFile[VBody[i].i64Hash] = VBody[i];
+		}
+		m_iInDownloadFileCount = m_MInDownloadFile.size();
+	}
 
 	return iRtn;
 }
-
-
-
-
-

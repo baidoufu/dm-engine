@@ -52,14 +52,12 @@ bool CCharacter::PopNextAction(SNextAction* pNextAction)
 
 bool CCharacter::FromBuffer(const char* buf,int iLen)
 {
-	//by json 传世角色信息
-	//_TDEFAULTMESSAGE	tdm;	//错误
-	//fnDecodeMessage(&tdm, (char*)buf); //错误
-	_LPTDEFAULTMESSAGE	tdm2 = (_LPTDEFAULTMESSAGE)((char*)buf);	//正确.只有头结构
+	// 传世角色信息 SC_PLAYER_ATTRIBUTE 封包
+	//_LPTDEFAULTMESSAGE	tdm2 = (_LPTDEFAULTMESSAGE)((char*)buf);	//正确.只有头结构
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)buf;	//正确,全部
 
-	SetGold(lpPacketMsg->stDefMsg.nRecog);
-	SetCareer(lpPacketMsg->stDefMsg.wParam);
+	SetGold(lpPacketMsg->stDefMsg.nRecog); // 设置金币数量
+	SetCareer(lpPacketMsg->stDefMsg.wParam); // 设置角色职业
 
 	//新的结构
 	//fnDecode6BitBuf((pszMsg + DEFBLOCKSIZE), (char*)&m_xMyHero.m_stAbility, sizeof(ACTORABILITY));
@@ -430,7 +428,7 @@ int CCharacter::GetWearGold()
 
 int CCharacter::CalStepCount(WORD wAction)
 {
-	//by json m_tagPlayerProperty.wPackageWeight > m_tagPlayerProperty.wMaxPackageWeight 错误导致不能跑步
+	// m_tagPlayerProperty.wPackageWeight > m_tagPlayerProperty.wMaxPackageWeight 错误导致不能跑步
 	if(m_tagPlayerProperty.wCurHP < 9 || m_tagPlayerProperty.wPackageWeight > m_tagPlayerProperty.wMaxPackageWeight || IsBianShen())
 		return 1;
 

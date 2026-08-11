@@ -772,7 +772,7 @@ enum E_MAGIC_ID
 	MAGICID_LIANJI_ZHUANGJI			  = 50017,					//连击撞击事件	
 
 	//其它特殊用处的编号
-	MAGICID_SHOW_IGA                  = 60001,                 //控制是否显示IGA视频广告,如果配置文件里没有这个编号的魔法根结点则不显示IGALIVE,如有问题要暂停IGALIVE只要更新magicfile.dat文件
+	//MAGICID_SHOW_IGA                  = 60001,                 //控制是否显示IGA视频广告,如果配置文件里没有这个编号的魔法根结点则不显示IGALIVE,如有问题要暂停IGALIVE只要更新magicfile.dat文件
 	MAGICID_SHOW_IGW                  = 60002,                 //控制是否载入IGW,如果配置文件里没有这个编号的魔法根结点则不载入IGW,如有问题要暂停IGW只要更新magicfile.dat文件
 	MAGICID_ENABLE_REQUIT             = 60003,                 //正在跨gs的时候快速小退,此时请求角色列表会失败,如果后面收到跳gs成功的消息应该再次退重新请求角色列表,配置了这个选项后开启此功能
 	MAGICID_ENABLE_CREDIT             = 60004,                 //是否开启信用功能

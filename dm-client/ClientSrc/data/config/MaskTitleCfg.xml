@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<MaskTitleCfg Ver="1">
+<!--
+	用于配置称号对应的步步生莲特效
+	格式如下：
+	<BuBu mask="称号名称" effect="特效编号"/>
+	特效编号分别对应不同的效果
+	5422: 步步生莲火特效
+	5423: 步步生莲冰特效
+	5424: 步步生莲_脚踏奇星1冰
+	5425: 步步生莲_脚踏奇星2火
+	5426: 步步生莲_脚踏奇星3光
+	5427: 步步生莲_XIN
+	5428: 步步生莲_骷髅
+-->
+<!-- 称号特效-->
+    <BuBu mask="孤王天下无双·战神" effect="5422"/>
+    <BuBu mask="本宫倾城无双·战姬" effect="5423"/>
+    <BuBu mask="孤王天下无双·魔王" effect="5422"/>
+    <BuBu mask="本宫倾城无双·魔姬" effect="5423"/>
+    <BuBu mask="孤王天下无双·道仙" effect="5422"/>
+    <BuBu mask="本宫倾城无双·道姬" effect="5423"/>
+    <BuBu mask="步步生莲·战" effect="5422"/>
+    <BuBu mask="步步生玉·战" effect="5423"/>
+    <BuBu mask="脚踏奇星·战" effect="5424"/>
+    <BuBu mask="七月流火·战" effect="5425"/>
+    <BuBu mask="神佑之光·战" effect="5426"/>
+    <BuBu mask="步步倾心·战" effect="5427"/>
+    <BuBu mask="死亡之境·战" effect="5428"/>
+    
+    <BuBu mask="步步生莲·法" effect="5422"/>
+    <BuBu mask="步步生玉·法" effect="5423"/>
+    <BuBu mask="脚踏奇星·法" effect="5424"/>
+    <BuBu mask="七月流火·法" effect="5425"/>
+    <BuBu mask="神佑之光·法" effect="5426"/>
+    <BuBu mask="步步倾心·法" effect="5427"/>
+    <BuBu mask="死亡之境·法" effect="5428"/>
+    
+    <BuBu mask="步步生莲·道" effect="5422"/>
+    <BuBu mask="步步生玉·道" effect="5423"/>
+    <BuBu mask="脚踏奇星·道" effect="5424"/>
+    <BuBu mask="七月流火·道" effect="5425"/>
+    <BuBu mask="神佑之光·道" effect="5426"/>
+    <BuBu mask="步步倾心·道" effect="5427"/>
+    <BuBu mask="死亡之境·道" effect="5428"/>
+    
+    <BuBu mask="步步生莲·战火" effect="5422"/>
+    <BuBu mask="步步生玉·战意" effect="5423"/>
+    <BuBu mask="脚踏奇星·战圣" effect="5424"/>
+    <BuBu mask="七月流火·战圣" effect="5425"/>
+    <BuBu mask="神佑之光·战圣" effect="5426"/>
+    <BuBu mask="步步倾心·战心" effect="5427"/>
+    <BuBu mask="死亡之境·战圣" effect="5428"/>
+    
+    <BuBu mask="步步生莲·法火" effect="5422"/>
+    <BuBu mask="步步生玉·法意" effect="5423"/>
+    <BuBu mask="脚踏奇星·圣法" effect="5424"/>
+    <BuBu mask="七月流火·圣法" effect="5425"/>
+    <BuBu mask="神佑之光·圣法" effect="5426"/>
+    <BuBu mask="步步倾心·法心" effect="5427"/>
+    <BuBu mask="死亡之境·圣法" effect="5428"/>
+    
+    <BuBu mask="步步生莲·道火" effect="5422"/>
+    <BuBu mask="步步生玉·道意" effect="5423"/>
+    <BuBu mask="脚踏奇星·圣道" effect="5424"/>
+    <BuBu mask="七月流火·圣道" effect="5425"/>
+    <BuBu mask="神佑之光·圣道" effect="5426"/>
+    <BuBu mask="步步倾心·道心" effect="5427"/>
+    <BuBu mask="死亡之境·圣道" effect="5428"/>
+    
+    <BuBu mask="三周年无双巅峰之霸者" effect="5424"/>
+    <BuBu mask="三周年无双巅峰之智者" effect="5424"/>
+    <BuBu mask="三周年无双巅峰之勇者" effect="5424"/>
+    <BuBu mask="三周年无双巅峰·霸者" effect="5424"/>
+    <BuBu mask="三周年无双巅峰·智者" effect="5424"/>
+    <BuBu mask="三周年无双巅峰·勇者" effect="5424"/>
+    <BuBu mask="我将藐视一切·战神" effect="5423"/>
+		<BuBu mask="我将藐视一切·法神" effect="5423"/>
+		<BuBu mask="我将藐视一切·道神" effect="5423"/>
+
+	<MaskTitle name="蓝色羽翼" show="true" exp="100">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="蓝色五色任务100次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="5点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="5点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="5点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="紫色情缘" show="true" exp="500">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="紫色五色任务100次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="8点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="8点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="8点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="贵族风范" show="true" exp="1000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="紫色五色任务200次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="10点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="10点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="10点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="紫金风暴" show="true" exp="1500">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="紫色五色任务500次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="20点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="20点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="20点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="紫金之王" show="true" exp="2000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="紫色五色任务1000次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="25点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="25点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="25点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="金色年华" show="true" exp="2000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="橙色五色任务100次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="25点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="15点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="15点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="黄金尊者" show="true" exp="4000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="橙色五色任务200次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="35点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="20点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="20点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="赤金守护者" show="true" exp="5000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="橙色五色任务300次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="45点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="25点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="25点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="巅峰赤金王者" show="true" exp="6000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="橙色五色任务500次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="55点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="30点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="巅峰铂金王者" show="true" exp="7000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="橙色五色任务800次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="65点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="35点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="35点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+	<MaskTitle name="巅峰钻石王者" show="true" exp="8000">
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="完成"/>
+				<col color="0xFF5AA0A0" content="橙色五色任务1000次"/>
+				<col color="0xffb48c5a" content="可获得"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  本职业攻击力："/>
+				<col color="0xFF00DD00" content="75点"/>
+				<col color="0xffb48c5a" content="  吸血："/> 
+				<col color="0xFF00DD00" content="40点"/>
+			</line>
+			<line>
+				<col color="0xffb48c5a" content="  暴击："/>
+				<col color="0xFF00DD00" content="40点"/>
+			</line>
+		</MaskTitleCol>
+		<MaskTitleCol>
+			<line>
+				<col color="0xffb48c5a" content="  永久"/>
+			</line>
+		</MaskTitleCol>
+	</MaskTitle>
+</MaskTitleCfg>

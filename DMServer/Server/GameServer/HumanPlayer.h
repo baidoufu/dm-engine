@@ -15,7 +15,6 @@
 #include "monstermanagerex.h"
 #include "monsterex.h"
 #include "ScriptNpc.h"
-#include "TimeAchieve.h"
 
 class CClientObj;
 class CScriptPage;
@@ -103,27 +102,6 @@ public:
 	CClientObj* GetClientObject() { return m_pClientObj; }
 	VOID GetViewDetail(xPacket& packet);
 	VOID UpdateViewName();
-	//获取时长封号特殊封号值
-	BYTE GetFenghaoType23() override 
-	{ 
-		return m_FenghaoInfo.btType2 > 0 ? m_FenghaoInfo.btType2 : m_FenghaoInfo.btType3;
-	}
-	//发送时长封号加密数据
-	VOID SendFengHaoData();
-	//发送时长封号玩家信息
-	VOID SendFengHaoGrowInfo();
-	//时长封号穿戴
-	VOID SendFengHaoEquip(int nCount);
-	//获取玩家时长封号信息
-	FenghaoInfo* GetFenghaoInfo() { return &m_FenghaoInfo; }
-	//检查时长封号是否过期
-	VOID CheckFengHaoTimeOut();
-	//玩家登录时, 请求获取封号数据
-	VOID OnFengHaoInfo(FenghaoInfo* pInfo);
-	//更新时长封号数据到DB
-	VOID UpdateFengHaoToDB();
-	//重新计算时长封号属性:index封号序号，boOperate 是加属性还是减属性
-	VOID RecalcFengHaoProp(BYTE index, BOOL boOperate, BOOL boProp = TRUE);
 
 	BOOL CanDoAction(actiontype action);
 
@@ -207,8 +185,8 @@ public:
 		if (m_pPet)
 			m_pPet->SetPickupItem(x, y);
 	}
-	// 发送豹子的名字
-	VOID SendPetName(ITEM* pItem);
+	// 发送物品扩展文字
+	VOID SendExName(ITEM* pItem);
 
 	BOOL EquipItem(int pos, ITEM& item, BOOL bForced = FALSE, BOOL bNoticePlayer = TRUE);
 	BOOL EquipItem(DWORD dwMakeIndex);
@@ -309,10 +287,6 @@ public:
 	VOID SendTakeBagItem(ITEM* pItem);
 	VOID SendWisper(const char* pszMsg, ...);
 	VOID SendScrollText(const char* pszText);
-	// 发送自定义快捷键
-	VOID SendClientKeyConfig();
-	// 发送客户端插件信息
-	VOID SendClientPluginInfo();
 	//使用物品
 	VOID UseItem(DWORD dwItemIndex, DWORD dwPackIndex);
 
@@ -534,7 +508,7 @@ public:
 		return ResMag_Count;
 	}
 	//发送生命值、魔法值 变化消息
-	VOID SendHpMpChanged(int damage = 0, WORD wEffect = 57);
+	VOID SendHpMpChanged(int damage = 0, BYTE wEffect = 0);
 
 	CGuildEx* GetGuild() { return m_pGuild; }
 	VOID SetGuild(CGuildEx* pGuild, const char* pszTitle = nullptr, int iLevel = 0);/*{ m_pGuild = pGuild;}*/
@@ -804,7 +778,6 @@ public:
 	// 幸运计算
 	int CalcLucky();
 	VOID PetsFlyto(CLogicMap* pToMap, UINT nToX, UINT nToY, BOOL IsBlock = TRUE);
-	VOID SendOpenGameTimeInfo();
 	int GetGameTIme()const { return m_Humandesc.dbinfo.nGameTime; }
 	VOID AddGameTime(int nGameTime) { m_Humandesc.dbinfo.nGameTime += nGameTime; }
 	VOID DecGameTime(int nGameTime)
@@ -850,37 +823,7 @@ public:
 	}
 	// 检查是否穿戴了指定物品
 	BOOL CheckItemInfo(int pos, BYTE stdMode, BYTE btShape) { return m_Equipments.CheckItemInfo(pos, stdMode, btShape); }
-public: //成就相关函数
-	//初始化成就数据
-	VOID InitAchievement(int nCount);
-	//调整成就组进度值
-	BOOL ChangeAchieveGroupExp(BYTE btGroupId, BYTE btType, DWORD btRecentCount);
-	//调整指定成就ID进度值
-	BOOL ChangeAchieveExp(WORD wId, BYTE btType, DWORD btRecentCount);
-	//调整指定成就ID状态
-	BOOL SetAchieveState(WORD wId, BYTE btStatu);
-	//调整指定成就ID完成时间
-	BOOL SetAchieveTime(WORD wId, DWORD dwTime);
-	//发送更新指定成就相关信息
-	BOOL SendGotAchieve(WORD wId);
-	//调整玩家成就点
-	BOOL ChangeAchievePoint(BYTE btType, DWORD dwExp);
-	//组包玩家的成就数据
-	VOID PacketAchieve(xPacket& packet, BYTE btType, DWORD nAchieveCount);
-	//获取玩家当前的成就进度
-	DWORD GetAchieveExp() const { return m_Achievement.dwExp; }
-	//获取玩家当前的成就等级
-	BYTE GetAchieveLevel() const { return m_Achievement.btLevel; }
-	//获取指定成就的进度值
-	DWORD GetAchieveExpById(WORD wId) const;
-	//获取指定成就的状态值
-	BYTE GetAchieveStateById(WORD wId) const;
-	//获取指定成就的完成时间
-	DWORD GetAchieveCompleteTimeById(WORD wId) const;
-	// 检查成就等级是否升级
-	VOID CheckAchieveLevelUp();
 protected:
-	VOID SendClientfunction();
 	DWORD m_dwForgePoint;
 	mutable std::array<DWORD, 4> m_dwParams;
 
@@ -891,7 +834,7 @@ protected:
 	AbilityShellRef m_xAbilityShellRef;
 	//char m_szCurrentNpcPage[128];
 
-	CServerTimer m_tmrGameTime; // 时长区-计时
+	CServerTimer m_tmrGameTime; // 每秒检查
 
 	CSystemTime m_LoginTime;
 	std::array<char, 256> m_szTempScriptVarValue{};
@@ -1002,10 +945,6 @@ protected:
 	WORD m_wPrivateShopFlags;
 	DWORD m_wPrivateShopSign;
 	BYTE m_btChatColor;
-
-	FenghaoInfo m_FenghaoInfo; // 玩家时长封号信息
-	CServerTimer m_tmrFenghaoTime; // 时长区-封号计时
-	AchievementData m_Achievement;  // 成就数据
 
 	TASKINFO m_TaskInfo;
 	int HushenBuffdamage = 0;//这个用来存储护身或者金刚受到的伤害

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="gb2312"?>
+<Ui>
+	<Window name = "PanelWnd" path = "PanelWnd.xml">
+		<Path path="NewPanelWnd.xml" />
+	</Window>
+  <Window name = "AvatarWnd" path = "AvatarWnd.xml"/>
+  <Window name = "NpcWnd" path = "NpcWnd.xml"/>
+</Ui>
+

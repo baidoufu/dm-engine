@@ -95,11 +95,11 @@ CTexManager::CTexManager(void)
 	m_hThread = CreateThread(NULL,0,ThreadLoadTex,NULL,0,&m_dwThreadID);
 	SetThreadPriority(m_hThread,THREAD_PRIORITY_ABOVE_NORMAL);
 
-	//by json 读取sgl文件
+	// 读取sgl文件
 	//Init("../data");  //读取sgl文件
 }
 
-//by json 初始化所有sgl文件
+// 初始化所有sgl文件
 /*
 bool CTexManager::Init(const char* strDataDir)
 {
@@ -256,7 +256,7 @@ CTexManager::~CTexManager(void)
 		CloseHandle(m_hThread);
 	}
 
-	//by json 释放所有sgl文件
+	// 释放所有sgl文件
 	/*
 	while(!m_mSglFile.empty())
 	{
@@ -715,7 +715,7 @@ LPTexture CTexManager::Inter_LoadTex(DWORD dwID,bool bThread,eReadPrior ePrior)
 	int			iPack	= HIWORD(dwID);
 	int			iIdx	= LOWORD(dwID);
 
-	//by json 传世资源读取
+	// 传世资源读取
 	/*
 	MSglFile::iterator itr = m_mSglFile.find(iPack);
 	if(itr == m_mSglFile.end())

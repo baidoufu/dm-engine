@@ -319,8 +319,8 @@ private:
 
 	typedef struct tagItemPacket
 	{
-		//BYTE	byLenOfName;	//名称的长度 0
-		char	szName[14];		//名称 1-13
+		BYTE	byLenOfName;	//名称的长度 0
+		CHAR	szName[14];		//名称 1-13
 		BYTE	byStdMode;		//StdMode 25
 		BYTE	byShape;		//Shape 26
 		BYTE	byWeight;		//Weight 27
@@ -331,7 +331,7 @@ private:
 
 		//DWORD   dwFlag;//28
 		BYTE byAniCount;
-		WORD wSource;
+		BYTE wSource;
 		BYTE byReserved;
 		BYTE byNeedIdentify;
 		WORD	wLooks; //32

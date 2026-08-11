@@ -66,7 +66,7 @@ VOID CHumanPlayer::DoProcess(OBJECTPROCESS* pProcess)
 				if (EquipItem(_U_CHARM, item, FALSE, FALSE))
 				{
 					if (item.dwMakeIndex != 0) AddBagItem(item);
-					SendMsg(GetId(), SM_ADDBAGITEM, 0, 0, 1, &old, sizeof(old));
+					SendMsg(GetId(), SM_ADDBAGITEM, 0, 0, 0, &old, sizeof(old));
 					SendMsg(old.dwMakeIndex, 0x23, _U_CHARM, 0, 0);
 				}
 			}

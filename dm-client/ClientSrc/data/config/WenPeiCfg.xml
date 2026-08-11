@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<WenPeiCfg Ver="1">
+  <WenPeis>
+    <!-- 顺序按 纹佩图鉴 里的顺序 looks = shape * 100 + n + 6000 -->
+    <!--  looks:配件looks ,shengwang : 分解此纹佩需要消耗X点声望值 ,rate1:初级精华概率 ，rate2：中级精华概率 ，rate3：高级精华概率，task：是否有任务-->
+    <!-- 主纹-->
+    <WenPei looks="6301" name="神武军初级铜镌雕" type="主饰纹" value="攻击上限+1" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级铜镌雕的获得方式：需要于矿洞除掉100只怪物。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到20级。"/>
+    <WenPei looks="6302" name="神武军初级银镌雕" type="主饰纹" value="攻击上限+2" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级银镌雕的获得方式：需要于尸王殿除掉100只怪物。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到25级。"/>
+    <WenPei looks="6303" name="神武军初级金镌雕" type="主饰纹" value="攻击上限+3" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级金镌雕的获得方式：需要于将军坟东除掉200只怪物。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到30级。"/>
+    <WenPei looks="6304" name="神武军中级铜镌雕" type="主饰纹" value="攻击上限+4" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军中级铜镌雕的获得方式：需要于将军坟南除掉200只怪物。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到32级。"/>
+    <WenPei looks="6305" name="神武军中级银镌雕" type="主饰纹" value="攻击上限+5" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军中级银镌雕的获得方式：需要于机关洞除掉200只怪物。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到36级。"/>
+    <WenPei looks="6306" name="神武军中级金镌雕" type="主饰纹" value="攻击上限+6" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军中级金镌雕的获得方式：需要于蛇魔谷地穴除掉200只怪物。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到40级。"/>
+    <WenPei looks="6307" name="神武军高级铜镌雕" type="主饰纹" value="暴击+2" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级铜镌雕的获得方式：需要于逆魔古刹收集100点圣殿力量。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到42级。"/>
+    <WenPei looks="6308" name="神武军高级银镌雕" type="主饰纹" value="暴击+3" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级银镌雕的获得方式：需要于禁地收集100点圣殿力量。" content2="该种纹佩部件只可取得一次。领取该任务需要人物等级达到44级。"/>
+    <WenPei looks="6309" name="神武军高级金镌雕" type="主饰纹" value="攻击上限+8" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级金镌雕的获得方式：需要于禁地收集200点圣殿力量。" content2="该种纹佩部件可以重复获得。领取该任务需要人物等级达到46级。"/>
+    <WenPei looks="6310" name="夺宝勇士铜镌雕" type="主饰纹" value="吸血+2" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="夺宝勇士铜镌雕的获得方式：需要于40级宝地收集100点圣殿力量。" content2="该种纹佩部件可以重复获得。领取该任务需要人物等级达到40级。"/>
+    <WenPei looks="6311" name="夺宝勇士银镌雕" type="主饰纹" value="吸血+3" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="夺宝勇士银镌雕的获得方式：需要于50级宝地收集100点圣殿力量。" content2="该种纹佩部件可以重复获得。领取该任务需要人物等级达到50级。"/>
+    <WenPei looks="6312" name="夺宝勇士金镌雕" type="主饰纹" value="吸血+5" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="夺宝勇士金镌雕的获得方式：需要于60级宝地收集100点圣殿力量。" content2="该种纹佩部件可以重复获得。领取该任务需要人物等级达到60级。"/>
+    <WenPei looks="6313" name="夺宝明珠" type="主饰纹" value="暴击+4" shengwang="5" rate1="20" rate2="80" rate3="0" task="false" content="夺宝明珠的获得方式：需要点亮20次珍宝珠。" content2="该种纹佩部件只可取得一次。"/>
+    <WenPei looks="6314" name="夺宝珍珠" type="主饰纹" value="暴击+6" shengwang="5" rate1="20" rate2="80" rate3="0" task="false" content="夺宝珍珠的获得方式：需要点亮50次珍宝珠。" content2="该种纹佩部件只可取得一次。"/>
+    <WenPei looks="6315" name="夺宝神珠" type="主饰纹" value="破防+2" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="夺宝神珠的获得方式：需要点亮100次珍宝珠。" content2="该种纹佩部件可以重复获得。"/>
+    <WenPei looks="6316" name="夺魂珠" type="主饰纹" value="破防+4" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="夺魂珠的获得方式：需要觉醒10件装备的器魂。" content2="该种纹佩部件只可取得一次。"/>
+    <WenPei looks="6317" name="定魂珠" type="主饰纹" value="破防+6" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="定魂珠的获得方式：需要觉醒50件装备的器魂。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6318" name="符石大师玉髓镌雕" type="主饰纹" value="吸血+6" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为善于还原符石的勇士颁发的纹佩部件，需要成功还原20颗4级符石" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6319" name="宝玉大师翡翠镌雕" type="主饰纹" value="吸血+10" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为善于汲取最高经验宝玉力量的勇士颁发的纹佩部件，需要吸取100个经验宝玉(大)" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6320" name="夺宝统帅铜镌雕" type="主饰纹" value="暴击+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="为精于打宝的勇士颁发的纹佩部件，需要于50级付费宝地收集100点圣殿力量--结界魔境" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6321" name="夺宝统帅银镌雕" type="主饰纹" value="暴击+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="为精于打宝的勇士颁发的纹佩部件，需要于60级付费宝地收集100点圣殿力量--通天魔境" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6322" name="夺宝统帅金镌雕" type="主饰纹" value="暴击+15" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="为精于打宝的勇士颁发的纹佩部件，需要于70级付费宝地收集100个点圣殿力量--魔城魔境" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6323" name="蓝冰龙纹" type="主饰纹" value="攻击上限+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6324" name="赤焰龙纹" type="主饰纹" value="破防+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6325" name="魔龙之首" type="主饰纹" value="攻击上限+12" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6326" name="阴阳密令" type="主饰纹" value="暴击+20" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+	<WenPei looks="6342" name="耀武羊威宝珠" type="主饰纹" value="攻击+15 暴击+25" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="羊年新年专属纹佩"/>
+	<WenPei looks="6346" name="凤舞九天宝珠" type="主纹饰" value="攻击+25 暴击+30" shengwang="" rate1="" rate2="" rate3="" task="false" content=""/>
+
+    <!-- 辅纹-->
+    <WenPei looks="6401" name="宝鉴勇士铜纹" type="辅饰纹" value="躲避+2" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="宝鉴勇士铜纹的获得方式：需要获得1点宝鉴力量。宝鉴力量在开启群英宝鉴时随机获得。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6402" name="宝鉴勇士银纹" type="辅饰纹" value="躲避+4" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="宝鉴勇士银纹的获得方式：需要获得5点宝鉴力量。宝鉴力量在开启群英宝鉴时随机获得。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6403" name="宝鉴勇士金纹" type="辅饰纹" value="躲避+6" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="宝鉴勇士金纹的获得方式：需要获得20点宝鉴力量。宝鉴力量在开启群英宝鉴时随机获得。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6404" name="符石勇士铜纹" type="辅饰纹" value="命中+2" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="符石勇士铜纹的获得方式：需要成功合成1颗2级符石。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6405" name="符石勇士银纹" type="辅饰纹" value="命中+3" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="符石勇士银纹的获得方式：需要成功合成1颗3级符石。" content2="该种纹佩部件只可取得一次。"/>
+    <WenPei looks="6406" name="符石勇士金纹" type="辅饰纹" value="命中+4" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="符石勇士金纹的获得方式：需要成功合成1颗4级符石。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6407" name="宝鉴达人铜纹" type="辅饰纹" value="生命+10" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="宝鉴达人铜纹的获得方式：需要获得80点宝鉴力量。宝鉴力量在开启群英宝鉴时随机获得。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6408" name="宝鉴达人银纹" type="辅饰纹" value="生命+15" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="宝鉴达人银纹的获得方式：需要获得150点宝鉴力量。宝鉴力量在开启群英宝鉴时随机获得。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6409" name="宝鉴达人金纹" type="辅饰纹" value="生命+25" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="宝鉴达人金纹的获得方式：需要获得250点宝鉴力量。宝鉴力量在开启群英宝鉴时随机获得。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6410" name="符石达人铜纹" type="辅饰纹" value="生命+40" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="符石达人铜纹的获得方式：需要成功合成5颗4级符石。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6411" name="符石达人银纹" type="辅饰纹" value="暴击+10" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="符石达人银纹的获得方式：需要成功合成5颗5级符石。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6412" name="符石达人金纹" type="辅饰纹" value="暴击+15" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="符石达人金纹的获得方式：需要成功合成10颗5级符石。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6413" name="江湖达人绿纹" type="辅饰纹" value="吸血+2" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="江湖达人绿纹的获得方式：需要在老兵处上交1个声望令牌(十)。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6414" name="江湖达人蓝纹" type="辅饰纹" value="吸血+4" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="江湖达人蓝纹的获得方式：需要在老兵处上交10个声望令牌(十)。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6415" name="江湖达人紫纹" type="辅饰纹" value="吸血+6" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="江湖达人紫纹的获得方式：需要在老兵处上交30个声望令牌(十)。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6416" name="江湖达人橙纹" type="辅饰纹" value="反弹+4" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="江湖达人橙纹的获得方式：需要在老兵处上交80个声望令牌(十)。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6417" name="江湖达人赤纹" type="辅饰纹" value="反弹+5" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="江湖达人赤纹的获得方式：需要在老兵处上交150个声望令牌(十)。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6418" name="符石大师玉髓纹" type="辅饰纹" value="吸血+8" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为善于为装备开孔的勇士颁发的纹佩部件，需要在装备上打50个孔" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6419" name="宝玉达人翡翠纹" type="辅饰纹" value="反弹+6" shengwang="10" rate1="80" rate2="70" rate3="30" task="false" content="为善于汲取初级经验宝玉力量的勇士颁发的纹佩部件，需要吸取100个经验宝玉(小)" />
+    <WenPei looks="6420" name="铁英之怒铜纹" type="辅饰纹" value="破防+4" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="为发现了群英宝鉴秘密的勇士颁发的纹佩部件，需要达成1次铁英之怒" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6421" name="铁英之怒银纹" type="辅饰纹" value="破防+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="为发现了群英宝鉴秘密的勇士颁发的纹佩部件，需要达成5次铁英之怒" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6422" name="铁英之怒金纹" type="辅饰纹" value="破防+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="为发现了群英宝鉴秘密的勇士颁发的纹佩部件，需要达成10次铁英之怒" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6423" name="蓝冰纹" type="辅饰纹" value="吸血+12" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6424" name="赤焰纹" type="辅饰纹" value="反弹+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6425" name="龙骨纹" type="辅饰纹" value="破防+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6426" name="阴阳纹" type="辅饰纹" value="抵抗+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+	<WenPei looks="6442" name="耀武羊威金纹" type="辅饰纹" value="躲避+10 魔法躲避+10%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="羊年新年专属纹佩"/>
+	<WenPei looks="6446" name="凤舞九天火纹" type="辅纹饰" value="躲避+15 魔法躲避+15%" shengwang="" rate1="" rate2="" rate3="" task="false" content=""/>
+
+    <!-- 底纹-->
+    <WenPei looks="6201" name="神武军初级铜令佩" type="底纹" value="全防御上限+1" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级铜令佩的获得方式：人物等级达到30级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6202" name="神武军初级银令佩" type="底纹" value="全防御上限+2" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级银令佩的获得方式：人物等级达到35级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6203" name="神武军初级金令佩" type="底纹" value="全防御上限+3" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级金令佩的获得方式：人物等级达到40级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6204" name="神武军中级铜令佩" type="底纹" value="全防御上限+4" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军中级铜令佩的获得方式：人物等级达到45级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6205" name="神武军中级银令佩" type="底纹" value="全防御上限+5" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军中级银令佩的获得方式：人物等级达到50级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6206" name="神武军中级金令佩" type="底纹" value="攻击下限+3" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军中级金令佩的获得方式：人物等级达到55级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6207" name="神武军高级铜令佩" type="底纹" value="攻击下限+4" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级铜令佩的获得方式：人物等级达到60级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6208" name="神武军高级银令佩" type="底纹" value="攻击下限+5" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级银令佩的获得方式：人物等级达到65级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6209" name="神武军高级金令佩" type="底纹" value="生命+20" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级金令佩的获得方式：人物等级达到70级后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6210" name="神武军将领铜令佩" type="底纹" value="生命+25" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="神武军将领铜令佩的获得方式：人物等级达到75后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6211" name="神武军将领银令佩" type="底纹" value="生命+30" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="神武军将领银令佩的获得方式：人物等级达到80后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6212" name="神武军将领金令佩" type="底纹" value="生命+40" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="神武军将领金令佩的获得方式：人物等级达到85后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6213" name="绿色勇士令佩" type="底纹" value="命中+2" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="绿色勇士令佩的获得方式：需要在刷新至绿色任务时失败100次。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6214" name="蓝色勇士令佩" type="底纹" value="魔法命中+2%" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="蓝色勇士令佩的获得方式：需要在刷新至蓝色任务时失败150次。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6215" name="紫色勇士令佩" type="底纹" value="命中+4" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="紫色勇士令佩的获得方式：需要在刷新至紫色任务时失败200次。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6216" name="橙色勇士令佩" type="底纹" value="魔法命中+4%" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="橙色勇士令佩的获得方式：需要在刷新至橙色任务时失败250次。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6217" name="赤红勇士令佩" type="底纹" value="抵抗+2" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="赤红勇士令佩的获得方式：需要收集100点五色力量，五色力量在刷新五色任务时会随机获得。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6218" name="符石大师玉髓令佩" type="底纹" value="攻击下限+6" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为善于镶嵌符石的勇士颁发的纹佩部件，需要成功镶嵌5颗5级符石" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6219" name="宝玉大师翡翠令佩" type="底纹" value="攻击下限+7" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为善于汲取中级经验宝玉力量的勇士颁发的纹佩部件，需要吸取100颗经验宝玉(中)的经验值" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6220" name="神武军统帅铜令佩" type="底纹" value="生命+50" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="神武军中最高级的勇士的身份象征，需要人物等级达到60" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6221" name="神武军统帅银令佩" type="底纹" value="生命+80" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6222" name="神武军统帅金令佩" type="底纹" value="生命+110" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6223" name="蓝冰卫士令佩" type="底纹" value="攻击下限+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6224" name="赤焰卫士令佩" type="底纹" value="魔法躲避+10%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6225" name="屠龙勇士令佩" type="底纹" value="攻击下限+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6226" name="阴阳修士令佩" type="底纹" value="生命+120" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+	<WenPei looks="6242" name="耀武羊威令佩" type="底纹" value="生命+200 吸血+15" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="羊年新年专属纹佩"/>	
+	<WenPei looks="6246" name="凤舞九天令佩" type="底纹" value="生命+300 吸血+18" shengwang="" rate1="" rate2="" rate3="" task="false" content=""/>
+
+    <!-- 边纹-->
+    <WenPei looks="6101" name="神武军初级铜镶边" type="边纹" value="躲避+1" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级铜镶边的获得方式：完成将军坟东全部主线任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6102" name="神武军初级银镶边" type="边纹" value="躲避+2" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级银镶边的获得方式：完成将军坟南全部主线任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6103" name="神武军初级金镶边" type="边纹" value="躲避+3" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军初级金镶边的获得方式：完成机关洞全部主线任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6104" name="神武军中级铜镶边" type="边纹" value="躲避+4" shengwang="0" rate1="100" rate2="0" rate3="0" task="true" content="神武军中级铜镶边的获得方式：完成蛇魔谷全部主线任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6105" name="神武军中级银镶边" type="边纹" value="躲避+5" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军中级银镶边的获得方式：完成逆魔古刹全部主线任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6106" name="神武军中级金镶边" type="边纹" value="命中+2" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军中级金镶边的获得方式：完成禁地全部主线任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6107" name="神武军高级黄铜镶边" type="边纹" value="命中+3" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级黄铜镶边的获得方式：需要完成10个勇士任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6108" name="神武军高级白银镶边" type="边纹" value="吸血+4" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级白银镶边的获得方式：需要完成50个勇士任务后即可领取。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6109" name="神武军高级黄金镶边" type="边纹" value="命中+4" shengwang="2" rate1="80" rate2="20" rate3="0" task="true" content="神武军高级黄金镶边的获得方式：需要完成100个勇士任务后即可领取。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6110" name="中州勇士黄铜镶边" type="边纹" value="魔法躲避+1%" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="中州勇士黄铜镶边的获得方式：需要购买1次10元宝的神武军物资。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6111" name="中州志士白银镶边" type="边纹" value="魔法躲避+2%" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="中州志士白银镶边的获得方式：需要购买5次10元宝的神武军物资。" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6112" name="中州英雄黄金镶边" type="边纹" value="魔法躲避+5%" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="中州英雄黄金镶边的获得方式：需要购买20次10元宝的神武军物资。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6113" name="绿色勇士镶边" type="边纹" value="魔法命中+2%" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="绿色勇士镶边的获得方式：需要完成100个绿色五色任务。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6114" name="蓝色勇士镶边" type="边纹" value="魔法命中+3%" shengwang="5" rate1="20" rate2="80" rate3="0" task="true" content="蓝色勇士镶边的获得方式：需要完成50个蓝色五色任务。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6115" name="紫色勇士镶边" type="边纹" value="魔法命中+5%" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="紫色勇士镶边的获得方式：需要完成50个紫色五色任务。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6116" name="橙色勇士镶边" type="边纹" value="躲避+8" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="橙色勇士镶边的获得方式：需要完成50个橙色五色任务。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6117" name="赤红勇士镶边" type="边纹" value="吸血+6" shengwang="10" rate1="0" rate2="70" rate3="30" task="true" content="赤红勇士镶边的获得方式：总计完成200个五色任务。" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6118" name="符石大师玉髓镶边" type="边纹" value="命中+6" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为精于钻研雕琢符石的勇士颁发的纹佩部件，需要成功雕琢5颗5级符石" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6119" name="宝玉大师翡翠镶边" type="边纹" value="魔法命中+8%" shengwang="10" rate1="0" rate2="70" rate3="30" task="false" content="为善于钻研经验宝玉力量的勇士颁发的纹佩部件，需要成功积累慢20颗经验宝玉(大)" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6120" name="神武军后勤兵铜镶边" type="边纹" value="魔法躲避+6%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6121" name="神武军后勤兵银镶边" type="边纹" value="魔法躲避+7%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" content2="该种纹佩部件只可取得一次。" />
+    <WenPei looks="6122" name="神武军后勤兵金镶边" type="边纹" value="魔法躲避+8%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" content2="该种纹佩部件可以重复获得。" />
+    <WenPei looks="6123" name="蓝冰卫士镶边" type="边纹" value="命中+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6124" name="赤焰卫士镶边" type="边纹" value="魔法命中+10%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6125" name="屠龙勇士镶边" type="边纹" value="破防+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+    <WenPei looks="6126" name="阴阳修士镶边" type="边纹" value="抵抗+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="" />
+	<WenPei looks="6130" name="圣殿守护者铜镶边" type="边纹" value="魔法躲避+5% 命中+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6131" name="圣殿守护者银镶边" type="边纹" value="魔法躲避+5% 抵抗+4" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6132" name="圣殿守护者金镶边" type="边纹" value="吸血+4 魔法命中+6%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6133" name="圣殿探求者铜镶边" type="边纹" value="破防+6 命中+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6134" name="圣殿探求者银镶边" type="边纹" value="破防+6 魔法躲避+5%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6135" name="圣殿探求者金镶边" type="边纹" value="破防+6 吸血+4" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6136" name="圣殿霸主炎阳镶边" type="边纹" value="破防+10 命中+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6137" name="圣殿霸主蓝莹镶边" type="边纹" value="破防+10 魔法躲避+8%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6138" name="圣殿霸主紫月镶边" type="边纹" value="破防+10 吸血+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6139" name="圣殿统领赤玉镶边" type="边纹" value="魔法躲避+8% 命中+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6140" name="圣殿统领苍玉镶边" type="边纹" value="魔法躲避+8% 抵抗+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6141" name="圣殿统领青玉镶边" type="边纹" value="吸血+8 魔法命中+10%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6430" name="圣殿守护者铜纹" type="辅饰纹" value="抵抗+4 破防+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6431" name="圣殿守护者银纹" type="辅饰纹" value="抵抗+4 暴击+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6432" name="圣殿守护者金纹" type="辅饰纹" value="抵抗+4 吸血+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6433" name="圣殿探求者铜纹" type="辅饰纹" value="暴击+8 破防+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6434" name="圣殿探求者银纹" type="辅饰纹" value="暴击+8 吸血+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6435" name="圣殿探求者金纹" type="辅饰纹" value="破防+6 吸血+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6436" name="圣殿霸主炎阳纹" type="辅饰纹" value="暴击+15 破防+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6437" name="圣殿霸主蓝莹纹" type="辅饰纹" value="暴击+15 吸血+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6438" name="圣殿霸主紫月纹" type="辅饰纹" value="破防+10 吸血+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6439" name="圣殿统领赤玉纹" type="辅饰纹" value="抵抗+6 破防+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6440" name="圣殿统领苍玉纹" type="辅饰纹" value="抵抗+6 暴击+15" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6441" name="圣殿统领青玉纹" type="辅饰纹" value="抵抗+6 吸血+10" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/> 
+	<WenPei looks="6330" name="圣殿守护者铜玉宝珠" type="主饰纹" value="吸血+6 破防+5" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6331" name="圣殿守护者银玉宝珠" type="主饰纹" value="吸血+6 暴击+12" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6332" name="圣殿守护者金玉宝珠" type="主饰纹" value="吸血+6 攻击上限+7" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6333" name="圣殿探求者铜玉宝珠" type="主饰纹" value="攻击上限+7 暴击+12" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6334" name="圣殿探求者银玉宝珠" type="主饰纹" value="攻击上限+7 破防+5" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6335" name="圣殿探求者金玉宝珠" type="主饰纹" value="暴击+12 破防+5" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6336" name="圣殿霸主炎阳宝珠" type="主饰纹" value="攻击上限+12 暴击+20" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6337" name="圣殿霸主蓝莹宝珠" type="主饰纹" value="攻击上限+12 破防+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6338" name="圣殿霸主紫月宝珠" type="主饰纹" value="暴击+20 破防+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6339" name="圣殿统领赤玉宝珠" type="主饰纹" value="吸血+10 破防+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6340" name="圣殿统领苍玉宝珠" type="主饰纹" value="吸血+10 暴击+20" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6341" name="圣殿统领青玉宝珠" type="主饰纹" value="吸血+10 攻击上限+12" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6230" name="圣殿守护者铜令佩" type="底纹" value="生命+70 魔法躲避+6%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6231" name="圣殿守护者银令佩" type="底纹" value="生命+70 全防御上限+3" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6232" name="圣殿守护者金令佩" type="底纹" value="魔法躲避+6% 魔法命中+3%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6233" name="圣殿探求者铜令佩" type="底纹" value="生命+70 命中+3" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6234" name="圣殿探求者银令佩" type="底纹" value="魔法躲避+6% 全防御上限+3" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6235" name="圣殿探求者金令佩" type="底纹" value="生命+70 魔法命中+3%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6236" name="圣殿霸主炎阳令佩" type="底纹" value="生命+120 命中+6" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6237" name="圣殿霸主蓝莹令佩" type="底纹" value="魔法躲避+10% 全防御上限+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6238" name="圣殿霸主紫月令佩" type="底纹" value="生命+120 魔法命中+6%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6239" name="圣殿统领赤玉令佩" type="底纹" value="生命+120 魔法躲避+10%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6240" name="圣殿统领苍玉令佩" type="底纹" value="生命+120 全防御上限+8" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>
+	<WenPei looks="6241" name="圣殿统领青玉令佩" type="底纹" value="魔法躲避+10% 魔法命中+6%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content=""/>   
+	<WenPei looks="6142" name="耀武羊威镶边" type="边纹" value="命中+20 魔法命中+15%" shengwang="20" rate1="0" rate2="20" rate3="80" task="false" content="羊年新年专属纹佩"/>
+	<WenPei looks="6146" name="凤舞九天镶边" type="边纹" value="命中+25 魔法命中+20%" shengwang="" rate1="" rate2="" rate3="" task="false" content=""/>
+
+  </WenPeis>
+</WenPeiCfg>

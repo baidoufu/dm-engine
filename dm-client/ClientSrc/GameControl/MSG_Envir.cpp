@@ -101,7 +101,7 @@ void CGameControl::MSG_Other_Player_Info(const char * msg,int iLen)
 	g_OtherData.OtherPlayer().GetLooks().Player.wBody = pChar->GetBody();
 }
 
-//by json 这里的刷新游戏问题
+// 这里的刷新游戏问题
 void CGameControl::MSG_Monster_Appearance(const char * msg,int iLen)
 {
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
@@ -119,12 +119,10 @@ void CGameControl::MSG_Monster_Appearance(const char * msg,int iLen)
 		//output_debug("MSG_Monster_Appearance MsgSize Monster&NPC Size %d !!! \n", iLen);
 	}
 
-	CHARDESC	stCharDesc;
-	memcpy(&stCharDesc, lpPacketMsg->szEncodeData, sizeof(CHARDESC));
-
 	if(id == SELF.GetID())
 	{
-		SELF.SetLooks(stCharDesc.nFeature);
+		__int64 looks = Conv_INT64(msg + 12);
+		SELF.SetLooks(looks);
 		return;
 	}
 
@@ -1178,7 +1176,7 @@ void CGameControl::MSG_Monster_Walk(const char * msg,int iLen)
 	int x = lpPacketMsg->stDefMsg.wParam;
 	int y = lpPacketMsg->stDefMsg.wTag;
 	BYTE bDir = LOBYTE(lpPacketMsg->stDefMsg.wSeries);
-	BYTE bGender = HIBYTE(lpPacketMsg->stDefMsg.wSeries);
+	//BYTE bGender = HIBYTE(lpPacketMsg->stDefMsg.wSeries);
 
 	TCHARDESC	stCharDesc;
 	memcpy(&stCharDesc, lpPacketMsg->szEncodeData, sizeof(TCHARDESC));
@@ -1195,7 +1193,7 @@ void CGameControl::MSG_Monster_Walk(const char * msg,int iLen)
 	pChar->SetStatus(stCharDesc.nStatus);
 	pChar->SetRealXY(x,y);
 
-	SNextAction * pNext = pChar->PushSNextAction(ACTION_WALK,msg[10],x,y);
+	SNextAction * pNext = pChar->PushSNextAction(ACTION_WALK,bDir,x,y);
 	if(pNext)
 	{
 		pNext->iLooks = Conv_INT64(msg+12);
@@ -1205,21 +1203,30 @@ void CGameControl::MSG_Monster_Walk(const char * msg,int iLen)
 
 void CGameControl::MSG_Monster_Run(const char * msg,int iLen)
 {
-	DWORD id = Conv_DWORD(msg);
-	WORD x = Conv_WORD(msg + 6);
-	WORD y = Conv_WORD(msg + 8);
+	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
+	DWORD id = lpPacketMsg->stDefMsg.nRecog;
+	int x = lpPacketMsg->stDefMsg.wParam;
+	int y = lpPacketMsg->stDefMsg.wTag;
+	BYTE bDir = LOBYTE(lpPacketMsg->stDefMsg.wSeries);
+
+	TCHARDESC stCharDesc;
+	memcpy(&stCharDesc, lpPacketMsg->szEncodeData, sizeof(TCHARDESC));
+
+	//DWORD id = Conv_DWORD(msg);
+	//WORD x = Conv_WORD(msg + 6);
+	//WORD y = Conv_WORD(msg + 8);
 
 	CCharacterAttr * pChar = g_pGameData->FindCharacterByID(id);
 	if(!pChar)
 		return;
 
+	pChar->SetStatus(stCharDesc.nStatus);
 	pChar->SetRealXY(x,y);
-	pChar->SetStatus(Conv_WORD(msg+22));
 
-	SNextAction* pNext = pChar->PushSNextAction(ACTION_RUN,msg[10],x,y);
+	SNextAction* pNext = pChar->PushSNextAction(ACTION_RUN,bDir,x,y);
 	if(pNext)
 	{
-		pNext->iLooks		= Conv_INT64(msg + 12);
+		pNext->iLooks = Conv_INT64(msg + 12);
 		pNext->uFlag |= SERVER_ACTION;
 	}
 } 
@@ -4214,13 +4221,13 @@ void CGameControl::MSG_Monster_Animate_Disappear(const char * msg,int iLen)
 
 }
 
-//by json NPC怪物刷新
+// NPC怪物刷新
 void CGameControl::MSG_Monster_Refresh(const char * msg,int iLen)
 {
-	//by json 传世解包
+	// 传世解包
 	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
 	DWORD id  = lpPacketMsg->stDefMsg.nRecog;
-	int m_nState = MAKELONG(lpPacketMsg->stDefMsg.wParam, lpPacketMsg->stDefMsg.wTag);
+	//int m_nState = MAKELONG(lpPacketMsg->stDefMsg.wParam, lpPacketMsg->stDefMsg.wTag);
 
 	FEATURE stFeature;
 	LONG nFeature	  = MAKELONG(lpPacketMsg->stDefMsg.wParam, lpPacketMsg->stDefMsg.wTag);
@@ -4230,6 +4237,8 @@ void CGameControl::MSG_Monster_Refresh(const char * msg,int iLen)
 	SAction* pAction = NULL;
 	if(SELF.GetID() == id){		//自己
 		SELF.SetLooks(nFeature);
+		SELF.SetSex(HIBYTE(lpPacketMsg->stDefMsg.wSeries));
+		SELF.SetDir(LOBYTE(lpPacketMsg->stDefMsg.wSeries));
 		if (!SELF.IsOnHorse())
 		{
 			SELF.SetFightOnLeopard(false);
@@ -4244,7 +4253,8 @@ void CGameControl::MSG_Monster_Refresh(const char * msg,int iLen)
 		if(pChar == NULL)
 			return;
 		pChar->SetLooks(nFeature);
-
+		pChar->SetSex(HIBYTE(lpPacketMsg->stDefMsg.wSeries));
+		pChar->SetDir(LOBYTE(lpPacketMsg->stDefMsg.wSeries));
 		if (!pChar->IsOnHorse())
 		{
 			pChar->SetFightOnLeopard(false);
@@ -4381,7 +4391,7 @@ void CGameControl::MSG_Monster_Refresh(const char * msg,int iLen)
 	}
 	else
 	{
-		//by json 这里有错误,所有的NPC全部刷成了怪物
+		// 这里有错误,所有的NPC全部刷成了怪物
 		CSimpleCharacterNode * pChar = g_pGameData->FindSimpleCharacter(id);
 		if(pChar == NULL)
 			return;

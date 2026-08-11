@@ -714,19 +714,19 @@ bool CPanelWnd::Msg(DWORD dwMsg,DWORD dwData,CControl * pControl)
 //#endif
 //				return true;
 //			}
-			else if(stricmp(pControl->GetName(),"SocialityWndButton") == 0)
-			{
-				if(g_pControl->FindWindowByName("RelationWnd"))
-				{
-					g_pControl->PopupWindow(MSG_CTRL_RELATION_WND,OPER_CLOSE);
-				}
-				else
-				{
-					g_pGameControl->SEND_Exchange_Menu_Click(DWORD(-6),"@main");
-				}
+			//else if(stricmp(pControl->GetName(),"SocialityWndButton") == 0)
+			//{
+			//	if(g_pControl->FindWindowByName("RelationWnd"))
+			//	{
+			//		g_pControl->PopupWindow(MSG_CTRL_RELATION_WND,OPER_CLOSE);
+			//	}
+			//	else
+			//	{
+			//		g_pGameControl->SEND_Exchange_Menu_Click(DWORD(-6),"@main");
+			//	}
 
-				return true;
-			}
+			//	return true;
+			//}
 			else if(stricmp(pControl->GetName(),"ChangeChannel") == 0)
 			{
 				OnChangeChannel(pControl);

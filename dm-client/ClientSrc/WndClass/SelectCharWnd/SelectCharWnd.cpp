@@ -67,9 +67,9 @@ CSelectCharWnd::CSelectCharWnd()
 	m_sTipText[4] = "法师(女)";
 	m_sTipText[5] = "道士(女)";
 
-	if (g_Config.GetBkMusicOn() && !g_pAudio->IsMusicPlaying(EAT_BKMUSIC,7))
+	if (g_Config.GetBkMusicOn())
 	{
-		g_pAudio->PlayMusic(EAT_BKMUSIC,7,true);	
+		g_pAudio->PlayMusic(EAT_BKMUSIC,9,true);	// 1009.ogg
 	}
 
 	PreLoadTex();

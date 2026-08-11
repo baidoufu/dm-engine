@@ -43,7 +43,4 @@ public:
 	VOID QueryTaskInfo(UINT id, DWORD dwKey, DWORD dwOwner);
 	//int	GetSendBufferSize(){ return (2048 * 2048);}
 	//int	GetRecvBufferSize(){ return (2048 * 2048);}
-	//时长封号系统数据
-	VOID UpdateFengHaoInfo(DWORD dwOwner, FenghaoInfo* pInfo);
-	VOID QueryFengHaoInfo(UINT id, DWORD dwKey, DWORD dwOwner);
 };

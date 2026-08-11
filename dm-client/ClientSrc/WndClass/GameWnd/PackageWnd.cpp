@@ -461,7 +461,7 @@ void CPackageWnd::OnDraw()
 			g_pGfx->DrawTextureNL(m_iScreenX+ m_ptGoodPoint.x + 6, m_iScreenY + iOffY + m_ptGoodPoint.y - 2 + m_iCellHeight*i+2,pTex);
 	}
 
-	//by json °ü¹ü·­Ò³
+	// °ü¹ü·­Ò³
 	if(MAX_PACKAGE_ELEMENT  < 66 + m_TabPage.iCurPage * 60)
 	{
 		int iLocked = min(66 + m_TabPage.iCurPage * 60 - MAX_PACKAGE_ELEMENT,60);

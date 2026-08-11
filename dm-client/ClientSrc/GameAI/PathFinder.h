@@ -106,7 +106,7 @@ extern POINT g_ptDIROff[];
 //用户应用搜索条件,适用于一屏幕内带怪物的搜索
 struct UserPathFindingInfo_t
 {
-	string MapID;				//地图ID
+	char MapID[64];				//地图ID
 	int iStartX,iStartY;	//网格相对整体地图偏移
 
 	int nRows;				//网格

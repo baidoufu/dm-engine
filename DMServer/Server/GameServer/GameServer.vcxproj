@@ -111,7 +111,6 @@
     <ClCompile Include="AliveObject.cpp" />
     <ClCompile Include="AutoScriptManager.cpp" />
     <ClCompile Include="BlueFireEvent.cpp" />
-    <ClCompile Include="BossTJ.cpp" />
     <ClCompile Include="BotBehaviorAction.cpp" />
     <ClCompile Include="BotBehaviorComposite.cpp" />
     <ClCompile Include="BotBehaviorCondition.cpp" />
@@ -122,11 +121,9 @@
     <ClCompile Include="BotManager.cpp" />
     <ClCompile Include="BotPlayer.cpp" />
     <ClCompile Include="BundleManager.cpp" />
-    <ClCompile Include="Human_Achieve.cpp" />
     <ClCompile Include="gsClientMsgHandler.cpp" />
     <ClCompile Include="Human_DoProcess.cpp" />
     <ClCompile Include="Human_OnFunc.cpp" />
-    <ClCompile Include="TimeAchieve.cpp" />
     <ClCompile Include="ChangeMapEvent.cpp" />
     <ClCompile Include="CmdProc.cpp" />
     <ClCompile Include="DamageEvent.cpp" />
@@ -138,14 +135,12 @@
     <ClCompile Include="EventProcessor.cpp" />
     <ClCompile Include="ExchangeObj.cpp" />
     <ClCompile Include="ExchangeObjectMgr.cpp" />
-    <ClCompile Include="FengHaoGrowManager.cpp" />
     <ClCompile Include="FireBurnEvent.cpp" />
     <ClCompile Include="FireNimoBurnEvent.cpp" />
     <ClCompile Include="FireRainEvent.cpp" />
     <ClCompile Include="FlagEventEx.cpp" />
     <ClCompile Include="FmtTextFile.cpp" />
     <ClCompile Include="GameServer.cpp" />
-    <ClCompile Include="GameStage.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="GmManager.cpp" />
     <ClCompile Include="GroupObject.cpp" />
@@ -159,7 +154,6 @@
     <ClCompile Include="Human_Action.cpp" />
     <ClCompile Include="Human_Chat.cpp" />
     <ClCompile Include="Human_Community.cpp" />
-    <ClCompile Include="Human_FengHao.cpp" />
     <ClCompile Include="Human_Guild.cpp" />
     <ClCompile Include="Human_Item.cpp" />
     <ClCompile Include="Human_Msg.cpp" />
@@ -173,7 +167,6 @@
     <ClCompile Include="ItemManager.cpp" />
     <ClCompile Include="MonsterAttack.cpp" />
     <ClCompile Include="TriggerEvent.cpp" />
-    <ClCompile Include="Variable_Achieve.cpp" />
     <ClCompile Include="Variable_Item.cpp" />
     <ClCompile Include="LogicMap.cpp" />
     <ClCompile Include="LogicMapMgr.cpp" />
@@ -254,7 +247,6 @@
     <ClInclude Include="AliveObject.h" />
     <ClInclude Include="AutoScriptManager.h" />
     <ClInclude Include="BlueFireEvent.h" />
-    <ClInclude Include="BossTJ.h" />
     <ClInclude Include="BotBehaviorAction.h" />
     <ClInclude Include="BotBehaviorComposite.h" />
     <ClInclude Include="BotBehaviorCondition.h" />
@@ -267,7 +259,6 @@
     <ClInclude Include="BotPlayer.h" />
     <ClInclude Include="BundleManager.h" />
     <ClInclude Include="gsClientMsgTable.h" />
-    <ClInclude Include="TimeAchieve.h" />
     <ClInclude Include="ChangeMapEvent.h" />
     <ClInclude Include="CmdProc.h" />
     <ClInclude Include="DamageEvent.h" />
@@ -279,7 +270,6 @@
     <ClInclude Include="EventProcessor.h" />
     <ClInclude Include="ExchangeObj.h" />
     <ClInclude Include="ExchangeObjectMgr.h" />
-    <ClInclude Include="FengHaoGrowManager.h" />
     <ClInclude Include="FindFile.h" />
     <ClInclude Include="FireBurnEvent.h" />
     <ClInclude Include="FireNimoBurnEvent.h" />
@@ -288,7 +278,6 @@
     <ClInclude Include="FlagEventListener.h" />
     <ClInclude Include="FmtTextFile.h" />
     <ClInclude Include="GameServer.h" />
-    <ClInclude Include="GameStage.h" />
     <ClInclude Include="GameWorld.h" />
     <ClInclude Include="GmManager.h" />
     <ClInclude Include="GroupObject.h" />

@@ -40,7 +40,9 @@ public:
 	virtual BOOL		ValidateDX(void) = 0;
 	virtual BOOL		ReCreateDX(void) = 0;
 	virtual BOOL        ResizeWindow(int iW,int iH) = 0;
-	virtual void		AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup = FALSE) = 0;
+	virtual void		AdjustWindow(HWND hWnd,int iW,int iH,BOOL bPopup = FALSE, BOOL bCenter = FALSE) = 0;
+	virtual void		CenterWindow() = 0;
+	virtual BOOL		MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint, BOOL bCenter = FALSE) = 0;
 
 	// ÆäËû
 	virtual BOOL		WillShowFrame(void) = 0;

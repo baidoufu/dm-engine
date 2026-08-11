@@ -104,10 +104,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="CodeWiki.md" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="file_manager.cpp" />
+    <ClCompile Include="wpf_archive.cpp" />
     <ClCompile Include="resource_client.cpp" />
     <ClCompile Include="resource_server.cpp" />
     <ClCompile Include="main.cpp" />
@@ -119,6 +117,7 @@
   <ItemGroup>
     <ClInclude Include="protocol.h" />
     <ClInclude Include="file_manager.h" />
+    <ClInclude Include="wpf_archive.h" />
     <ClInclude Include="resource_client.h" />
     <ClInclude Include="resource_server.h" />
     <ClInclude Include="stdafx.h" />

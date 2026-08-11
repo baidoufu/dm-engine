@@ -15,13 +15,9 @@
 #include "StringListManager.h"
 #include "fmttextfile.h"
 #include "titlemanager.h"
-#include "FengHaoGrowManager.h"
 #include "downitemmgr.h"
 #include "BundleManager.h"
 #include "eventmanager.h"
-#include "BossTJ.h"
-#include "TimeAchieve.h"
-#include "GameStage.h"
 #include "guildex.h"
 #include "guildmanagerex.h"
 #include "monsterex.h"
@@ -215,7 +211,6 @@ BOOL CGameWorld::LoadServerConfig()
 	m_VarList[EVI_ONCEPKPOINT] = (DWORD)m_sfServer.GetInteger("Var", "OncePkPoint", 3);
 	m_VarList[EVI_ONEPKPOINTTIME] = (DWORD)m_sfServer.GetInteger("Var", "OnePkPointTime", 120);
 	m_VarList[EVI_BODYTIME] = (DWORD)m_sfServer.GetInteger("Var", "BodyTime", 60);
-	m_VarList[EVI_STOREAGESIZE] = (DWORD)m_sfServer.GetInteger("Var", "StoreageSize", 39);
 	m_VarList[EVI_SANDCITYTAKETIME] = (DWORD)m_sfServer.GetInteger("Var", "SandCityTakeTime", 300);
 	m_VarList[EVI_WARENEMYCOLOR] = (DWORD)m_sfServer.GetInteger("Var", "WarEnemyColor", 243);
 	m_VarList[EVI_WARALLYCOLOR] = (DWORD)m_sfServer.GetInteger("Var", "WarAllyColor", 4);
@@ -497,42 +492,6 @@ VOID CGameWorld::LoadNotice()
 	m_LineNoticeTimer.Savetime();
 }
 
-VOID CGameWorld::LoadClientKeyConfig()
-{
-	m_ClientKeyConfig.fill({});
-	FileGuard fp(fopen(".\\Data\\Config\\ClientKeyConfig.json", "rb"));
-	if (!fp)
-	{
-		PRINT(ERROR_RED, "无法打开 ClientKeyConfig.json 文件\n");
-		return;
-	}
-	std::array<char, 6144> readBuffer{};
-	rapidjson::FileReadStream is(fp, readBuffer.data(), readBuffer.size());
-	rapidjson::Document doc;
-	doc.ParseStream(is);
-	// fclose 由 FileGuard 析构自动完成 (延迟到作用域结束, doc 已解析完毕, 无影响)
-	if (doc.HasParseError())
-	{
-		PRINT(ERROR_RED, "ClientKeyConfig.json 解析错误: %d\n", doc.GetParseError());
-		return;
-	}
-	if (!doc.IsArray())
-	{
-		PRINT(ERROR_RED, "ClientKeyConfig.json 格式错误: 根节点应为数组\n");
-		return;
-	}
-	int nCount = doc.Size();
-	if (nCount > 100) nCount = 100;
-	for (int i = 0; i < nCount; i++)
-	{
-		const rapidjson::Value& item = doc[i];
-		if (!item.IsObject()) continue;
-		m_ClientKeyConfig[i].Key1 = item.HasMember("Key1") && item["Key1"].IsString() ? (BYTE)std::stoi(item["Key1"].GetString(), nullptr, 16) : 0;
-		m_ClientKeyConfig[i].Key2 = item.HasMember("Key2") && item["Key2"].IsString() ? (BYTE)std::stoi(item["Key2"].GetString(), nullptr, 16) : 0;
-		m_ClientKeyConfig[i].unknow = item.HasMember("unknow") && item["unknow"].IsString() ? (WORD)std::stoi(item["unknow"].GetString(), nullptr, 16) : 0;
-	}
-}
-
 BOOL CGameWorld::Init()
 {
 	// 脚本系统首先读取
@@ -553,7 +512,6 @@ BOOL CGameWorld::Init()
 	LoadSafeArea();
 	LoadStartPoint();
 	LoadNotice();
-	LoadClientKeyConfig();
 
 	CItemManager::GetInstance()->Load(".\\Data\\Config\\BaseItem.csv");
 	CItemManager::GetInstance()->LoadLimit(".\\Data\\Config\\ItemLimit.txt");
@@ -563,7 +521,6 @@ BOOL CGameWorld::Init()
 	CMagicManager::GetInstance()->LoadMagicExt(".\\Data\\Config\\MagicExt.csv");
 	CMagicManager::GetInstance()->LoadMaigcskill(".\\Data\\Config\\MagicSkill.xml");
 	CTitleManager::GetInstance()->LoadData(".\\Data\\Config\\Titles.csv");
-	CFengHaoGrowManager::GetInstance()->LoadData(".\\Data\\Config\\FengHaoGrow.csv");
 
 	CBundleManager::GetInstance()->LoadBundle(".\\Data\\Config\\BundleItem.csv");
 
@@ -593,9 +550,6 @@ BOOL CGameWorld::Init()
 	CAutoScriptManager::GetInstance()->Load(".\\Data\\AutoScript.txt");
 	CMapScriptManager::GetInstance()->Load(".\\Data\\MapScript.txt");
 	CTaskManager::GetInstance()->Load(".\\Data\\Task");
-	CBossTJ::GetInstance()->Load(".\\Data\\Config\\BossTJ.xml");
-	CTimeAchieve::GetInstance()->Load(".\\Data\\Config\\TimeAchieve.xml");
-	CGameStage::GetInstance()->Load(".\\Data\\Config\\GameStage.xml");
 	CBotManager::GetInstance()->CreateBotsFromConfig(".\\Data\\Bot\\BotConfig.csv");
 
 	InitThreadPool(); // 初始化工作线程池
@@ -743,7 +697,6 @@ VOID CGameWorld::Update()
 	case 2: case 7:
 	{
 		CTimeSystem::GetInstance()->Update(); // 时间定时器
-		CBossTJ::GetInstance()->Update(); // Boss图鉴刷新时间更新
 		CEventManager::GetInstance()->UpdateEvents();
 		CDownItemMgr::GetInstance()->UpdateDownItem();//更新掉落物品
 		CMonsterManagerEx::GetInstance()->UpdateFreeObjects(); // 释放
@@ -1243,6 +1196,7 @@ VOID CGameWorld::UpdateMonsterParallel(xListHost<CMonsterEx>& monsterList, Monst
 	// 3秒超时：若工作线程异常未能Signal，避免主线程永久卡死
 	if (!barrier.Arrive(5000))
 	{
+		DPRINT(SUCCESS_GREEN, "BARRIER_TIMEOUT: mapCount=%d monsterCount=%d", numBatches, totalMonsters);
 		assert(!"UpdateMonsterParallel: worker tasks did not complete within 5s timeout");
 	}
 

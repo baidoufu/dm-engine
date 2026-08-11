@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+<MapSafeCfg Ver="1">
+	<SafeMap>  <!-- 覆盖MapSafeArea -->
+		<Map id="F025"/>
+		<Map id="F026"/>
+		<Map id="F027"/>
+		<Map id="F028"/>
+		<Map id="F029"/>
+		<Map id="F030"/>
+		<Map id="F031"/>
+		<Map id="F032"/>
+		<Map id="F033"/>
+		<Map id="F034"/>
+		<Map id="F035"/>
+		<Map id="ARENA000"/>
+		<Map id="ARENA011"/>
+		<Map id="W001"/>
+		<Map id="F009"/>
+		<Map id="F013"/>
+		<Map id="F016"/>
+		<Map id="L005"/>
+		<Map id="L005f"/>
+		<Map id="G001"/>
+		<Map id="AY001"/>
+		<Map id="AY002"/>
+		<Map id="SC001"/>
+		<Map id="SC002"/>
+		<Map id="SC003"/>
+		<Map id="WC001"/>
+		<Map id="WC002"/>
+		<Map id="WC003"/>
+		<Map id="WC004"/>
+		<Map id="WC005"/>
+		<Map id="WC006"/>
+		<Map id="WC007"/>
+		<Map id="WC001f"/>
+		<Map id="WC004f"/>
+		<Map id="WC007f"/>
+		<Map id="BX052"/>
+		<Map id="BX053"/>
+		<Map id="BX054"/>
+		<Map id="BX055"/>
+		<Map id="BX056"/>
+		<Map id="BX057"/>
+		<Map id="BX058"/>
+		<Map id="BX059"/>
+		<Map id="BX060"/>
+		<Map id="BX061"/>
+		<Map id="BX062"/>
+		<Map id="BX063"/>
+		<Map id="BX064"/>
+		<Map id="BX065"/>
+		<Map id="BX066"/>
+		<Map id="BX067"/>
+		<Map id="BX068"/>
+		<Map id="BX069"/>
+		<Map id="BX070"/>
+		<Map id="BX071"/>
+		<Map id="BX001"/>
+		<Map id="BX002"/>
+		<Map id="BX003"/>
+		<Map id="BX004"/>
+		<Map id="BX005"/>
+		<Map id="BX006"/>
+		<Map id="BX007"/>
+		<Map id="BX008"/>
+		<Map id="BX009"/>
+		<Map id="BX010"/>
+		<Map id="BX011"/>
+		<Map id="BX012"/>
+		<Map id="BX013"/>
+		<Map id="BX014"/>
+		<Map id="BX015"/>
+		<Map id="BX016"/>
+		<Map id="BX017"/>
+		<Map id="BX018"/>
+		<Map id="BX019"/>
+		<Map id="BX020"/>
+		<Map id="XY001"/>
+		<Map id="XY002"/>
+		<Map id="XY003"/>
+		<Map id="XY004"/>
+		<Map id="XY005"/>
+		<Map id="XY006"/>
+		<Map id="XY008"/>
+		<Map id="XY009"/>
+		<Map id="XY010"/>
+		<Map id="JPXL001"/>
+		<Map id="JPXL005"/>
+		<Map id="JPXL010"/>
+		<Map id="WK001"/>
+		<Map id="WK002"/>
+		<Map id="WK003"/>
+		<Map id="WK004"/>
+		<Map id="QueYsh00"/>
+		<Map id="QueYsh01"/>
+		<Map id="QueYsh02"/>
+		<Map id="QueYsh03"/>
+		<Map id="QueYsh04"/>
+		<Map id="QueYsh05"/>
+		<Map id="QueYsh06"/>
+		<Map id="QueYsh07"/>
+		<Map id="QueYsh08"/>
+		<Map id="QueYsh09"/>
+		<Map id="QueYsh10"/>
+		<Map id="QueYsh11"/>
+		<Map id="QueYsh12"/>
+		<Map id="QueYsh13"/>
+		<Map id="QueYsh14"/>
+		<Map id="QueYsh15"/>
+		<Map id="QueYsh16"/>
+		<Map id="QueYsh17"/>
+		<Map id="QueYsh18"/>
+		<Map id="QueYsh19"/>
+		<Map id="SWYZB"/>
+		<Map id="FlyMD"/>
+		<Map id="FlySD"/>
+		<Map id="LC001"/>
+		<Map id="LC002"/>
+		<Map id="heroisland"/>
+		<Map id="shanghang"/>
+		<Map id="ZCJS"/>
+		<Map id="YYJD"/>
+		<Map id="DZ001"/>
+		<Map id="FD01"/>
+		<Map id="yj-jjd"/>
+		<Map id="yj-jjd"/>
+	</SafeMap>
+	<MapSafeArea>
+		<Map id="0" x="474" y="222" radius="25"/>
+		<Map id="0" x="410" y="612" radius="22"/>
+		<Map id="1" x="229" y="241" radius="26"/>
+		<Map id="101" x="229" y="241" radius="26"/>
+		<Map id="201" x="229" y="241" radius="26"/>
+		<Map id="8" x="229" y="241" radius="26"/>
+		<Map id="2" x="223" y="448" radius="15"/>
+		<Map id="2" x="208" y="448" radius="15"/>
+		<Map id="4" x="340" y="178" radius="15"/>
+		<Map id="5" x="462" y="107" radius="15"/>
+		<Map id="128" x="25" y="25" radius="100"/>
+		<Map id="7" x="54" y="41" radius="17"/>
+		<Map id="MH001" x="111" y="80" radius="100"/>
+		<Map id="MH008" x="124" y="69" radius="10"/>
+		<Map id="MH012" x="166" y="97" radius="10"/>
+		<Map id="MH019" x="28" y="43" radius="10"/>
+		<Map id="MH026" x="94" y="105" radius="10"/>
+		<Map id="MH036" x="149" y="67" radius="10"/>
+		<Map id="MH055" x="62" y="40" radius="10"/>
+		<Map id="MH056" x="62" y="40" radius="10"/>
+		<Map id="MH057" x="62" y="40" radius="10"/>
+		<Map id="SH000" x="20" y="45" radius="100"/>
+		<Map id="LXXD" x="116" y="31" radius="10"/>
+		<Map id="LXXD" x="73" y="64" radius="10"/>
+		<Map id="KFZZB" x="97" y="104" radius="300"/>
+		<Map id="smd" x="48" y="43" radius="100"/>
+		<Map id="hjba1" x="48" y="43" radius="100"/>
+		<Map id="hjba2" x="48" y="43" radius="100"/>
+		<Map id="skycity3" x="218" y="127" radius="6"/>
+		<Map id="skycity3" x="90" y="198" radius="5"/>
+		<Map id="0" x="417" y="248" radius="10"/>
+		<Map id="bbc" x="106" y="320" radius="20"/>
+		<Map id="btc" x="106" y="320" radius="20"/>
+		<Map id="blc" x="106" y="320" radius="20"/>
+		<Map id="bbc" x="130" y="240" radius="50"/>
+		<Map id="btc" x="130" y="240" radius="50"/>
+		<Map id="blc" x="130" y="240" radius="50"/>
+		<Map id="QYYD" x="91" y="88" radius="150"/>
+		<Map id="4" x="387" y="142" radius="10"/>
+		<Map id="sh006" x="10" y="17" radius="20"/>
+	</MapSafeArea>
+</MapSafeCfg>

@@ -1,0 +1,2123 @@
+<!-- type == 0 JumpPoint type == 1 NPC -->
+<mapjump>
+	<map id="0">
+		<Jump srcx="777" srcy="396" type="0">
+			<!-- jiangjunfen dong yiceng -->
+			<Ponit dstid="H081" dstx="201" dsty="329"/>
+		</Jump>
+		<Jump srcx="783" srcy="532" type="0">
+			<!-- sishui zhaoze -->
+			<Ponit dstid="7" dstx="12" dsty="14"/>
+		</Jump>
+		<Jump srcx="28" srcy="346" type="0">
+			<!-- jiangjunfenyiceng -->
+			<Ponit dstid="H071" dstx="258" dsty="497"/>
+		</Jump>
+		<Jump srcx="725" srcy="35" type="0">
+			<!-- reshahuangmo -->
+			<Ponit dstid="2" dstx="438" dsty="971"/>
+		</Jump>
+		<Jump srcx="484" srcy="141" type="0">
+			<!-- zhongzhou dao huanggong -->
+			<Ponit dstid="SH000" dstx="12" dsty="52"/>
+		</Jump>
+		<Jump srcx="548" srcy="197" type="0">
+			<!-- zhongzhou dao wuguan -->
+			<Ponit dstid="SH003" dstx="19" dsty="28"/>
+		</Jump>
+		<Jump srcx="419" srcy="203" type="0">
+			<!-- zhongzhou dao wuguan -->
+			<Ponit dstid="SH008" dstx="19" dsty="28"/>
+		</Jump>		
+		<Jump srcx="497" srcy="245" type="0">
+			<!-- zhongzhou dao wuguan -->
+			<Ponit dstid="SH010" dstx="19" dsty="28"/>
+		</Jump>				
+		<Jump srcx="740" srcy="328" type="0">
+			<!-- zhongzhou dao wuguan -->
+			<Ponit dstid="6" dstx="19" dsty="28"/>
+		</Jump>			
+		<!-- NPC -->
+		<!--NSP-->
+		<Jump srcx="468" srcy="226" type="1">
+			<!--zhongzhoulaobin-->
+			<Ponit dstid="0" dstx="33" dsty="355">
+				<Command Com="@main1"/>
+				<command Com="@lingmuall"/>
+				<command Com="@lingmue"/>
+				<command Com="@lms"/>
+				<!--qu jiangjunfendong-->
+			</Ponit>
+		</Jump>
+		<!--NSP-->
+		<!--CSC-->
+		<Jump srcx="468" srcy="226" type="1">
+			<!--zhongzhoulaobin-->
+			<Ponit dstid="QYYD" dstx="72" dsty="86">
+				<Command Com="@goqyyd"/>
+				<command Com="@gotoqyyd"/>
+				<!--qu qunyingyingdi-->
+			</Ponit>
+		</Jump>
+		<Jump srcx="477" srcy="222" type="1">
+			<!--qunyingmoshi-->
+			<Ponit dstid="QYYD" dstx="72" dsty="86">
+				<Command Com="@goqyyd"/>
+				<command Com="@gotoqyyd"/>
+				<!--qu qunyingyingdi-->
+			</Ponit>
+		</Jump>
+		<!--/CSC-->
+		<Jump srcx="468" srcy="226" type="1">
+			<!-- zhongzhoulaobin -->
+			<Ponit dstid="1" dstx="238" dsty="236">
+				<Command Com="@main1"/>
+				<command Com="@othergo"/>
+				<command Com="@island"/>
+				<command Com="@island1"/>
+				<!-- qu luoxiadao -->
+			</Ponit>
+		</Jump>
+		<Jump srcx="468" srcy="226" type="1">
+			<!-- zhongzhoulaobin -->
+			<Ponit dstid="5" dstx="459" dsty="105">
+				<Command Com="@goxyqj"/>
+				<!-- qu xyqj -->
+			</Ponit>
+		</Jump>
+		<Jump srcx="468" srcy="226" type="1">
+			<!-- zhongzhoulaobin -->
+			<Ponit dstid="BBC" dstx="238" dsty="236">
+				<Command Com="@main1"/>
+				<command Com="@xinshoucun"/>
+				<command Com="@bibo"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="468" srcy="226" type="1">
+			<!-- zhongzhoulaobin -->
+			<Ponit dstid="BLC" dstx="238" dsty="236">
+				<Command Com="@main1"/>
+				<command Com="@xinshoucun"/>
+				<command Com="@bilang"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="468" srcy="226" type="1">
+			<!-- zhongzhoulaobin -->
+			<Ponit dstid="BTC" dstx="238" dsty="236">
+				<Command Com="@main1"/>
+				<command Com="@xinshoucun"/>
+				<command Com="@bitao"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="468" srcy="226" type="1">
+			<!-- zhongzhoulaobin -->
+			<Ponit dstid="heroisland" dstx="80" dsty="95">
+				<Command Com="@main1"/>
+				<command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<!-- NEW -->
+	<map id="SH003">
+		<!-- wuguan -->
+		<Jump srcx="18" srcy="31" type="0">
+			<!-- wuguan dao zhongzhou -->
+			<Ponit dstid="0" dstx="549" dsty="199"/>
+		</Jump>
+	</map>
+	<map id="MH001">
+		<!-- haidao -->
+		<Jump srcx="125" srcy="90" type="1">
+			<!-- haidao dao lianyuyiceng -->
+			<Ponit dstid="NL001" dstx="86" dsty="195">
+				<Command Com="@go"/>
+				<!-- qu lianyumojing -->
+			</Ponit>
+		</Jump>
+		<Jump srcx="125" srcy="90" type="1">
+			<!-- haidao dao lianyukuangchang -->
+			<Ponit dstid="WC007" dstx="18" dsty="136">
+				<Command Com="@wcsb"/>
+				<!-- qu lianyukuangchang -->
+			</Ponit>
+		</Jump>
+		<Jump srcx="125" srcy="90" type="1">
+			<!-- haidao dao zhongzhou -->
+			<Ponit dstid="0" dstx="470" dsty="220">
+				<Command Com="@freegoout"/>
+				<!-- qu zhongzhou -->
+			</Ponit>
+		</Jump>
+	</map>
+	<map id="NL001">
+		<!-- lianyuyiceng -->
+		<Jump srcx="86" srcy="195" type="1">
+			<!-- lianyuyiceng dao haidao -->
+			<Ponit dstid="MH001" dstx="130" dsty="95">
+				<Command Com="@out"/>
+				<!-- qu haidao -->
+			</Ponit>
+		</Jump>
+	</map>
+	<map id="H071">
+		<!-- jiangjunfenyiceng -->
+		<Jump srcx="259" srcy="499" type="0">
+			<!-- jiangjunfenyiceng dao zhongzhou -->
+			<Ponit dstid="0" dstx="30" dsty="351"/>
+		</Jump>
+		<!-- nsp -->
+		<Jump srcx="256" srcy="258" type="0">
+			<!-- jiangjunfenyiceng dao jiangjunfenyerceng -->
+			<Ponit dstid="H072" dstx="25" dsty="216"/>
+		</Jump>
+		<!-- nsp -->
+	</map>
+	<!-- nsp -->
+	<map id="H072">
+		<!-- jiangjunfenerceng -->
+		<Jump srcx="244" srcy="263" type="0">
+			<!-- jiangjunfenerceng dao jiangjunfensanceng -->
+			<Ponit dstid="H073" dstx="239" dsty="248"/>
+		</Jump>
+		<Jump srcx="24" srcy="219" type="0">
+			<!-- jiangjunfenerceng dao jiangjunfenyyiceng -->
+			<Ponit dstid="H071" dstx="254" dsty="260"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H073">
+		<!-- jiangjunfensanceng -->
+		<Jump srcx="155" srcy="170" type="0">
+			<!-- jiangjunfensanceng dao jiangjundian -->
+			<Ponit dstid="H074" dstx="44" dsty="37"/>
+		</Jump>
+		<Jump srcx="236" srcy="245" type="0">
+			<!-- jiangjunfensanceng dao jiangjunfenyerceng -->
+			<Ponit dstid="H072" dstx="244" dsty="261"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H074">
+		<!-- jiangjundian -->
+		<Jump srcx="42" srcy="36" type="0">
+			<!-- jiangjunfenyiceng dao zhongzhou -->
+			<Ponit dstid="H073" dstx="154" dsty="168"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H081">
+		<!-- jiangjunfendongyiceng -->
+		<Jump srcx="206" srcy="169" type="0">
+			<!-- jiangjunfendongyiceng dao jiangjunfendongerceng -->
+			<Ponit dstid="H082" dstx="107" dsty="83"/>
+		</Jump>
+		<Jump srcx="198" srcy="331" type="0">
+			<!-- jiangjunfendongyiceng dao zhongzhou -->
+			<Ponit dstid="0" dstx="774" dsty="396"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H082">
+		<!-- jiangjunfendongerceng -->
+		<Jump srcx="256" srcy="183" type="0">
+			<!-- jiangjunfendongerceng dao tanxihuilang -->
+			<Ponit dstid="H084" dstx="144" dsty="150"/>
+		</Jump>
+		<Jump srcx="197" srcy="244" type="0">
+			<!-- jiangjunfendongerceng dao beimingchanglang -->
+			<Ponit dstid="H083" dstx="162" dsty="168"/>
+		</Jump>
+		<Jump srcx="105" srcy="81" type="0">
+			<!-- jiangjunfendongerceng dao jiangjunfendongyicen -->
+			<Ponit dstid="H081" dstx="204" dsty="166"/>
+		</Jump>
+		<Jump srcx="103" srcy="88" type="0">
+			<!-- jiangjunfendongerceng dao xuanbinggudaonan -->
+			<Ponit dstid="BT003" dstx="118" dsty="63"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H083">
+		<!-- beimingchanglang -->
+		<Jump srcx="304" srcy="155" type="0">
+			<!-- beimingchanglang dao tanxihuilang -->
+			<Ponit dstid="H084" dstx="166" dsty="294"/>
+		</Jump>
+		<Jump srcx="81" srcy="241" type="0">
+			<!-- beimingchanglang dao jiangjunfendongsiceng -->
+			<Ponit dstid="H085" dstx="285" dsty="145"/>
+		</Jump>
+		<Jump srcx="160" srcy="165" type="0">
+			<!-- beimingchanglang dao jiangjunfendongerceng -->
+			<Ponit dstid="H082" dstx="196" dsty="241"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H084">
+		<!-- beimingchanglang -->
+		<Jump srcx="164" srcy="297" type="0">
+			<!-- tanxihuilang dao beimingchanglang -->
+			<Ponit dstid="H083" dstx="302" dsty="158"/>
+		</Jump>
+		<Jump srcx="142" srcy="147" type="0">
+			<!-- tanxihuilang dao jiangjunfendongerceng -->
+			<Ponit dstid="H082" dstx="255" dsty="180"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H085">
+		<!-- jiangjunwendongsiceng -->
+		<Jump srcx="120" srcy="151" type="0">
+			<!-- jiangjunwendongsiceng dao jiangjunwendongwuceng -->
+			<Ponit dstid="H086" dstx="119" dsty="91"/>
+		</Jump>
+		<Jump srcx="287" srcy="142" type="0">
+			<!-- jiangjunwendongsiceng dao beimingchanglang -->
+			<Ponit dstid="H083" dstx="83" dsty="237"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!-- nsp -->
+	<map id="H086">
+		<!-- jiangjunwendongwuceng -->
+		<Jump srcx="121" srcy="94" type="0">
+			<!-- jiangjunwendongwuceng dao jiangjunwendongsiceng -->
+			<Ponit dstid="H085" dstx="124" dsty="155"/>
+		</Jump>
+	</map>
+	<!-- nsp -->
+	<!--nsp1-->
+	<map id="S011">
+		<!--nimogushayiceng-->
+		<Jump srcx="155" srcy="155" type="0">
+			<!--nimogushayiceng dao jiangjintang-->
+			<Ponit dstid="S012" dstx="58" dsty="51"/>
+		</Jump>
+		<Jump srcx="277" srcy="277" type="0">
+			<!--nimogushayiceng dao yuemapingyuan-->
+			<Ponit dstid="3" dstx="362" dsty="705"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S012">
+		<!--jiangjintang-->
+		<Jump srcx="40" srcy="31" type="0">
+			<!--jiangjintang dao nimogushaerceng-->
+			<Ponit dstid="S013" dstx="259" dsty="265"/>
+		</Jump>
+		<Jump srcx="59" srcy="53" type="0">
+			<!--jiangjintang dao nimogushayiceng-->
+			<Ponit dstid="S011" dstx="157" dsty="157"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S013">
+		<!--nimogushaerceng-->
+		<Jump srcx="367" srcy="374" type="0">
+			<!--nimogushaerceng dao fuhudian-->
+			<Ponit dstid="S015" dstx="42" dsty="34"/>
+		</Jump>
+		<Jump srcx="131" srcy="138" type="0">
+			<!--nimogushaerceng dao xianglongdian-->
+			<Ponit dstid="S014" dstx="58" dsty="51"/>
+		</Jump>
+		<Jump srcx="261" srcy="268" type="0">
+			<!--nimogushaerceng dao nimodgushayiceng-->
+			<Ponit dstid="S012" dstx="42" dsty="34"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S014">
+		<!--xianglongdian-->
+		<Jump srcx="40" srcy="31" type="0">
+			<!--xianglongdian dao nimogushasanceng-->
+			<Ponit dstid="S016" dstx="366" dsty="372"/>
+		</Jump>
+		<Jump srcx="59" srcy="53" type="0">
+			<!--xianglongdian dao nimogushaerceng-->
+			<Ponit dstid="S013" dstx="133" dsty="140"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S015">
+		<!--fuhudian-->
+		<Jump srcx="40" srcy="31" type="0">
+			<!--xianglongdian dao nimoguershaerceng-->
+			<Ponit dstid="S013" dstx="366" dsty="372"/>
+		</Jump>
+		<Jump srcx="59" srcy="53" type="0">
+			<!--xianglongdian dao nimogushasanceng-->
+			<Ponit dstid="S016" dstx="133" dsty="140"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S016">
+		<!--nimogushasanceng-->
+		<Jump srcx="236" srcy="243" type="0">
+			<!--nimogushasanceng dao xiuzhendian-->
+			<Ponit dstid="S017" dstx="58" dsty="51"/>
+		</Jump>
+		<Jump srcx="131" srcy="138" type="0">
+			<!--nimogushasanceng dao fuhudian-->
+			<Ponit dstid="S015" dstx="58" dsty="51"/>
+		</Jump>
+		<Jump srcx="367" srcy="374" type="0">
+			<!--nimogushasanceng dao xianglongdian-->
+			<Ponit dstid="S014" dstx="42" dsty="34"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S017">
+		<!--xiuzhendian-->
+		<Jump srcx="40" srcy="31" type="0">
+			<!--xiuzhendian dao nimoguershasiceng-->
+			<Ponit dstid="S018" dstx="161" dsty="292"/>
+		</Jump>
+		<Jump srcx="59" srcy="53" type="0">
+			<!--xiuzhendian dao nimogushasanceng-->
+			<Ponit dstid="S016" dstx="238" dsty="245"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="S018">
+		<!--nimogushasiceng-->
+		<Jump srcx="235" srcy="103" type="0">
+			<!--nimogushasiceng dao taijizhen-->
+			<Ponit dstid="S019" dstx="121" dsty="122"/>
+		</Jump>
+		<Jump srcx="162" srcy="295" type="0">
+			<!--nimogushasiceng dao xiuzhendian-->
+			<Ponit dstid="S017" dstx="42" dsty="34"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="N001">
+		<!--dixuerukou-->
+		<Jump srcx="101" srcy="375" type="0">
+			<!--dixuerukou dao huandao-->
+			<Ponit dstid="N002" dstx="327" dsty="263"/>
+		</Jump>
+		<Jump srcx="185" srcy="274" type="0">
+			<!--dixuerukou dao shemodao-->
+			<Ponit dstid="10" dstx="62" dsty="41"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="N002">
+		<!--huandao-->
+		<Jump srcx="134" srcy="367" type="0">
+			<!--huandao dao baichongxue-->
+			<Ponit dstid="N003" dstx="63" dsty="115"/>
+		</Jump>
+		<Jump srcx="326" srcy="262" type="0">
+			<!--huandao dao dixuerukou-->
+			<Ponit dstid="N001" dstx="100" dsty="374"/>
+		</Jump>
+		<Jump srcx="375" srcy="277" type="0">
+			<!--huandao dao xuanbinggudaoxi-->
+			<Ponit dstid="BT005" dstx="37" dsty="30"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="N003">
+		<!--baichongxue-->
+		<Jump srcx="228" srcy="156" type="0">
+			<!--baichongxue dao huandao-->
+			<Ponit dstid="N004" dstx="210" dsty="485"/>
+		</Jump>
+		<Jump srcx="62" srcy="117" type="0">
+			<!--baichongxue dao pansedao-->
+			<Ponit dstid="N002" dstx="133" dsty="368"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M001">
+		<!--jiguandaoyi-->
+		<Jump srcx="262" srcy="97" type="0">
+			<!--jiguandaoyi dao pandaoyi-->
+			<Ponit dstid="M020" dstx="55" dsty="15"/>
+		</Jump>
+		<Jump srcx="132" srcy="227" type="0">
+			<!--jiguandaoyi dao tianjitang-->
+			<Ponit dstid="M007" dstx="34" dsty="110"/>
+		</Jump>
+		<Jump srcx="96" srcy="146" type="0">
+			<!--jiguandaoyi dao jiguandaosan-->
+			<Ponit dstid="M003" dstx="241" dsty="215"/>
+		</Jump>
+		<Jump srcx="255" srcy="44" type="0">
+			<!--jiguandaoyi dao jiguandaoer-->
+			<Ponit dstid="M002" dstx="93" dsty="278"/>
+		</Jump>
+		<Jump srcx="44" srcy="255" type="0">
+			<!--jiguandaoyi dao erhuangshamo-->
+			<Ponit dstid="2" dstx="200" dsty="200"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M002">
+		<!--jiguandaoer-->
+		<Jump srcx="160" srcy="206" type="0">
+			<!--jiguandaoer dao dixiatongdaosan-->
+			<Ponit dstid="E003" dstx="184" dsty="31"/>
+		</Jump>
+		<Jump srcx="362" srcy="252" type="0">
+			<!--jiguandaoer dao gongfangdatingsan-->
+			<Ponit dstid="M012" dstx="54" dsty="46"/>
+		</Jump>
+		<Jump srcx="96" srcy="124" type="0">
+			<!--jiguandaoer dao gongfangdatingyi-->
+			<Ponit dstid="M010" dstx="210" dsty="205"/>
+		</Jump>
+		<Jump srcx="246" srcy="123" type="0">
+			<!--jiguandaoer dao zhongshudating-->
+			<Ponit dstid="M018" dstx="47" dsty="200"/>
+		</Jump>
+		<Jump srcx="92" srcy="280" type="0">
+			<!--jiguandaoer dao jiguandaoyi-->
+			<Ponit dstid="M001" dstx="253" dsty="46"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M003">
+		<!--jiguandaosan-->
+		<Jump srcx="117" srcy="184" type="0">
+			<!--jiguandaosan dao zhandouguangchangyi-->
+			<Ponit dstid="M030" dstx="111" dsty="75"/>
+		</Jump>
+		<Jump srcx="185" srcy="120" type="0">
+			<!--jiguandaosan dao gongfangdatingyi-->
+			<Ponit dstid="M010" dstx="86" dsty="153"/>
+		</Jump>
+		<Jump srcx="242" srcy="217" type="0">
+			<!--jiguandaosan dao jiguandaoyi-->
+			<Ponit dstid="M001" dstx="98" dsty="148"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M004">
+		<!--jiguandaosi-->
+		<Jump srcx="63" srcy="77" type="0">
+			<!--jiguandaosi dao zhongzhuantinger-->
+			<Ponit dstid="M017" dstx="57" dsty="61"/>
+		</Jump>
+		<Jump srcx="14" srcy="141" type="0">
+			<!--jiguandaosi dao zhongshudadian-->
+			<Ponit dstid="M018" dstx="197" dsty="47"/>
+		</Jump>
+		<Jump srcx="120" srcy="44" type="0">
+			<!--jiguandaosi dao shengongtang-->
+			<Ponit dstid="M009" dstx="99" dsty="29"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M006">
+		<!--jiguanzhiluer-->
+		<Jump srcx="131" srcy="100" type="0">
+			<!--jiguanzhiluer dao zhandouguangchanger-->
+			<Ponit dstid="M031" dstx="54" dsty="138"/>
+		</Jump>
+		<Jump srcx="58" srcy="197" type="0">
+			<!--jiguanzhiluer dao zhongzhuantingyi-->
+			<Ponit dstid="M016" dstx="49" dsty="53"/>
+		</Jump>
+		<Jump srcx="73" srcy="74" type="0">
+			<!--jiguanzhiluer dao shengongtang-->
+			<Ponit dstid="M009" dstx="60" dsty="196"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M007">
+		<!--shenjitang-->
+		<Jump srcx="220" srcy="59" type="0">
+			<!--shenjitang dao gongfangdatingsan-->
+			<Ponit dstid="M012" dstx="88" dsty="164"/>
+		</Jump>
+		<Jump srcx="32" srcy="108" type="0">
+			<!--shenjitang dao jiguandaoyi-->
+			<Ponit dstid="M001" dstx="131" dsty="224"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M008">
+		<!--zhaohuatang-->
+		<Jump srcx="80" srcy="78" type="0">
+			<!--zhaohuatang dao gongfangdatingyi-->
+			<Ponit dstid="M010" dstx="174" dsty="63"/>
+		</Jump>
+		<Jump srcx="101" srcy="18" type="0">
+			<!--zhaohuatang dao changkuer-->
+			<Ponit dstid="M015" dstx="117" dsty="157"/>
+		</Jump>
+		<Jump srcx="94" srcy="135" type="0">
+			<!--zhaohuatang dao zhongshudadian-->
+			<Ponit dstid="M018" dstx="52" dsty="57"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M009">
+		<!--shengongtang-->
+		<Jump srcx="188" srcy="200" type="0">
+			<!--shengongtang dao gongfangdatinger-->
+			<Ponit dstid="M011" dstx="28" dsty="52"/>
+		</Jump>
+		<Jump srcx="58" srcy="198" type="0">
+			<!--shengongtang dao jiguanzhiluer-->
+			<Ponit dstid="M006" dstx="71" dsty="76"/>
+		</Jump>
+		<Jump srcx="202" srcy="63" type="0">
+			<!--shengongtang dao jiguanzhiluyi-->
+			<Ponit dstid="M005" dstx="91" dsty="54"/>
+		</Jump>
+		<Jump srcx="97" srcy="27" type="0">
+			<!--shengongtang dao jiguandaosi-->
+			<Ponit dstid="M004" dstx="119" dsty="42"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M010">
+		<!--gongfangdatingyi-->
+		<Jump srcx="181" srcy="220" type="0">
+			<!--gongfangdatingyi dao gongfangdatingsan-->
+			<Ponit dstid="M012" dstx="18" dsty="78"/>
+		</Jump>
+		<Jump srcx="176" srcy="61" type="0">
+			<!--gongfangdatingyi dao zhaohuantang-->
+			<Ponit dstid="M008" dstx="81" dsty="76"/>
+		</Jump>
+		<Jump srcx="84" srcy="155" type="0">
+			<!--gongfangdatingyi dao jiguandaosan-->
+			<Ponit dstid="M003" dstx="183" dsty="122"/>
+		</Jump>
+		<Jump srcx="211" srcy="207" type="0">
+			<!--gongfangdatingyi dao jiguandaoer-->
+			<Ponit dstid="M002" dstx="98" dsty="125"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M011">
+		<!--gongfangdatinger-->
+		<Jump srcx="37" srcy="107" type="0">
+			<!--gongfangdatinger dao zhandouguangchanger-->
+			<Ponit dstid="M031" dstx="138" dsty="48"/>
+		</Jump>
+		<Jump srcx="122" srcy="68" type="0">
+			<!--gongfangdatinger dao gongfangdatingsi-->
+			<Ponit dstid="M013" dstx="71" dsty="126"/>
+		</Jump>
+		<Jump srcx="27" srcy="50" type="0">
+			<!--gongfangdatinger dao shengongtang-->
+			<Ponit dstid="M009" dstx="187" dsty="198"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M012">
+		<!--gongfangdatingsan-->
+		<Jump srcx="180" srcy="203" type="0">
+			<!--gongfangdatingsan dao zhongzhuantingyi-->
+			<Ponit dstid="M016" dstx="41" dsty="39"/>
+		</Jump>
+		<Jump srcx="178" srcy="73" type="0">
+			<!--gongfangdatingsan dao changkuyi-->
+			<Ponit dstid="M014" dstx="53" dsty="115"/>
+		</Jump>
+		<Jump srcx="17" srcy="80" type="0">
+			<!--gongfangdatingsan dao gongfangdatingyi-->
+			<Ponit dstid="M010" dstx="179" dsty="222"/>
+		</Jump>
+		<Jump srcx="86" srcy="167" type="0">
+			<!--gongfangdatingsan dao zhandouguangchanger-->
+			<Ponit dstid="M007" dstx="218" dsty="61"/>
+		</Jump>
+		<Jump srcx="56" srcy="44" type="0">
+			<!--gongfangdatingsan dao zhandouguangchanger-->
+			<Ponit dstid="M002" dstx="365" dsty="248"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M013">
+		<!--gongfangdatingsi-->
+		<Jump srcx="69" srcy="129" type="0">
+			<!--gongfangdatingsi dao gongfangdatinger-->
+			<Ponit dstid="M011" dstx="120" dsty="70"/>
+		</Jump>
+		<Jump srcx="21" srcy="66" type="0">
+			<!--gongfangdatingsi dao jiguanzhiluyi-->
+			<Ponit dstid="M005" dstx="48" dsty="87"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M014">
+		<!--changkuyi-->
+		<Jump srcx="50" srcy="23" type="0">
+			<!--changkuyi dao zhongshudadian-->
+			<Ponit dstid="M018" dstx="191" dsty="196"/>
+		</Jump>
+		<Jump srcx="51" srcy="117" type="0">
+			<!--changkuyi dao gongfangdatingsan-->
+			<Ponit dstid="M012" dstx="176" dsty="75"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M015">
+		<!--changkuer-->
+		<Jump srcx="160" srcy="119" type="0">
+			<!--changkuer dao zhongzhuantinger-->
+			<Ponit dstid="M017" dstx="42" dsty="38"/>
+		</Jump>
+		<Jump srcx="118" srcy="159" type="0">
+			<!--changkuer dao zhaohuatang-->
+			<Ponit dstid="M008" dstx="103" dsty="20"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M016">
+		<!--zhongzhuantingyi-->
+		<Jump srcx="50" srcy="52" type="0">
+			<!--zhongzhuantingyi dao jiguanzhiluer-->
+			<Ponit dstid="M006" dstx="60" dsty="195"/>
+		</Jump>
+		<Jump srcx="39" srcy="37" type="0">
+			<!--zhongzhuantingyi dao gaongfangdatingsan-->
+			<Ponit dstid="M012" dstx="178" dsty="201"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M017">
+		<!--zhongzhuantinger-->
+		<Jump srcx="49" srcy="51" type="0">
+			<!--zhongzhuantinger dao jiguanzhiluyi-->
+			<Ponit dstid="M005" dstx="59" dsty="43"/>
+		</Jump>
+		<Jump srcx="58" srcy="63" type="0">
+			<!--zhongzhuantinger dao jiguandaosi-->
+			<Ponit dstid="M004" dstx="65" dsty="79"/>
+		</Jump>
+		<Jump srcx="40" srcy="36" type="0">
+			<!--zhongzhuantinger dao changkuer-->
+			<Ponit dstid="M015" dstx="159" dsty="117"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M018">
+		<!--zhongzhuandadian-->
+		<Jump srcx="192" srcy="199" type="0">
+			<!--zhongzhuandadian dao changkuyi-->
+			<Ponit dstid="M014" dstx="52" dsty="25"/>
+		</Jump>
+		<Jump srcx="50" srcy="55" type="0">
+			<!--zhongzhuandadian dao zhaohuatang-->
+			<Ponit dstid="M008" dstx="93" dsty="133"/>
+		</Jump>
+		<Jump srcx="199" srcy="45" type="0">
+			<!--zhongzhuandadian dao jiguandaosi-->
+			<Ponit dstid="M004" dstx="16" dsty="138"/>
+		</Jump>
+		<Jump srcx="45" srcy="202" type="0">
+			<!--zhongzhuandadian dao jiguandaoer-->
+			<Ponit dstid="M002" dstx="244" dsty="125"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M020">
+		<!--pandaoyi-->
+		<Jump srcx="36" srcy="56" type="0">
+			<!--pandaoyi dao huixuantongdaoyi-->
+			<Ponit dstid="M021" dstx="92" dsty="131"/>
+		</Jump>
+		<Jump srcx="53" srcy="13" type="0">
+			<!--pandaoyi dao jiguandaoyi-->
+			<Ponit dstid="M001" dstx="261" dsty="94"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M021">
+		<!--huixuantongdaoyi-->
+		<Jump srcx="122" srcy="156" type="0">
+			<!--huixuantongdaoyi dao pandaoer-->
+			<Ponit dstid="M022" dstx="52" dsty="86"/>
+		</Jump>
+		<Jump srcx="90" srcy="133" type="0">
+			<!--huixuantongdaoyi dao pandaoyi-->
+			<Ponit dstid="M020" dstx="35" dsty="57"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M022">
+		<!--pandaoer-->
+		<Jump srcx="49" srcy="46" type="0">
+			<!--pandaoer dao sichadao-->
+			<Ponit dstid="M023" dstx="37" dsty="210"/>
+		</Jump>
+		<Jump srcx="53" srcy="88" type="0">
+			<!--pandaoer dao huixuantongdaoyi-->
+			<Ponit dstid="M021" dstx="123" dsty="157"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M023">
+		<!--sichadao-->
+		<Jump srcx="229" srcy="130" type="0">
+			<!--sichadao dao zhandouchanglang-->
+			<Ponit dstid="M026" dstx="22" dsty="283"/>
+		</Jump>
+		<Jump srcx="201" srcy="44" type="0">
+			<!--sichadao dao jiaodouchang-->
+			<Ponit dstid="M025" dstx="65" dsty="184"/>
+		</Jump>
+		<Jump srcx="100" srcy="38" type="0">
+			<!--sichadao dao yuhuizhidi-->
+			<Ponit dstid="M024" dstx="67" dsty="262"/>
+		</Jump>
+		<Jump srcx="35" srcy="212" type="0">
+			<!--sichadao dao pandaoer-->
+			<Ponit dstid="M022" dstx="47" dsty="47"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M024">
+		<!--yuhuizhidi-->
+		<Jump srcx="237" srcy="153" type="0">
+			<!--yuhuizhidi dao zhandouguangchangsan-->
+			<Ponit dstid="M032" dstx="59" dsty="67"/>
+		</Jump>
+		<Jump srcx="226" srcy="84" type="0">
+			<!--yuhuizhidi dao pandaosan-->
+			<Ponit dstid="M027" dstx="55" dsty="98"/>
+		</Jump>
+		<Jump srcx="69" srcy="265" type="0">
+			<!--yuhuizhidi dao sichadao-->
+			<Ponit dstid="M023" dstx="101" dsty="39"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M025">
+		<!--jiaodouchang-->
+		<Jump srcx="217" srcy="32" type="0">
+			<!--jiaodouchang dao pandaosan-->
+			<Ponit dstid="M027" dstx="62" dsty="106"/>
+		</Jump>
+		<Jump srcx="63" srcy="186" type="0">
+			<!--jiaodouchang dao sichadao-->
+			<Ponit dstid="M023" dstx="199" dsty="45"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M026">
+		<!--zhandouchanglang-->
+		<Jump srcx="123" srcy="128" type="0">
+			<!--zhandouchanglang dao zhandouguangchangsan-->
+			<Ponit dstid="M032" dstx="155" dsty="97"/>
+		</Jump>
+		<Jump srcx="283" srcy="20" type="0">
+			<!--zhandouchanglang dao pandaosan-->
+			<Ponit dstid="M027" dstx="69" dsty="114"/>
+		</Jump>
+		<Jump srcx="20" srcy="285" type="0">
+			<!--zhandouchanglang dao pandaoyi-->
+			<Ponit dstid="M023" dstx="227" dsty="131"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M027">
+		<!--pandaosan-->
+		<Jump srcx="43" srcy="80" type="0">
+			<!--pandaosan dao huixuantongdaoer-->
+			<Ponit dstid="M028" dstx="45" dsty="177"/>
+		</Jump>
+		<Jump srcx="68" srcy="116" type="0">
+			<!--pandaosan dao zhandouchanglang-->
+			<Ponit dstid="M026" dstx="282" dsty="22"/>
+		</Jump>
+		<Jump srcx="61" srcy="108" type="0">
+			<!--pandaosan dao jiaodouchang-->
+			<Ponit dstid="M025" dstx="216" dsty="34"/>
+		</Jump>
+		<Jump srcx="54" srcy="100" type="0">
+			<!--pandaosan dao yuhuizhidi-->
+			<Ponit dstid="M024" dstx="225" dsty="85"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M028">
+		<!--huixuantongdaoer-->
+		<Jump srcx="98" srcy="82" type="0">
+			<!--huixuantongdaoer dao pandaosi-->
+			<Ponit dstid="M029" dstx="50" dsty="41"/>
+		</Jump>
+		<Jump srcx="44" srcy="176" type="0">
+			<!--huixuantongdaoer dao pandaosan-->
+			<Ponit dstid="M027" dstx="42" dsty="78"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M029">
+		<!--pandaosi-->
+		<Jump srcx="90" srcy="45" type="0">
+			<!--pandaosi dao pandaosi-->
+			<Ponit dstid="M005" dstx="46" dsty="95"/>
+		</Jump>
+		<Jump srcx="52" srcy="44" type="0">
+			<!--pandaosi dao huixuantongdaoer-->
+			<Ponit dstid="M028" dstx="100" dsty="84"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M030">
+		<!--zhandouguangchangyi-->
+		<Jump srcx="110" srcy="76" type="0">
+			<!--zhandouguangchangyi dao jiguandaosan-->
+			<Ponit dstid="M003" dstx="115" dsty="186"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M031">
+		<!--zhandouguangchanger-->
+		<Jump srcx="139" srcy="46" type="0">
+			<!--zhandouguangchanger dao gongfangdatinger-->
+			<Ponit dstid="M011" dstx="39" dsty="104"/>
+		</Jump>
+		<Jump srcx="53" srcy="140" type="0">
+			<!--zhandouguangchanger  dao jiguanzhiluer-->
+			<Ponit dstid="M006" dstx="130" dsty="104"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!--nsp1-->
+	<map id="M032">
+		<!--zhandouguangchangsan-->
+		<Jump srcx="156" srcy="99" type="0">
+			<!--zhandouguangchangsan  dao zhandouchanglang-->
+			<Ponit dstid="M026" dstx="124" dsty="131"/>
+		</Jump>
+		<Jump srcx="58" srcy="66" type="0">
+			<!--zhandouguangchangsan  dao yuhuizhidi-->
+			<Ponit dstid="M024" dstx="236" dsty="150"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<!-- /NEW -->
+	<!-- CSC_kuangdong -->
+	<map id="T011">
+		<!-- kuangqurukou -->
+		<Jump srcx="12" srcy="142" type="0">
+			<!-- kuangqurukou dao luoxiadao -->
+			<Ponit dstid="1" dstx="473" dsty="401"/>
+		</Jump>
+		<Jump srcx="105" srcy="88" type="0">
+			<!-- kuangqurukou dao nanbukuangshiyunshuzhan -->
+			<Ponit dstid="T012" dstx="18" dsty="28"/>
+		</Jump>
+		<Jump srcx="123" srcy="10" type="0">
+			<!-- kuangqurukou dao beibukuangshiyunshuzhan -->
+			<Ponit dstid="T013" dstx="73" dsty="86"/>
+		</Jump>
+		<Jump srcx="61" srcy="20" type="0">
+			<!-- kuangqurukou dao shusantongdao -->
+			<Ponit dstid="T022" dstx="86" dsty="90"/>
+		</Jump>
+		<Jump srcx="12" srcy="141" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="1" dstx="475" dsty="397"/>
+		</Jump>		
+	</map>
+
+	<map id="T011_101">
+		<!-- kuangqurukou -->
+		<Jump srcx="12" srcy="142" type="0">
+			<!-- kuangqurukou dao luoxiadao -->
+			<Ponit dstid="101" dstx="473" dsty="401"/>
+		</Jump>
+		<Jump srcx="105" srcy="88" type="0">
+			<!-- kuangqurukou dao nanbukuangshiyunshuzhan -->
+			<Ponit dstid="T012_101" dstx="18" dsty="28"/>
+		</Jump>
+		<Jump srcx="123" srcy="10" type="0">
+			<!-- kuangqurukou dao beibukuangshiyunshuzhan -->
+			<Ponit dstid="T013_101" dstx="73" dsty="86"/>
+		</Jump>
+		<Jump srcx="61" srcy="20" type="0">
+			<!-- kuangqurukou dao shusantongdao -->
+			<Ponit dstid="T022_101" dstx="86" dsty="90"/>
+		</Jump>
+		<Jump srcx="12" srcy="141" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="101" dstx="475" dsty="397"/>
+		</Jump>		
+	</map>
+	
+	<map id="T011_201">
+		<!-- kuangqurukou -->
+		<Jump srcx="12" srcy="142" type="0">
+			<!-- kuangqurukou dao luoxiadao -->
+			<Ponit dstid="201" dstx="473" dsty="401"/>
+		</Jump>
+		<Jump srcx="105" srcy="88" type="0">
+			<!-- kuangqurukou dao nanbukuangshiyunshuzhan -->
+			<Ponit dstid="T012_201" dstx="18" dsty="28"/>
+		</Jump>
+		<Jump srcx="123" srcy="10" type="0">
+			<!-- kuangqurukou dao beibukuangshiyunshuzhan -->
+			<Ponit dstid="T013_201" dstx="73" dsty="86"/>
+		</Jump>
+		<Jump srcx="61" srcy="20" type="0">
+			<!-- kuangqurukou dao shusantongdao -->
+			<Ponit dstid="T022_201" dstx="86" dsty="90"/>
+		</Jump>
+		<Jump srcx="12" srcy="141" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="201" dstx="475" dsty="397"/>
+		</Jump>		
+	</map>
+
+	
+	
+	
+	<map id="T012">
+		<!-- nanbukuangshiyunshuzhan -->
+		<Jump srcx="17" srcy="25" type="0">
+			<!-- nanbukuangshiyunshuzhan dao kuangqurukou -->
+			<Ponit dstid="T011" dstx="103" dsty="86"/>
+		</Jump>
+		<Jump srcx="26" srcy="83" type="0">
+			<!-- nanbukuangshiyunshuzhan dao xibukuangqu -->
+			<Ponit dstid="T017" dstx="38" dsty="15"/>
+		</Jump>
+	</map>
+	<map id="T013">
+		<!-- beibukuangshiyunshuzhan -->
+		<Jump srcx="75" srcy="89" type="0">
+			<!-- beibukuangshiyunshuzhan dao kuangqurukou -->
+			<Ponit dstid="T011" dstx="125" dsty="13"/>
+		</Jump>
+		<Jump srcx="15" srcy="56" type="0">
+			<!-- beibukuangshiyunshuzhan dao beibukuangqu -->
+			<Ponit dstid="T018" dstx="121" dsty="106"/>
+		</Jump>
+	</map>
+	<map id="T014">
+		<!-- nanbuduanqu -->
+		<Jump srcx="20" srcy="80" type="0">
+			<!-- nanbuduanqu dao kuangshijingxuanchang -->
+			<Ponit dstid="T016" dstx="87" dsty="25"/>
+		</Jump>
+		<Jump srcx="81" srcy="18" type="0">
+			<!-- nanbuduanqu dao xibukuangqu -->
+			<Ponit dstid="T017" dstx="91" dsty="126"/>
+		</Jump>
+	</map>
+	<map id="T015">
+		<!-- zhongbukuangqu -->
+		<Jump srcx="14" srcy="28" type="0">
+			<!-- zhongbukuangqu dao beibuduanceng -->
+			<Ponit dstid="T021" dstx="83" dsty="15"/>
+		</Jump>
+		<Jump srcx="172" srcy="142" type="0">
+			<!-- zhongbukuangqu dao shusantongdao -->
+			<Ponit dstid="T022" dstx="17" dsty="71"/>
+		</Jump>
+		<Jump srcx="58" srcy="145" type="0">
+			<!-- zhongbukuangqu dao shiwangdian -->
+			<Ponit dstid="L004" dstx="97" dsty="40"/>
+		</Jump>
+		
+	</map>
+	
+	<map id="T015_101">
+		<!-- zhongbukuangqu -->
+		<Jump srcx="14" srcy="28" type="0">
+			<!-- zhongbukuangqu dao beibuduanceng -->
+			<Ponit dstid="T021_101" dstx="83" dsty="15"/>
+		</Jump>
+		<Jump srcx="172" srcy="142" type="0">
+			<!-- zhongbukuangqu dao shusantongdao -->
+			<Ponit dstid="T022_101" dstx="17" dsty="71"/>
+		</Jump>
+		<Jump srcx="58" srcy="145" type="0">
+			<!-- zhongbukuangqu dao shiwangdian -->
+			<Ponit dstid="L004_101" dstx="97" dsty="40"/>
+		</Jump>
+		
+	</map>
+	
+	<map id="T015_201">
+		<!-- zhongbukuangqu -->
+		<Jump srcx="14" srcy="28" type="0">
+			<!-- zhongbukuangqu dao beibuduanceng -->
+			<Ponit dstid="T021_201" dstx="83" dsty="15"/>
+		</Jump>
+		<Jump srcx="172" srcy="142" type="0">
+			<!-- zhongbukuangqu dao shusantongdao -->
+			<Ponit dstid="T022_201" dstx="17" dsty="71"/>
+		</Jump>
+		<Jump srcx="58" srcy="145" type="0">
+			<!-- zhongbukuangqu dao shiwangdian -->
+			<Ponit dstid="L004_201" dstx="97" dsty="40"/>
+		</Jump>
+		
+	</map>	
+		
+	<map id="T016">
+		<!-- kuangshijingxuanchang -->
+		<Jump srcx="89" srcy="22" type="0">
+			<!-- kuangshijingxuanchang dao nanbuduanceng -->
+			<Ponit dstid="T014" dstx="22" dsty="78"/>
+		</Jump>
+		<Jump srcx="38" srcy="132" type="0">
+			<!-- kuangshijingxuanchang dao shusantongdao -->
+			<Ponit dstid="T022" dstx="65" dsty="17"/>
+		</Jump>
+	</map>
+	<map id="T017">
+		<!-- xibukuangqu -->
+		<Jump srcx="40" srcy="12" type="0">
+			<!-- xibukuangqu dao nanbukuangshiyunshuzhan -->
+			<Ponit dstid="T012" dstx="29" dsty="80"/>
+		</Jump>
+		<Jump srcx="88" srcy="129" type="0">
+			<!-- xibukuangqu dao nanbuduanceng -->
+			<Ponit dstid="T014" dstx="79" dsty="21"/>
+		</Jump>
+	</map>
+	<map id="T018">
+		<!-- beibukuangqu -->
+		<Jump srcx="123" srcy="103" type="0">
+			<!-- beibukuangqu dao beibukuangshiyunshuzhan -->
+			<Ponit dstid="T013" dstx="17" dsty="53"/>
+		</Jump>
+		<Jump srcx="22" srcy="128" type="0">
+			<!-- beibukuangqu dao binansuo -->
+			<Ponit dstid="T020" dstx="73" dsty="23"/>
+		</Jump>
+		<Jump srcx="110" srcy="14" type="0">
+			<!-- beibukuangqu dao shusantongdao -->
+			<Ponit dstid="T022" dstx="26" dsty="18"/>
+		</Jump>
+	</map>
+	<map id="T019">
+		<!-- dongbukuangqu -->
+		<Jump srcx="27" srcy="127" type="0">
+			<!-- dongbukuangqu dao binansuo -->
+			<Ponit dstid="T020" dstx="17" dsty="53"/>
+		</Jump>
+		<Jump srcx="111" srcy="12" type="0">
+			<!-- dongbukuangqu dao beibuduanceng -->
+			<Ponit dstid="T021" dstx="19" dsty="83"/>
+		</Jump>
+	</map>
+	<map id="T020">
+		<!-- binansuo -->
+		<Jump srcx="75" srcy="20" type="0">
+			<!-- binansuo dao beibukuangqu -->
+			<Ponit dstid="T018" dstx="24" dsty="126"/>
+		</Jump>
+		<Jump srcx="16" srcy="50" type="0">
+			<!-- binansuo dao dongbukuangqu -->
+			<Ponit dstid="T019" dstx="25" dsty="125"/>
+		</Jump>
+	</map>
+	<map id="T021">
+		<!-- beibuduanceng -->
+		<Jump srcx="85" srcy="13" type="0">
+			<!-- beibuduanceng dao zhongbukuangqu -->
+			<Ponit dstid="T015" dstx="16" dsty="26"/>
+		</Jump>
+		<Jump srcx="17" srcy="85" type="0">
+			<!-- beibuduanceng dao dongbukuangqu -->
+			<Ponit dstid="T019" dstx="109" dsty="15"/>
+		</Jump>
+	</map>
+	
+	
+	<map id="T022">
+		<!-- shusantongdao -->
+		<Jump srcx="83" srcy="93" type="0">
+			<!-- shusantongdao dao kuangqurukou -->
+			<Ponit dstid="T011" dstx="59" dsty="22"/>
+		</Jump>
+		<Jump srcx="15" srcy="73" type="0">
+			<!-- shusantongdao dao zhongbukuangqu -->
+			<Ponit dstid="T015" dstx="170" dsty="145"/>
+		</Jump>
+		<Jump srcx="64" srcy="14" type="0">
+			<!-- shusantongdao dao kuangshijingxuanchang -->
+			<Ponit dstid="T016" dstx="36" dsty="130"/>
+		</Jump>
+		<Jump srcx="28" srcy="21" type="0">
+			<!-- shusantongdao dao beibukuangqu -->
+			<Ponit dstid="T018" dstx="111" dsty="16"/>
+		</Jump>
+	</map>
+	
+	<map id="T022_101">
+		<!-- shusantongdao -->
+		<Jump srcx="83" srcy="93" type="0">
+			<!-- shusantongdao dao kuangqurukou -->
+			<Ponit dstid="T011_101" dstx="59" dsty="22"/>
+		</Jump>
+		<Jump srcx="15" srcy="73" type="0">
+			<!-- shusantongdao dao zhongbukuangqu -->
+			<Ponit dstid="T015_101" dstx="170" dsty="145"/>
+		</Jump>
+		<Jump srcx="64" srcy="14" type="0">
+			<!-- shusantongdao dao kuangshijingxuanchang -->
+			<Ponit dstid="T016_101" dstx="36" dsty="130"/>
+		</Jump>
+		<Jump srcx="28" srcy="21" type="0">
+			<!-- shusantongdao dao beibukuangqu -->
+			<Ponit dstid="T018_101" dstx="111" dsty="16"/>
+		</Jump>
+	</map>
+	
+	<map id="T022_201">
+		<!-- shusantongdao -->
+		<Jump srcx="83" srcy="93" type="0">
+			<!-- shusantongdao dao kuangqurukou -->
+			<Ponit dstid="T011_201" dstx="59" dsty="22"/>
+		</Jump>
+		<Jump srcx="15" srcy="73" type="0">
+			<!-- shusantongdao dao zhongbukuangqu -->
+			<Ponit dstid="T015_201" dstx="170" dsty="145"/>
+		</Jump>
+		<Jump srcx="64" srcy="14" type="0">
+			<!-- shusantongdao dao kuangshijingxuanchang -->
+			<Ponit dstid="T016_201" dstx="36" dsty="130"/>
+		</Jump>
+		<Jump srcx="28" srcy="21" type="0">
+			<!-- shusantongdao dao beibukuangqu -->
+			<Ponit dstid="T018_201" dstx="111" dsty="16"/>
+		</Jump>
+	</map>
+
+
+
+
+
+	
+	
+	<map id="T023">
+		<!-- feiqikuangkeng -->
+		<Jump srcx="70" srcy="21" type="1">
+			<!-- feiqikuangkeng dao reshahuangmo -->
+			<Ponit dstid="2" dstx="137" dsty="826">
+				<Command Com="@letmeout"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<!-- /CSC_kuangdong -->
+	<map id="SH000">
+		<Jump srcx="12" srcy="54" type="1">
+			<!-- huanggong dao zhongzhou -->
+			<Ponit dstid="0" dstx="475" dsty="151">
+				<Command Com="@jiansg"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="21" srcy="45" type="1">
+			<!-- huanggong dao shengdianshan -->
+			<Ponit dstid="sjs" dstx="58" dsty="261">
+				<Command Com="@gosjs"/>
+				<Command Com="@gotosds"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<map id="M005">
+		<!--jiguanzhiluyi-->
+		<Jump srcx="45" srcy="97" type="0">
+			<!--jiguanzhiluyi dao pandaosi-->
+			<Ponit dstid="M029" dstx="88" dsty="47"/>
+		</Jump>
+		<Jump srcx="57" srcy="41" type="0">
+			<!--jiguanzhiluyi dao zhongzhuantinger-->
+			<Ponit dstid="M017" dstx="47" dsty="50"/>
+		</Jump>
+		<Jump srcx="89" srcy="56" type="0">
+			<!--jiguanzhiluyi dao shengongtang-->
+			<Ponit dstid="M009" dstx="200" dsty="65"/>
+		</Jump>
+		<Jump srcx="50" srcy="85" type="0">
+			<!--jiguanzhiluyi dao gongfangdatingsi-->
+			<Ponit dstid="M013" dstx="22" dsty="64"/>
+		</Jump>
+		<Jump srcx="92" srcy="106" type="0">
+			<!--jiguanzhiluyi dao erhuangshamo-->
+			<Ponit dstid="2" dstx="208" dsty="428"/>
+		</Jump>
+	</map>
+	<!--nsp1-->
+	<map id="7">
+		<Jump srcx="11" srcy="9" type="0">
+			<!-- sishuizhaoze dao zhongzhou -->
+			<Ponit dstid="0" dstx="781" dsty="524"/>
+		</Jump>
+		<!-- CSC -->
+		<Jump srcx="389" srcy="45" type="0">
+			<!-- sishuizhaoze dao dixiamoyuyiceng -->
+			<Ponit dstid="MC001" dstx="65" dsty="206"/>
+		</Jump>
+		<Jump srcx="257" srcy="272" type="0">
+			<!-- sishuizhaoze dao tiexuemocheng -->
+			<Ponit dstid="MC014" dstx="214" dsty="264"/>
+		</Jump>
+		<!-- /CSC -->
+	</map>
+	<!-- CSC -->
+	<map id="MC001">
+		<!-- dixiamoyuyiceng -->
+		<Jump srcx="63" srcy="203" type="0">
+			<!-- dixiamoyuyiceng dao sishuizhaoze -->
+			<Ponit dstid="7" dstx="387" dsty="49"/>
+		</Jump>
+		<Jump srcx="79" srcy="33" type="0">
+			<!-- dixiamoyuyiceng dao dixiamoyuerceng -->
+			<Ponit dstid="MC002" dstx="63" dsty="203"/>
+		</Jump>
+	</map>
+	<map id="MC002">
+		<!-- dixiamoyuerceng -->
+		<Jump srcx="225" srcy="66" type="0">
+			<!-- dixiamoyuerceng dao dixiamoyuyiceng -->
+			<Ponit dstid="MC001" dstx="82" dsty="30"/>
+		</Jump>
+		<Jump srcx="91" srcy="94" type="0">
+			<!-- dixiamoyuerceng dao dixiamoyusanceng -->
+			<Ponit dstid="MC003" dstx="92" dsty="80"/>
+		</Jump>
+	</map>
+	<map id="MC003">
+		<!-- dixiamoyusanceng -->
+		<Jump srcx="124" srcy="284" type="0">
+			<!-- dixiamoyusanceng dao dixiamoyuerceng -->
+			<Ponit dstid="MC002" dstx="112" dsty="252"/>
+		</Jump>
+		<Jump srcx="224" srcy="180" type="0">
+			<!-- dixiamoyusanceng dao dixiamoyusiceng -->
+			<Ponit dstid="MC004" dstx="135" dsty="147"/>
+		</Jump>
+	</map>
+	<map id="MC004">
+		<!-- dixiamoyusiceng -->
+		<Jump srcx="136" srcy="145" type="0">
+			<!-- dixiamoyusiceng dao dixiamoyusanceng -->
+			<Ponit dstid="MC003" dstx="223" dsty="181"/>
+		</Jump>
+		<Jump srcx="78" srcy="230" type="0">
+			<!-- dixiamoyusiceng dao dixiamoyuwuceng -->
+			<Ponit dstid="MC005" dstx="241" dsty="22"/>
+		</Jump>
+		<Jump srcx="210" srcy="104" type="0">
+			<!-- dixiamoyusiceng dao tiexuemocheng -->
+			<Ponit dstid="MC014" dstx="69" dsty="205"/>
+		</Jump>
+	</map>
+	<map id="MC005">
+		<!-- dixiamoyuwuceng -->
+		<Jump srcx="242" srcy="20" type="0">
+			<!-- dixiamoyuwuceng dao dixiamoyusiceng -->
+			<Ponit dstid="MC004" dstx="80" dsty="228"/>
+		</Jump>
+		<Jump srcx="56" srcy="254" type="0">
+			<!-- dixiamoyuwuceng dao dixiamoyuliuceng -->
+			<Ponit dstid="MC006" dstx="106" dsty="245"/>
+		</Jump>
+	</map>
+	<map id="MC006">
+		<!-- dixiamoyuliuceng -->
+		<Jump srcx="107" srcy="243" type="0">
+			<!-- dixiamoyuliuceng dao dixiamoyuwuceng -->
+			<Ponit dstid="MC005" dstx="55" dsty="252"/>
+		</Jump>
+		<Jump srcx="339" srcy="84" type="0">
+			<!-- dixiamoyuliuceng dao dixiamoyuliuceng -->
+			<Ponit dstid="MC006" dstx="359" dsty="184"/>
+		</Jump>
+		<Jump srcx="360" srcy="183" type="0">
+			<!-- dixiamoyuliuceng dao dixiamoyuliuceng -->
+			<Ponit dstid="MC006" dstx="338" dsty="86"/>
+		</Jump>
+		<Jump srcx="94" srcy="94" type="0">
+			<!-- dixiamoyuliuceng dao dixiamoyuqiceng -->
+			<Ponit dstid="MC007" dstx="245" dsty="50"/>
+		</Jump>
+		<Jump srcx="157" srcy="129" type="0">
+			<!-- dixiamoyuliuceng dao xinzhimoyu -->
+			<Ponit dstid="MC011" dstx="102" dsty="100"/>
+		</Jump>
+	</map>
+	<map id="MC007">
+		<!-- dixiamoyuqiceng -->
+		<Jump srcx="246" srcy="48" type="0">
+			<!-- dixiamoyuqiceng dao dixiamoyuliuceng -->
+			<Ponit dstid="MC006" dstx="96" dsty="92"/>
+		</Jump>
+		<Jump srcx="37" srcy="260" type="0">
+			<!-- dixiamoyuqiceng dao dixiamoyubaceng -->
+			<Ponit dstid="MC008" dstx="54" dsty="40"/>
+		</Jump>
+	</map>
+	<map id="MC008">
+		<!-- dixiamoyubaceng -->
+		<Jump srcx="52" srcy="40" type="0">
+			<!-- dixiamoyubaceng dao dixiamoyuqiceng -->
+			<Ponit dstid="MC007" dstx="39" dsty="258"/>
+		</Jump>
+	</map>
+	<map id="MC009">
+		<!-- modian -->
+		<Jump srcx="22" srcy="109" type="0">
+			<!-- modian dao tiexuemocheng -->
+			<Ponit dstid="MC010" dstx="274" dsty="143"/>
+		</Jump>
+	</map>
+	<map id="MC010">
+		<!-- tiexuemocheng -->
+		<Jump srcx="68" srcy="203" type="0">
+			<!-- tiexuemocheng dao sishuizhaoze -->
+			<Ponit dstid="7" dstx="68" dsty="43"/>
+		</Jump>
+	</map>
+	<map id="MC011">
+		<!-- xinzhimoyu -->
+		<Jump srcx="103" srcy="164" type="0">
+			<!-- xinzhimoyu dao dixiamoyuliuceng -->
+			<Ponit dstid="MC006" dstx="196" dsty="198"/>
+		</Jump>
+	</map>
+	<map id="MC014">
+		<!-- tiexuemocheng -->
+		<Jump srcx="76" srcy="73" type="0">
+			<!-- tiexuemocheng dao tiexuemogong -->
+			<Ponit dstid="MG001" dstx="145" dsty="155"/>
+		</Jump>
+	</map>
+	<map id="MG001">
+		<!-- tiexuemogong -->
+		<Jump srcx="220" srcy="212" type="1">
+			<!-- tiexuemogong dao sishuizhaoze -->
+			<Ponit dstid="7" dstx="100" dsty="100">
+				<Command Com="@to7"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="220" srcy="212" type="1">
+			<!-- tiexuemogong dao tiexuemocheng -->
+			<Ponit dstid="MC014" dstx="80" dsty="76">
+				<Command Com="@mc010"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="85" srcy="179" type="0">
+			<!-- tiexuemogong dao tanxihuilang -->
+			<Ponit dstid="MG002" dstx="55" dsty="176"/>
+		</Jump>
+	</map>
+	<map id="MG002">
+		<!-- tanxihuilang -->
+		<Jump srcx="84" srcy="202" type="0">
+			<!-- tanxihuilang dao tiexuemogong -->
+			<Ponit dstid="MG001" dstx="100" dsty="204"/>
+		</Jump>
+	</map>
+	<!-- /CSC -->
+	<map id="1">
+		<Jump srcx="477" srcy="395" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="T011" dstx="14" dsty="138"/>
+		</Jump>
+		<!-- NPC -->
+		<Jump srcx="253" srcy="248" type="1">
+			<!-- luoxiadao laobin -->
+			<Ponit dstid="heroisland" dstx="470" dsty="226">
+				<Command Com="@main1"/>
+				<command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+
+		<Jump srcx="253" srcy="248" type="1">
+			<!-- luoxiadao laobin -->
+			<Ponit dstid="0" dstx="470" dsty="226">
+				<Command Com="@main1"/>
+				<command Com="@capital"/>
+				<command Com="@capital1"/>
+			</Ponit>
+		</Jump>		
+	</map>
+		
+	<map id="101">
+		<Jump srcx="477" srcy="395" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="T011_101" dstx="14" dsty="138"/>
+		</Jump>
+		<!-- NPC -->
+		<Jump srcx="253" srcy="248" type="1">
+			<!-- luoxiadao laobin -->
+			<Ponit dstid="heroisland" dstx="470" dsty="226">
+				<Command Com="@main1"/>
+				<command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="253" srcy="248" type="1">
+			<!-- luoxiadao laobin -->
+			<Ponit dstid="0" dstx="470" dsty="226">
+				<Command Com="@main1"/>
+				<command Com="@capital"/>
+				<command Com="@capital1"/>
+			</Ponit>
+		</Jump>			
+	</map>
+	
+	<map id="201">
+		<Jump srcx="477" srcy="395" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="T011_201" dstx="14" dsty="138"/>
+		</Jump>
+		<!-- NPC -->
+		<Jump srcx="253" srcy="248" type="1">
+			<!-- luoxiadao laobin -->
+			<Ponit dstid="heroisland" dstx="470" dsty="226">
+				<Command Com="@main1"/>
+				<command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="253" srcy="248" type="1">
+			<!-- luoxiadao laobin -->
+			<Ponit dstid="0" dstx="470" dsty="226">
+				<Command Com="@main1"/>
+				<command Com="@capital"/>
+				<command Com="@capital1"/>
+			</Ponit>
+		</Jump>			
+	</map>		
+	
+	<map id="2">
+		<Jump srcx="443" srcy="526" type="0">
+			<!-- reshahuangmo dao yuemapingyuan -->
+			<Ponit dstid="3" dstx="17" dsty="534"/>
+		</Jump>
+		<Jump srcx="344" srcy="23" type="0">
+			<!-- reshahuangmo dao shemogu -->
+			<Ponit dstid="10" dstx="82" dsty="64"/>
+		</Jump>
+		<Jump srcx="439" srcy="973" type="0">
+			<!-- reshahuangmo dao zhongzhou -->
+			<Ponit dstid="0" dstx="725" dsty="37"/>
+		</Jump>
+		<Jump srcx="207" srcy="427" type="0">
+			<!-- reshahuangmo dao jiguanzhiluyi -->
+			<Ponit dstid="M005" dstx="91" dsty="104"/>
+		</Jump>
+		<!--/nsp1-->
+		<Jump srcx="201" srcy="428" type="0">
+			<!--reshahuangmo dao jiguandaoyi-->
+			<Ponit dstid="M001" dstx="46" dsty="252"/>
+		</Jump>
+		<Jump srcx="197" srcy="514" type="0">
+			<!--reshahuangmo dao jiguandaoyi-->
+			<Ponit dstid="SH024" dstx="46" dsty="252"/>
+		</Jump>		
+		
+		<!--/nsp1-->
+	</map>
+	<map id="3">
+		<Jump srcx="15" srcy="534" type="0">
+			<!-- yuemaoingyuan dao reshahuangmo -->
+			<Ponit dstid="2" dstx="441" dsty="526"/>
+		</Jump>
+		<Jump srcx="360" srcy="704" type="0">
+			<!-- yuemapingyuan dao nimo -->
+			<Ponit dstid="S011" dstx="275" dsty="276"/>
+		</Jump>
+	</map>
+	<map id="4">
+		<Jump srcx="14" srcy="65" type="0">
+			<!-- jindi dao xiyuqijing -->
+			<Ponit dstid="5" dstx="599" dsty="606"/>
+		</Jump>
+		<Jump srcx="179" srcy="482" type="0">
+			<!-- jindi dao shemogu -->
+			<Ponit dstid="10" dstx="61" dsty="13"/>
+		</Jump>
+		<!-- CSC -->
+		<Jump srcx="45" srcy="162" type="0">
+			<!-- jindi dao jindizhimen -->
+			<Ponit dstid="J001" dstx="247" dsty="258"/>
+		</Jump>
+		<!-- /CSC -->
+	</map>
+	<!-- CSC -->
+	<map id="J001">
+		<!-- jindizhimen -->
+		<Jump srcx="249" srcy="259" type="0">
+			<!-- jindizhimen dao jindi -->
+			<Ponit dstid="4" dstx="46" dsty="164"/>
+		</Jump>
+		<Jump srcx="59" srcy="284" type="0">
+			<!-- jindizhimen dao zhaoyuechi -->
+			<Ponit dstid="J002" dstx="266" dsty="145"/>
+		</Jump>
+		<Jump srcx="265" srcy="97" type="0">
+			<!-- jindizhimen dao binshizhidi -->
+			<Ponit dstid="J004" dstx="36" dsty="350"/>
+		</Jump>
+	</map>
+	<map id="J002">
+		<!-- zhaoyuechi -->
+		<Jump srcx="267" srcy="143" type="0">
+			<!-- zhaoyuechi dao jindizhimen -->
+			<Ponit dstid="J001" dstx="60" dsty="282"/>
+		</Jump>
+		<Jump srcx="113" srcy="27" type="0">
+			<!-- zhaoyuechi dao hanbinzoulang -->
+			<Ponit dstid="J003" dstx="153" dsty="234"/>
+		</Jump>
+	</map>
+	<map id="J003">
+		<!-- hanbinzoulang -->
+		<Jump srcx="155" srcy="235" type="0">
+			<!-- hanbinzoulang dao zhaoyuechi -->
+			<Ponit dstid="J002" dstx="114" dsty="29"/>
+		</Jump>
+		<Jump srcx="210" srcy="38" type="0">
+			<!-- hanbinzoulang dao qingyugong -->
+			<Ponit dstid="J005" dstx="46" dsty="307"/>
+		</Jump>
+	</map>
+	<map id="J004">
+		<!-- binshizhidi -->
+		<Jump srcx="35" srcy="352" type="0">
+			<!-- binshizhidi dao jindizhimen -->
+			<Ponit dstid="J001" dstx="114" dsty="29"/>
+		</Jump>
+		<Jump srcx="89" srcy="38" type="0">
+			<!-- binshizhidi dao qingyugong -->
+			<Ponit dstid="J005" dstx="292" dsty="350"/>
+		</Jump>
+	</map>
+	<map id="J005">
+		<!-- qingyugong -->
+		<Jump srcx="45" srcy="309" type="0">
+			<!-- qingyugong dao hanbinzoulang -->
+			<Ponit dstid="J003" dstx="209" dsty="40"/>
+		</Jump>
+		<Jump srcx="293" srcy="352" type="0">
+			<!-- qingyugong dao binshizhidi -->
+			<Ponit dstid="J004" dstx="91" dsty="41"/>
+		</Jump>
+		<Jump srcx="57" srcy="47" type="0">
+			<!-- qingyugong dao shengsimen -->
+			<Ponit dstid="J006" dstx="100" dsty="185"/>
+		</Jump>
+	</map>
+	<map id="J006">
+		<!-- shengsimen -->
+		<Jump srcx="101" srcy="187" type="0">
+			<!-- shengsimen dao qingyugong -->
+			<Ponit dstid="J005" dstx="59" dsty="50"/>
+		</Jump>
+		<Jump srcx="26" srcy="58" type="0">
+			<!-- shengsimen dao jiubuhui -->
+			<Ponit dstid="J007" dstx="238" dsty="186"/>
+		</Jump>
+		<Jump srcx="35" srcy="13" type="0">
+			<!-- shengsimen dao shishangxing -->
+			<Ponit dstid="J009" dstx="202" dsty="207"/>
+		</Jump>
+		<Jump srcx="183" srcy="59" type="0">
+			<!-- shengsimen dao jiejie -->
+			<Ponit dstid="J011" dstx="89" dsty="59"/>
+		</Jump>
+	</map>
+	<map id="J007">
+		<!-- jiubuhui -->
+		<Jump srcx="239" srcy="188" type="0">
+			<!-- jiubuhui dao shengsimen -->
+			<Ponit dstid="J006" dstx="28" dsty="61"/>
+		</Jump>
+		<Jump srcx="10" srcy="143" type="0">
+			<!-- jiubuhui dao heianlunhui -->
+			<Ponit dstid="J008" dstx="79" dsty="47"/>
+		</Jump>
+	</map>
+	<map id="J008">
+		<!-- heianlunhui -->
+		<Jump srcx="80" srcy="45" type="0">
+			<!-- heianlunhui dao jiubuhui -->
+			<Ponit dstid="J007" dstx="11" dsty="141"/>
+		</Jump>
+		<Jump srcx="27" srcy="22" type="1">
+			<!-- tongtianxuanwo dao cangmangdating -->
+			<Ponit dstid="AS002" dstx="28" dsty="114">
+				<Command Com="@cangmang"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<map id="J009">
+		<!-- shishangxing -->
+		<Jump srcx="203" srcy="209" type="0">
+			<!-- shishangxing dao shengsimen -->
+			<Ponit dstid="J006" dstx="37" dsty="16"/>
+		</Jump>
+		<Jump srcx="36" srcy="191" type="0">
+			<!-- shishangxing dao moxue -->
+			<Ponit dstid="J010" dstx="31" dsty="26"/>
+		</Jump>
+	</map>
+	<map id="J010">
+		<!-- moxue -->
+		<Jump srcx="32" srcy="23" type="0">
+			<!-- moxue dao shishangxing -->
+			<Ponit dstid="J009" dstx="37" dsty="189"/>
+		</Jump>
+	</map>
+	<map id="J011">
+		<!-- jiejie -->
+		<Jump srcx="88" srcy="61" type="0">
+			<!-- jiejie dao shengsimen -->
+			<Ponit dstid="J006" dstx="182" dsty="61"/>
+		</Jump>
+		<Jump srcx="240" srcy="284" type="0">
+			<!-- jiejie dao fengyinzhidi -->
+			<Ponit dstid="J012" dstx="75" dsty="68"/>
+		</Jump>
+	</map>
+	<map id="J012">
+		<!-- fengyinzhidi -->
+		<Jump srcx="323" srcy="313" type="0">
+			<!-- fengyinzhidi dao jindi -->
+			<Ponit dstid="4" dstx="410" dsty="181"/>
+		</Jump>
+		<Jump srcx="73" srcy="65" type="0">
+			<!-- fengyinzhidi dao jiejie -->
+			<Ponit dstid="J011" dstx="238" dsty="283"/>
+		</Jump>
+	</map>
+	<map id="AS001">
+		<!-- xuwuzhiguan -->
+		<Jump srcx="23" srcy="120" type="0">
+			<!-- xuwuzhiguan dao jindizhimen -->
+			<Ponit dstid="TT003" dstx="281" dsty="295"/>
+		</Jump>
+		<Jump srcx="131" srcy="23" type="0">
+			<!-- xuwuzhiguan dao xiuluoshendian -->
+			<Ponit dstid="AS004" dstx="144" dsty="27"/>
+		</Jump>
+	</map>
+	<map id="AS002">
+		<!-- cangmangdating -->
+		<Jump srcx="30" srcy="118" type="0">
+			<!-- cangmangdating dao jindizhimen -->
+			<Ponit dstid="J001" dstx="229" dsty="228"/>
+		</Jump>
+		<Jump srcx="121" srcy="28" type="0">
+			<!-- cangmangdating dao xiuluoshendian -->
+			<Ponit dstid="AS004" dstx="208" dsty="270"/>
+		</Jump>
+	</map>
+	<map id="AS003">
+		<!-- fengyinmodi -->
+		<Jump srcx="35" srcy="58" type="0">
+			<!-- fengyinmodi dao zhongzhou -->
+			<Ponit dstid="0" dstx="425" dsty="178"/>
+		</Jump>
+		<Jump srcx="113" srcy="134" type="0">
+			<!-- fengyinmodi dao xiuluoshendian -->
+			<Ponit dstid="AS004" dstx="20" dsty="181"/>
+		</Jump>
+	</map>
+	<map id="AS004">
+		<!-- xiuluoshendian -->
+		<Jump srcx="146" srcy="27" type="0">
+			<!-- xiuluoshendian dao xuwuzhiguan -->
+			<Ponit dstid="AS001" dstx="132" dsty="22"/>
+		</Jump>
+		<Jump srcx="206" srcy="269" type="0">
+			<!-- xiuluoshendian dao cangmangdating -->
+			<Ponit dstid="AS002" dstx="123" dsty="26"/>
+		</Jump>
+		<Jump srcx="22" srcy="181" type="0">
+			<!-- xiuluoshendian dao fengyinmodi -->
+			<Ponit dstid="AS003" dstx="115" dsty="133"/>
+		</Jump>
+		<Jump srcx="161" srcy="135" type="1">
+			<!-- sanjiexuanwo dao zhongzhou -->
+			<Ponit dstid="0" dstx="436" dsty="189">
+			</Ponit>
+		</Jump>
+	</map>
+	<!-- /CSC -->
+	<map id="10">
+		<Jump srcx="61" srcy="11" type="0">
+			<!-- shemogu dao jindi -->
+			<Ponit dstid="4" dstx="180" dsty="480"/>
+		</Jump>
+		<Jump srcx="83" srcy="66" type="0">
+			<!-- shemogu dao reshahuangmo -->
+			<Ponit dstid="2" dstx="343" dsty="25"/>
+		</Jump>
+		<!--/nsp1-->
+		<Jump srcx="64" srcy="38" type="0">
+			<!--shemogu dao dixuerukou-->
+			<Ponit dstid="N001" dstx="186" dsty="273"/>
+		</Jump>
+		<!--/nsp1-->
+	</map>
+	<map id="5">
+		<Jump srcx="601" srcy="607" type="0">
+			<!-- xiyuqijing dao jindi -->
+			<Ponit dstid="4" dstx="16" dsty="65"/>
+		</Jump>
+		<!-- NEW -->
+		<Jump srcx="462" srcy="107" type="1">
+			<!-- xiyuqijing dao zhongzhou -->
+			<Ponit dstid="0" dstx="470" dsty="220">
+				<Command Com="@gogozzwc"/>
+			</Ponit>
+		</Jump>
+		<!-- /NEW -->
+		<!-- CSC -->
+		<Jump srcx="133" srcy="75" type="0">
+			<!-- xiyuqijing dao yishouzhetian -->
+			<Ponit dstid="TT001" dstx="316" dsty="313"/>
+		</Jump>
+		<!-- /CSC -->
+	</map>
+	<!-- CSC -->
+	<map id="TT001">
+		<!-- yishouzhetian -->
+		<Jump srcx="337" srcy="316" type="0">
+			<!-- yishouzhetian dao xiyuqijing -->
+			<Ponit dstid="5" dstx="138" dsty="105"/>
+		</Jump>
+		<Jump srcx="56" srcy="173" type="0">
+			<!-- yishouzhetian dao erdaolangxian -->
+			<Ponit dstid="TT002" dstx="44" dsty="165"/>
+		</Jump>
+	</map>
+	<map id="TT002">
+		<!-- erdaolangxian -->
+		<Jump srcx="42" srcy="167" type="0">
+			<!-- erdaolangxian dao yishouzhetian -->
+			<Ponit dstid="TT001" dstx="55" dsty="176"/>
+		</Jump>
+		<Jump srcx="165" srcy="42" type="0">
+			<!-- erdaolangxian dao sanjiaopailou -->
+			<Ponit dstid="TT003" dstx="169" dsty="25"/>
+		</Jump>
+	</map>
+	<map id="TT003">
+		<!-- sanjiaopailou -->
+		<Jump srcx="167" srcy="27" type="0">
+			<!-- sanjiaopailou dao xiyuqijing -->
+			<Ponit dstid="TT002" dstx="164" dsty="46"/>
+		</Jump>
+		<Jump srcx="297" srcy="171" type="0">
+			<!-- sanjiaopailou dao sifangleitai -->
+			<Ponit dstid="TT004" dstx="310" dsty="180"/>
+		</Jump>
+	</map>
+	<map id="TT004">
+		<!-- sifangleitai -->
+		<Jump srcx="381" srcy="256" type="0">
+			<!-- sifangleitai dao wangtiantai -->
+			<Ponit dstid="14" dstx="32" dsty="22"/>
+		</Jump>
+		<Jump srcx="308" srcy="182" type="0">
+			<!-- sifangleitai dao sanjiaopailou -->
+			<Ponit dstid="TT003" dstx="296" dsty="175"/>
+		</Jump>
+		<Jump srcx="182" srcy="51" type="0">
+			<!-- sifangleitai dao wuxinggongdian -->
+			<Ponit dstid="TT005" dstx="188" dsty="51"/>
+		</Jump>
+	</map>
+	<map id="14">
+		<!-- wangtiantai -->
+		<Jump srcx="30" srcy="19" type="0">
+			<!-- wangtiantai dao sifangleitai -->
+			<Ponit dstid="TT004" dstx="380" dsty="253"/>
+		</Jump>
+	</map>
+	<map id="TT005">
+		<!-- wuxinggongdian -->
+		<Jump srcx="186" srcy="52" type="0">
+			<!-- wuxinggongdian dao sifangleitai -->
+			<Ponit dstid="TT004" dstx="181" dsty="55"/>
+		</Jump>
+		<Jump srcx="61" srcy="179" type="0">
+			<!-- wuxinggongdian dao liudaolunhui -->
+			<Ponit dstid="TT006" dstx="62" dsty="201"/>
+		</Jump>
+	</map>
+	<map id="TT006">
+		<!-- liudaolunhui -->
+		<Jump srcx="279" srcy="348" type="0">
+			<!-- liudaolunhui dao feixiantai -->
+			<Ponit dstid="16" dstx="14" dsty="28"/>
+		</Jump>
+		<Jump srcx="60" srcy="203" type="0">
+			<!-- liudaolunhui dao wuxinggongdian -->
+			<Ponit dstid="TT005" dstx="60" dsty="183"/>
+		</Jump>
+		<Jump srcx="189" srcy="77" type="0">
+			<!-- liudaolunhui dao qixuanguanka -->
+			<Ponit dstid="TT007" dstx="210" dsty="79"/>
+		</Jump>
+	</map>
+	<map id="16">
+		<!-- feixiantai -->
+		<Jump srcx="14" srcy="28" type="0">
+			<!-- feixiantai dao liudaolunhui -->
+			<Ponit dstid="TT006" dstx="278" dsty="345"/>
+		</Jump>
+	</map>
+	<map id="TT007">
+		<!-- qixuanguanka -->
+		<Jump srcx="208" srcy="80" type="0">
+			<!-- qixuanguanka dao liudaolunhui -->
+			<Ponit dstid="TT006" dstx="188" dsty="81"/>
+		</Jump>
+		<Jump srcx="207" srcy="209" type="0">
+			<!-- qixuanguanka dao baxianzongheng -->
+			<Ponit dstid="TT008" dstx="155" dsty="232"/>
+		</Jump>
+	</map>
+	<map id="TT008">
+		<!-- baxianzongheng -->
+		<Jump srcx="253" srcy="324" type="0">
+			<!-- baxianzongheng dao zhaixingtai -->
+			<Ponit dstid="18" dstx="45" dsty="19"/>
+		</Jump>
+		<Jump srcx="153" srcy="234" type="0">
+			<!-- baxianzongheng dao qixuanguanka -->
+			<Ponit dstid="TT007" dstx="206" dsty="213"/>
+		</Jump>
+		<Jump srcx="224" srcy="162" type="0">
+			<!-- baxianzongheng dao jiuchongyunxiao -->
+			<Ponit dstid="TT009" dstx="262" dsty="129"/>
+		</Jump>
+	</map>
+	<map id="18">
+		<!-- zhaixingtai -->
+		<Jump srcx="15" srcy="19" type="0">
+			<!-- zhaixingtai dao baxianzongheng -->
+			<Ponit dstid="TT008" dstx="252" dsty="321"/>
+		</Jump>
+	</map>
+	<map id="TT009">
+		<!-- jiuchongyunxiao -->
+		<Jump srcx="260" srcy="131" type="0">
+			<!-- jiuchongyunxiao dao baxianzongheng -->
+			<Ponit dstid="TT008" dstx="223" dsty="166"/>
+		</Jump>
+	</map>
+	<!-- /CSC -->
+	<map id="BBC">
+		<Jump srcx="93" srcy="315" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="heroisland" dstx="79" dsty="95">
+				<Command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="134" srcy="259" type="1">
+			<!-- xinshouchenglaobing dao zhongzhou -->
+			<Ponit dstid="0" dstx="562" dsty="317">
+				<Command Com="@main1"/>
+				<command Com="@gogo0"/>
+				<command Com="@gogo0a"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="65" srcy="419" type="1">
+			<!-- xinshoucheng dao luoxiadao -->
+			<Ponit dstid="1" dstx="65" dsty="132">
+				<Command Com="@movelxd"/>
+				<command Com="@paylxd"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<map id="BLC">
+		<Jump srcx="93" srcy="315" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="heroisland" dstx="79" dsty="95">
+				<Command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="134" srcy="259" type="1">
+			<!-- xinshouchenglaobing dao zhongzhou -->
+			<Ponit dstid="0" dstx="562" dsty="317">
+				<Command Com="@main1"/>
+				<command Com="@gogo0"/>
+				<command Com="@gogo0a"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="65" srcy="419" type="1">
+			<!-- xinshoucheng dao luoxiadao -->
+			<Ponit dstid="1" dstx="65" dsty="132">
+				<Command Com="@movelxd"/>
+				<command Com="@paylxd"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<map id="BTC">
+		<Jump srcx="93" srcy="315" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="heroisland" dstx="79" dsty="95">
+				<Command Com="@gogoyxd"/>
+				<command Com="@gogoyxda"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="134" srcy="259" type="1">
+			<!-- xinshouchenglaobing dao zhongzhou -->
+			<Ponit dstid="0" dstx="562" dsty="317">
+				<Command Com="@main1"/>
+				<command Com="@gogo0"/>
+				<command Com="@gogo0a"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="65" srcy="419" type="1">
+			<!-- xinshoucheng dao luoxiadao -->
+			<Ponit dstid="1" dstx="65" dsty="132">
+				<Command Com="@movelxd"/>
+				<command Com="@paylxd"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<map id="HEROISLAND">
+		<Jump srcx="105" srcy="67" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="1" dstx="136" dsty="263">
+				<Command Com="@xinshoucun"/>
+				<command Com="@bibo"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="105" srcy="67" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="101" dstx="136" dsty="263">
+				<Command Com="@xinshoucun"/>
+				<command Com="@bilang"/>
+			</Ponit>
+		</Jump>
+		<Jump srcx="105" srcy="67" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="201" dstx="136" dsty="263">
+				<Command Com="@xinshoucun"/>
+				<command Com="@bitao"/>
+			</Ponit>
+		</Jump>
+		
+		<Jump srcx="80" srcy="87" type="1">
+			<!-- xinshoucheng dao yingxiongdao -->
+			<Ponit dstid="0" dstx="470" dsty="220">
+				<Command Com="@gogo0"/>
+				<command Com="@gogo0a"/>
+			</Ponit>
+		</Jump>
+				
+	</map>
+	<!-- CSC -->
+	<map id="QYYD">
+		<Jump srcx="71" srcy="85" type="1">
+			<!-- qunyingyingdi dao zhongzhou -->
+			<Ponit dstid="0" dstx="470" dsty="220">
+				<Command Com="@gozz"/>
+			</Ponit>
+		</Jump>
+	</map>
+	<!-- /CSC -->
+
+
+
+	<map id="L004">
+		<Jump srcx="99" srcy="37" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="T015" dstx="59" dsty="142"/>
+		</Jump>
+	</map>
+		
+	<map id="L004_101">
+		<Jump srcx="99" srcy="37" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="T015_101" dstx="475" dsty="397"/>
+		</Jump>
+	</map>
+
+	<map id="L004_201">
+		<Jump srcx="99" srcy="37" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="T015_201" dstx="475" dsty="397"/>
+		</Jump>
+	</map>	
+	
+	<map id="sh008">
+		<Jump srcx="4" srcy="14" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="0" dstx="417" dsty="206"/>
+		</Jump>
+	</map>	
+	
+	
+	<map id="sh010">
+		<Jump srcx="6" srcy="15" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="0" dstx="417" dsty="206"/>
+		</Jump>
+	</map>		
+	
+	<map id="sh024">
+		<Jump srcx="5" srcy="20" type="0">
+			<!-- luoxiadao dao kuangdong -->
+			<Ponit dstid="2" dstx="199" dsty="517"/>
+		</Jump>
+	</map>		
+	
+	
+</mapjump>		

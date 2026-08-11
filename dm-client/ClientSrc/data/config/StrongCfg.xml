@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="gb2312" standalone="yes"?>
+
+<StrongCfg Ver="1">      
+    <Strong type = "1" title="我要升级">
+    	 <Level beginlevel = "1" endlevel = "27" desc="&lt;color=FF9900     完成主线任务，可以获得大量经验；&gt; \&lt;color=FF9900 同时主线任务可以获得不错的装备奖励； &gt; \&lt;color=FF9900 以及各种提升实力的道具 &gt;" 
+    			content=" \ 当前等级适合完成主线任务；
+    					  \ &lt;color=FF0000 还可以打开经验宝玉等快速升级。&gt;"
+       />   
+    	 <Level beginlevel = "28" endlevel = "49" desc="&lt;color=FF9900     提升真火等级，可以获得丰厚的属&gt; \&lt;color=FF9900 性成长，可以打开小地图周围的活动日 &gt; \&lt;color=FF9900 志，了解更多可以参加的活动 &gt;" 
+    			content=" \ 当前等级适合完成主线任务；
+    					  \ 五色任务,&lt;去找王城官员/@@jumpto HEROISLAND 80,87&gt;
+    					  \ 每日真火任务,&lt;去找宝儿/@@jumpto FD01 64,91&gt;
+    					  \ 参加机关迷城等,&lt;去找老兵挑战炼狱/@@jumpto 0 467,226&gt;
+    					  \&lt;color=FF0000  打开小地图周围的天罡传送卷了解更多 &gt;
+    					  \ &lt;color=FF0000 还可以打开经验宝玉等快速升级。&gt;"
+       />   
+    	 <Level beginlevel = "50" endlevel = "79" desc="&lt;color=FF9900     提升真火等级，可以获得丰厚的属；&gt; \&lt;color=FF9900 性成长，可以打开小地图周围的活动日 &gt; \&lt;color=FF9900 志，了解更多可以参加的活动 &gt;" 
+    			content=" \ 五色任务,&lt;去找王城官员/@@jumpto HEROISLAND 80,87&gt;
+    					  \ 每日真火任务,&lt;去找宝儿/@@jumpto FD01 64,91&gt;
+    					  \ 参加保卫中州等,&lt;去找老兵挑战炼狱/@@jumpto 0 467,226&gt;
+    					  \&lt;color=FF0000  打开小地图周围的天罡传送卷了解更多 &gt;
+    					  \ &lt;color=FF0000 还可以打开经验宝玉等快速升级。&gt;"
+       />         
+    	 <Level beginlevel = "80" endlevel = "200" desc="&lt;color=FF9900     提升真火等级，可以获得丰厚的属；&gt; \&lt;color=FF9900 性成长，可以打开小地图周围的活动日 &gt; \&lt;color=FF9900 志，了解更多可以参加的活动 &gt;" 
+    			content=" \ 五色任务,&lt;去找王城官员/@@jumpto HEROISLAND 80,87&gt;
+    					  \ 每日真火任务,&lt;去找宝儿/@@jumpto FD01 64,91&gt;
+    					  \ 参加神卫试练谷,&lt;去找老兵挑战炼狱/@@jumpto 0 467,226&gt;
+    					  \&lt;color=FF0000  打开小地图周围的天罡传送卷了解更多 &gt;
+    					  \ &lt;color=FF0000 还可以打开经验宝玉等快速升级。&gt;"
+       />                           
+    </Strong>
+    <Strong type = "2" job = "1" title="我要学技能">
+    	 <Level beginlevel = "1" endlevel = "11" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;" 
+    			content=" \小火球是新手法师的利器，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />   
+         <Level beginlevel = "12" endlevel = "15" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;"  
+    			content=" \ 小火球是新手法师的利器，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 抗拒火环是法师推人技能，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />   
+         <Level beginlevel = "16" endlevel = "16" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;"  
+    			content=" \ 抗拒火环是法师推人技能，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 地狱火焰是法师群攻技能，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />     
+         <Level beginlevel = "17" endlevel = "18" desc="&lt;color=FF9900     雷电术和冰箭术只能学习其中之一,在&gt; \&lt;color=FF9900 书店的技能大师处可以遗忘已学分支技能， &gt; \&lt;color=FF9900 点击技能面板的+号，消耗技能丹升级技能 &gt;"  
+    			content=" \ 地狱火焰是法师群攻技能，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 雷电术是法师电系技能，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 冰箭术是法师冰系技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />     
+         <Level beginlevel = "19" endlevel = "20" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt; "   
+    			content=" \ 瞬间移动是随机传送技能，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 雷电术是法师电系技能，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 冰箭术是法师冰系技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />   
+         <Level beginlevel = "21" endlevel = "25" desc="&lt;color=FF9900     风火轮和火炎刀只能学习其中之一,在&gt; \&lt;color=FF9900 书店的技能大师处可以遗忘已学分支技能， &gt; \&lt;color=FF9900 点击技能面板的+号，消耗技能丹升级技能 &gt;"    
+    			content=" \ 瞬间移动是随机传送技能，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 风火轮是火系防护技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 火炎刀是小火球加强版，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 爆裂火焰是单次群攻技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 火墙是中级群攻技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;"
+       />    
+          <Level beginlevel = "26" endlevel = "28" desc="&lt;color=FF9900   疾光电影和冰龙破只能学习其中之一,在&gt; \&lt;color=FF9900 书店的技能大师处可以遗忘已学分支技能， &gt; \&lt;color=FF9900 点击技能面板的+号，消耗技能丹升级技能 &gt;"    
+    			content=" \ 疾光电影是电系攻击技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+      		    		  \ 冰龙破是冰系攻击技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 火墙是中级群攻技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;"
+       />  
+          <Level beginlevel = "29" endlevel = "31" desc="&lt;color=FF9900   学习技能是提升能力的重要途径,中级技&gt; \&lt;color=FF9900 能书尸王殿内的尸王有几率掉落，普通技 &gt; \&lt;color=FF9900 能书可以在书店购买，&gt; " 
+    			content=" \ 玄冰刃是冰系群攻技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+      		    		  \ 地狱雷光是电系群攻技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 魔法盾是高级防御技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;"
+       />         
+          <Level beginlevel = "32" endlevel = "200" desc="&lt;color=FF9900   学习技能是提升能力的重要途径,中级技&gt; \&lt;color=FF9900 能书尸王殿内的尸王有几率掉落，普通技 &gt; \&lt;color=FF9900 能书可以在书店购买。 &gt;  " 
+    			content=" \ 普通技能书，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 中级技能书，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 高级技能书，高级地图掉落"
+       />   
+    </Strong>
+    <Strong type = "2" job = "0" title="我要学技能">
+    	 <Level beginlevel = "1" endlevel = "11" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;" 
+    			content=" \初级剑法是新手战士入门技，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />      
+         <Level beginlevel = "12" endlevel = "19" desc="&lt;color=FF9900     血影刀法、残影刀法、攻杀剑法只能&gt; \&lt;color=FF9900 学习其中之一,在书店的技能大师处可以遗 &gt; \&lt;color=FF9900 忘已学分支技能 &gt;"  
+    			content=" \ 血影刀法是增加命中技能，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 残影刀法是增加命中技能，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 攻杀剑法是增加命中技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />     
+         <Level beginlevel = "20" endlevel = "24" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;"   
+    			content=" \ 护身真气是战士防护技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />   
+         <Level beginlevel = "25" endlevel = "27" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt; "   
+    			content=" \ 刺杀剑术是战士标志技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />      
+         <Level beginlevel = "28" endlevel = "29" desc="&lt;color=FF9900     抱月刀和半月弯刀只能学习其中之一,&gt; \&lt;color=FF9900 在书店的技能大师处可以遗忘已学分支技 &gt; \&lt;color=FF9900  能 &gt;"    
+    			content=" \ 抱月刀是攻击四周目标，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 半月弯刀是攻击半圆内的，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 刺杀剑术是战士标志技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />    
+         <Level beginlevel = "30" endlevel = "34" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt; "    
+    			content=" \ 野蛮冲撞是战士冲撞技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 抱月刀是攻击四周目标，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 半月弯刀是攻击半圆内的，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 刺杀剑术是战士标志技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />                 
+         <Level beginlevel = "35" endlevel = "200" desc="&lt;color=FF9900   学习技能是提升能力的重要途径,中级技&gt; \&lt;color=FF9900 能书尸王殿内的尸王有几率掉落，普通技 &gt; \&lt;color=FF9900 能书可以在书店购买。 &gt;  " 
+    			content=" \ 普通技能书，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 中级技能书，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 高级技能书，高级地图掉落"
+       />   
+    </Strong>   
+    <Strong type = "2" job = "2" title="我要学技能">
+    	 <Level beginlevel = "1" endlevel = "8" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;" 
+    			content=" \ 治疗术是道士的回血技能，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />   
+    	 <Level beginlevel = "9" endlevel = "13" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;" 
+    			content=" \ 精神战法是增加道士命中，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />            
+         <Level beginlevel = "14" endlevel = "17" desc="&lt;color=FF9900     诅咒术和施毒术只能学习其中之一,在&gt; \&lt;color=FF9900 书店的技能大师处可以遗忘已学分支技能， &gt; \&lt;color=FF9900 点击技能面板的+号，消耗技能丹升级技能 &gt;"  
+    			content=" \ 诅咒术是减少目标防御、魔法，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 施毒术是减少目标防御、生命，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 精神战法是增加道士命中，&lt;书店有售/@@jumpto 1 234,225&gt;"
+       />  
+    	 <Level beginlevel = "18" endlevel = "18" desc="&lt;color=FF9900     学习技能是提升能力的重要途径,在包&gt; \&lt;color=FF9900 裹里双击书籍就可以学习，F11打开技能面 &gt; \&lt;color=FF9900 板可以配置快捷键，&gt;" 
+    			content=" \ 灵魂道符是道士攻击技能，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 诅咒术是减少目标防御、魔法，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 施毒术是减少目标防御、生命，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 精神战法是增加道士命中，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />            
+         <Level beginlevel = "19" endlevel = "19" desc="&lt;color=FF9900     骷髅术和赶尸只能学习其中之一,在&gt; \&lt;color=FF9900 书店的技能大师处可以遗忘已学分支技能， &gt; \&lt;color=FF9900 点击技能面板的+号，消耗技能丹升级技能 &gt;"    
+    			content=" \ 骷髅术是召唤骷髅作战，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 赶尸是召唤死去的生物，&lt;书店有售/@@jumpto SH010 10,9&gt;
+    					  \ 灵魂道符是是道士攻击技能，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />    
+          <Level beginlevel = "20" endlevel = "20" desc="&lt;color=FF9900   替身法符和隐身术只能学习其中之一,在&gt; \&lt;color=FF9900 书店的技能大师处可以遗忘已学分支技能， &gt; \&lt;color=FF9900 点击技能面板的+号，消耗技能丹升级技能 &gt;"    
+    			content=" \ 替身法符是转移仇恨，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+      		    		  \ 隐身术是躲避怪物，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 灵魂道符是是道士攻击技能，&lt;书店有售/@@jumpto 1 234,225&gt;
+    					  \ 骷髅术是召唤骷髅作战，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 赶尸是召唤死去的生物，&lt;书店有售/@@jumpto SH010 10,9&gt;"
+       />  
+          <Level beginlevel = "21" endlevel = "25" desc="&lt;color=FF9900   学习技能是提升能力的重要途径,中级技&gt; \&lt;color=FF9900 能书尸王殿内的尸王有几率掉落，普通技 &gt; \&lt;color=FF9900 能书可以在书店购买，&gt; &lt;传送书店/@@jumpto SH010 10,9 &gt; " 
+    			content=" \ 集体隐身术是高级隐身术，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+      		    		  \ 幽灵盾增加团队魔防，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 神圣战甲术增加团队物防，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;"
+       />    
+          <Level beginlevel = "26" endlevel = "27" desc="&lt;color=FF9900   学习技能是提升能力的重要途径,中级技&gt; \&lt;color=FF9900 能书尸王殿内的尸王有几率掉落，普通技 &gt; \&lt;color=FF9900 能书可以在书店购买，&gt; &lt;传送书店/@@jumpto SH010 10,9 &gt; " 
+    			content=" \ 狮子吼是道士推人技能，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 集体隐身术是大号隐身术，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+      		    		  \ 幽灵盾增加团队魔防，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 神圣战甲术增加团队物防，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;"
+       />               
+          <Level beginlevel = "28" endlevel = "200" desc="&lt;color=FF9900   学习技能是提升能力的重要途径,中级技&gt; \&lt;color=FF9900 能书尸王殿内的尸王有几率掉落，普通技 &gt; \&lt;color=FF9900 能书可以在书店购买。 &gt;  " 
+    			content=" \ 普通技能书，&lt;书店有售/@@jumpto SH010 10,9&gt;
+      		    		  \ 中级技能书，&lt;尸王殿掉落/@@jumpto T015 59,143&gt;
+    					  \ 高级技能书，高级地图掉落"
+       />   
+    </Strong>     
+    <Strong type = "3" title="我要打宝">
+    	 <Level beginlevel = "1" endlevel = "19" desc="&lt;color=FF9900 任务赠送的装备对于新手来说，提示实力&gt;\&lt;color=FF9900 很明显；穿戴战力越高的装备，战斗力越&gt; \&lt;color=FF9900 强，选择对应职业的装备也很重要! &gt;  " 
+    			content="\ 当前等级适合完成主线任务;
+      					 \ 新手地图野外打怪掉落。 "
+       /> 
+    	 <Level beginlevel = "20" endlevel = "29" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 适合进入机关宝地，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;"
+       /> 
+    	 <Level beginlevel = "30" endlevel = "39" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 适合进入机关宝地，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 适合进入蛇穴宝地，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;"
+       />  
+         <Level beginlevel = "40" endlevel = "49" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 逆魔宝地(圣战级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 逆魔魔境(圣战级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;"
+       />  
+         <Level beginlevel = "50" endlevel = "59" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 结界宝地(神武级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 结界魔境(神武级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 逆魔宝地(圣战级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 逆魔魔境(圣战级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;"
+       />   
+         <Level beginlevel = "60" endlevel = "69" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 通天宝地(战神级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 通天魔境(战神级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 结界宝地(神武级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 结界魔境(神武级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;
+    					 \&lt;color=FF0000  等级越高的宝地，难度越高&gt;"
+       />  
+         <Level beginlevel = "70" endlevel = "79" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 魔城宝地(血煞级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 魔城魔境(血煞级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 通天宝地(战神级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 通天魔境(战神级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;
+    					 \&lt;color=FF0000  等级越高的宝地，难度越高&gt;"
+       /> 
+         <Level beginlevel = "80" endlevel = "200" desc="&lt;color=FF9900  机关宝地的怪物有几率掉落高级装备，&gt;\&lt;color=FF9900  实力达到一定的水平的玩家，可以进入&gt; \&lt;color=FF9900  相应的宝地，寻找各种高级装备! &gt;  " 
+    			content="\ 修罗宝地(蟠龙级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 修罗魔境(蟠龙级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 魔城宝地(血煞级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \ 魔城魔境(血煞级)，&lt;传送到宝地使者/@@jumpto 0 473,221&gt;
+    					 \&lt;color=FF0000  魔境的掉落几率高于宝地的掉落几率&gt;
+    					 \&lt;color=FF0000  等级越高的宝地，难度越高&gt;"
+       />                       
+    </Strong>
+    <Strong type = "4" title="我要强化装备">
+     	 <Level beginlevel = "1" endlevel = "19" desc="&lt;color=FF9900  你的实力不济，还是去野外打打装备吧！&gt; " 
+    			content="\ 还是去野外打打装备吧;"
+       /> 
+    	 <Level beginlevel = "20" endlevel = "40" desc="&lt;color=FF9900 通过宝地使者进行打宝，获得高级装备，&gt;\&lt;color=FF9900 才能对这些高级装备进行加工&gt;  " 
+    			content="\ 进入打宝地图打宝，&lt;传送到宝地使者/@@jumpto 0 473,221 &gt;
+    					 \ 完成圣殿纹佩任务，合成圣殿纹佩
+    					 \&lt;color=FF0000  打开背包里圣殿纹佩按钮，了解更多&gt;"
+       /> 
+    	 <Level beginlevel = "41" endlevel = "100" desc="&lt;color=FF9900  对高级装备进行加工可以提高这些装备 &gt;\&lt;color=FF9900  的属性，在相应的npc处进行强化&gt; " 
+    			content="\ 装备强化、符石镶嵌，&lt;传送到符石商人/@@jumpto HEROISLAND 60,131&gt;
+    					 \ 器魂觉醒、升级，&lt;传送到器魂精炼师/@@jumpto 4 386,145&gt;
+    					 \ 装备继承升级等，&lt;传送到玄玄老人/@@jumpto SH045 7,17&gt;
+    					 \ 纹佩精炼，&lt;传送到纹佩精炼炉/@@jumpto sh000 20,40&gt;
+    					 \ 盾牌升级，&lt;传送到白辰/@@jumpto sh000 20,40&gt;
+    					 \ 法宝强化，&lt;传送到宝儿/@@jumpto FD01 63,93&gt;"
+       />  
+    	 <Level beginlevel = "101" endlevel = "200" desc="&lt;color=FF9900  对高级装备进行加工可以提高这些装备 &gt;\&lt;color=FF9900  的属性，在相应的npc处进行强化&gt; " 
+    			content="\ 装备强化、符石镶嵌，&lt;传送到符石商人/@@jumpto HEROISLAND 60,131&gt;
+    					 \ 器魂觉醒、升级，&lt;传送到器魂精炼师/@@jumpto 4 386,145&gt;
+    					 \ 装备继承升级等，&lt;传送到玄玄老人/@@jumpto SH045 7,17&gt;
+    					 \ 装备精炼，&lt;传送到北斗老人/@@jumpto sh000 20,40&gt;
+    					 \ 纹佩精炼，&lt;传送到纹佩精炼炉/@@jumpto sh000 20,40&gt;
+    					 \ 盾牌升级，&lt;传送到白辰/@@jumpto sh000 20,40&gt;
+    					 \ 法宝强化，&lt;传送到宝儿/@@jumpto FD01 63,93&gt;"
+       />                  
+    </Strong>    
+</StrongCfg>

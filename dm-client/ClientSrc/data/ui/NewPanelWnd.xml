@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="gb2312"?>
+<Window name = "PanelWnd" mask="11200">
+  <Offset x = "0" y = "0" align = "bottom" />
+  <BackTexture index = "11200" />
+
+  <Button name ="RangeWndButton">
+    <Offset x = "666" y = "64" Align ="TopLeft"/>
+    <NormalTexture index = "11202" />
+    <HighlightTexture index = "11203" />
+    <PushedTexture index = "11204" />
+    <Tips text="英雄排名榜" />
+  </Button>
+  <Button name ="SocialityWndButton">
+    <Offset x = "625" y = "64" Align ="TopLeft"/>
+    <NormalTexture index = "11205" />
+    <HighlightTexture index = "11206" />
+    <PushedTexture index = "11207" />
+    <Tips text="显示社交界面(CTRL+I)" />    
+	<Scripts>
+      <OnClick>
+        UpdateWindow("RelationWnd");
+      </OnClick>
+    </Scripts>
+  </Button>
+  <Button name ="TroopWndButton">
+    <Offset x = "584" y = "64" Align ="TopLeft"/>
+    <NormalTexture index = "11208" />
+    <HighlightTexture index = "11209" />
+    <PushedTexture index = "11210" />
+    <Tips text="与其他玩家进行组队" />
+    <Scripts>
+      <OnClick>
+        UpdateWindow("TeamWnd");
+      </OnClick>
+    </Scripts>
+  </Button>
+  <Button name ="TradeWndButton">
+    <Offset x = "502" y = "64" Align ="TopLeft"/>
+    <NormalTexture index = "11211" />
+    <HighlightTexture index = "11212" />
+    <PushedTexture index = "11213" />
+    <Tips text="与其他玩家进行交易" />
+  </Button>
+  <Button name ="BoothWndButton">
+    <Offset x = "543" y = "64" Align ="TopLeft"/>
+    <NormalTexture index = "11214" />
+    <HighlightTexture index = "11215" />
+    <PushedTexture index = "11216" />
+    <Tips text="摆摊" />
+  </Button>
+
+  <Button name ="QuitButton">
+    <Offset x = "343" y = "80" />
+    <NormalTexture index = "22020" />
+    <HighlightTexture index = "22021" />
+    <PushedTexture index = "22022" />
+    <Tips text="退出传世无双" />
+  </Button>
+  <Button name ="OutButton">
+    <Offset x = "436" y = "80" />
+    <NormalTexture index = "22023" />
+    <HighlightTexture index = "22024" />
+    <PushedTexture index = "22025" />
+    <Tips text="返回人物选择界面(Alt-X)" />
+  </Button>
+
+  <Button name ="TaskWndButton">
+    <Offset x = "460" y = "64" Align ="TopLeft"/>
+    <NormalTexture index = "11223" />
+    <HighlightTexture index = "11224" />
+    <PushedTexture index = "11225" />
+    <Tips text="任务日志(CTRL+T)" />
+    <Scripts>
+      <OnClick>
+        UpdateWindow("TaskWnd");
+      </OnClick>
+    </Scripts>
+  </Button>
+
+  <Button name ="FireWndButton" mask="11229">
+    <Offset x = "352" y = "2" Align ="TopLeft"/>
+    <NormalTexture index = "11229" />
+    <HighlightTexture index = "11230" />
+    <PushedTexture index = "11231" />
+    <Tips text="显示三昧真火界面(CTRL+L)" /> 
+  </Button> 
+  
+  <Button name ="StoreWndButton" mask="11232">
+    <Offset x = "351" y = "3" Align ="TopLeft"/>
+    <NormalTexture index = "11232" />
+    <HighlightTexture index = "11233" />
+    <PushedTexture index = "11234" />
+    <Tips text="商城－进入商城购买道具" />
+    <Scripts>
+      <OnClick>
+        UpdateWindow("WooolStoreWnd");
+      </OnClick>
+    </Scripts>     
+  </Button>
+    
+  <Button name ="PackageWndButton" mask="11220">
+    <Offset x = "352" y = "2" Align ="TopLeft"/>
+    <NormalTexture index = "11220" />
+    <HighlightTexture index = "11221" />
+    <PushedTexture index = "11222" />
+    <Tips text="显示包裹界面(F9)" />
+    <Scripts>
+      <OnClick>
+        UpdateWindow("PackageWnd");
+      </OnClick>
+    </Scripts>    
+  </Button>
+ 
+   <Button name ="SkillWndButton" mask="11226">
+    <Offset x = "351" y = "2" Align ="TopLeft"/>
+    <NormalTexture index = "11226" />
+    <HighlightTexture index = "11227" />
+    <PushedTexture index = "11228" />
+    <Tips text="显示技能界面(F11)" />
+    <Scripts>
+      <OnClick>
+        UpdateWindow("SkillWnd");
+      </OnClick>
+    </Scripts>
+  </Button>
+    
+  <Button name ="CharWndButton" mask="11217">
+    <Offset x = "352" y = "2" Align ="TopLeft"/>
+    <NormalTexture index = "11217" />
+    <HighlightTexture index = "11218" />
+    <PushedTexture index = "11219" />
+    <Tips text="显示人物属性装备界面(F10)" />
+    <Scripts>
+      <OnClick>
+        UpdateWindow("AvatarWnd");
+      </OnClick>
+    </Scripts>
+  </Button>
+  
+ </Window>
