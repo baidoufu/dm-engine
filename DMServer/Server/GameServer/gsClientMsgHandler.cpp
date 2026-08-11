@@ -225,6 +225,35 @@ VOID CClientObj::HandleGuildMemberList(PMIRMSG pMsg, int datasize)
 		pGuild->SendDurationMemberList(m_pPlayer);
 }
 
+VOID CClientObj::HandleCongifInfo(PMIRMSG pMsg, int datasize)
+{
+	BYTE btWH = LOBYTE(pMsg->wParam[1]); // 客户端分辨率类型，用于设置玩家视觉范围大小
+	int btRange = 12;
+	switch (btWH)
+	{
+	case 0:
+		btRange = 12;
+		break;
+	case 1:
+		btRange = 14;
+		break;
+	case 2:
+		btRange = 16;
+		break;
+	case 3:
+		btRange = 18;
+		break;
+	case 4:
+		btRange = 20;
+		break;
+	case 5:
+		btRange = 22;
+		break;
+	}
+	m_pPlayer->SetViewRange(btRange);
+	m_pPlayer->SetViewSearchRange(btRange);
+}
+
 VOID CClientObj::HandleDropItem(PMIRMSG pMsg, int datasize)
 {
 	if (!m_pPlayer->CanDropItem()) return;
@@ -329,17 +358,20 @@ VOID CClientObj::HandleNpcClick(PMIRMSG pMsg, int datasize)
 			m_pPlayer->SendCloseScriptPage(0xffffffff);
 		return;
 	}
-	if (pMsg->dwFlag == 0xfffffff0)
+	if (pMsg->data[0] == '@') // 字符串指令 或者 字符串指令 + texID 标志
 	{
-		char szPage[256];
-		sprintf_s(szPage, sizeof(szPage), "变强攻略.%s", (const char*)pMsg->data);
-		CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), szPage);
-		return;
+		CScriptNpc* pNpc = CNpcManager::GetInstance()->GetScriptNpcById(pMsg->dwFlag);
+		if (pNpc != nullptr)
+			pNpc->QuerySelectLink(m_pPlayer, pMsg->data);
 	}
-
-	CScriptNpc* pNpc = CNpcManager::GetInstance()->GetScriptNpcById(pMsg->dwFlag);
-	if (pNpc != nullptr)
-		pNpc->QuerySelectLink(m_pPlayer, pMsg->data);
+	else // 图片坐标模式
+	{
+		//  偏移	大小	字段	说明
+		//	6	BYTE(1B)	0x01	覆盖头部保留区第6字节为标志
+		//	12	DWORD(4B)	texID	纹理 / 图标 ID
+		//	16	WORD(2B)	x	图片 X 坐标
+		//	18	WORD(2B)	y	图片 Y 坐标
+	}
 }
 
 VOID CClientObj::HandleGetItemPrice(PMIRMSG pMsg, int datasize)
@@ -421,8 +453,6 @@ VOID CClientObj::HandleDropGold(PMIRMSG pMsg, int datasize)
 
 VOID CClientObj::HandleConfirmFirstDialog(PMIRMSG pMsg, int datasize)
 {
-	BYTE btWH = LOBYTE(pMsg->wParam[1]); // 客户端分辨率类型，用于设置玩家视觉范围大小
-	
 	CDBClientObj* pDI = CServer::GetInstance()->GetDBConnection(DI_CHARINFO);
 	if (pDI)
 	{
@@ -646,11 +676,6 @@ VOID CClientObj::HandleHeartBeat(PMIRMSG pMsg, int datasize)
 	// 客户端的心跳包 后续做其他判断
 }
 
-VOID CClientObj::HandlePetBackExp(PMIRMSG pMsg, int datasize)
-{
-	CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "灵兽.BackExp");
-}
-
 VOID CClientObj::HandleSocialInfo(PMIRMSG pMsg, int datasize)
 {
 	switch (pMsg->wParam[0])
@@ -660,260 +685,6 @@ VOID CClientObj::HandleSocialInfo(PMIRMSG pMsg, int datasize)
 		m_pPlayer->UpdateCommunityInfoToClient();
 	}
 	break;
-	}
-}
-
-VOID CClientObj::HandleFuncCollection(PMIRMSG pMsg, int datasize)
-{
-	if (_stricmp(pMsg->data, "guildmgr") == 0)
-	{
-		Guildmgr* pGuildmgr = (Guildmgr*)pMsg->data;
-		switch (pGuildmgr->btCode)
-		{
-		case 0:
-		{
-			CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), "行会.Help");
-		}
-		break;
-		case 1:
-		{
-			xPacketPool::ScopedPacket packet(65535);
-			const char* s1C = "guildmgr";
-			packet->push(s1C);
-			packet->push(1);
-			int nValue = 1;
-			packet->push((LPVOID)&nValue, 1);
-			nValue = 0x0B;
-			packet->push((LPVOID)&nValue, 4);
-			std::string szRecruitStateList = CGuildManagerEx::GetInstance()->GetRecruitStateList();
-			if (szRecruitStateList == "") break;
-			packet->push(szRecruitStateList.c_str());
-			packet->push(1);
-			m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-		}
-		break;
-		case 2:
-		{
-			if (m_pPlayer->GetPropValue(PI_LEVEL) < 11)
-			{
-				m_pPlayer->SaySystem("你的等级还未超过10级, 能力还不够, 无法报名应征行会.");
-				break;
-			}
-			const char* pszGuildName = pMsg->data + sizeof(Guildmgr);
-			CGuildEx* pGuild = CGuildManagerEx::GetInstance()->FindGuild(pszGuildName);
-			if (pGuild)
-			{
-				if (pGuild->AddApplyPlayer(m_pPlayer))
-					m_pPlayer->SaySystem("你成功申请了加入行会, 会长将会择优录取.");
-				else
-					m_pPlayer->SaySystem("你已经申请过该行会了, 请耐心等候.");
-			}
-		}
-		break;
-		case 3:
-		{
-			CGuildEx* pGuild = m_pPlayer->GetGuild();
-			if (!pGuild) break;
-			if (!pGuild->IsMaster(m_pPlayer))break;
-			pGuild->SendApplyList(m_pPlayer);
-		}
-		break;
-		case 4:
-		{
-			CGuildEx* pGuild = m_pPlayer->GetGuild();
-			if (!pGuild)
-			{
-				m_pPlayer->SaySystem("你还没有加入任何行会, 不能招募会员.");
-				break;
-			}
-			if (!pGuild->IsMaster(m_pPlayer))
-			{
-				m_pPlayer->SaySystem("你不是行会会长, 不能招募行会成员, 前往皇宫找寻国王可创建行会.");
-				break;
-			}
-			if (pGuild->IsFull())
-			{
-				m_pPlayer->SaySystem("你当前行会成员已经达到上限, 前往皇宫找寻国王可提高上限成员.");
-				break;
-			}
-			const char* pszCharName = pMsg->data + sizeof(Guildmgr);
-			int* boAllow = (int*)(pszCharName + strlen(pszCharName) + 1);
-			pGuild->DelApplyPlayer(pszCharName);
-			if (*boAllow == 0)
-			{
-				pGuild->SendDurationMemberList();
-				CHumanPlayer* pPlayer = CHumanPlayerMgr::GetInstance()->FindbyName(pszCharName);
-				if (pPlayer)
-				{
-					if (pPlayer->GetGuild() != nullptr)
-						m_pPlayer->SaySystem("%s 已经加入了其他行会, 招募失败.", pszCharName);
-					else if (pPlayer->GetPropValue(PI_LEVEL) > 0 && pGuild->AddMember(pPlayer))
-					{
-						m_pPlayer->SaySystem("成功招募了行会成员 %s.", pszCharName);
-						pGuild->SendDurationMemberList();
-						pPlayer->UpdateViewName();
-					}
-					else
-						m_pPlayer->SaySystem("%s 等级不足, 招募失败.", pszCharName);
-				}
-				else
-				{
-					if (pGuild->AddMember(pszCharName))
-						m_pPlayer->SaySystem("成功招募了行会成员 %s.", pszCharName);
-				}
-			}
-			else
-				m_pPlayer->SaySystem("你拒绝了 %s 的行会申请.", pszCharName);
-		}
-		break;
-		case 5:
-		{
-			int* nSelect = (int*)(pMsg->data + sizeof(Guildmgr));
-			int* boRecruitState = (int*)((char*)nSelect + 4);
-			CGuildEx* pGuild = m_pPlayer->GetGuild();
-			if (*nSelect == 1)
-				pGuild->SetRecruitState(*boRecruitState);
-			else
-			{
-				xPacketPool::ScopedPacket packet;
-				const char* s1C = "guildmgr";
-				packet->push(s1C);
-				packet->push(1);
-				int nValue = 0x05;
-				packet->push((LPVOID)&nValue, 4);
-				packet->push(1);
-				nValue = 0x01;
-				packet->push((LPVOID)&nValue, 4);
-				nValue = (pGuild && pGuild->GetRecruitState()) ? 0x01 : 0x00;
-				packet->push((LPVOID)&nValue, 4);
-				packet->push(12);
-				nValue = 0x01;
-				packet->push((LPVOID)&nValue, 4);
-				nValue = (pGuild && pGuild->GetRecruitState()) ? 0x01 : 0x00;
-				packet->push((LPVOID)&nValue, 4);
-				packet->push(4);
-				m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-			}
-		}
-		break;
-		case 6:
-		{
-			CGuildEx* pGuild = m_pPlayer->GetGuild();
-			if (!pGuild) break;
-			if (!pGuild->IsMaster(m_pPlayer))break;
-			if (pGuildmgr->nType == 0)
-			{
-				xPacketPool::ScopedPacket packet(65535);
-				const char* s1C = "guildmgr";
-				packet->push(s1C);
-				packet->push(1);
-				int nValue = 0x06;
-				packet->push((LPVOID)&nValue, 1);
-				nValue = 0x01;
-				packet->push((LPVOID)&nValue, 4);
-				std::string szRecruitStateList = pGuild->GetDeclarationList(TRUE);
-				packet->push(szRecruitStateList.c_str());
-				packet->push(1);
-				nValue = 0x01;
-				packet->push((LPVOID)&nValue, 4);
-				packet->push(12);
-				nValue = 0x01;
-				packet->push((LPVOID)&nValue, 4);
-				nValue = 0x01;
-				packet->push((LPVOID)&nValue, 4);
-				nValue = 0x00;
-				packet->push((LPVOID)&nValue, 4);
-				m_pPlayer->SendMsg(m_pPlayer->GetId(), 0xa02, 0, 0, 0, (LPVOID)packet->getbuf(), packet->getsize());
-			}
-			else
-			{
-				if (pGuild == nullptr) break;
-				const char* pszDeclaration = pMsg->data + sizeof(Guildmgr);
-				pGuild->SetDeclarationList(pszDeclaration);
-			}
-		}
-		break;
-		}
-	}
-	else
-	{
-		char szPage[64];
-		snprintf(szPage, sizeof(szPage), "自定义界面.%s", pMsg->data);
-
-		const BYTE* p = (const BYTE*)pMsg->data;
-		int pos = 0;
-		int maxPos = datasize; // 数据边界
-		auto ReadInt = [&](int& n) -> BOOL
-			{
-				if (pos + 4 > maxPos) return FALSE;
-				memcpy(&n, p + pos, 4);
-				pos += 4;
-				return TRUE;
-			};
-		auto ReadByte = [&](BYTE& b) -> BOOL
-			{
-				if (pos + 1 > maxPos) return FALSE;
-				memcpy(&b, p + pos, 1);
-				pos += 1;
-				return TRUE;
-			};
-		auto ReadString = [&](const char*& pszStr) -> BOOL
-			{
-				if (pos >= maxPos) return FALSE;
-				pszStr = (const char*)(p + pos);
-				int len = (int)strlen(pszStr);
-				if (pos + len + 1 > maxPos) return FALSE;
-				pos += len + 1;
-				return TRUE;
-			};
-		const char* pszActName = nullptr;
-		if (!ReadString(pszActName)) return;
-		m_pPlayer->GetScriptTarget()->SetVariableValue("CustomActName", (char*)pszActName);
-		int nActType;
-		char szActType[16];
-		if (!ReadInt(nActType)) return;
-		snprintf(szActType, 16, "%d", nActType);
-		m_pPlayer->GetScriptTarget()->SetVariableValue("CustomActType", szActType);
-		BYTE byHaveStrData = 0;
-		if (!ReadByte(byHaveStrData)) return;
-		if (byHaveStrData)
-		{
-			int nStrCount;
-			char szStrCount[16];
-			if (!ReadInt(nStrCount)) return;
-			if (nStrCount < 0 || nStrCount > 100) return;
-			snprintf(szStrCount, 16, "%d", nStrCount);
-			m_pPlayer->GetScriptTarget()->SetVariableValue("CustomStrCount", szStrCount);
-			char szVar[16];
-			for (int i = 0; i < nStrCount; i++)
-			{
-				const char* pszStr = nullptr;
-				if (!ReadString(pszStr)) return;
-				snprintf(szVar, 16, "CustomS%d", i + 1);
-				m_pPlayer->GetScriptTarget()->SetVariableValue(szVar, (char*)pszStr);
-			}
-		}
-		BYTE byHaveIntData = 0;
-		if (!ReadByte(byHaveIntData)) return;
-		if (byHaveIntData)
-		{
-			int nIntCount;
-			char szIntCount[16];
-			if (!ReadInt(nIntCount)) return;
-			if (nIntCount < 0 || nIntCount > 100) return;
-			snprintf(szIntCount, 16, "%d", nIntCount);
-			m_pPlayer->GetScriptTarget()->SetVariableValue("CustomIntCount", szIntCount);
-			char szVar[16], szVal[16];
-			int nVal;
-			for (int i = 0; i < nIntCount; i++)
-			{
-				if (!ReadInt(nVal)) return;
-				snprintf(szVar, 16, "CustomN%d", i + 1);
-				snprintf(szVal, 16, "%d", nVal);
-				m_pPlayer->GetScriptTarget()->SetVariableValue(szVar, szVal);
-			}
-		}
-		CSystemScript::GetInstance()->Execute(m_pPlayer->GetScriptTarget(), szPage);
 	}
 }
 

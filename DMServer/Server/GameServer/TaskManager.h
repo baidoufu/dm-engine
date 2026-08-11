@@ -8,6 +8,7 @@ typedef struct task_step
 		FILLSELF(0);
 	}
 	BYTE btType; // 任务类型, 0 主线任务, 1 支线任务, 2 日常任务
+	UINT nPic; // 任务图片ID
 	char* pszStepaim; // 任务介绍
 	char* pszDesc; // 任务说明
 }TASK_STEP;

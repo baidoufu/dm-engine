@@ -118,11 +118,12 @@ void CGameControl::MSG_Monster_Appearance(const char * msg,int iLen)
 	}else if( g_pGameData->FindSimpleCharacter(id) != NULL){
 		//output_debug("MSG_Monster_Appearance MsgSize Monster&NPC Size %d !!! \n", iLen);
 	}
+	CHARDESC stCharDesc;
+	memcpy(&stCharDesc, lpPacketMsg->szEncodeData, sizeof(CHARDESC));
 
 	if(id == SELF.GetID())
 	{
-		__int64 looks = Conv_INT64(msg + 12);
-		SELF.SetLooks(looks);
+		SELF.SetLooks(stCharDesc.nFeature);
 		return;
 	}
 
@@ -557,7 +558,7 @@ void CGameControl::MSG_Monster_Appearance(const char * msg,int iLen)
 
 		if(id == SELF.GetID())
 		{
-			SELF.SetLooks(Conv_INT64(msg+12));
+			SELF.SetLooks(stCharDesc.nFeature);
 			return;
 		}
 
@@ -3694,9 +3695,13 @@ void CGameControl::MSG_Monster_Bone(const char * msg,int iLen)
 void CGameControl::MSG_Monster_Corpus(const char * msg,int iLen)
 {
 	string temp;
-	WORD x = Conv_WORD(msg + 6);
-	WORD y = Conv_WORD(msg + 8);
-	BYTE bySexAndDigTag = (BYTE)msg[11];
+	LPPACKETMSG lpPacketMsg = (LPPACKETMSG)msg;
+	DWORD id = lpPacketMsg->stDefMsg.nRecog;
+	int x = lpPacketMsg->stDefMsg.wParam;
+	int y = lpPacketMsg->stDefMsg.wTag;
+	BYTE bDir = LOBYTE(lpPacketMsg->stDefMsg.wSeries);
+	BYTE bySexAndDigTag = HIBYTE(lpPacketMsg->stDefMsg.wSeries);
+
 	std::string strtemp;
 	int iLenTemp=24;
 
@@ -3707,9 +3712,10 @@ void CGameControl::MSG_Monster_Corpus(const char * msg,int iLen)
 	pChar->SetDir(msg[10]);
 	pChar->SetSex(bySexAndDigTag & 0x0F);
 
-	__int64 looks = Conv_INT64(msg + 12);
-	pChar->SetLooks(looks);
-	pChar->SetStatus(Conv_WORD(msg+22));
+	CHARDESC stCharDesc;
+	memcpy(&stCharDesc, lpPacketMsg->szEncodeData, sizeof(CHARDESC));
+	pChar->SetLooks(stCharDesc.nFeature);
+	pChar->SetStatus(stCharDesc.nStatus);
 	pChar->SetDead(true);
 	if(pChar->GetRaceNo() == 236 )
 		pChar->SetDir(4);

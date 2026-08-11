@@ -60,7 +60,10 @@ public:
 	VOID SetMapId(UINT mapid) { m_Mapid = mapid; }
 	VOID SetUpdateKey(DWORD dwKey) { m_dwUpdateKey = dwKey; }
 	DWORD GetUpdateKey()const { return m_dwUpdateKey; }
-
+	VOID SetViewSearchRange(int btRange) { m_bViewSearchRange = btRange; }
+	int GetViewSearchRange()const { return m_bViewSearchRange; }
+	VOID SetViewRange(int btRange) { m_bViewRange = btRange; }
+	int GetViewRange()const { return m_bViewRange; }
 	virtual BOOL InSafeArea();
 	BOOL InCityArea();
 	BOOL InWarArea();
@@ -84,5 +87,7 @@ protected:
 	WORD m_wX, m_wY;
 	UINT m_Mapid;
 	UINT m_Id;
+	int m_bViewSearchRange; // ËÑË÷·¶Î§
+	int m_bViewRange; // ÊÓ¾õ·¶Î§
 	std::array<std::unique_ptr<xListHost<CMapObject>::xListNode>, LNI_MAX> m_DLinkNodes;
 };

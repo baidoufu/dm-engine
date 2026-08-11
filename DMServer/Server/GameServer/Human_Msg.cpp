@@ -216,15 +216,16 @@ VOID CHumanPlayer::SendTimeWeatherChanged()
 	WORD wTime = 0xffff;
 	if (!m_pMap->IsFlagSeted(MF_DAY) && !m_pMap->IsFlagSeted(MF_NIGHT))
 		wTime = CTimeSystem::GetInstance()->GetCurrentlyTime();
-	WORD wWeather = m_pMap->GetWeather().wWeatherIndex;
-	WORD wFlag = m_pMap->GetWeather().wFlag;
-	DWORD dwWeatherColor = m_pMap->GetWeather().dwWeatherColor;
-	if (!m_pMap->IsFlagSeted(MF_WEATHER))
+	WORD wWeather = m_pMap->GetWeather().wWeatherIndex; // 天气类型
+	WORD wFlag = m_pMap->GetWeather().wFlag; // 雾化速度
+	DWORD dwWeatherColor = m_pMap->GetWeather().dwWeatherColor; // 天气颜色
+	if (!m_pMap->IsFlagSeted(MF_WEATHER))//是否地图配置开启天气
 	{
 		wWeather = 0;
 		dwWeatherColor = 0xffffffff;
 	}
-	SendMsg(m_pMap->GetWeather().dwBGColor, SM_SETGAMEDATETIME, wTime, wWeather, wFlag, &dwWeatherColor, sizeof(DWORD));
+	WORD w2 = MAKEWORD(wWeather, 0); // 天气类型, 密度
+	SendMsg(m_pMap->GetWeather().dwBGColor, SM_SETGAMEDATETIME, wTime, w2, wFlag, &dwWeatherColor, sizeof(DWORD));
 }
 
 static thread_local std::array<DBITEM, 180> s_dbPacketDst{};

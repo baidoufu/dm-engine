@@ -2047,5 +2047,7 @@ bool CSysConfigWnd::OnclickOK()
 
 	g_pControl->PopupWindow(MSG_CTRL_SYSCONFIG_WND,OPER_CLOSE);
 
+	g_pGameControl->MSG_Config_Req(NULL, 0);//发送配置信息给客户端
+
 	return true;
 }

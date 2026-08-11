@@ -249,7 +249,7 @@ void CPackageWnd::OnCreate()
 		m_pMoreButton = new CCtrlButton();		
 		AddControl(m_pMoreButton); 
 		m_pMoreButton->CreateEx(this,19,iOffY + 341,95,96,97);
-		m_pMoreButton->SetText("更多",COLOR_BTN_NORMAL,COLOR_BTN_MOUSEON,COLOR_BTN_PRESS,COLOR_BTN_DISABLE,12);
+		m_pMoreButton->SetText("商城",COLOR_BTN_NORMAL,COLOR_BTN_MOUSEON,COLOR_BTN_PRESS,COLOR_BTN_DISABLE,12);
 
 		m_pVIPTradeWndBtn = new CCtrlButton();
 		AddControl(m_pVIPTradeWndBtn);

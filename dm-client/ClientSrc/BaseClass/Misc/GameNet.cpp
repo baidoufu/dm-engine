@@ -156,7 +156,7 @@ void CGameNet::OnSocketMessageRecieve(char* pszMsg, int nLen)
 
 	fnDecodeMessage(&tdm, pszMsg);
 	output_debug("协议 %d, Recog=%d, Param=%d, Tag=%d, Series=%d, IsGS=%d\n", tdm.wIdent, tdm.nRecog, tdm.wParam, tdm.wTag, tdm.wSeries, isOnGameProc);
-	if(tdm.wIdent == 50 || tdm.wIdent == 51)		//临时解决办法
+	if(tdm.wIdent == SC_CONFIG_INFO) //临时解决办法
 	{
 		isOnGameProc = true;
 	}

@@ -64,6 +64,10 @@ BOOL CBotPlayer::InitBot(BOT_CREATE_DESC& desc)
 		LG2("机器人: 初始化玩家基础数据失败 [%s]\n", desc.dbinfo.szName);
 		return FALSE;
 	}
+	// 设置视觉范围
+	SetViewRange(22);
+	SetViewSearchRange(22);
+
 	// 修正HP/MP为满值（Init中hp=1只是占位，避免走hp==0分支覆盖坐标）
 	int iMaxHp = GetPropValue(PI_MAXHP);
 	int iMaxMp = GetPropValue(PI_MAXMP);

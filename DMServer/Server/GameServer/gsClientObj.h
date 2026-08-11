@@ -57,6 +57,7 @@ public:
 	VOID HandleTradeRequest(PMIRMSG pMsg, int datasize);
 	VOID HandlePetFeed(PMIRMSG pMsg, int datasize);
 	VOID HandleGuildMemberList(PMIRMSG pMsg, int datasize);
+	VOID HandleCongifInfo(PMIRMSG pMsg, int datasize);
 	VOID HandleDropItem(PMIRMSG pMsg, int datasize);
 	VOID HandlePickupItem(PMIRMSG pMsg, int datasize);
 	VOID HandleTakeOnItem(PMIRMSG pMsg, int datasize);
@@ -93,9 +94,7 @@ public:
 	VOID HandleViewGuildExp(PMIRMSG pMsg, int datasize);
 	VOID HandleRequestGroupPos(PMIRMSG pMsg, int datasize);
 	VOID HandleHeartBeat(PMIRMSG pMsg, int datasize);
-	VOID HandlePetBackExp(PMIRMSG pMsg, int datasize);
 	VOID HandleSocialInfo(PMIRMSG pMsg, int datasize);
-	VOID HandleFuncCollection(PMIRMSG pMsg, int datasize);
 	VOID HandleGuildFengHao(PMIRMSG pMsg, int datasize);
 	VOID HandleReplyGuild(PMIRMSG pMsg, int datasize);
 	VOID HandleTrainHorse(PMIRMSG pMsg, int datasize);

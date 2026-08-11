@@ -177,8 +177,7 @@ void CSelectCharWnd::InitLayout()
 		m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20,60,20,412,613);
 		m_FrameInfo[CA_FEMALE_TAOIST].Init(20,60,20,409,595);
 	}
-
-	else
+	else if (g_pGfx->GetWidth() == 1280)
 	{
 		m_CharArea[CA_MALE_FIGHTER].Init(425,287,517,469,-2,-83,285,474);
 		m_CharArea[CA_MALE_ENCHANTER].Init(168,360,330,552,-19,-110,77,541);
@@ -203,6 +202,50 @@ void CSelectCharWnd::InitLayout()
 		m_FrameInfo[CA_FEMALE_FIGHTER].Init(20,48,20,433,617);
 		m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20,60,20,412,613);
 		m_FrameInfo[CA_FEMALE_TAOIST].Init(20,60,20,409,595);
+	}
+	else
+	{
+		int iOffsetX = 160;
+		int iOffsetY = 100;
+		if (g_pGfx->GetWidth() == 1600)
+		{
+			iOffsetX = 160;
+			iOffsetY = 100;
+		}
+		else if (g_pGfx->GetWidth() == 1920)
+		{
+			iOffsetX = 320;
+			iOffsetY = 280;
+		}
+		else // if (g_pGfx->GetWidth() == 2560)
+		{
+			iOffsetX = 640;
+			iOffsetY = 640;
+		}
+
+		m_CharArea[CA_MALE_FIGHTER].Init(425 + iOffsetX, 287 + iOffsetY, 517 + iOffsetX, 469 + iOffsetY, -2 + iOffsetX, -83 + iOffsetY, 285 + iOffsetX, 474 + iOffsetY);
+		m_CharArea[CA_MALE_ENCHANTER].Init(168 + iOffsetX, 360 + iOffsetY, 330 + iOffsetX, 552 + iOffsetY, -19 + iOffsetX, -110 + iOffsetY, 77 + iOffsetX, 541 + iOffsetY);
+		m_CharArea[CA_MALE_TAOIST].Init(910 + iOffsetX, 177 + iOffsetY, 1018 + iOffsetX, 305 + iOffsetY, 19 + iOffsetX, -117 + iOffsetY, 129 + iOffsetX, 427 + iOffsetY);
+		m_CharArea[CA_FEMALE_FIGHTER].Init(300 + iOffsetX, 160 + iOffsetY, 382 + iOffsetX, 328 + iOffsetY, 2 + iOffsetX, -113 + iOffsetY, 642 + iOffsetX, 330 + iOffsetY);
+		m_CharArea[CA_FEMALE_ENCHANTER].Init(978 + iOffsetX, 403 + iOffsetY, 1086 + iOffsetX, 614 + iOffsetY, -10 + iOffsetX, -114 + iOffsetY, 881 + iOffsetX, 571 + iOffsetY);
+		m_CharArea[CA_FEMALE_TAOIST].Init(777 + iOffsetX, 325 + iOffsetY, 870 + iOffsetX, 513 + iOffsetY, -13 + iOffsetX, -109 + iOffsetY, 19 + iOffsetX, 413 + iOffsetY);
+
+		m_CharArea[CA_MIDDLE_CHAR].Init(581 + iOffsetX, 332 + iOffsetY, 721 + iOffsetX, 604 + iOffsetY, 229 + iOffsetX, 215 + iOffsetY, 0, 0);
+		m_CharArea[CA_LEFT_CHAR].Init(400 + iOffsetX, 332 + iOffsetY, 640 + iOffsetX, 604 + iOffsetY, 76 + iOffsetX, 215 + iOffsetY, 0, 0);
+		m_CharArea[CA_RIGHT_CHAR].Init(725 + iOffsetX, 332 + iOffsetY, 865 + iOffsetX, 604 + iOffsetY, 385 + iOffsetX, 215 + iOffsetY, 0, 0);
+
+		//m_FirstIdx.Init(5001,6001,9001,0,0);
+		m_FirstIdx.Init(19000, 18000, 20000, 0, 0);
+		//18000区间存储被选中动画front
+		//19000区间用于存储创建角色待选动画back
+		//2000区间用于存储待选动画stand
+
+		m_FrameInfo[CA_MALE_FIGHTER].Init(20, 60, 20, 410, 608);
+		m_FrameInfo[CA_MALE_ENCHANTER].Init(20, 60, 20, 421, 601);
+		m_FrameInfo[CA_MALE_TAOIST].Init(20, 60, 20, 409, 617);
+		m_FrameInfo[CA_FEMALE_FIGHTER].Init(20, 48, 20, 433, 617);
+		m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20, 60, 20, 412, 613);
+		m_FrameInfo[CA_FEMALE_TAOIST].Init(20, 60, 20, 409, 595);
 	}
 }
 
@@ -239,6 +282,31 @@ void CSelectCharWnd::InitButtons()
 		m_pDeleteCharButton->CreateEx(this,366,749,20738,20739,20740, 20741);
 		m_pRecoverCharButton->CreateEx(this,809,749,20731,20732,20733,20734);
 		m_pQuitButton->CreateEx(this,1001,749,20742,20743,20744, 20745);
+	}
+	else
+	{
+		int iOffsetX = 160;
+		int iOffsetY = 100;
+		if (g_pGfx->GetWidth() == 1600)
+		{
+			iOffsetX = 160;
+			iOffsetY = 100;
+		}
+		else if (g_pGfx->GetWidth() == 1920)
+		{
+			iOffsetX = 320;
+			iOffsetY = 280;
+		}
+		else // if (g_pGfx->GetWidth() == 2560)
+		{
+			iOffsetX = 640;
+			iOffsetY = 640;
+		}
+		m_pStartButton->CreateEx(this, 595 + iOffsetX, 737 + iOffsetY, 20735, 20736, 20737);
+		m_pCreateCharButton->CreateEx(this, 175 + iOffsetX, 749 + iOffsetY, 20727, 20728, 20729, 20730);
+		m_pDeleteCharButton->CreateEx(this, 366 + iOffsetX, 749 + iOffsetY, 20738, 20739, 20740, 20741);
+		m_pRecoverCharButton->CreateEx(this, 809 + iOffsetX, 749 + iOffsetY, 20731, 20732, 20733, 20734);
+		m_pQuitButton->CreateEx(this, 1001 + iOffsetX, 749 + iOffsetY, 20742, 20743, 20744, 20745);
 	}
 }
 
@@ -304,7 +372,7 @@ void CSelectCharWnd::Draw()
 	{
 		//DrawTexture(0,0,2000);
 		//DrawTexture(120,0,2025);
-		DrawTexture(0,0,19599);
+		DrawTexture(0,0,19599);//背景图
 
 		DrawTexture(0,0,20751);
 		if (g_bHasDownLoadInitPackage)
@@ -328,7 +396,7 @@ void CSelectCharWnd::Draw()
 			g_pGfx->SetRenderMode();
 		}
 	}
-	else
+	else if (g_pGfx->GetWidth() == 1280)
 	{
 		DrawTexture(0, 0, 19597);
 
@@ -340,12 +408,49 @@ void CSelectCharWnd::Draw()
 			g_pGfx->SetRenderMode();
 		}
 	}
+	else if (g_pGfx->GetWidth() == 1600)
+	{
+		DrawTexture(0, 0, 19596);
+
+		DrawTexture(160, 100, 20753);
+		if (g_bHasDownLoadInitPackage)
+		{
+			g_pGfx->SetRenderMode(RM_ADD2);
+			DrawTexture(111 + 160, 100, 20754);
+			g_pGfx->SetRenderMode();
+		}
+	}
+	else if (g_pGfx->GetWidth() == 1920)
+	{
+		DrawTexture(0, 0, 19595);
+
+		DrawTexture(320, 280, 20753);
+		if (g_bHasDownLoadInitPackage)
+		{
+			g_pGfx->SetRenderMode(RM_ADD2);
+			DrawTexture(111 + 320, 280, 20754);
+			g_pGfx->SetRenderMode();
+		}
+	}
+	else //if (g_pGfx->GetWidth() == 2560)
+	{
+		DrawTexture(0, 0, 19594);
+
+		DrawTexture(640, 640, 20753);
+		if (g_bHasDownLoadInitPackage)
+		{
+			g_pGfx->SetRenderMode(RM_ADD2);
+			DrawTexture(111 + 640, 640, 20754);
+			g_pGfx->SetRenderMode();
+		}
+	}
 
 	if(g_OtherData.IsReceivedCharList())
 	{
 		DrawCharacters(); //绘制创建人物和选中角色图片
 	}
-
+	
+	// 下方按钮
 	if(g_pGfx->GetWidth() == 800 || g_bNeedScale)
 	{
 		DrawTexture(0,465,20726);
@@ -354,10 +459,32 @@ void CSelectCharWnd::Draw()
 	{
 		DrawTexture(0,616 + 12,20725);
 	}
-	else
+	else if (g_pGfx->GetWidth() == 1280)
 	{
 		DrawTexture(0,648 + 12,20724);
 	}
+	else
+	{
+		int iOffsetX = 160;
+		int iOffsetY = 100;
+		if (g_pGfx->GetWidth() == 1600)
+		{
+			iOffsetX = 160;
+			iOffsetY = 100;
+		}
+		else if (g_pGfx->GetWidth() == 1920)
+		{
+			iOffsetX = 320;
+			iOffsetY = 280;
+		}
+		else // if (g_pGfx->GetWidth() == 2560)
+		{
+			iOffsetX = 640;
+			iOffsetY = 640;
+		}
+		DrawTexture(iOffsetX, iOffsetY + 648 + 12, 20724);
+	}
+
 	DrawCharInfo(); //绘制角色信息
 
 	CCtrlWindow::Draw();
@@ -627,26 +754,50 @@ bool CSelectCharWnd::Msg(DWORD dwMsg,DWORD dwData,CControl * pControl)
 			}
 			else
 			{
-				if(g_pGfx->GetWidth() == 1280)
+				if (g_pGfx->GetWidth() == 800)
 				{
-					if(iWhichArea == 0 || iWhichArea == 1 || iWhichArea == 3)
-						m_pCreateCharWnd->Create(this,900,70);
+					if (iWhichArea == 0 || iWhichArea == 1 || iWhichArea == 3)
+						m_pCreateCharWnd->Create(this, 480, 30);
 					else
-						m_pCreateCharWnd->Create(this,138,70);
+						m_pCreateCharWnd->Create(this, 80, 30);
 				}
-				else if(g_pGfx->GetWidth() == 800)
-				{
-					if(iWhichArea == 0 || iWhichArea == 1 || iWhichArea == 3)
-						m_pCreateCharWnd->Create(this,480,30);
-					else
-						m_pCreateCharWnd->Create(this,80,30);
-				}
-				else
+				else if (g_pGfx->GetWidth() == 1024)
 				{
 					if(iWhichArea == 0 || iWhichArea == 1 || iWhichArea == 3)
 						m_pCreateCharWnd->Create(this,648,70);
 					else
 						m_pCreateCharWnd->Create(this,138,70);
+				}
+				else if (g_pGfx->GetWidth() == 1280)
+				{
+					if (iWhichArea == 0 || iWhichArea == 1 || iWhichArea == 3)
+						m_pCreateCharWnd->Create(this, 900, 70);
+					else
+						m_pCreateCharWnd->Create(this, 138, 70);
+				}
+				else
+				{
+					int iOffsetX = 160;
+					int iOffsetY = 100;
+					if (g_pGfx->GetWidth() == 1600)
+					{
+						iOffsetX = 160;
+						iOffsetY = 100;
+					}
+					else if (g_pGfx->GetWidth() == 1920)
+					{
+						iOffsetX = 320;
+						iOffsetY = 280;
+					}
+					else // if (g_pGfx->GetWidth() == 2560)
+					{
+						iOffsetX = 640;
+						iOffsetY = 640;
+					}
+					if (iWhichArea == 0 || iWhichArea == 1 || iWhichArea == 3)
+						m_pCreateCharWnd->Create(this, 900 + iOffsetX, 70 + iOffsetY);
+					else
+						m_pCreateCharWnd->Create(this, 138 + iOffsetX, 70 + iOffsetY);
 				}
 			}
 
@@ -767,7 +918,7 @@ void CSelectCharWnd::DrawCharInfo()
 			TextOut(iStartX+132 ,698,GetJobName(info.byJob),dwColor, DTF_Center);
 			TextOut(iStartX+220,698,strLevel.c_str(),dwColor, DTF_Center);
 		}
-		else
+		else if (g_pGfx->GetWidth() == 1280)
 		{
 			int iStartX = 182;
 			if(ii > 0)
@@ -776,6 +927,35 @@ void CSelectCharWnd::DrawCharInfo()
 			TextOut(iStartX+10,730,info.szRoleName,dwColor, DTF_Center);
 			TextOut(iStartX+170 ,730,GetJobName(info.byJob),dwColor, DTF_Center);
 			TextOut(iStartX+305,730,strLevel.c_str(),dwColor, DTF_Center);
+		}
+		else
+		{
+			int iOffsetX = 160;
+			int iOffsetY = 100;
+			if (g_pGfx->GetWidth() == 1600)
+			{
+				iOffsetX = 160;
+				iOffsetY = 100;
+			}
+			else if (g_pGfx->GetWidth() == 1920)
+			{
+				iOffsetX = 320;
+				iOffsetY = 280;
+			}
+			else // if (g_pGfx->GetWidth() == 2560)
+			{
+				iOffsetX = 640;
+				iOffsetY = 640;
+			}
+
+			int iStartX = 182;
+			if (ii > 0)
+				iStartX = 839;
+			iStartX = iStartX + iOffsetX;
+
+			TextOut(iStartX + 10, 730 + iOffsetY, info.szRoleName, dwColor, DTF_Center);
+			TextOut(iStartX + 170, 730 + iOffsetY, GetJobName(info.byJob), dwColor, DTF_Center);
+			TextOut(iStartX + 305, 730 + iOffsetY, strLevel.c_str(), dwColor, DTF_Center);
 		}
 	}
 

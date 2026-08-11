@@ -62,7 +62,7 @@ BOOL CGmManager::ExecGameCmd(const char* pszCommand, CHumanPlayer* pPlayer)
 	
 	xCharSet csWht(" \t\"");
 	xCharSet csSpl(" \t,");
-	o_strncpy(buffer.get(), pszCommand, lenCmd);
+	o_strncpy(buffer.get(), pszCommand, lenCmd + 1);
 	char* Params[20];
 	replaceOutPair(buffer.get(), '(', ')', ' ');
 

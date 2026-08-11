@@ -37,7 +37,7 @@ inline BOOL xCheckAccount(const char* pszName)
 inline BOOL xCheckBirthday(const char* pszBirthday)
 {
 	std::array<char, 40> szText = {};
-	o_strncpy(szText.data(), pszBirthday, 10);
+	o_strncpy(szText.data(), pszBirthday, 11);
 	xStringsExpander<20> birthday(szText.data(), '/');
 	if (birthday.getCount() != 3)return FALSE;
 	int t = atoi(birthday[0]);

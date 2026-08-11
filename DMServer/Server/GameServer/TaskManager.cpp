@@ -40,6 +40,8 @@ VOID CTaskManager::OnFoundFile(const char* pszFilename, UINT nParam)
 		define.pSteps[i].pszStepaim = copystring(sf.GetString("setup", szItemName, "没有任务描述"));
 		snprintf(szItemName, 64, "stepdesc%u", n);
 		define.pSteps[i].pszDesc = copystring(sf.GetString("setup", szItemName, "没有任务描述"));
+		snprintf(szItemName, 64, "steppic%u", n);
+		define.pSteps[i].nPic = sf.GetInteger("setup", szItemName, 0);
 	}
 	sf.Close();
 

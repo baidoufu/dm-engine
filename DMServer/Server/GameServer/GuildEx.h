@@ -97,9 +97,8 @@ public:
 	VOID SendWords(const char* pszWords);
 	VOID UpdateNames();
 
-	// 时光区-组员消息数据
+	// 组员消息数据
 	VOID AppendDurationMembers(xPacket& packet);
-	VOID AppendDurationMembers2(xPacket& packet);
 
 	VOID ReviewAroundNameColor();
 

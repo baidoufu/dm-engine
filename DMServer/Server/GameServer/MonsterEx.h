@@ -56,6 +56,8 @@ public:
 			case 0x79: // Ê÷Ä¾
 				return OBJ_TREE;
 			}
+			if (m_pDesc->base.btRace == MR_BOSS)
+				return OBJ_BOSS;
 		}
 		return OBJ_MONSTER;
 	}

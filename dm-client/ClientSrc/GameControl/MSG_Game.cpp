@@ -88,6 +88,32 @@ void CGameControl::SEND_Messagebox_Reply(DWORD dwNpcID,const char * info,bool bF
 	ADD_ARRAY(info,iLen);
 	SEND_GAME_SERVER();
 }
+
+void CGameControl::MSG_Config_Req(const char* msg, int iLen)
+{
+	SET_COMMAND(CS_CONFIG_INFO, 256);
+
+	int iWidth = g_pGfx->GetWidth();
+	int iHeight = g_pGfx->GetHeight();
+	BYTE byWH = 0;
+	if (iWidth == 800 && iHeight == 600)
+		byWH = 0;
+	else if (iWidth == 1024 && iHeight == 768)
+		byWH = 1;
+	else if (iWidth == 1280 && iHeight == 800)
+		byWH = 2;
+	else if (iWidth == 1600 && iHeight == 900)
+		byWH = 3;
+	else if (iWidth == 1920 && iHeight == 1080)
+		byWH = 4;
+	else if (iWidth == 2560 && iHeight == 1440)
+		byWH = 5;
+
+	ASSIGN_BYTE(8, byWH); // 分辨率类型序号
+
+	SEND_GAME_SERVER();
+}
+
 //'<tab1>asdasdassdsa<tab1end><tab2>asdasdassdsa<tab2end>'
 void CGameControl::MSG_Game_Greeting(const char * msg,int iLen)
 {
@@ -254,24 +280,6 @@ TRY_BEGIN;
 	//SendGameInfoForCheck();		//向客户端监控系统发送游戏信息
 	ASSIGN_BYTE(6,bySign);
 	ASSIGN_BYTE(7,g_iParamGameType);//从什么地方登录的
-
-	int iWidth = g_pGfx->GetWidth();
-	int iHeight = g_pGfx->GetHeight();
-	BYTE byWH = 0;
-	if (iWidth == 800 && iHeight == 600)
-		byWH = 0;
-	else if (iWidth == 1024 && iHeight == 768)
-		byWH = 1;
-	else if (iWidth == 1280 && iHeight == 800)
-		byWH = 2;
-	else if (iWidth == 1600 && iHeight == 900)
-		byWH = 3;
-	else if (iWidth == 1920 && iHeight == 1080)
-		byWH = 4;
-	else if (iWidth == 2560 && iHeight == 1440)
-		byWH = 5;
-
-	ASSIGN_BYTE(8, byWH); // 分辨率类型序号
 
 	m_dwJumpTime = GetTickCount();
 	g_Login.SetAutoLoginInType(0);

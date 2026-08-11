@@ -77,10 +77,12 @@ VOID CMagicManager::LoadMaigc(const char* pszMagicFile)
 
 BOOL CMagicManager::AddMagicClassString(char* pszMagicClassDesc)
 {
-	char* Params[16];
-	int nParam = SearchParam(pszMagicClassDesc, Params, 16, ",");
-	//#name/id/job/effecttype/effectvalue/needlv1/lv1exp/needlv2/lv2exp/needlv3/lv3exp/spl/dspl/delay/needmagic/mutexmagic
-	if (nParam < 16) return FALSE;
+	char* Params[26];
+	int nParam = SearchParam(pszMagicClassDesc, Params, 26, ",");
+	//#name/id/job/effecttype/effectvalue/
+	// needlv1/lv1exp/needlv2/lv2exp/needlv3/lv3exp/needlv4/lv4exp/needlv5/lv5exp/needlv6/lv6exp/needlv7/lv7exp/needlv8/lv8exp/
+	// spl/dspl/delay/needmagic/mutexmagic
+	if (nParam < 24) return FALSE;
 
 	MAGICCLASS class1;
 	MAGICCLASS* pClass = &class1;
@@ -95,40 +97,51 @@ BOOL CMagicManager::AddMagicClassString(char* pszMagicClassDesc)
 	pClass->dwNeedExp[1] = (DWORD)StringToInteger(Params[8]);
 	pClass->btNeedLv[2] = (BYTE)StringToInteger(Params[9]);
 	pClass->dwNeedExp[2] = (DWORD)StringToInteger(Params[10]);
+	pClass->btNeedLv[3] = (BYTE)StringToInteger(Params[11]);
+	pClass->dwNeedExp[3] = (DWORD)StringToInteger(Params[12]);
 
-	pClass->btNeedLv[3] = pClass->btNeedLv[2];
-	pClass->dwNeedExp[3] = pClass->dwNeedExp[2];
+	pClass->btNeedLv[4] = (BYTE)StringToInteger(Params[13]);
+	pClass->dwNeedExp[4] = (DWORD)StringToInteger(Params[14]);
+	pClass->btNeedLv[5] = (BYTE)StringToInteger(Params[15]);
+	pClass->dwNeedExp[5] = (DWORD)StringToInteger(Params[16]);
 
-	pClass->sSpell = (WORD)StringToInteger(Params[11]);
-	pClass->sDefSpell = (WORD)StringToInteger(Params[12]);
-	pClass->wDelay = (WORD)StringToInteger(Params[13]);
+	pClass->btNeedLv[6] = (BYTE)StringToInteger(Params[17]);
+	pClass->dwNeedExp[6] = (DWORD)StringToInteger(Params[18]);
+	pClass->btNeedLv[7] = (BYTE)StringToInteger(Params[19]);
+	pClass->dwNeedExp[7] = (DWORD)StringToInteger(Params[20]);
+	pClass->btNeedLv[8] = pClass->btNeedLv[7];
+	pClass->dwNeedExp[8] = pClass->dwNeedExp[7];
 
-	if (nParam > 14)
+	pClass->sSpell = (WORD)StringToInteger(Params[21]);
+	pClass->sDefSpell = (WORD)StringToInteger(Params[22]);
+	pClass->wDelay = (WORD)StringToInteger(Params[23]);
+
+	if (nParam > 24)
 	{
-		if (strchr(Params[14], '|') != nullptr)
+		if (strchr(Params[24], '|') != nullptr)
 		{
-			xStringsExtracter<3>	needmagic(Params[14], "|");
+			xStringsExtracter<3> needmagic(Params[24], "|");
 			for (UINT n = 0; n < needmagic.getCount(); n++)
 			{
 				pClass->wNeedMagic[n] = (WORD)StringToInteger(needmagic[n]);
 			}
 		}
 		else 
-			pClass->wNeedMagic[0] = (WORD)StringToInteger(Params[14]);
+			pClass->wNeedMagic[0] = (WORD)StringToInteger(Params[24]);
 	}
 
-	if (nParam > 15)
+	if (nParam > 25)
 	{
-		if (strchr(Params[15], '|') != nullptr)
+		if (strchr(Params[25], '|') != nullptr)
 		{
-			xStringsExtracter<3>	mutexmagic(Params[15], "|");
+			xStringsExtracter<3>	mutexmagic(Params[25], "|");
 			for (UINT n = 0; n < mutexmagic.getCount(); n++)
 			{
 				pClass->wMutexMagic[n] = (WORD)StringToInteger(mutexmagic[n]);
 			}
 		}
 		else 
-			pClass->wMutexMagic[0] = (WORD)StringToInteger(Params[15]);
+			pClass->wMutexMagic[0] = (WORD)StringToInteger(Params[25]);
 	}
 	if (!AddMagicClass(pClass))
 	{
@@ -212,6 +225,8 @@ VOID CMagicManager::LoadMaigcskill(const char* pszMagicFile)
 					case 53:
 					case 59:
 					case 60:
+					case 107:
+					case 115:
 					{
 						skillElem->QueryIntAttribute("Lv", &skill.level);
 						skillElem->QueryIntAttribute("Value1", &skill.value1);
@@ -226,6 +241,8 @@ VOID CMagicManager::LoadMaigcskill(const char* pszMagicFile)
 					case 41:
 					case 65:
 					case 74:
+					case 111:
+					case 114:
 					{
 						skillElem->QueryIntAttribute("Lv", &skill.level);
 						skillElem->QueryIntAttribute("Value1", &skill.value1);

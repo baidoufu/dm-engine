@@ -204,10 +204,15 @@ inline VOID GetTimeFromString(SYSTEMTIME& t, const char* pszString)
 /// <param name="psrc"></param>
 /// <param name="length"></param>
 /// <returns></returns>
-inline char* o_strncpy(char* pdest, const char* psrc, int length)
+inline char* o_strncpy(char* pdest, const char* psrc, size_t length)
 {
-	strncpy(pdest, psrc, length);
-	pdest[length] = 0;
+	if (length == 0) return pdest;
+
+	const char* found = (const char*)memchr(psrc, '\0', length);
+	size_t copy_len = found ? (found - psrc) : length;
+
+	memcpy(pdest, psrc, copy_len);
+	pdest[copy_len < length ? copy_len : length - 1] = '\0';
 	return pdest;
 }
 

@@ -107,10 +107,10 @@ VOID CDownItemObject::OnEnterMap(CLogicMap* pMap)
 {
 	CMapObject::OnEnterMap(pMap);
 	int mx = getX(), my = getY();
-	// 搜索范围与玩家视野搜索范围 VIEW_SEARCH_RANGE 保持一致
-	for (int x = -VIEW_SEARCH_RANGE; x <= VIEW_SEARCH_RANGE; x++)
+	// 搜索范围与玩家视野搜索范围 m_bViewSearchRange 保持一致
+	for (int x = -m_bViewSearchRange; x <= m_bViewSearchRange; x++)
 	{
-		for (int y = -VIEW_SEARCH_RANGE; y <= VIEW_SEARCH_RANGE; y++)
+		for (int y = -m_bViewSearchRange; y <= m_bViewSearchRange; y++)
 		{
 			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
@@ -134,10 +134,10 @@ VOID CDownItemObject::OnLeaveMap(CLogicMap* pMap)
 {
 	CMapObject::OnLeaveMap(pMap);
 	int mx = getX(), my = getY();
-	// 搜索范围与玩家视野搜索范围 VIEW_SEARCH_RANGE 保持一致
-	for (int x = -VIEW_SEARCH_RANGE; x <= VIEW_SEARCH_RANGE; x++)
+	// 搜索范围与玩家视野搜索范围 m_bViewSearchRange 保持一致
+	for (int x = -m_bViewSearchRange; x <= m_bViewSearchRange; x++)
 	{
-		for (int y = -VIEW_SEARCH_RANGE; y <= VIEW_SEARCH_RANGE; y++)
+		for (int y = -m_bViewSearchRange; y <= m_bViewSearchRange; y++)
 		{
 			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)

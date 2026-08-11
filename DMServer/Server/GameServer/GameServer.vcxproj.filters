@@ -474,6 +474,9 @@
     <ClCompile Include="Human_DoProcess.cpp">
       <Filter>功能处理\玩家</Filter>
     </ClCompile>
+    <ClCompile Include="ConSkill.cpp">
+      <Filter>功能处理\技能</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMap.h">
@@ -799,6 +802,9 @@
     </ClInclude>
     <ClInclude Include="BotBehaviorDecorator.h">
       <Filter>机器人</Filter>
+    </ClInclude>
+    <ClInclude Include="ConSkill.h">
+      <Filter>功能处理\技能</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

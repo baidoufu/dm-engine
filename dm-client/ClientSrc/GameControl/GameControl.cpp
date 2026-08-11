@@ -55,6 +55,8 @@ CGameControl::CGameControl(void)
 	m_callback[GG_CLI_DynCode_NTF]=                &CGameControl::MSG_DynCode_NTF;
 	m_callback[GG_CLI_InGameVerify_REQ]=           &CGameControl::MSG_InGameVerify_Req;
 	m_callback[GG_CLI_LoginVerify_REQ]=            &CGameControl::Msg_Login_Check_Mask;
+
+	m_callback[SC_CONFIG_INFO] =				   &CGameControl::MSG_Config_Req;		//客户端配置信息
     //////////////////////////////////////////////////////////////////////////
 
 

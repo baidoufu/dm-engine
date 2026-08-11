@@ -485,7 +485,7 @@
 
 //行会相关操作消息
 //      消息命令							消息值      消息注释
-#define CS_GUILD_REQUEST					0x03F3 		//行会相关命令(创建行会,申请攻城,申请行会战等)
+#define CS_GUILD_REQUEST					0x03F3 		//行会相关命令(创建行会,申请攻城,申请行会战等)-未使用
 #define CS_GUILD_MESSAGE_EDIT				0x0410 		//编辑行会公告
 #define CS_GUILD_MEMBER_TITLE_EDIT			0x0411 		//编辑行会成员封号
 #define CS_GUILD_LOOK_EXP_VAL				0x0412		//察看行会经验值
@@ -954,3 +954,8 @@
 #define SC_LOGIN_SDOA						0x01CD	   //SDOA登录
 
 #define CS_LOGIN_CHECK_MASK					0x0AFD		//PT登录校验码
+
+
+// 新加封包
+#define CS_CONFIG_INFO						0x03E7		//客户端配置消息
+#define SC_CONFIG_INFO						0x03E7		//客户端配置消息

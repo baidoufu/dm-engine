@@ -46,8 +46,8 @@ BOOL CHumanPlayer::DeleteTask(WORD wTaskId, BOOL bCompleteTask)
 	this->m_TaskInfo.tasks[i].wStep = 0;
 	RebuildTaskIdIndexMap(i);
 
-	BYTE m = CTaskManager::GetInstance()->GetTaskType(wTaskId);//任务类型
-	SendMsg(wTaskId, 0x9596, 0, 0, MAKEWORD(2, m));
+	//BYTE m = CTaskManager::GetInstance()->GetTaskType(wTaskId);//任务类型
+	SendMsg(wTaskId, 0x9596, 0, 0, 2);
 	if (bCompleteTask)
 	{
 		m_TaskInfo.dwTotalTaskCount++; //已完成任务数+1
@@ -170,13 +170,15 @@ VOID CHumanPlayer::SendTaskInfo()
 			ParseTaskParams(szTaskDesc, szFinalDesc, 2048, &m_TaskInfo.tasks[i]);
 			ParseTaskParams(szStepaim, szFinalAim, 256, &m_TaskInfo.tasks[i]);
 
-			if (szFinalAim[0] != '\0')
-				sprintf(szTempBuffer, "<Task title=%s>%s</Task><aim>%s</aim>", szFinalTitle, szFinalDesc, szFinalAim);
-			else
-				sprintf(szTempBuffer, "<Task title=%s>%s</Task>", szFinalTitle, szFinalDesc);
+			xStringsExpander<8> expander(szFinalTitle, "--");
 
-			BYTE m = pTaskMgr->GetTaskType(wTaskId);//任务类型
-			SendMsg(wTaskId, 0x9596, LOBYTE(dwStep), 0, MAKEWORD(1, m), (LPVOID)szTempBuffer);//添加新任务或更新现有任务信息
+			if (szFinalAim[0] != '\0')
+				sprintf(szTempBuffer, "#MBI %u,0 #BTL %s #STL %s #PIC %u #TDN%s #DSP%s", wTaskId, expander[0], expander[1], pStep->nPic, szFinalAim, szFinalDesc);
+			else
+				sprintf(szTempBuffer, "#MBI %u,0 #BTL %s #STL %s #PIC %u #DSP%s", wTaskId, expander[0], expander[1], pStep->nPic, szFinalDesc);
+
+			//BYTE m = pTaskMgr->GetTaskType(wTaskId);//任务类型
+			SendMsg(wTaskId, 0x9596, 0, 0, 1, (LPVOID)szTempBuffer);//添加新任务或更新现有任务信息
 		}
 	}
 }

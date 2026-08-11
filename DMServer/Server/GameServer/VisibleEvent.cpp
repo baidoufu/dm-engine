@@ -105,9 +105,9 @@ VOID CVisibleEvent::OnEnterMap(CLogicMap* pMap)
 	char szBuffer[1024];
 	int length = 1024;
 	if (!GetViewmsg(szBuffer, length))return;
-	for (int x = -VIEW_SEARCH_RANGE; x <= VIEW_SEARCH_RANGE; x++)
+	for (int x = -m_bViewSearchRange; x <= m_bViewSearchRange; x++)
 	{
-		for (int y = -VIEW_SEARCH_RANGE; y <= VIEW_SEARCH_RANGE; y++)
+		for (int y = -m_bViewSearchRange; y <= m_bViewSearchRange; y++)
 		{
 			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)
@@ -130,9 +130,9 @@ VOID CVisibleEvent::OnLeaveMap(CLogicMap* pMap)
 {
 	CMapObject::OnLeaveMap(pMap);
 	int mx = getX(), my = getY();
-	for (int x = -VIEW_SEARCH_RANGE; x <= VIEW_SEARCH_RANGE; x++)
+	for (int x = -m_bViewSearchRange; x <= m_bViewSearchRange; x++)
 	{
-		for (int y = -VIEW_SEARCH_RANGE; y <= VIEW_SEARCH_RANGE; y++)
+		for (int y = -m_bViewSearchRange; y <= m_bViewSearchRange; y++)
 		{
 			CMapCellInfo* pInfo = pMap->GetMapCellInfoShared(mx + x, my + y);
 			if (pInfo && pInfo->m_xObjectList.getCount() > 0)

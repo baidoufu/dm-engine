@@ -74,6 +74,8 @@ VOID CAliveObject::Clean()
 	m_Mapid = 0;
 	m_bPosLocked = FALSE;
 	m_bMonsterType = 0;
+	m_dwKillNum = 0;
+	m_wLianJiTime = 0;
 	m_nVisibleObjectFlag = 0;
 	AddVisibleObjectType(OBJ_PLAYER);
 	m_bDead = FALSE;
@@ -85,8 +87,7 @@ VOID CAliveObject::Clean()
 	SetSuperHit(FALSE);
 	SetHpRecoverTick(800);
 	SetMpRecoverTick(800);
-	m_AddHpTimer.Savetime();
-	m_AddMpTimer.Savetime();
+	m_CheckTimer.Savetime();
 	SetAddHp(0, 0);
 	SetAddMp(0, 0);
 	//m_dwSystemFlag = 0;
@@ -561,6 +562,7 @@ BOOL CAliveObject::CompleteAction(BOOL bForceStop)
 BOOL CAliveObject::GetOutViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 {
 	if (IsSystemFlagSeted(SF_HIDED)) return FALSE;
+	// 怪物消失的封包
 	length = EncodeMsg(pszMsg, GetId(), SM_DISAPPEAR, m_wX, m_wY, 0, nullptr);
 	return TRUE;
 }
@@ -580,23 +582,26 @@ BOOL CAliveObject::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 	if (m_bDead)
 	{
 		if (IsSystemFlagSeted(SF_BONE))
-			wCmd = 0x21;
+			wCmd = 0x21; // 出现骨头
 		else
-			wCmd = SM_DEATH;
+			wCmd = SM_DEATH; // 出现怪物尸体
 	}
 	WORD w1 = 100;
 	WORD wd = (dwMaxHp > 0) ? (dwHp * 100 / dwMaxHp) : 0; // 百分比取整
-	pdwData[2] = static_cast<DWORD>(MAKELONG(wd, w1));
+	if (GetType() == OBJ_BOSS)
+		pdwData[2] = static_cast<DWORD>(MAKELONG(dwHp, dwMaxHp));
+	else
+		pdwData[2] = static_cast<DWORD>(MAKELONG(wd, w1));
 	pdwData[3] = 0;
-	int len = sprintf(szData + 16, "%s/%u", GetViewName(), GetNameColor(pViewer));
+	int len = sprintf(szData + 16, "%s/%u", GetViewName(), GetNameColor(this));
 	// 在数据最后面插入15个空字节, 去过滤玩家、怪、宠物的一些独特封号
 	memcpy(szData + 16, szData + 16, static_cast<size_t>(len) + 15);
 	int totalLen = len + 15;
 	WORD w3 = 0;
 	if (GetType() == OBJ_MONSTER)
-		w3 = (m_bMonsterType << 8) | m_Direction;
+		w3 = m_bMonsterType << 12 | GetSex() << 8 | m_Direction;
 	else
-		w3 = (GetSex() << 8) | m_Direction;
+		w3 = GetSex() << 8 | m_Direction;
 	length = EncodeMsg(pszMsg, GetId(), wCmd, m_wX, m_wY, w3, (LPVOID)szData, 16 + totalLen);
 	if (GetType() == OBJ_PLAYER && pViewer && pViewer->GetType() == OBJ_PLAYER)
 		((CAliveObject*)pViewer)->SendFeatureChanged();
@@ -679,8 +684,8 @@ VOID CAliveObject::Update()
 			if (m_SystemFlag.IsTimeOut(i))//系统标识时间计算
 			{
 				DWORD dwParam = m_SystemFlag.GetParam(i);
-				m_SystemFlag.ClrStatus(i);
-				OnSystemFlagCleared(i, dwParam);
+				if (m_SystemFlag.ClrStatus(i))
+					OnSystemFlagCleared(i, dwParam);
 			}
 		}
 		if (fStatusChanged) SendStatusChanged(); // 发送状态改变
@@ -744,9 +749,9 @@ VOID CAliveObject::Update()
 					}
 				}
 			}
-			if (m_AddHpTimer.IsTimeOut(500)) // 吃药增加HP
+			if (m_CheckTimer.IsTimeOut(500)) 
 			{
-				if (m_dwAddHp > 0)
+				if (m_dwAddHp > 0)// 吃药增加HP
 				{
 					if (GetPropValue(PI_CURHP) < GetPropValue(PI_MAXHP))
 					{
@@ -758,11 +763,7 @@ VOID CAliveObject::Update()
 					else
 						m_dwAddHp = 0;
 				}
-				m_AddHpTimer.Savetime();
-			}
-			if (m_AddMpTimer.IsTimeOut(500)) // 吃药增加MP
-			{
-				if (m_dwAddMp > 0)
+				if (m_dwAddMp > 0)// 吃药增加MP
 				{
 					if (GetPropValue(PI_CURMP) < GetPropValue(PI_MAXMP))
 					{
@@ -774,10 +775,19 @@ VOID CAliveObject::Update()
 					else
 						m_dwAddMp = 0;
 				}
-				m_AddMpTimer.Savetime();
+				if (IsSystemFlagSeted(SF_KUANGNUWIND))
+				{
+					MagicBoom(GetSystemFlagParam(SF_KUANGNUWIND), getX(), getY(), 1);
+				}
+
+				m_CheckTimer.Savetime();
 			}
 			if (bSendHpChanged)SendHpMpChanged(-nHp); // 发53封包
 			if (bSendMpChanged)SendHpMpChanged();
+		}
+		if (m_wLianJiTime != 0 && m_KillNumTimer.IsTimeOut(m_wLianJiTime * 1000)) // 连斩无双 超时情理
+		{
+			m_dwKillNum = 0;
 		}
 	}
 	break;
@@ -879,7 +889,7 @@ VOID CAliveObject::CleanVisibleList()
 	int mw = m_pMap->GetWidth();
 	int mh = m_pMap->GetHeight();
 	int dx = getX(), dy = getY();
-	int nRange = VIEW_SEARCH_RANGE;
+	int nRange = m_bViewSearchRange;
 	int startx = MAX(0, dx - nRange);
 	int endx = MIN(mw - 1, dx + nRange);
 	int starty = MAX(0, dy - nRange);
@@ -1035,7 +1045,7 @@ VOID CAliveObject::SearchViewRange()
 	int mw = pMap->GetWidth();
 	int mh = pMap->GetHeight();
 	int dx = getX(), dy = getY();
-	int nRange = VIEW_SEARCH_RANGE;
+	int nRange = m_bViewSearchRange;
 	int startx = MAX(0, dx - nRange);
 	int endx = MIN(mw - 1, dx + nRange);
 	int starty = MAX(0, dy - nRange);
@@ -1119,7 +1129,7 @@ VOID CAliveObject::RefreshViewList()
 	int mw = pMap->GetWidth();
 	int mh = pMap->GetHeight();
 	int dx = getX(), dy = getY();
-	int nRange = VIEW_SEARCH_RANGE;
+	int nRange = m_bViewSearchRange;
 	int startx = MAX(0, dx - nRange);
 	int endx = MIN(mw - 1, dx + nRange);
 	int starty = MAX(0, dy - nRange);
@@ -1219,7 +1229,7 @@ VOID CAliveObject::UpdateViewRange(UINT ox, UINT oy)
 	int nx = getX(), ny = getY();
 	if (nx == ox && ny == oy) return;
 	int mw = static_cast<int>(m_pMap->GetWidth()) - 1, mh = static_cast<int>(m_pMap->GetHeight()) - 1;
-	int nRange = VIEW_SEARCH_RANGE;
+	int nRange = m_bViewSearchRange;
 	RECT rc1 = { static_cast<LONG>(ox - nRange), static_cast<LONG>(oy - nRange), static_cast<LONG>(ox + nRange), static_cast<LONG>(oy + nRange) };
 	RECT rc2 = { static_cast<LONG>(nx - nRange), static_cast<LONG>(ny - nRange), static_cast<LONG>(nx + nRange), static_cast<LONG>(ny + nRange) };
 	RECT rcs[4];
@@ -1366,9 +1376,37 @@ VOID CAliveObject::ToDeath(DWORD dwKiller)
 		else
 			w3 = GetDirection();
 		SendAroundMsg(GetId(), SM_NOWDEATH, w1, w2, w3, (LPVOID)dwArray, sizeof(dwArray));
-		if (CanRecvMsg())
-			SendMsg(GetId(), SM_NOWDEATH, w1, w2, w3, (LPVOID)dwArray, sizeof(dwArray));
+		SendMsg(GetId(), SM_NOWDEATH, w1, w2, w3, (LPVOID)dwArray, sizeof(dwArray));
 		OnDeath(dwKiller);
+
+		CAliveObject* pKiller = CGameWorld::GetInstance()->GetAliveObjectById(dwKiller);
+		if (pKiller && pKiller->CanRecvMsg())
+		{
+			// 先判断是否学有 连斩无双 技能
+			CHumanPlayer* pPlayer = (CHumanPlayer*)pKiller;
+			USERMAGIC* pMagic = pPlayer->GetMagic(114);
+			if (pMagic == nullptr) return;
+			const Magic& magicSkill = CMagicManager::GetInstance()->GetMagic(114);
+			const auto& skillData = magicSkill.skills[pPlayer->GetVarValue("job")];
+			DWORD dwKillNum = ++pKiller->m_dwKillNum;// 当前连击杀怪计数
+			if (dwKillNum > skillData.value4) return; // 超过最大，不发封包
+			if (dwKillNum == 1)//计数第一个就开始计时
+			{
+				pKiller->m_wLianJiTime = skillData.value3; // 间隔时间
+				pKiller->m_KillNumTimer.Savetime();
+			}
+			//发送连击显示 数字
+			WORD pW1 = dwKillNum & 0xffff;
+			WORD pW2 = (dwKillNum & 0xffff0000) >> 16;
+			BOOL boIsXP = 0;
+			if (dwKillNum >= skillData.value4)
+			{
+				boIsXP = 1;
+				pKiller->AddProcess(EP_LIANJIXP, skillData.value1, skillData.value2, 0, 0, 100);
+			}
+			WORD pW3 = MAKEWORD(boIsXP, pKiller->m_wLianJiTime); //表示XP是否启动，1表示启动，其他表示未启动。和 间隔时间。
+			pKiller->SendMsg(pKiller->GetId(), 0x0A55, pW1, pW2, pW3); //MSG_LianJi_Show
+		}
 	}
 }
 
@@ -1706,6 +1744,13 @@ VOID CAliveObject::DoProcess(OBJECTPROCESS* pProcess)
 	case EP_CHANGEMAP://从连接点切换地图
 	{
 		FlyTo(pProcess->dwParam[0], pProcess->dwParam[1], pProcess->dwParam[2], FALSE);
+	}
+	break;
+	case EP_LIANJIXP://连击无双触发
+	{
+		for (int i = 0; i < 8; i++)
+			DoLineMagic(pProcess->dwParam[0], i, 8);
+		MagicBoom(pProcess->dwParam[1], getX(), getY(), 8, 400);
 	}
 	break;
 	}

@@ -8,6 +8,7 @@
 #include "downitemmgr.h"
 #include "equipment.h"
 #include "itemmanager.h"
+#include "ConSkill.h"
 #include "gameworld.h"
 #include "npcmanager.h"
 #include "scriptnpc.h"
@@ -62,6 +63,7 @@ VOID CHumanPlayer::Clean()
 	this->m_ScriptTarget.Clean();
 	m_vMagic.clear();
 	m_fMagicLoaded = FALSE;
+	ClearAllConSkillBuffs(this);
 	m_iPetCount = 0;
 	CAliveObject::Clean();
 	m_DBTimer.Savetime();
@@ -252,12 +254,12 @@ BOOL CHumanPlayer::Init(CREATEHUMANDESC& desc)
 		AddVisibleObjectType(objTye);
 	}
 
+	Sendfirstdlg(CGameWorld::GetInstance()->GetNotice());//658 发送登录窗口提示
 	SendMsg(0, 0x9591, 0, 0, 0, "9, 9, 9, 9"); // 发送版本号
 	SendMsg(0, 0x328, 1, 0, 0); // 服务器通知客户端是否使用动态加密算法, 以及动态加密数据的长度设置
-	SendMsg(0, 0x9594, 0, iBagCount, 10);//38292 发送背包大小
+	SendMsg(0, 0x9594, 0, iBagCount, MAXBOOT_SLOT);//38292 发送背包大小
 	SendMsg(GetId(), 0x9593, 1, 0, desc.dbinfo.wPersonCode, (LPVOID)desc.dbinfo.szPersonSign);//38291 设置个性化签名
 	SendMsg(GetId(), 0x9593, 2, 0, 0, (LPVOID)desc.dbinfo.szTempRank);//38291 设置临时称号
-	Sendfirstdlg(CGameWorld::GetInstance()->GetNotice());//658 发送登录窗口提示
 	CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(desc.dbinfo.mapid);
 	if (pMap == nullptr) return FALSE;
 	SendMsg(GetId(), SM_SETMAP, m_wX, m_wY, 0, (LPVOID)pMap->GetName());//人物在地图的位置
@@ -1029,6 +1031,7 @@ VOID CHumanPlayer::Update()
 			m_pExchangeObj->End(this, ET_CANCEL);
 	}
 	CAliveObject::Update();
+	UpdateConSkillBuffs(this);//更新连击技能BUFF
 }
 
 VOID CHumanPlayer::AddExp(DWORD dwExp, int level, DWORD dwId)
@@ -1259,6 +1262,7 @@ VOID CHumanPlayer::SetMagic(MAGICDB* pArray, int count)
 	RecalcHitSpeed();
 	UpdateSubProp();
 	m_fMagicLoaded = TRUE;
+	UpdateConSkillActive(this);
 }
 
 BOOL CHumanPlayer::AddMagic(WORD wId, BYTE btLevel)
@@ -1287,6 +1291,7 @@ BOOL CHumanPlayer::AddMagic(WORD wId, BYTE btLevel)
 		OnAddMagic(pRaw);
 		RecalcHitSpeed();
 		UpdateSubProp();
+		UpdateConSkillActive(this);
 	}
 	return TRUE;
 }
@@ -1317,6 +1322,7 @@ BOOL CHumanPlayer::AddMagic(const char* pszName, BYTE btLevel)
 		OnAddMagic(pRaw);
 		RecalcHitSpeed();
 		UpdateSubProp();
+		UpdateConSkillActive(this);
 	}
 	return TRUE;
 }
@@ -1344,6 +1350,8 @@ BOOL CHumanPlayer::GetViewmsg(char* pszMsg, int& length, CMapObject* pViewer)
 		wFlag |= 2;
 	if (IsSystemFlagSeted(SF_STRONGSHIELD))
 		wFlag |= 1;
+	if (IsSystemFlagSeted(SF_KUANGNUWIND))
+		wFlag |= 8192;
 	if (IsSystemFlagSeted(SF_GODBLESS))
 	{
 		wFlag |= 4;
@@ -1688,7 +1696,7 @@ BOOL CHumanPlayer::AddMoney(money_type type, DWORD dwCount, BOOL bUpdateClient)
 
 BOOL CHumanPlayer::TrainMagic(USERMAGIC* pMagic, int exp)
 {
-	if (pMagic->magic.btLevel < 3)
+	if (pMagic->magic.btLevel < 9)
 	{
 		if (exp == 0) exp = (Getrand(3) + 1);
 		if (IsSpecialEquipmentFunctionOn(SEF_TRAINSKILL))exp *= 2;
@@ -2498,4 +2506,24 @@ VOID CHumanPlayer::LoadVars()
 	_makepath(szPath, nullptr, ".\\Data\\Charvars", GetName(), "txt");
 	if (GetScriptTarget())
 		GetScriptTarget()->LoadVars(szPath);
+}
+
+VOID CHumanPlayer::InitMyConSkill()
+{
+	UpdateConSkillActive(this);
+}
+
+VOID CHumanPlayer::UpdateMyConSkillBuffs()
+{
+	UpdateConSkillBuffs(this);
+}
+
+VOID CHumanPlayer::ClearMyConSkillBuffs()
+{
+	ClearAllConSkillBuffs(this);
+}
+
+VOID CHumanPlayer::OnMyConSkillMagicSuccess(WORD wMagicID)
+{
+	OnConSkillMagicSuccess(this, wMagicID);
 }

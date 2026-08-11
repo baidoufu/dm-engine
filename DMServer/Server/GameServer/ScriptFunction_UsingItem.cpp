@@ -441,13 +441,6 @@ DEFINE_SCRIPT_FUNCTION(CHANGEWEATHER)
 		pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(Params[0].nParam);
 		nWeather = Params[1].nParam;
 	}
-	//0：天晴
-	//1：细雨缠绵	@天气 $0001 $0000 $0000000
-	//2：烟雨朦胧	@天气 $f102 $0000 $ffffffff
-	//3：沙漠风暴	@天气 $1403 $0032 $ffffff99
-	//4：玫瑰花雨	@天气 $0004 $0000 $0000000
-	//5：紫樱缤纷	@天气 $0005 $0000 $0000000
-	//6：飞雪连天	@天气 $0006 $0000 $0000000
 	WORD nSpeed = 0;
 	DWORD dwFogColor = 0;
 	if (nWeather == 3)
@@ -461,9 +454,9 @@ DEFINE_SCRIPT_FUNCTION(CHANGEWEATHER)
 		nWeather |= 0xf100;
 		dwFogColor = 0xffffffff;
 	}
-	pMap->GetWeather().wWeatherIndex = nWeather;
-	pMap->GetWeather().wFlag = nSpeed;
-	pMap->GetWeather().dwWeatherColor = dwFogColor;
+	pMap->GetWeather().wWeatherIndex = nWeather; // 天气类型
+	pMap->GetWeather().wFlag = nSpeed; // 雾化速度
+	pMap->GetWeather().dwWeatherColor = dwFogColor; // 天气颜色
 	CGameWorld::GetInstance()->AddGlobeProcess(EP_WEATHERCHANGED, pMap->GetIndex());
 }
 END_SCRIPT_FUNCTION

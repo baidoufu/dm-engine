@@ -891,13 +891,15 @@ DEFINE_SCRIPT_FUNCTION(MONGEN){
 	int y = pPlayer->getY() + rand() % 10 - 5;
 	int r = 0;
 	int c = 1;
+	if (mapid == 0) return 0;
 	if (nParam == 2)
 	{
-		mapid = Params[1].nParam;
-		CLogicMap* pMap = CLogicMapMgr::GetInstance()->GetLogicMapById(mapid);
-		auto randomCoord = pMap->GetRandomCoordinate();
-		x = randomCoord.first;
-		y = randomCoord.second;
+		c = Params[1].nParam;
+	}
+	else if (nParam == 3)
+	{
+		x = Params[1].nParam;
+		y = Params[2].nParam;
 	}
 	else if (nParam == 4) 
 	{

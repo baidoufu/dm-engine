@@ -202,8 +202,8 @@ public:
 	//请求离线托管
 	void SEND_OfflineTrustee(BYTE byType);
 
-
-
+	//请求客户端配置信息
+	void MSG_Config_Req					(const char* msg, int iLen);
 
     //////////////////////////////////////////////////////////////////////////
 

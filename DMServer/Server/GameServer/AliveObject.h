@@ -84,8 +84,6 @@ private:
 	CServerTimer timer;
 };
 
-constexpr int VIEW_RANGE = 16; // 原版是12
-constexpr int VIEW_SEARCH_RANGE = VIEW_RANGE + 2;
 typedef xListHost<VISIBLE_OBJECT> VISIBLE_OBJECT_LIST;
 // 活体对象类, 继承自CMapObject对象
 class CAliveObject : public CMapObject
@@ -567,13 +565,13 @@ protected:
 	{
 		if (IsStatusSet(SI_CLOAK)) ClrStatus(SI_CLOAK);
 	}
+	CServerTimer m_CheckTimer; // 定期定时器
+
 	DWORD m_dwAddHp; // 增加生命值数量
 	DWORD m_dwAddHpSpeed; // 增加生命值速度
-	CServerTimer m_AddHpTimer; // 加生命值定时器
 
 	DWORD m_dwAddMp; // 增加魔法值数量
 	DWORD m_dwAddMpSpeed; // 增加魔法值速度
-	CServerTimer m_AddMpTimer; // 加魔法值定时器
 
 	CServerTimer m_HpRecoverTimer; // 恢复生命值定时器
 	DWORD m_dwHpRecoverTick; // 恢复生命值间隔时间
@@ -616,7 +614,11 @@ protected:
 	BOOL m_bDead;
 	BOOL m_bPosLocked;
 
-	BYTE m_bMonsterType; // 怪物类型 0x10 标示可以挖肉
+	BYTE m_bMonsterType; // 怪物类型 1 标示可以挖肉
+
+	DWORD m_dwKillNum; // 连击无双击杀的数量
+	WORD m_wLianJiTime; // 连击无双时间 * 1000
+	CServerTimer m_KillNumTimer; // 连击无双击杀的数量定时器
 
 	static xObjectPool<VISIBLE_OBJECT>	m_xVisibleObjectPool;
 	std::array<int, PI_PROP_COUNT> m_AddProp;

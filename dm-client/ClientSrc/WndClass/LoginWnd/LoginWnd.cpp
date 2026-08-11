@@ -326,7 +326,7 @@ void CLoginWnd::Draw()
 		//	DrawTexture(-128,360,22089);
 		//}
 	}
-	else
+	else if (g_pGfx->GetWidth() == 1280)
 	{
 		DrawTexture(0,0,22127);
 		//if (g_bHasDownLoadInitPackage)
@@ -339,25 +339,38 @@ void CLoginWnd::Draw()
 		//	DrawTexture(836,410,22092);
 		//	DrawTexture(0,395,22089);
 		//}
-	}	
+	}
+	else if (g_pGfx->GetWidth() == 1600)
+	{
+		DrawTexture(0, 0, 22165);
+	}
+	else if (g_pGfx->GetWidth() == 1920)
+	{
+		DrawTexture(0, 0, 22166);
+	}
+	else //if (g_pGfx->GetWidth() == 2560)
+	{
+		DrawTexture(0, 0, 22167);
+	}
 
-	//版本号
+	// 画版本内容
 	char strVersion[256] = {0};
 	sprintf(strVersion,"传奇世界 v%s",g_strVersion);
 	//TextOut(m_iWidth / 2,15,strVersion,0xFFFFFFFF,DTF_Center);//里面会再缩放一次,没有必要,因为外面用不是绝对位置
 	g_pFont->DrawText(m_iScreenX + m_iWidth / 2,m_iScreenY + 15,strVersion,0xFFFFFFFF,m_iFont,m_iFontSize, DTF_Center);
 
+	// 画警告
 	if(m_pUserLoginWnd)
 	{
 		if(g_pGfx->GetWidth() > 800)
 		{
 			DrawTexture(2,640,819);
-			TextOut(93,730,m_strHomeUrl.c_str(),0xFFFFFF00,DTF_UnderLine);
+			//TextOut(93,730,m_strHomeUrl.c_str(),0xFFFFFF00,DTF_UnderLine); //网站链接
 		}
 		else
 		{
 			DrawTexture(-21,494,819);
-			TextOut(71,579,m_strHomeUrl.c_str(),0xFFFFFF00,DTF_UnderLine);
+			//TextOut(71,579,m_strHomeUrl.c_str(),0xFFFFFF00,DTF_UnderLine); //网站链接
 		}
 	}
 
@@ -428,9 +441,11 @@ void CLoginWnd::Draw()
 	//	return;
 	//}
 
+	return; // 直接返回，不去显示盛大LOGO
+
 	if(m_dwSndaTime > 0)
 	{
-		if(dwCount < m_dwSndaTime + 0) //停留2秒
+		if(dwCount < m_dwSndaTime + 2000) //停留2秒
 		{
 			if(m_dwSndaTexID)
 			{

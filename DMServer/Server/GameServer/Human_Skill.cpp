@@ -12,6 +12,7 @@
 #include "damageevent.h"
 #include "magicmanager.h"
 #include "monstertrapper.h"
+#include "ConSkill.h"
 
 AbilityShell g_xSkillAbilityShell42[4];
 AbilityShell g_xSkillAbilityShell61[8];
@@ -24,6 +25,8 @@ VOID CHumanPlayer::SendSpecialStatusChanged(BOOL bToAround)
 		wFlag |= 2;
 	if (IsSystemFlagSeted(SF_STRONGSHIELD)) // 金刚护体
 		wFlag |= 1;
+	if (IsSystemFlagSeted(SF_KUANGNUWIND)) // 狂怒旋风
+		wFlag |= 8192;
 	if (IsSystemFlagSeted(SF_GODBLESS)) // 护身
 	{
 		wFlag |= 4;
@@ -387,6 +390,51 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				bSuccess = FALSE;
 		}
 		break;
+		case 107: // 狂怒旋风 
+		{
+			if (IsSystemFlagSeted(SF_KUANGNUWIND))
+				bSuccess = FALSE;
+			else
+			{
+				int nDamage = getskillpower(wMagicId);// 伤害值
+				nDamage += CalcLucky();
+				const int dwTime = skillData.value3;// 时间
+#ifdef _DEBUG
+				SaySystem("狂怒旋风 时间 %u 秒", dwTime);
+#endif
+				bTrain = AddProcess(EP_SETSYSTEMFLAG, SF_KUANGNUWIND, TRUE, nDamage, dwTime * 1000);
+			}
+		}
+		break;
+		case 111: // 英勇咆哮 
+		{
+			int nDamage = getskillpower(wMagicId);// 伤害值
+			nDamage += CalcLucky();
+			const int nTime = skillData.value3;// 麻痹时间
+			const int nProbability = skillData.value4;// 麻痹几率
+			int nRand = Getrand(100);
+			if (nRand < nProbability)
+				pObject->SetStatus(SI_PALSY, 0, nTime * 1000);
+			int nDis = DISTANCE(pObject->getX(), pObject->getY(), nSrcX, nSrcY);
+			bTrain = pObject->AddProcess(EP_BEATTACKED, nDamage, GetId(), DT_MAGIC, 0, 120 * nDis + 500);
+		}
+		break;
+		case 115: // 八方分影斩 
+		{
+			bSuccess = FALSE;
+			const int nShadowNum = skillData.value3;// 幻影数量
+			WORD w3 = MAKEWORD(nShadowNum, dir);
+			SendAroundMsg(GetId(), 0x0A48, x, y, w3);
+			SendMsg(GetId(), 0x0A48, x, y, w3);
+
+			int nDis = DISTANCE(x, y, nSrcX, nSrcY);
+			AddProcess(EP_SKILLFLY, x, y, 0, 0, 120 * nDis + 500);
+			GETNEXTNEXTPOS(x, y, dir);
+			int nDamage = getskillpower(wMagicId);// 伤害值
+			nDamage += CalcLucky();
+			bTrain = MagicBoom(nDamage, x, y, 1, 120 * nDis + 1500);
+		}
+		break;
 		default:
 		{
 			if (dwClassFlag & MAGICFLAG_ACTIVED)
@@ -450,7 +498,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 #ifdef _DEBUG
 			if (wMagicId == 5)
 				SaySystem("火炎刀 伤害值:%d", nDamage);
@@ -474,7 +521,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		{
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			const int nCount = skillData.value3;
 #ifdef _DEBUG
 			if (wMagicId == 9)
@@ -496,7 +542,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 #ifdef _DEBUG
 			if (wMagicId == 11)
 				SaySystem("雷电术 伤害值:%d", nDamage);
@@ -614,11 +659,8 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		break;
 		case 22: // 火墙
 		{
-			int minmc = GetPropValue(PI_MINMC);
-			int maxmc = GetPropValue(PI_MAXMC);
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			const int dwTick = skillData.value3;
 			const int dwTime = skillData.value4;
 #ifdef _DEBUG
@@ -633,7 +675,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		{
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			int nDelay = 800;
 			if (wMagicId == 24)
 			{
@@ -722,7 +763,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 		{
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			const int dwTime = skillData.value3;
 			bTrain = SetStatus(SI_FENGHUOLUN, nDamage, dwTime * 1000);
 #ifdef _DEBUG
@@ -735,7 +775,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			static constexpr std::array<int, 4> effectdir = { 1, 3, 5, 7 };
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			const int nCount = skillData.value3;
 #ifdef _DEBUG
 			SaySystem("玄冰刃 伤害值:%d", nDamage);
@@ -754,7 +793,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			static constexpr std::array<POINT, 4> ptEffect = {{ { 1, 1}, { -1, 1}, { 1, -1}, { -1, -1} }}; // 四个方向点
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			const int nCount = skillData.value3;
 #ifdef _DEBUG
 			SaySystem("五雷轰 伤害值:%d", nDamage);
@@ -776,7 +814,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			if (m_pMap == nullptr) return FALSE;
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			const int value3 = skillData.value3;
 			const int value4 = skillData.value4;
 #ifdef _DEBUG
@@ -808,7 +845,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			const int value5 = skillData.value5; // 火雨伤害范围
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 			MagicBoom(nDamage + value4, x, y, value5, 1600); // 火雨
 #ifdef _DEBUG
 			SaySystem("流星火雨 时间 %u 秒", value3);
@@ -872,7 +908,6 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 				break;
 			int nDamage = getskillpower(wMagicId);
 			nDamage += CalcLucky();
-			nDamage = MAX(0, nDamage);
 #ifdef _DEBUG
 			if (wMagicId == 13)
 			{
@@ -1402,6 +1437,9 @@ BOOL CHumanPlayer::SpellCast(int x, int y, UINT nTarget, WORD wMagicId)
 			SendAroundMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, &playSkill, sizeof(playSkill));
 			SendMsg(GetId(), SM_PLAYSKILLEFFECT, x, y, wEffect, &playSkill, sizeof(playSkill));
 		}
+		// 连击技能处理: 如果是连击子技能, 推进进度并激活Buff
+		if (IsConSkillMagic(wMagicId))
+			OnConSkillMagicSuccess(this, wMagicId);
 		if (bTrain) TrainMagic(pMagic);
 		return TRUE;
 	}
@@ -1518,7 +1556,6 @@ BOOL CHumanPlayer::SpecialHit(int dir, WORD wSkillId)
 	// 计算基础伤害
 	int nPower = getskillpower(wSkillId);
 	nPower += CalcLucky();
-	nPower = MAX(0, nPower);
 	// 统一计算百分比伤害的辅助函数
 	auto CalculateBonusDamage = [this](int basePower, WORD skillId) -> int {
 		const Magic& magicskill = CMagicManager::GetInstance()->GetMagic(skillId);

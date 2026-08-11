@@ -1454,7 +1454,7 @@ VOID CHumanPlayer::UseItem(DWORD dwItemIndex, DWORD dwPackIndex)//吃物品
 	break;
 	case ISM_BOOK://技能书
 	{
-		if (pItem->baseitem.btShape != m_Humandesc.dbinfo.btClass)
+		if (pItem->baseitem.btShape != 3 && pItem->baseitem.btShape != m_Humandesc.dbinfo.btClass)
 		{
 			SaySystem(getstrings(SD_STUDYSKILL_WRONGJOB));
 			bSuccess = FALSE;

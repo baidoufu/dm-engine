@@ -38,6 +38,7 @@ enum e_process //最大支持64个
 	EP_DEAD,				//死亡
 	EP_BEATTACKED,			//攻击
 	EP_CHANGEMAP,			//从连接点切换地图
+	EP_LIANJIXP,			//连击无双触发XP
 	//玩家的线程
 	EP_OPENSCRIPTPAGE,		//打开脚本页
 	EP_CLOSEPAGE,			//关闭脚本页
@@ -319,17 +320,17 @@ typedef struct tagViewDetail //观察其他角色信息
 
 typedef struct tagViewDetailEx //观察其他角色扩展信息
 {
-	BYTE btVipTradeLevel; //VIP交易等级
+	BYTE btVipTradeLevel{}; //VIP交易等级
 	BYTE btJob{}; //职业
 	BYTE btRideStatus{}; // 骑战状态
-	BYTE btGuildTowerLevel; //行会塔等级
-	BYTE btGuildTowerSwitch; //行会塔是否开启
-	BYTE mGuildBuffer[28]; //行会Buff加成
-	WORD wSelfGuildTowerSwitch; //行会Buff对自己是否有效
-	CHAR szOfficer[32]; //行会官职名称
-	BYTE btGuildPhyle; //行会神魔属性 (0=凡人, 1=修神, 2=修魔)
-	BYTE mGuildBufferPhyle; //神魔属性加成 (本体+元神)
-	CHAR szPhyleName; //宗族名称
+	BYTE btGuildTowerLevel{}; //行会塔等级
+	BYTE btGuildTowerSwitch{}; //行会塔是否开启
+	BYTE mGuildBuffer[28]{}; //行会Buff加成
+	WORD wSelfGuildTowerSwitch{}; //行会Buff对自己是否有效
+	CHAR szOfficer[32]{}; //行会官职名称
+	BYTE btGuildPhyle{}; //行会神魔属性 (0=凡人, 1=修神, 2=修魔)
+	BYTE mGuildBufferPhyle{}; //神魔属性加成 (本体+元神)
+	CHAR szPhyleName[25]{}; //宗族名称
 }VIEWDETAIL_EX;
 
 struct tag_PlaySkillEffect //技能特效
@@ -369,6 +370,7 @@ enum e_object_type // 对象类型
 	OBJ_EVENT,			//事件
 	OBJ_PLAYER,			//玩家
 	OBJ_MONSTER,		//怪物
+	OBJ_BOSS,			//BOSS
 	OBJ_PET,			//宠物
 	OBJ_GUARD,			//卫士、弓箭手
 	OBJ_TREE,			//树木
@@ -499,8 +501,8 @@ typedef struct tagMAGICCLASS //技能类
 	BYTE btJob{}; // 职业
 	BYTE btEffectType{}; // 效果类型
 	BYTE btEffectValue{}; // 效果标志
-	BYTE btNeedLv[4]{}; // 等级需求
-	DWORD dwNeedExp[4]{}; // 经验需求
+	BYTE btNeedLv[9]{}; // 等级需求
+	DWORD dwNeedExp[9]{}; // 经验需求
 	WORD sSpell{}; // 施法值
 	WORD sDefSpell{}; // 默认施法值
 	WORD wDelay{}; // CD时间(毫秒)
@@ -571,6 +573,7 @@ enum e_systemflag //系统标志索引 0 - 31
 	SF_COMMUNITYLOADED,		//人脉读取
 	SF_WINDSHIELD,			//风影盾
 	SF_STRONGSHIELD,		//金刚护体
+	SF_KUANGNUWIND,			//狂怒旋风
 	SF_SPECIALREPAIR,		//特殊修理
 	SF_BANED,				//禁止发言
 	SF_GODBLESS,			//护身-4种类型：神佑、神御、重击、秒杀
@@ -818,8 +821,9 @@ enum e_visible_event //可见事件
 	VE_FIRERAIN = 0X16,	//火云
 };
 
+constexpr int MAXBOOT_SLOT = 10; //摊位的最大格子数
 constexpr int SMALLBAG_SLOT = 46;	//小背包格子数
-constexpr int BIGBAG_SLOT = 180;	//大背包格子数
+constexpr int BIGBAG_SLOT = 186;	//大背包格子数
 constexpr int STOREAGE_SLOT = 100;		//仓库格子数
 constexpr int PETBAG_SLOT = 10;		//宠物背包格子数
 constexpr DWORD TYPEFLAG_TARGETOBJECT = ((DWORD)((1 << OBJ_PLAYER) | (1 << OBJ_MONSTER)) | (1 << OBJ_PET));	//可被攻击的对象

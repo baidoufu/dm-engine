@@ -519,9 +519,21 @@ void CUserLoginWnd::Draw()
 		{
 			g_pTexMgr->PreLoadImm(PACKAGE_INTERFACE,19598,EP_UI);
 		}
-		else
+		else if (g_pGfx->GetWidth() == 1280)
 		{
-			g_pTexMgr->PreLoadImm(PACKAGE_INTERFACE,19597,EP_UI);
+			g_pTexMgr->PreLoadImm(PACKAGE_INTERFACE, 19597, EP_UI);
+		}
+		else if (g_pGfx->GetWidth() == 1600)
+		{
+			g_pTexMgr->PreLoadImm(PACKAGE_INTERFACE, 19596, EP_UI);
+		}
+		else if (g_pGfx->GetWidth() == 1920)
+		{
+			g_pTexMgr->PreLoadImm(PACKAGE_INTERFACE, 19595, EP_UI);
+		}
+		else //if (g_pGfx->GetWidth() == 2560)
+		{
+			g_pTexMgr->PreLoadImm(PACKAGE_INTERFACE,19594,EP_UI);
 		}
 
 		struct FrameCount_t
@@ -580,7 +592,7 @@ void CUserLoginWnd::Draw()
 			m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20,60,20,412,613);
 			m_FrameInfo[CA_FEMALE_TAOIST].Init(20,60,20,409,595);
 		}
-		else
+		else if (g_pGfx->GetWidth() == 1280)
 		{
 			m_FirstIdx.Init(19000,18000,20000,0,0);
 
@@ -590,6 +602,39 @@ void CUserLoginWnd::Draw()
 			m_FrameInfo[CA_FEMALE_FIGHTER].Init(20,48,20,433,617);
 			m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20,60,20,412,613);
 			m_FrameInfo[CA_FEMALE_TAOIST].Init(20,60,20,409,595);
+		}
+		else if (g_pGfx->GetWidth() == 1600)
+		{
+			m_FirstIdx.Init(19000, 18000, 20000, 0, 0);
+
+			m_FrameInfo[CA_MALE_FIGHTER].Init(20, 60, 20, 410, 608);
+			m_FrameInfo[CA_MALE_ENCHANTER].Init(20, 60, 20, 421, 601);
+			m_FrameInfo[CA_MALE_TAOIST].Init(20, 60, 20, 409, 617);
+			m_FrameInfo[CA_FEMALE_FIGHTER].Init(20, 48, 20, 433, 617);
+			m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20, 60, 20, 412, 613);
+			m_FrameInfo[CA_FEMALE_TAOIST].Init(20, 60, 20, 409, 595);
+		}
+		else if (g_pGfx->GetWidth() == 1920)
+		{
+			m_FirstIdx.Init(19000, 18000, 20000, 0, 0);
+
+			m_FrameInfo[CA_MALE_FIGHTER].Init(20, 60, 20, 410, 608);
+			m_FrameInfo[CA_MALE_ENCHANTER].Init(20, 60, 20, 421, 601);
+			m_FrameInfo[CA_MALE_TAOIST].Init(20, 60, 20, 409, 617);
+			m_FrameInfo[CA_FEMALE_FIGHTER].Init(20, 48, 20, 433, 617);
+			m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20, 60, 20, 412, 613);
+			m_FrameInfo[CA_FEMALE_TAOIST].Init(20, 60, 20, 409, 595);
+		}
+		else // if (g_pGfx->GetWidth() == 2560)
+		{
+			m_FirstIdx.Init(19000, 18000, 20000, 0, 0);
+
+			m_FrameInfo[CA_MALE_FIGHTER].Init(20, 60, 20, 410, 608);
+			m_FrameInfo[CA_MALE_ENCHANTER].Init(20, 60, 20, 421, 601);
+			m_FrameInfo[CA_MALE_TAOIST].Init(20, 60, 20, 409, 617);
+			m_FrameInfo[CA_FEMALE_FIGHTER].Init(20, 48, 20, 433, 617);
+			m_FrameInfo[CA_FEMALE_ENCHANTER].Init(20, 60, 20, 412, 613);
+			m_FrameInfo[CA_FEMALE_TAOIST].Init(20, 60, 20, 409, 595);
 		}
 
 

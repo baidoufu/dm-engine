@@ -285,7 +285,7 @@ VOID CMonsterAttack::NuZhenShanHe(CAliveObject* pTarget, int myX, int myY, int n
 	if (pMon == nullptr) return;
 	CLogicMap* pMap = pMon->GetMap();
 	if (pMap == nullptr) return;
-	const int range = VIEW_RANGE / 2;
+	const int range = pMon->GetViewRange() / 2;
 	for (int x = myX - range; x <= myX + range; x++)
 	{
 		for (int y = myY - range; y <= myY + range; y++)

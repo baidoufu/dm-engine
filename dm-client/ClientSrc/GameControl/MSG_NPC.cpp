@@ -1143,7 +1143,7 @@ void  CGameControl::MSG_Exchange_Repair_Fail(const char * msg,int iLen)
 
 void CGameControl::MSG_Object_Take(const char * msg,int iLen)
 {
-	DWORD id = *((DWORD *)(msg + 66));
+	DWORD id = *((DWORD *)(msg + 56));
 
 	//托管包裹的物品的收回
 	BYTE type = *(BYTE*)(msg + 8);

@@ -314,7 +314,7 @@ VOID CAiObjectEx::Ai_StupidMove()
 		if (IsGotoOwner()) return;
 		CLogicMap* pMap = pOwner->GetMap();
 		int x = pOwner->getX(), y = pOwner->getY();
-		if (DISTANCE(getX(), getY(), x, y) >= VIEW_RANGE)
+		if (DISTANCE(getX(), getY(), x, y) >= pOwner->GetViewRange())
 		{
 			FlyTo(pMap, x, y, FALSE);
 		}

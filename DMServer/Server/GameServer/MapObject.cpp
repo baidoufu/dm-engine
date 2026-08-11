@@ -36,6 +36,8 @@ VOID CMapObject::Clean()
 	m_dwRefenceCount = 0;
 	m_dwUpdateKey = 0;
 	m_Id = 0;
+	m_bViewSearchRange = 22;
+	m_bViewRange = 18;
 }
 
 VOID CMapObject::setXY(WORD x, WORD y)

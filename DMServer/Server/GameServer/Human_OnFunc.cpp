@@ -6,6 +6,7 @@
 #include "guildex.h"
 #include "SystemScript.h"
 #include "ItemManager.h"
+#include "ConSkill.h"
 
 static std::array<char, 65536> g_szTempString{};
 static std::array<ITEM, 100> g_items{};
@@ -18,6 +19,7 @@ typedef struct tagDropEquipment
 VOID CHumanPlayer::OnDeath(DWORD dwKiller)
 {
 	CleanPets();
+	ClearAllConSkillBuffs(this); // 死亡时清除连击Buff
 	CSystemScript::GetInstance()->Execute(GetScriptTarget(), "PlayerEnv.OnDeath", FALSE); // 执行死亡触发脚本
 	CAliveObject* pObj = CGameWorld::GetInstance()->GetAliveObjectById(dwKiller);
 	BOOL bPersonKill = TRUE;
@@ -277,7 +279,18 @@ VOID CHumanPlayer::OnSystemFlagCleared(int index, DWORD dwParam)
 		UpdateSubProp();
 		SendSpecialStatusChanged();
 		SaySystemAttrib(CC_GREENS, "你的金刚护体已经被击碎!");
-
+	}
+	else if (index == SF_KUANGNUWIND) // 狂怒旋风
+	{
+		USERMAGIC* pMagic = GetMagic(107);
+		if (pMagic == nullptr) return;
+		//Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
+		//DecProp(PI_ESCAPE, magicskill.skills[pMagic->magic.btLevel].value7);//恢复躲避
+		//DecProp(PI_MAGESCAPE, magicskill.skills[pMagic->magic.btLevel].value8);//恢复魔法躲避
+		//UpdateProp();
+		//UpdateSubProp();
+		SendSpecialStatusChanged();
+		SaySystemAttrib(CC_GREENS, "你的狂怒旋风已经被击碎!");
 	}
 	else if (index == SF_TRANSFORMED)
 	{
@@ -345,6 +358,16 @@ VOID CHumanPlayer::OnSystemFlagSeted(int index, DWORD dwParam)
 		AddProp(PI_MAGESCAPE, magicskill.skills[pMagic->magic.btLevel].value8);//增加魔法躲避
 		UpdateProp();
 		UpdateSubProp();
+		SendSpecialStatusChanged();
+	}
+	else if (index == SF_KUANGNUWIND)
+	{
+		USERMAGIC* pMagic = GetMagic(61);
+		//Magic magicskill = CMagicManager::GetInstance()->GetMagic(pMagic->magic.wId);
+		//AddProp(PI_ESCAPE, magicskill.skills[pMagic->magic.btLevel].value7);//增加躲避
+		//AddProp(PI_MAGESCAPE, magicskill.skills[pMagic->magic.btLevel].value8);//增加魔法躲避
+		//UpdateProp();
+		//UpdateSubProp();
 		SendSpecialStatusChanged();
 	}
 	else if (index == SF_TRANSFORMED)

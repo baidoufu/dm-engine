@@ -923,7 +923,7 @@ BOOL CMonsterEx::SetDesc(MonsterClass* pClass)
 	if (m_pDesc->sprop.pFlag & SF_PICKUPITEM)
 		CAliveObject::AddVisibleObjectType(OBJ_DOWNITEM);
 	if (m_pDesc->sprop.pFlag & SF_BODYITEM)
-		m_bMonsterType = 0x10;
+		m_bMonsterType = 1;
 	if (m_pDesc->aiset.LockDir == 0)
 		SetDirection((e_direction)Getrand(ED_MAX));
 	else

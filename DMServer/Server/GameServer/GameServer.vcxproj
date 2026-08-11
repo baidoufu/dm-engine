@@ -126,6 +126,7 @@
     <ClCompile Include="Human_OnFunc.cpp" />
     <ClCompile Include="ChangeMapEvent.cpp" />
     <ClCompile Include="CmdProc.cpp" />
+    <ClCompile Include="ConSkill.cpp" />
     <ClCompile Include="DamageEvent.cpp" />
     <ClCompile Include="DownItemMgr.cpp" />
     <ClCompile Include="DownItemObject.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="BundleManager.h" />
     <ClInclude Include="gsClientMsgTable.h" />
     <ClInclude Include="ChangeMapEvent.h" />
+    <ClInclude Include="ConSkill.h" />
     <ClInclude Include="CmdProc.h" />
     <ClInclude Include="DamageEvent.h" />
     <ClInclude Include="DownItemMgr.h" />

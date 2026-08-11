@@ -15,6 +15,7 @@
 #include "monstermanagerex.h"
 #include "monsterex.h"
 #include "ScriptNpc.h"
+#include "ConSkill.h"
 
 class CClientObj;
 class CScriptPage;
@@ -228,6 +229,12 @@ public:
 	VOID SetHuoLi(int h) { m_iHuoli = h; }
 	//施放技能或者魔法, x, y 是鼠标的坐标
 	BOOL SpellCast(int x, int y, UINT nTarget, WORD wMagicId);
+	// 连击技能相关方法
+	PlayerConSkillState& GetConSkillState() { return m_ConSkillState; }
+	VOID InitMyConSkill();
+	VOID UpdateMyConSkillBuffs();
+	VOID ClearMyConSkillBuffs();
+	VOID OnMyConSkillMagicSuccess(WORD wMagicID);
 	//战士技能攻击
 	BOOL SpecialHit(int dir, WORD wSkillId);
 	//公用飞行技能, 移形换影、遁地、化身蝙蝠
@@ -964,6 +971,7 @@ private:
 	DWORD m_dwZhenBaoStar;
 	WORD m_wYuanQi;		//当前元气值
 	BOOL m_bYuanQi;		//是否触发元气
+	PlayerConSkillState m_ConSkillState; // 连击技能状态
 	WORD m_wStamina;	//精力值
 	WORD m_wMaxStamina;	//最大精力值
 };

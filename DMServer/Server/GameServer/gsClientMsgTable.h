@@ -31,6 +31,7 @@ public:
 		setHandler(0x0312, &CClientObj::HandleTradeRequest);//服务器通过有玩家请求和自己交易
 		setHandler(0x0331, &CClientObj::HandlePetFeed);//从界面上直接喂食
 		setHandler(0x0345, &CClientObj::HandleGuildMemberList);//新的行会成员列表请求
+		setHandler(0x03e7, &CClientObj::HandleCongifInfo);//客户端发送的配置信息
 		setHandler(0x03e8, &CClientObj::HandleDropItem);//把包裹中的物品丢掉
 		setHandler(0x03e9, &CClientObj::HandlePickupItem);//从地上捡起物品放入包裹
 		setHandler(0x03eb, &CClientObj::HandleTakeOnItem);//从包裹里的物品装备到身上
@@ -69,9 +70,7 @@ public:
 		setHandler(0x0412, &CClientObj::HandleViewGuildExp);//察看行会经验值
 		setHandler(0x041f, &CClientObj::HandleRequestGroupPos);//查询队员位置信息
 		setHandler(0x04a5, &CClientObj::HandleHeartBeat);//心跳包
-		setHandler(0x0892, &CClientObj::HandlePetBackExp);//灵兽返回经验
 		setHandler(0x09a6, &CClientObj::HandleSocialInfo);//社交信息
-		setHandler(0x0a02, &CClientObj::HandleFuncCollection);//功能集合
 		setHandler(0x0a11, &CClientObj::HandleGuildFengHao);//行会封号
 		setHandler(0x0aaa, &CClientObj::HandleReplyGuild);//行会-回复邀请
 		setHandler(0x0ba0, &CClientObj::HandleTrainHorse);//驯马

@@ -40,6 +40,7 @@
 #include "minelist.h"
 #include "marketmanager.h"
 #include "autoscriptmanager.h"
+#include "ConSkill.h"
 #include "mapscriptmanager.h"
 #include "guildwarmanager.h"
 #include "TaskManager.h"
@@ -553,6 +554,7 @@ BOOL CGameWorld::Init()
 	CBotManager::GetInstance()->CreateBotsFromConfig(".\\Data\\Bot\\BotConfig.csv");
 
 	InitThreadPool(); // 初始化工作线程池
+	InitConSkillSystem(); // 初始化连击技能系统
 	return TRUE;
 }
 
@@ -678,7 +680,7 @@ VOID CGameWorld::Update()
 	DWORD dwkey = (m_dwUpdateKey % 10);
 	switch (dwkey)
 	{
-	case 0: case 4:
+	case 0: case 5:
 	{
 		if (m_xUpdateAutoMonsterList.getCount() > 1000)
 			UpdateMonsterParallel(m_xUpdateAutoMonsterList, MUT_AUTO, 1000);
@@ -686,7 +688,7 @@ VOID CGameWorld::Update()
 			UpdateMonster(m_xUpdateAutoMonsterList, MUT_AUTO);
 	}
 	break;
-	case 1: case 5:
+	case 1: case 4:
 	{
 		if (m_xUpdateMonsterList.getCount() > 600)
 			UpdateMonsterParallel(m_xUpdateMonsterList, MUT_ACTIVE, 600);

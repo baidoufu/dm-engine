@@ -91,6 +91,8 @@ VOID CClientObj::OnDBMsg(PMIRMSG pMsg, int datasize)
 		CHARDBINFO* pInfo = (CHARDBINFO*)pMsg->data;
 		if (pInfo->dwClientKey != m_dwClientKey)
 			break;
+
+		SendMsg(0, 0x3e7, 0, 0, 0);//请求客户端配置信息，还会把通道切换到 isOnGameProc
 		if (pMsg->wParam[0] != SE_OK)
 		{
 			SendMsg(0, 0xafa, 0, 0, 0, (LPVOID)"读取数据库失败, 请联系管理员解决!");
@@ -350,6 +352,10 @@ VOID CClientObj::ProcClientMsg(PMIRMSG pMsg, int datasize)
 	HandlerTable::MsgHandler handler = g_handlerTable.GetHandler(pMsg->wCmd);
 	if (handler != nullptr)
 	{
+#ifdef _DEBUG
+		CServer* pServer = CServer::GetInstance();
+		pServer->OnUnknownMsg(pMsg, datasize, 1);
+#endif
 		(this->*handler)(pMsg, datasize);
 	}
 #ifdef _DEBUG
@@ -404,14 +410,14 @@ VOID CClientObj::SendBagItems(DBITEM* pItems, int count)
 {
 	// 背包物品数据
 	if (count > BIGBAG_SLOT) count = BIGBAG_SLOT;
-	std::vector<ITEMCLIENT> items(BIGBAG_SLOT);
+	std::vector<ITEMCLIENT> items(count);
 	for (int i = 0; i < count; i++)
 	{
 		items[i] = *(ITEMCLIENT*)&pItems[i].item;
 	}
 	m_pPlayer->SendMsg(m_pPlayer->GetId(), SM_BAGINFO, 0, 0, count, items.data(), sizeof(ITEMCLIENT) * count);
 	// 背包物品位置数据 - 使用与count一致的截断值
-	std::vector<BAGITEMPOS> itempos(BIGBAG_SLOT);
+	std::vector<BAGITEMPOS> itempos(count);
 	for (int i = 0; i < count; i++)
 	{
 		itempos[i].ItemId = pItems[i].item.dwMakeIndex;

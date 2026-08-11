@@ -421,9 +421,8 @@ VOID CHumanPlayer::DoProcess(OBJECTPROCESS* pProcess)
 	break;
 	case EP_SKILLFLY:
 	{
-		if (m_pMap)
+		if (m_pMap && m_pMap->MoveObject(this, pProcess->dwParam[0], pProcess->dwParam[1]))
 		{
-			m_pMap->MoveObject(this, pProcess->dwParam[0], pProcess->dwParam[1]);
 			m_wActionX = static_cast<WORD>(pProcess->dwParam[0]);
 			m_wActionY = static_cast<WORD>(pProcess->dwParam[1]);
 		}

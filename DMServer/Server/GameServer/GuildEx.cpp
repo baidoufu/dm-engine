@@ -214,47 +214,15 @@ VOID CGuildGroupEx::AppendDurationMembers(xPacket& packet)
 	while (pNode)
 	{
 		CHumanPlayer* pPlayer = pNode->getObject()->GetRefPlayer();
-		packet.push("0");
-		packet.push("0"); // 天人境界类型
-		packet.push(pNode->getObject()->GetName());
+		packet.push("0"); //'1' = 在线，其他 = 离线
+		packet.push("2"); // 宗派：原始值 '2'→无宗派(0)，'3'→神宗(1)，'4'→魔宗(2)
+		packet.push(pNode->getObject()->GetName()); // 成员姓名
+		// 如果有助手就插入以下信息
+		//packet.push("*");
+		//packet.push("0"); //'1' = 在线，其他 = 离线
+		//packet.push("2"); // 助手宗派：原始值 '2'→无宗派(0)，'3'→神宗(1)，'4'→魔宗(2)
+		//packet.push(pNode->getObject()->GetName()); // 助手成员姓名
 		packet.push("/");
-		pNode = pNode->getPrev();
-	}
-}
-
-VOID CGuildGroupEx::AppendDurationMembers2(xPacket& packet)
-{
-	GUILDMEMBERNODE* pNode = m_xMemberList.getHead();
-	if (pNode == nullptr)return;
-	while (pNode->getNext())pNode = pNode->getNext();
-	while (pNode)
-	{
-		CHumanPlayer* pPlayer = pNode->getObject()->GetRefPlayer();
-		if (pPlayer)
-		{
-			packet.push(pPlayer->GetName()); //m_xMemberList
-			packet.push(1);
-			BYTE boOnLine = TRUE;
-			packet.push((LPVOID)&boOnLine, 1); // 在线
-			packet.push(4); // 本周贡献值
-			packet.push(4); // 历史贡献值
-			BYTE btPro = pPlayer->GetPro();
-			packet.push(&btPro, 1); // 职业
-			WORD wLevel = pPlayer->GetPropValue(PI_LEVEL);
-			packet.push(&wLevel, 2); // 等级
-		}
-		else
-		{
-			packet.push(pNode->getObject()->GetName());
-			packet.push(1);
-			packet.push(1); // 不在线
-			packet.push(4); // 本周贡献值
-			packet.push(4); // 历史贡献值
-			BYTE btPro = pNode->getObject()->GetPro();
-			packet.push(&btPro, 1); // 职业
-			WORD wLevel = pNode->getObject()->GetLevel();
-			packet.push(&wLevel, 2); // 等级
-		}
 		pNode = pNode->getPrev();
 	}
 }
@@ -869,7 +837,7 @@ BOOL CGuildEx::Load(const char* pszFile)
 	}
 	strcpy(szGuildContentFile + len - 3, "var");
 	m_xVarList.LoadFromFile(szGuildContentFile);
-	PRINT(SUCCESS_GREEN, "行会 %s 已读取!\n", m_szName);
+	PRINT(SUCCESS_GREEN, "行会 %s 已读取!\n", m_szName.data());
 	return TRUE;
 }
 
@@ -1033,33 +1001,16 @@ BOOL CGuildEx::SendDurationMemberList(CHumanPlayer* pPlayer)
 	{
 		if (m_xGroups[n] && m_xGroups[n]->GetCount() > 0)
 		{
-			snprintf(szText, 256, "#%u/*%s/", m_xGroups[n]->GetLevel(), m_xGroups[n]->GetName());
+			snprintf(szText, 256, "#%u/*%s/", m_xGroups[n]->GetLevel(), m_xGroups[n]->GetName()); // 序号/标题/
 			packet1->push(szText);
-			m_xGroups[n]->AppendDurationMembers(*packet1);
+			m_xGroups[n]->AppendDurationMembers(*packet1); // 成员1/成员2........
 			nGroupCount++;
 		}
 	}
+	// 新的行会成员列表
 	length = EncodeMsg((char*)packet->getfreebuf(), 0, 0x345, 0, 0, 0, (LPVOID)packet1->getbuf(), packet1->getsize());
 	packet->addsize(length);
-	//发送行会成员数据
-	packet1->clear();
-	packet1->push(&nGroupCount, 2);
-	for (UINT n = 0; n < m_nGroupCount; n++)
-	{
-		if (m_xGroups[n] && m_xGroups[n]->GetCount() > 0)
-		{
-		    UINT uLevel = m_xGroups[n]->GetLevel();
-			const char* szGroupName = m_xGroups[n]->GetName();
-			WORD uCount = m_xGroups[n]->GetCount();
-			packet1->push(&uLevel, 2);//分组序号
-			packet1->push(szGroupName);//分组名
-			packet1->push(1);
-			packet1->push(&uCount, 2);//分组下人数
-			m_xGroups[n]->AppendDurationMembers2(*packet1);
-		}
-	}
-	length = EncodeMsg((char*)packet->getfreebuf(), 0, 0x34a, 1, 0, 0, (LPVOID)packet1->getbuf(), packet1->getsize());
-	packet->addsize(length);
+	
 	if (pPlayer == nullptr)
 	{
 		const char* pData = packet->getbuf();

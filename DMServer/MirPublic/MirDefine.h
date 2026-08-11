@@ -508,6 +508,10 @@
 // 放入休息物品成功
 //dwFlag = 金钱
 #define SM_PUTREPAIRITEMOK		0x29f
+// 连击技能buff
+//dwFlag = wMagicID 技能ID
+//w1 = iTime 持续时间
+#define SM_CONSKILLBUFF			0x0492
 
 ///////////////-=[全局变量定义]=-///////////////////////////////
 
